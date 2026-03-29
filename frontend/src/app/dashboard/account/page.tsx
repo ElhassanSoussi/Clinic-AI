@@ -1,0 +1,276 @@
+"use client";
+
+import { useState } from "react";
+import { User, Lock, Loader2, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
+
+type FeedbackState = {
+  type: "success" | "error";
+  message: string;
+} | null;
+
+export default function AccountPage() {
+  const { user } = useAuth();
+  const [fullName, setFullName] = useState(user?.full_name || "");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileFeedback, setProfileFeedback] = useState<FeedbackState>(null);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState<FeedbackState>(null);
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(["profile"]));
+
+  const toggleSection = (id: string) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSaveProfile = async () => {
+    if (!fullName.trim()) return;
+    setSavingProfile(true);
+    setProfileFeedback(null);
+    try {
+      await api.auth.updateProfile({ full_name: fullName.trim() });
+      setProfileFeedback({ type: "success", message: "Profile updated." });
+      // Update localStorage so sidebar reflects the change
+      const stored = localStorage.getItem("auth_user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          parsed.full_name = fullName.trim();
+          localStorage.setItem("auth_user", JSON.stringify(parsed));
+        } catch { /* ignore */ }
+      }
+      setTimeout(() => setProfileFeedback(null), 3000);
+    } catch (err) {
+      setProfileFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to update profile.",
+      });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordFeedback(null);
+    if (!currentPassword || !newPassword) {
+      setPasswordFeedback({ type: "error", message: "Please fill in all password fields." });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordFeedback({ type: "error", message: "New password must be at least 6 characters." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordFeedback({ type: "error", message: "New passwords do not match." });
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      await api.auth.changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+      setPasswordFeedback({ type: "success", message: "Password changed successfully." });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordFeedback(null), 3000);
+    } catch (err) {
+      setPasswordFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to change password.",
+      });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Account</h1>
+        <p className="text-slate-500 text-sm mt-1">
+          Manage your profile and security settings
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {/* Profile Section */}
+        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => toggleSection("profile")}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-slate-500" />
+              <h2 className="text-sm font-semibold text-slate-900">Profile</h2>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openSections.has("profile") ? "rotate-180" : ""}`} />
+          </button>
+          {openSections.has("profile") && (
+            <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+              {profileFeedback && (
+                <Feedback state={profileFeedback} />
+              )}
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="full-name" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    id="full-name"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="account-email" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    id="account-email"
+                    type="email"
+                    value={user?.email || ""}
+                    disabled
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Email cannot be changed. Contact support if needed.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Role
+                  </label>
+                  <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-teal-700 bg-teal-50 rounded-lg">
+                    Owner
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile || !fullName.trim()}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {savingProfile ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Save Profile"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Password Section */}
+        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => toggleSection("password")}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-slate-500" />
+              <h2 className="text-sm font-semibold text-slate-900">Change Password</h2>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openSections.has("password") ? "rotate-180" : ""}`} />
+          </button>
+          {openSections.has("password") && (
+            <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+              {passwordFeedback && (
+                <Feedback state={passwordFeedback} />
+              )}
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="current-password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Current Password
+                  </label>
+                  <input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                    autoComplete="current-password"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="new-password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    New Password
+                  </label>
+                  <input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={savingPassword}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {savingPassword ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Change Password"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Feedback({ state }: { state: NonNullable<FeedbackState> }) {
+  return (
+    <div
+      className={`mb-4 p-3 text-sm rounded-lg border flex items-center gap-2 ${
+        state.type === "success"
+          ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+          : "bg-red-50 text-red-700 border-red-100"
+      }`}
+    >
+      {state.type === "success" ? (
+        <CheckCircle2 className="w-4 h-4 shrink-0" />
+      ) : (
+        <AlertCircle className="w-4 h-4 shrink-0" />
+      )}
+      {state.message}
+    </div>
+  );
+}
