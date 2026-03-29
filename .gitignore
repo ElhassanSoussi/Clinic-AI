@@ -1,0 +1,46 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# ── Node / Next.js ─────────────────────────────────────
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+.vercel/
+
+# ── Environment / Secrets ──────────────────────────────
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# ── OS ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ─────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Misc ────────────────────────────────────────────────
+*.log
+*.pem
+*.bak
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Nested repo metadata (future root Git repo) ────────
+frontend/.git/
