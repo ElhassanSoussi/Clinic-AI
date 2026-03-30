@@ -10,13 +10,15 @@ interface FloatingSetupPopupProps {
   onGoLive?: () => void;
 }
 
-export function FloatingSetupPopup({ clinic, onGoLive }: FloatingSetupPopupProps) {
+export function FloatingSetupPopup({ clinic, onGoLive }: Readonly<FloatingSetupPopupProps>) {
   const [dismissed, setDismissed] = useState(false);
   const [visible, setVisible] = useState(true);
 
   const systemStatus = clinic ? computeSystemStatus(clinic) : null;
   const isLive = systemStatus?.status === "LIVE";
   const isReady = systemStatus?.status === "READY";
+  let popupTitle = "Setup incomplete";
+  let popupBody: React.ReactNode;
 
   // Auto-hide after 4s when LIVE
   useEffect(() => {
@@ -38,10 +40,66 @@ export function FloatingSetupPopup({ clinic, onGoLive }: FloatingSetupPopupProps
   const cfg = STATUS_CONFIG[systemStatus.status];
 
   const openDrawer = (section?: string | null) => {
-    window.dispatchEvent(
+    globalThis.dispatchEvent(
       new CustomEvent("open-settings-drawer", { detail: section ?? null })
     );
   };
+
+  if (isLive) {
+    popupTitle = "You\u2019re live";
+    popupBody = (
+      <div className="flex items-center gap-2.5">
+        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+        <p className="text-sm text-slate-600">
+          System ready and your AI assistant is receiving patients.
+        </p>
+      </div>
+    );
+  } else if (isReady) {
+    popupTitle = "Ready to go live";
+    popupBody = (
+      <>
+        <p className="text-sm text-slate-600 mb-3">
+          All sections are complete. Activate your AI assistant to start receiving patients.
+        </p>
+        <button
+          onClick={() => onGoLive?.()}
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+        >
+          <Rocket className="w-4 h-4" />
+          Go Live
+        </button>
+      </>
+    );
+  } else {
+    popupBody = (
+      <>
+        <ul className="space-y-2 mb-3">
+          {incomplete.slice(0, 3).map((item) => (
+            <li key={item.key} className="flex items-start gap-2">
+              <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cfg.dot}`} />
+              <button
+                onClick={() => openDrawer(item.drawerSection)}
+                className="text-sm text-slate-700 hover:text-slate-900 text-left"
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button
+          onClick={() => {
+            const first = incomplete[0];
+            openDrawer(first?.drawerSection ?? null);
+          }}
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+        >
+          <Settings className="w-4 h-4" />
+          Fix now
+        </button>
+      </>
+    );
+  }
 
   return (
     <div
@@ -53,9 +111,7 @@ export function FloatingSetupPopup({ clinic, onGoLive }: FloatingSetupPopupProps
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${cfg.dot} ${!isLive && !isReady ? "animate-pulse" : ""}`} />
-          <span className="text-sm font-semibold text-slate-900">
-            {isLive ? "You\u2019re live" : isReady ? "Ready to go live" : "Setup incomplete"}
-          </span>
+          <span className="text-sm font-semibold text-slate-900">{popupTitle}</span>
         </div>
         <button
           onClick={() => {
@@ -74,53 +130,7 @@ export function FloatingSetupPopup({ clinic, onGoLive }: FloatingSetupPopupProps
 
       {/* Body */}
       <div className="px-4 py-3">
-        {isLive ? (
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <p className="text-sm text-slate-600">
-              System ready &mdash; your AI assistant is receiving patients.
-            </p>
-          </div>
-        ) : isReady ? (
-          <>
-            <p className="text-sm text-slate-600 mb-3">
-              All sections are complete. Activate your AI assistant to start receiving patients.
-            </p>
-            <button
-              onClick={() => onGoLive?.()}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-            >
-              <Rocket className="w-4 h-4" />
-              Go Live
-            </button>
-          </>
-        ) : (
-          <>
-            <ul className="space-y-2 mb-3">
-              {incomplete.slice(0, 3).map((item) => (
-                <li key={item.key} className="flex items-start gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cfg.dot}`} />
-                  <button
-                    onClick={() => openDrawer(item.drawerSection)}
-                    className="text-sm text-slate-700 hover:text-slate-900 text-left"
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={() => {
-                const first = incomplete[0];
-                openDrawer(first?.drawerSection ?? null);
-              }}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              Fix now
-            </button>
-          </>
-        )}
+        {popupBody}
       </div>
     </div>
   );

@@ -35,9 +35,7 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 ai = OpenAIService()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONSTANTS
-# ─────────────────────────────────────────────────────────────────────────────
+# Constants
 
 BOOKING_INTENT_KEYWORDS = [
     "book", "appointment", "schedule", "visit", "see a doctor", "see the doctor",
@@ -179,51 +177,19 @@ def extract_corrected_value(field: str, message: str) -> str:
     """Extract a likely replacement value when user corrects a field in confirmation."""
     text = message.strip()
 
-    if field == "phone":
-        return extract_phone(text)
-    if field == "email":
-        return extract_email(text)
-    if field == "name":
-        return extract_name(text)
+    direct_extractors = {
+        "phone": extract_phone,
+        "email": extract_email,
+        "name": extract_name,
+    }
+    if field in direct_extractors:
+        return direct_extractors[field](text)
 
-    if field == "reason":
-        m = re.search(r"reason\s+(?:is|to)\s+(.+)", text, re.IGNORECASE)
-        if m:
-            candidate = m.group(1).strip()
-            # Keep only the updated part before contrast terms.
-            candidate = re.split(r",\s*not\s+|\s+not\s+", candidate, maxsplit=1, flags=re.IGNORECASE)[0].strip()
-            return candidate
-        m = re.search(r"(?:change|update)\s+(?:the\s+)?reason\s+(?:to\s+)?(.+)", text, re.IGNORECASE)
-        if m:
-            return m.group(1).strip()
+    specialized_value = _extract_special_corrected_value(field, text)
+    if specialized_value:
+        return specialized_value
 
-    if field == "datetime":
-        # Example: "Not tomorrow, Friday instead" -> keep phrase after comma
-        if "," in text:
-            tail = text.split(",")[-1].strip()
-            tail = re.sub(r"\binstead\b", "", tail, flags=re.IGNORECASE).strip(" ,")
-            if tail:
-                return tail
-        m = re.search(r"(?:instead\s+)?(?:to\s+)?(.+)\s+instead", text, re.IGNORECASE)
-        if m:
-            return m.group(1).strip(" ,")
-        m = re.search(r"(?:change|update)\s+(?:the\s+)?(?:date|time|day)\s+(?:to\s+)?(.+)", text, re.IGNORECASE)
-        if m:
-            return m.group(1).strip()
-        m = re.search(r"not\s+.+?,\s*(.+)", text, re.IGNORECASE)
-        if m:
-            return m.group(1).strip(" ,")
-
-    lowered = text.lower()
-    # Remove common correction prefixes so we keep the updated value.
-    prefixes = [
-        "no,", "actually", "change", "the", "my", "is", "to", "not", "wrong",
-        "instead", "please",
-    ]
-    tokens = [t for t in re.split(r"\s+", lowered) if t]
-    cleaned_tokens = [t for t in tokens if t not in prefixes]
-    cleaned = " ".join(cleaned_tokens).strip()
-    return cleaned if cleaned else text
+    return _strip_correction_prefixes(text)
 
 
 def find_matching_slot(user_message: str, available_slots: list) -> Optional[int]:
@@ -287,7 +253,74 @@ def match_slot_choice(user_message: str, slot_options: list[dict]) -> Optional[d
     if not msg:
         return None
 
-    # Direct ordinal choices: prioritize explicit order references.
+    ordinal_match = _match_ordinal_slot_choice(msg, slot_options)
+    if ordinal_match is not None:
+        return ordinal_match
+
+    scored_match = _match_scored_slot_choice(msg, slot_options)
+    if scored_match is None:
+        return None
+
+    best_match, best_score = scored_match
+    return best_match if best_score >= 2 else None
+
+
+def _extract_special_corrected_value(field: str, text: str) -> str:
+    if field == "reason":
+        return _extract_reason_correction(text)
+    if field == "datetime":
+        return _extract_datetime_correction(text)
+    return ""
+
+
+def _extract_reason_correction(text: str) -> str:
+    patterns = [
+        r"reason\s+(?:is|to)\s+(.+)",
+        r"(?:change|update)\s+(?:the\s+)?reason\s+(?:to\s+)?(.+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if not match:
+            continue
+
+        candidate = match.group(1).strip()
+        if pattern == patterns[0]:
+            candidate = re.split(r",\s*not\s+|\s+not\s+", candidate, maxsplit=1, flags=re.IGNORECASE)[0].strip()
+        return candidate
+    return ""
+
+
+def _extract_datetime_correction(text: str) -> str:
+    if "," in text:
+        tail = text.split(",")[-1].strip()
+        tail = re.sub(r"\binstead\b", "", tail, flags=re.IGNORECASE).strip(" ,")
+        if tail:
+            return tail
+
+    patterns = [
+        r"(?:instead\s+)?(?:to\s+)?(.+)\s+instead",
+        r"(?:change|update)\s+(?:the\s+)?(?:date|time|day)\s+(?:to\s+)?(.+)",
+        r"not\s+.+?,\s*(.+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(1).strip(" ,")
+    return ""
+
+
+def _strip_correction_prefixes(text: str) -> str:
+    prefixes = {
+        "no,", "actually", "change", "the", "my", "is", "to", "not", "wrong",
+        "instead", "please",
+    }
+    tokens = [token for token in re.split(r"\s+", text.lower()) if token]
+    cleaned_tokens = [token for token in tokens if token not in prefixes]
+    cleaned = " ".join(cleaned_tokens).strip()
+    return cleaned if cleaned else text
+
+
+def _match_ordinal_slot_choice(msg: str, slot_options: list[dict]) -> Optional[dict]:
     ordinal_patterns = [
         (r"\b(first|1st|option\s*1|#1)\b", 0),
         (r"\b(second|2nd|option\s*2|#2)\b", 1),
@@ -299,7 +332,6 @@ def match_slot_choice(user_message: str, slot_options: list[dict]) -> Optional[d
         if re.search(pattern, msg) and idx < len(slot_options):
             return slot_options[idx]
 
-    # Bare numeric/word answers are common in chat widgets.
     bare_ordinal = {
         "1": 0,
         "one": 0,
@@ -312,33 +344,41 @@ def match_slot_choice(user_message: str, slot_options: list[dict]) -> Optional[d
         "5": 4,
         "five": 4,
     }
-    if msg in bare_ordinal and bare_ordinal[msg] < len(slot_options):
-        return slot_options[bare_ordinal[msg]]
+    idx = bare_ordinal.get(msg)
+    if idx is None or idx >= len(slot_options):
+        return None
+    return slot_options[idx]
 
+
+def _score_slot_option(msg: str, option: dict) -> int:
+    date_txt = _normalize_text(option["date"])
+    time_txt = _normalize_text(option["time"])
+    label_txt = _normalize_text(option["label"])
+
+    score = 0
+    if date_txt and _contains_phrase(msg, date_txt):
+        score += 2
+    if time_txt and _contains_phrase(msg, time_txt):
+        score += 2
+    if label_txt and _contains_phrase(msg, label_txt):
+        score += 3
+
+    tokens = [t for t in re.split(r"[^a-z0-9]+", label_txt) if t and len(t) > 2]
+    return score + sum(1 for token in tokens if token in msg)
+
+
+def _match_scored_slot_choice(msg: str, slot_options: list[dict]) -> Optional[tuple[dict, int]]:
     best_match = None
     best_score = 0
     for option in slot_options:
-        date_txt = _normalize_text(option["date"])
-        time_txt = _normalize_text(option["time"])
-        label_txt = _normalize_text(option["label"])
-
-        score = 0
-        if date_txt and _contains_phrase(msg, date_txt):
-            score += 2
-        if time_txt and _contains_phrase(msg, time_txt):
-            score += 2
-        if label_txt and _contains_phrase(msg, label_txt):
-            score += 3
-
-        # Token overlap for close phrasing.
-        tokens = [t for t in re.split(r"[^a-z0-9]+", label_txt) if t and len(t) > 2]
-        score += sum(1 for t in tokens if t in msg)
-
+        score = _score_slot_option(msg, option)
         if score > best_score:
             best_score = score
             best_match = option
 
-    return best_match if best_score >= 2 else None
+    if best_match is None:
+        return None
+    return best_match, best_score
 
 
 def looks_like_custom_datetime(text: str) -> bool:
@@ -753,54 +793,481 @@ def reply_confirm_restart() -> str:
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MAIN ORCHESTRATOR
-# ─────────────────────────────────────────────────────────────────────────────
+@dataclass
+class ChatContext:
+    db: Any
+    clinic: dict
+    clinic_id: str
+    conversation_id: str
+    session_id: str
+    user_message: str
+    booking_data: BookingData
+    available_slots: list
+    slot_options: list[dict]
 
-async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> dict:
-    db = get_supabase()
 
-    # ── Load clinic ──────────────────────────────────────────────────────────
-    clinic_result = (
-        db.table("clinics").select("*").eq("slug", clinic_slug).single().execute()
+@dataclass
+class ChatTransition:
+    next_state: str
+    system_prompt: str
+    response_override: Optional[str] = None
+    lead_created: bool = False
+    lead_id: Optional[str] = None
+
+
+def confirmation_transition(clinic: dict, booking_data: BookingData) -> ChatTransition:
+    return ChatTransition(
+        next_state="booking_confirm",
+        system_prompt=build_confirmation_prompt(clinic, booking_data),
+        response_override=reply_confirmation(booking_data),
     )
-    if not clinic_result.data:
-        logger.warning(f"Chat for unknown clinic slug: {clinic_slug}")
-        return {
-            "reply": "Sorry, I couldn't find that clinic. Please check the link and try again.",
-            "session_id": session_id,
-            "intent": "error",
-            "lead_created": False,
-            "lead_id": None,
-        }
 
-    clinic = clinic_result.data
-    clinic_id = clinic["id"]
 
-    # ── Plan enforcement: check if clinic subscription allows chat ────────
+def faq_interrupt_transition(state: str, context: ChatContext) -> Optional[ChatTransition]:
+    if detect_intent(context.user_message) != "faq" or "?" not in context.user_message:
+        return None
+    return ChatTransition(
+        next_state=state,
+        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+    )
+
+
+def set_manual_datetime(booking_data: BookingData, value: str) -> None:
+    booking_data.datetime = value.strip()
+    booking_data.slot_row_index = None
+    booking_data.slot_source = "manual"
+
+
+def set_selected_slot(booking_data: BookingData, selected: dict) -> None:
+    booking_data.datetime = selected["label"]
+    booking_data.slot_row_index = selected["row_index"]
+    booking_data.slot_source = "availability"
+
+
+def transition_after_reason(clinic: dict, booking_data: BookingData, slot_options: list[dict]) -> ChatTransition:
+    if booking_data.correction_mode and booking_data.correction_field == "reason":
+        booking_data.correction_mode = False
+        booking_data.correction_field = ""
+        return confirmation_transition(clinic, booking_data)
+
+    if clinic.get("availability_enabled") and slot_options:
+        return ChatTransition(
+            next_state="booking_slot_offer",
+            system_prompt=build_collect_datetime_prompt(clinic, booking_data, slot_options),
+            response_override=reply_offer_slots(slot_options),
+        )
+
+    reply = reply_no_slots_fallback() if clinic.get("availability_enabled") else reply_ask_datetime([])
+    return ChatTransition(
+        next_state="booking_datetime_fallback",
+        system_prompt=build_collect_datetime_prompt(clinic, booking_data, []),
+        response_override=reply,
+    )
+
+
+def transition_after_datetime(clinic: dict, booking_data: BookingData) -> ChatTransition:
+    if booking_data.correction_mode and booking_data.correction_field == "datetime":
+        booking_data.correction_mode = False
+        booking_data.correction_field = ""
+        return confirmation_transition(clinic, booking_data)
+
+    return ChatTransition(
+        next_state="booking_name",
+        system_prompt=build_collect_name_prompt(clinic, booking_data),
+        response_override=reply_ask_name(),
+    )
+
+
+def transition_after_name(clinic: dict, booking_data: BookingData) -> ChatTransition:
+    if booking_data.correction_mode and booking_data.correction_field == "name":
+        booking_data.correction_mode = False
+        booking_data.correction_field = ""
+        return confirmation_transition(clinic, booking_data)
+
+    return ChatTransition(
+        next_state="booking_phone",
+        system_prompt=build_collect_phone_prompt(clinic, booking_data),
+        response_override=reply_ask_phone(booking_data.name),
+    )
+
+
+def transition_after_phone(clinic: dict, booking_data: BookingData) -> ChatTransition:
+    if booking_data.correction_mode and booking_data.correction_field == "phone":
+        booking_data.correction_mode = False
+        booking_data.correction_field = ""
+        return confirmation_transition(clinic, booking_data)
+
+    return ChatTransition(
+        next_state="booking_email",
+        system_prompt=build_collect_email_prompt(clinic, booking_data),
+        response_override=reply_ask_email(),
+    )
+
+
+def correction_prompt_for_field(field: str, booking_data: BookingData) -> str:
+    reply_map = {
+        "reason": reply_ask_reason(),
+        "datetime": reply_ask_datetime([]),
+        "name": reply_ask_name(),
+        "phone": reply_ask_phone(booking_data.name),
+        "email": reply_ask_email(),
+    }
+    return reply_map[field]
+
+
+def apply_inline_correction(field: str, candidate: str, booking_data: BookingData) -> bool:
+    if field == "datetime" and len(candidate) > 3 and candidate.lower() not in ["date", "time", "datetime"]:
+        set_manual_datetime(booking_data, candidate)
+        return True
+    if field == "reason" and len(candidate) > 3 and candidate.lower() not in ["reason", "visit"]:
+        booking_data.reason = candidate
+        return True
+    if field == "phone" and any(ch.isdigit() for ch in candidate):
+        booking_data.phone = extract_phone(candidate)
+        return True
+    if field == "email" and "@" in candidate:
+        booking_data.email = extract_email(candidate)
+        return True
+    if field == "name" and len(candidate) > 2:
+        booking_data.name = extract_name(candidate)
+        return True
+    return False
+
+
+def reserve_selected_slot(context: ChatContext, lead_id: str) -> None:
+    if not context.booking_data.slot_row_index or not context.clinic.get("availability_enabled"):
+        return
+    try:
+        from app.services.google_sheets import reserve_slot_in_sheet
+
+        reserve_slot_in_sheet(
+            context.clinic.get("google_sheet_id"),
+            context.clinic.get("availability_sheet_tab") or "Availability",
+            int(context.booking_data.slot_row_index),
+            context.booking_data.name,
+            lead_id,
+        )
+    except Exception as err:
+        logger.error(f"Slot reservation error: {err}")
+
+
+def save_confirmed_lead(context: ChatContext) -> ChatTransition:
+    intake_data = {
+        "patient_name": context.booking_data.name,
+        "patient_phone": context.booking_data.phone,
+        "patient_email": context.booking_data.email,
+        "reason_for_visit": context.booking_data.reason,
+        "preferred_datetime_text": context.booking_data.datetime,
+        "slot_row_index": context.booking_data.slot_row_index,
+        "slot_source": context.booking_data.slot_source,
+        "source": "web_chat",
+        "notes": "Selected from availability" if context.booking_data.slot_source == "availability" else "Manual preferred time",
+    }
+    lead = create_lead(context.clinic_id, intake_data)
+    lead_id = lead["id"]
+
+    reserve_selected_slot(context, lead_id)
+
+    context.db.table("conversations").update({"lead_id": lead_id}).eq("id", context.conversation_id).execute()
+    logger.info(f"Lead created from chat: {lead_id} (session {context.session_id[:8]})")
+    return ChatTransition(
+        next_state="booking_complete",
+        system_prompt=build_completion_prompt(context.clinic, context.booking_data),
+        response_override=reply_completion(context.clinic, context.booking_data),
+        lead_created=True,
+        lead_id=lead_id,
+    )
+
+
+def handle_general_state(context: ChatContext) -> ChatTransition:
+    intent = detect_intent(context.user_message)
+    if intent == "booking":
+        return ChatTransition(
+            next_state="booking_reason",
+            system_prompt=build_booking_start_prompt(context.clinic, context.available_slots),
+            response_override=reply_booking_start(),
+        )
+    if intent == "faq":
+        return ChatTransition(
+            next_state="faq",
+            system_prompt=build_faq_prompt(context.clinic, context.user_message),
+        )
+    if is_simple_greeting(context.user_message):
+        return ChatTransition(
+            next_state="greeting",
+            system_prompt=build_greeting_prompt(context.clinic),
+            response_override=reply_greeting(context.clinic),
+        )
+    return ChatTransition(
+        next_state="fallback",
+        system_prompt=build_fallback_prompt(context.clinic),
+        response_override=reply_fallback(context.clinic),
+    )
+
+
+def handle_general_entry_state(context: ChatContext) -> ChatTransition:
+    transition = handle_general_state(context)
+    if transition.next_state == "fallback":
+        return ChatTransition(
+            next_state="greeting",
+            system_prompt=build_greeting_prompt(context.clinic),
+            response_override=reply_greeting(context.clinic),
+        )
+    return transition
+
+
+def handle_faq_state(context: ChatContext) -> ChatTransition:
+    intent = detect_intent(context.user_message)
+    if intent == "booking":
+        return ChatTransition(
+            next_state="booking_reason",
+            system_prompt=build_booking_start_prompt(context.clinic, context.available_slots),
+            response_override=reply_booking_start(),
+        )
+    return ChatTransition(
+        next_state="faq",
+        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+    )
+
+
+def handle_booking_reason_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_reason", context)
+    if faq_transition:
+        return faq_transition
+    context.booking_data.reason = context.user_message.strip()
+    return transition_after_reason(context.clinic, context.booking_data, context.slot_options)
+
+
+def handle_booking_slot_offer_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_slot_offer", context)
+    if faq_transition:
+        return faq_transition
+
+    selected = match_slot_choice(context.user_message, context.slot_options)
+    if selected:
+        set_selected_slot(context.booking_data, selected)
+        return ChatTransition(
+            next_state="booking_name",
+            system_prompt=build_collect_name_prompt(context.clinic, context.booking_data),
+            response_override=reply_ask_name(),
+        )
+    if wants_manual_time(context.user_message):
+        return ChatTransition(
+            next_state="booking_datetime_fallback",
+            system_prompt=build_collect_datetime_prompt(context.clinic, context.booking_data, []),
+            response_override=reply_ask_datetime([]),
+        )
+    if looks_like_custom_datetime(context.user_message):
+        set_manual_datetime(context.booking_data, context.user_message)
+        return ChatTransition(
+            next_state="booking_name",
+            system_prompt=build_collect_name_prompt(context.clinic, context.booking_data),
+            response_override=reply_ask_name(),
+        )
+    return ChatTransition(
+        next_state="booking_slot_selection",
+        system_prompt=build_collect_datetime_prompt(context.clinic, context.booking_data, context.slot_options),
+        response_override=reply_offer_slots(context.slot_options),
+    )
+
+
+def handle_booking_slot_selection_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_slot_selection", context)
+    if faq_transition:
+        return faq_transition
+
+    selected = match_slot_choice(context.user_message, context.slot_options)
+    if selected:
+        set_selected_slot(context.booking_data, selected)
+    elif wants_manual_time(context.user_message) or looks_like_custom_datetime(context.user_message):
+        set_manual_datetime(context.booking_data, context.user_message)
+    else:
+        return ChatTransition(
+            next_state="booking_slot_selection",
+            system_prompt=build_collect_datetime_prompt(context.clinic, context.booking_data, context.slot_options),
+            response_override=reply_offer_slots(context.slot_options),
+        )
+
+    return ChatTransition(
+        next_state="booking_name",
+        system_prompt=build_collect_name_prompt(context.clinic, context.booking_data),
+        response_override=reply_ask_name(),
+    )
+
+
+def handle_booking_datetime_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_datetime_fallback", context)
+    if faq_transition:
+        return faq_transition
+
+    context.booking_data.datetime = context.user_message.strip()
+    matched = find_matching_slot(context.user_message, context.available_slots)
+    if matched is not None:
+        context.booking_data.slot_row_index = matched
+        context.booking_data.slot_source = "availability"
+    else:
+        context.booking_data.slot_row_index = None
+        context.booking_data.slot_source = "manual"
+    return transition_after_datetime(context.clinic, context.booking_data)
+
+
+def handle_booking_name_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_name", context)
+    if faq_transition:
+        return faq_transition
+    context.booking_data.name = extract_name(context.user_message)
+    return transition_after_name(context.clinic, context.booking_data)
+
+
+def handle_booking_phone_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_phone", context)
+    if faq_transition:
+        return faq_transition
+    context.booking_data.phone = extract_phone(context.user_message)
+    return transition_after_phone(context.clinic, context.booking_data)
+
+
+def handle_booking_email_state(context: ChatContext) -> ChatTransition:
+    faq_transition = faq_interrupt_transition("booking_email", context)
+    if faq_transition:
+        return faq_transition
+
+    if "@" not in context.user_message and any(phrase in context.user_message.lower() for phrase in EMAIL_SKIP_PHRASES):
+        context.booking_data.email = ""
+    else:
+        context.booking_data.email = extract_email(context.user_message)
+    context.booking_data.correction_mode = False
+    context.booking_data.correction_field = ""
+    return confirmation_transition(context.clinic, context.booking_data)
+
+
+def handle_booking_confirm_state(context: ChatContext) -> ChatTransition:
+    if is_confirmation(context.user_message):
+        return save_confirmed_lead(context)
+
+    if is_denial(context.user_message):
+        field = detect_field_to_change(context.user_message)
+        if field is None:
+            return ChatTransition(
+                next_state="booking_confirm",
+                system_prompt=build_confirm_restart_prompt(context.clinic, context.booking_data),
+                response_override=reply_confirm_restart(),
+            )
+
+        candidate = extract_corrected_value(field, context.user_message)
+        if apply_inline_correction(field, candidate, context.booking_data):
+            return confirmation_transition(context.clinic, context.booking_data)
+
+        context.booking_data.correction_mode = True
+        context.booking_data.correction_field = field
+        return ChatTransition(
+            next_state=f"booking_{field}",
+            system_prompt=build_confirm_restart_prompt(context.clinic, context.booking_data),
+            response_override=correction_prompt_for_field(field, context.booking_data),
+        )
+
+    return confirmation_transition(context.clinic, context.booking_data)
+
+
+def handle_booking_complete_state(context: ChatContext) -> ChatTransition:
+    intent = detect_intent(context.user_message)
+    if intent == "booking":
+        context.booking_data.reason = ""
+        context.booking_data.datetime = ""
+        context.booking_data.name = ""
+        context.booking_data.phone = ""
+        context.booking_data.email = ""
+        context.booking_data.slot_row_index = None
+        context.booking_data.slot_source = "manual"
+        context.booking_data.correction_mode = False
+        context.booking_data.correction_field = ""
+        return ChatTransition(
+            next_state="booking_reason",
+            system_prompt=build_booking_start_prompt(context.clinic, context.available_slots),
+            response_override=reply_booking_start(),
+        )
+    return ChatTransition(
+        next_state="booking_complete",
+        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+    )
+
+
+def handle_unknown_state(context: ChatContext) -> ChatTransition:
+    return ChatTransition(
+        next_state="fallback",
+        system_prompt=build_fallback_prompt(context.clinic),
+        response_override=reply_fallback(context.clinic),
+    )
+
+
+STATE_HANDLERS = {
+    "general": handle_general_entry_state,
+    "greeting": handle_general_state,
+    "fallback": handle_general_state,
+    "faq": handle_faq_state,
+    "booking_reason": handle_booking_reason_state,
+    "booking_slot_offer": handle_booking_slot_offer_state,
+    "booking_slot_selection": handle_booking_slot_selection_state,
+    "booking_datetime": handle_booking_datetime_state,
+    "booking_datetime_fallback": handle_booking_datetime_state,
+    "booking_name": handle_booking_name_state,
+    "booking_phone": handle_booking_phone_state,
+    "booking_email": handle_booking_email_state,
+    "booking_confirm": handle_booking_confirm_state,
+    "booking_complete": handle_booking_complete_state,
+}
+
+
+def resolve_chat_transition(state: str, context: ChatContext) -> ChatTransition:
+    handler = STATE_HANDLERS.get(state, handle_unknown_state)
+    return handler(context)
+
+
+def build_chat_result(reply: str, session_id: str, intent: str, lead_created: bool = False, lead_id: Optional[str] = None) -> dict:
+    return {
+        "reply": reply,
+        "session_id": session_id,
+        "intent": intent,
+        "lead_created": lead_created,
+        "lead_id": lead_id,
+    }
+
+
+def load_clinic_for_chat(db: Any, clinic_slug: str, session_id: str) -> tuple[Optional[dict], Optional[dict]]:
+    clinic_result = db.table("clinics").select("*").eq("slug", clinic_slug).single().execute()
+    if clinic_result.data:
+        return clinic_result.data, None
+
+    logger.warning(f"Chat for unknown clinic slug: {clinic_slug}")
+    return None, build_chat_result(
+        reply="Sorry, I couldn't find that clinic. Please check the link and try again.",
+        session_id=session_id,
+        intent="error",
+    )
+
+
+def enforce_chat_access(clinic: dict, session_id: str) -> Optional[dict]:
     from app.services.pricing import is_at_lead_limit
-    sub_status = clinic.get("subscription_status", "trialing")
-    if sub_status == "inactive":
-        return {
-            "reply": "This clinic's subscription is currently inactive. Please ask the clinic to renew their plan.",
-            "session_id": session_id,
-            "intent": "error",
-            "lead_created": False,
-            "lead_id": None,
-        }
+
+    if clinic.get("subscription_status", "trialing") == "inactive":
+        return build_chat_result(
+            reply="This clinic's subscription is currently inactive. Please ask the clinic to renew their plan.",
+            session_id=session_id,
+            intent="error",
+        )
 
     plan_id = clinic.get("plan", "trial")
     leads_used = clinic.get("monthly_leads_used", 0)
     if is_at_lead_limit(plan_id, leads_used):
-        return {
-            "reply": "This clinic has reached its monthly appointment request limit. Please contact the clinic directly by phone.",
-            "session_id": session_id,
-            "intent": "limit_reached",
-            "lead_created": False,
-            "lead_id": None,
-        }
+        return build_chat_result(
+            reply="This clinic has reached its monthly appointment request limit. Please contact the clinic directly by phone.",
+            session_id=session_id,
+            intent="limit_reached",
+        )
+    return None
 
-    # ── Load or create conversation ──────────────────────────────────────────
+
+def load_or_create_conversation(db: Any, clinic_id: str, session_id: str) -> dict:
     conv_result = (
         db.table("conversations")
         .select("*")
@@ -811,38 +1278,36 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
         .execute()
     )
     if conv_result.data:
-        conversation = conv_result.data[0]
-    else:
-        conv_insert = db.table("conversations").insert({
-            "clinic_id": clinic_id,
-            "session_id": session_id,
-            "last_intent": "general",
-            "summary": "",
-        }).execute()
-        conversation = conv_insert.data[0]
+        return conv_result.data[0]
 
-    conversation_id = conversation["id"]
+    conv_insert = db.table("conversations").insert({
+        "clinic_id": clinic_id,
+        "session_id": session_id,
+        "last_intent": "general",
+        "summary": "",
+    }).execute()
+    return conv_insert.data[0]
 
-    # ── Persist user message ─────────────────────────────────────────────────
+
+def persist_user_message(db: Any, conversation_id: str, user_message: str) -> None:
     db.table("conversation_messages").insert({
         "conversation_id": conversation_id,
         "role": "user",
         "content": user_message,
     }).execute()
 
-    # ── Load conversation state ──────────────────────────────────────────────
-    state, booking_data = load_state(conversation)
 
-    # ── Load available slots (if integration enabled) ────────────────────────
+def load_slot_context(clinic: dict) -> tuple[list, list[dict]]:
     available_slots: list = []
     if clinic.get("availability_enabled"):
         available_slots = get_available_slots(
             clinic.get("google_sheet_id"),
             clinic.get("availability_sheet_tab") or "Availability",
         )
-    slot_options = format_slot_options(available_slots, max_slots=5)
+    return available_slots, format_slot_options(available_slots, max_slots=5)
 
-    # ── Build message history for LLM ────────────────────────────────────────
+
+def build_message_history(db: Any, conversation_id: str, user_message: str) -> list[dict]:
     history_result = (
         db.table("conversation_messages")
         .select("role, content")
@@ -853,21 +1318,65 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
     )
     messages = []
     found_current = False
-    for m in history_result.data:
-        messages.append({"role": m["role"], "content": m["content"]})
-        if m["role"] == "user" and m["content"] == user_message:
+    for message in history_result.data:
+        messages.append({"role": message["role"], "content": message["content"]})
+        if message["role"] == "user" and message["content"] == user_message:
             found_current = True
     if not found_current:
         messages.append({"role": "user", "content": user_message})
+    return messages
+
+
+async def generate_chat_reply(clinic: dict, system_prompt: str, messages: list[dict], response_override: Optional[str]) -> str:
+    if response_override is not None:
+        return response_override
+    try:
+        return await ai.generate_response(system_prompt, messages)
+    except Exception as err:
+        logger.error(f"OpenAI error: {err}")
+        return clinic.get(
+            "fallback_message",
+            "I apologize for the inconvenience. Please call the clinic directly for assistance.",
+        )
+
+
+def persist_assistant_message(db: Any, conversation_id: str, ai_reply: str) -> None:
+    db.table("conversation_messages").insert({
+        "conversation_id": conversation_id,
+        "role": "assistant",
+        "content": ai_reply,
+    }).execute()
+
+
+# Main orchestrator
+
+async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> dict:
+    db = get_supabase()
+
+    clinic, clinic_error = load_clinic_for_chat(db, clinic_slug, session_id)
+    if clinic_error:
+        return clinic_error
+
+    clinic_id = clinic["id"]
+
+    access_error = enforce_chat_access(clinic, session_id)
+    if access_error:
+        return access_error
+
+    conversation = load_or_create_conversation(db, clinic_id, session_id)
+
+    conversation_id = conversation["id"]
+    persist_user_message(db, conversation_id, user_message)
+
+    state, booking_data = load_state(conversation)
+    available_slots, slot_options = load_slot_context(clinic)
+    messages = build_message_history(db, conversation_id, user_message)
 
     logger.info(
         f"Session {session_id[:8]} | State: {state} | "
         f"Msg: {user_message[:60]!r} | Slots: {len(available_slots)}"
     )
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # STATE MACHINE — determine system prompt and next state
-    # ─────────────────────────────────────────────────────────────────────────
     lead_created = False
     lead_id: Optional[str] = None
     next_state = state
@@ -875,316 +1384,23 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
     response_override: Optional[str] = None
 
     try:
-        # ── GENERAL / GREETING / FALLBACK ──────────────────────────────────
-        if state in ("general", "greeting", "fallback"):
-            intent = detect_intent(user_message)
-            if intent == "booking":
-                next_state = "booking_reason"
-                system_prompt = build_booking_start_prompt(clinic, available_slots)
-                response_override = reply_booking_start()
-            elif intent == "faq":
-                next_state = "faq"
-                system_prompt = build_faq_prompt(clinic, user_message)
-            else:
-                if state == "general" or is_simple_greeting(user_message):
-                    next_state = "greeting"
-                    response_override = reply_greeting(clinic)
-                else:
-                    next_state = "fallback"
-                    response_override = reply_fallback(clinic)
-
-        # ── FAQ ─────────────────────────────────────────────────────────────
-        elif state == "faq":
-            intent = detect_intent(user_message)
-            if intent == "booking":
-                next_state = "booking_reason"
-                system_prompt = build_booking_start_prompt(clinic, available_slots)
-                response_override = reply_booking_start()
-            else:
-                next_state = "faq"
-                system_prompt = build_faq_prompt(clinic, user_message)
-
-        # ── BOOKING STEP 1: REASON FOR VISIT ────────────────────────────────
-        elif state == "booking_reason":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_reason"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-            booking_data.reason = user_message.strip()
-            if booking_data.correction_mode and booking_data.correction_field == "reason":
-                booking_data.correction_mode = False
-                booking_data.correction_field = ""
-                next_state = "booking_confirm"
-                response_override = reply_confirmation(booking_data)
-            else:
-                if clinic.get("availability_enabled") and slot_options:
-                    next_state = "booking_slot_offer"
-                    response_override = reply_offer_slots(slot_options)
-                elif clinic.get("availability_enabled") and not slot_options:
-                    next_state = "booking_datetime_fallback"
-                    response_override = reply_no_slots_fallback()
-                else:
-                    next_state = "booking_datetime_fallback"
-                    response_override = reply_ask_datetime([])
-
-        # ── BOOKING STEP 2A: OFFER SLOTS ───────────────────────────────────
-        elif state == "booking_slot_offer":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_slot_offer"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-
-            selected = match_slot_choice(user_message, slot_options)
-            if selected:
-                booking_data.datetime = selected["label"]
-                booking_data.slot_row_index = selected["row_index"]
-                booking_data.slot_source = "availability"
-                next_state = "booking_name"
-                response_override = reply_ask_name()
-            elif wants_manual_time(user_message):
-                next_state = "booking_datetime_fallback"
-                response_override = reply_ask_datetime([])
-            elif looks_like_custom_datetime(user_message):
-                booking_data.datetime = user_message.strip()
-                booking_data.slot_row_index = None
-                booking_data.slot_source = "manual"
-                next_state = "booking_name"
-                response_override = reply_ask_name()
-            else:
-                next_state = "booking_slot_selection"
-                response_override = reply_offer_slots(slot_options)
-
-        # ── BOOKING STEP 2B: SLOT SELECTION CLARIFICATION ──────────────────
-        elif state == "booking_slot_selection":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_slot_selection"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-
-            selected = match_slot_choice(user_message, slot_options)
-            if selected:
-                booking_data.datetime = selected["label"]
-                booking_data.slot_row_index = selected["row_index"]
-                booking_data.slot_source = "availability"
-                next_state = "booking_name"
-                response_override = reply_ask_name()
-            elif wants_manual_time(user_message) or looks_like_custom_datetime(user_message):
-                booking_data.datetime = user_message.strip()
-                booking_data.slot_row_index = None
-                booking_data.slot_source = "manual"
-                next_state = "booking_name"
-                response_override = reply_ask_name()
-            else:
-                next_state = "booking_slot_selection"
-                response_override = reply_offer_slots(slot_options)
-
-        # ── BOOKING STEP 2C: MANUAL DATE / TIME FALLBACK ────────────────────
-        elif state in ("booking_datetime", "booking_datetime_fallback"):
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_datetime_fallback"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-            booking_data.datetime = user_message.strip()
-            # Check if the user selected a specific offered slot
-            matched = find_matching_slot(user_message, available_slots)
-            if matched is not None:
-                booking_data.slot_row_index = matched
-                booking_data.slot_source = "availability"
-            else:
-                booking_data.slot_row_index = None
-                booking_data.slot_source = "manual"
-            if booking_data.correction_mode and booking_data.correction_field == "datetime":
-                booking_data.correction_mode = False
-                booking_data.correction_field = ""
-                next_state = "booking_confirm"
-                system_prompt = build_confirmation_prompt(clinic, booking_data)
-                response_override = reply_confirmation(booking_data)
-            else:
-                next_state = "booking_name"
-                system_prompt = build_collect_name_prompt(clinic, booking_data)
-                response_override = reply_ask_name()
-
-        # ── BOOKING STEP 3: PATIENT NAME ─────────────────────────────────────
-        elif state == "booking_name":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_name"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-            booking_data.name = extract_name(user_message)
-            if booking_data.correction_mode and booking_data.correction_field == "name":
-                booking_data.correction_mode = False
-                booking_data.correction_field = ""
-                next_state = "booking_confirm"
-                system_prompt = build_confirmation_prompt(clinic, booking_data)
-                response_override = reply_confirmation(booking_data)
-            else:
-                next_state = "booking_phone"
-                system_prompt = build_collect_phone_prompt(clinic, booking_data)
-                response_override = reply_ask_phone(booking_data.name)
-
-        # ── BOOKING STEP 4: PHONE NUMBER ─────────────────────────────────────
-        elif state == "booking_phone":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_phone"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-            booking_data.phone = extract_phone(user_message)
-            if booking_data.correction_mode and booking_data.correction_field == "phone":
-                booking_data.correction_mode = False
-                booking_data.correction_field = ""
-                next_state = "booking_confirm"
-                system_prompt = build_confirmation_prompt(clinic, booking_data)
-                response_override = reply_confirmation(booking_data)
-            else:
-                next_state = "booking_email"
-                system_prompt = build_collect_email_prompt(clinic, booking_data)
-                response_override = reply_ask_email()
-
-        # ── BOOKING STEP 5: EMAIL (OPTIONAL) ─────────────────────────────────
-        elif state == "booking_email":
-            if detect_intent(user_message) == "faq" and "?" in user_message:
-                next_state = "booking_email"
-                system_prompt = build_faq_prompt(clinic, user_message)
-                response_override = None
-                raise StopIteration
-            if "@" not in user_message and any(p in user_message.lower() for p in EMAIL_SKIP_PHRASES):
-                booking_data.email = ""
-            else:
-                booking_data.email = extract_email(user_message)
-            booking_data.correction_mode = False
-            booking_data.correction_field = ""
-            next_state = "booking_confirm"
-            system_prompt = build_confirmation_prompt(clinic, booking_data)
-            response_override = reply_confirmation(booking_data)
-
-        # ── BOOKING STEP 6: CONFIRMATION ─────────────────────────────────────
-        elif state == "booking_confirm":
-            if is_confirmation(user_message):
-                # Patient confirmed — save the lead
-                intake_data = {
-                    "patient_name": booking_data.name,
-                    "patient_phone": booking_data.phone,
-                    "patient_email": booking_data.email,
-                    "reason_for_visit": booking_data.reason,
-                    "preferred_datetime_text": booking_data.datetime,
-                    "slot_row_index": booking_data.slot_row_index,
-                    "slot_source": booking_data.slot_source,
-                    "source": "web_chat",
-                    "notes": "Selected from availability" if booking_data.slot_source == "availability" else "Manual preferred time",
-                }
-                lead = create_lead(clinic_id, intake_data)
-                lead_created = True
-                lead_id = lead["id"]
-                next_state = "booking_complete"
-
-                # Reserve the Google Sheet slot synchronously if applicable
-                if booking_data.slot_row_index and clinic.get("availability_enabled"):
-                    try:
-                        from app.services.google_sheets import reserve_slot_in_sheet
-                        reserve_slot_in_sheet(
-                            clinic.get("google_sheet_id"),
-                            clinic.get("availability_sheet_tab") or "Availability",
-                            int(booking_data.slot_row_index),
-                            booking_data.name,
-                            lead_id,
-                        )
-                    except Exception as e:
-                        logger.error(f"Slot reservation error: {e}")
-
-                # Link lead to conversation
-                db.table("conversations").update(
-                    {"lead_id": lead_id}
-                ).eq("id", conversation_id).execute()
-
-                system_prompt = build_completion_prompt(clinic, booking_data)
-                response_override = reply_completion(clinic, booking_data)
-                logger.info(f"Lead created from chat: {lead_id} (session {session_id[:8]})")
-
-            elif is_denial(user_message):
-                # Patient wants to change something
-                field = detect_field_to_change(user_message)
-                if field:
-                    # If user already provided corrected value in this message, apply it directly.
-                    candidate = extract_corrected_value(field, user_message)
-                    if field == "datetime" and len(candidate) > 3 and candidate.lower() not in ["date", "time", "datetime"]:
-                        booking_data.datetime = candidate
-                        booking_data.slot_row_index = None
-                        booking_data.slot_source = "manual"
-                        next_state = "booking_confirm"
-                        system_prompt = build_confirmation_prompt(clinic, booking_data)
-                        response_override = reply_confirmation(booking_data)
-                    elif field == "reason" and len(candidate) > 3 and candidate.lower() not in ["reason", "visit"]:
-                        booking_data.reason = candidate
-                        next_state = "booking_confirm"
-                        system_prompt = build_confirmation_prompt(clinic, booking_data)
-                        response_override = reply_confirmation(booking_data)
-                    elif field == "phone" and any(ch.isdigit() for ch in candidate):
-                        booking_data.phone = extract_phone(candidate)
-                        next_state = "booking_confirm"
-                        system_prompt = build_confirmation_prompt(clinic, booking_data)
-                        response_override = reply_confirmation(booking_data)
-                    elif field == "email" and "@" in candidate:
-                        booking_data.email = extract_email(candidate)
-                        next_state = "booking_confirm"
-                        system_prompt = build_confirmation_prompt(clinic, booking_data)
-                        response_override = reply_confirmation(booking_data)
-                    elif field == "name" and len(candidate) > 2:
-                        booking_data.name = extract_name(candidate)
-                        next_state = "booking_confirm"
-                        system_prompt = build_confirmation_prompt(clinic, booking_data)
-                        response_override = reply_confirmation(booking_data)
-                    else:
-                        booking_data.correction_mode = True
-                        booking_data.correction_field = field
-                        next_state = f"booking_{field}"
-                        reply_map = {
-                            "reason": reply_ask_reason(),
-                            "datetime": reply_ask_datetime([]),
-                            "name": reply_ask_name(),
-                            "phone": reply_ask_phone(booking_data.name),
-                            "email": reply_ask_email(),
-                        }
-                        response_override = reply_map[field]
-                else:
-                    # Not sure what to change — list the options
-                    next_state = "booking_confirm"
-                    system_prompt = build_confirm_restart_prompt(clinic, booking_data)
-                    response_override = reply_confirm_restart()
-
-            else:
-                # Ambiguous — show confirmation again
-                next_state = "booking_confirm"
-                system_prompt = build_confirmation_prompt(clinic, booking_data)
-                response_override = reply_confirmation(booking_data)
-
-        # ── BOOKING COMPLETE ─────────────────────────────────────────────────
-        elif state == "booking_complete":
-            intent = detect_intent(user_message)
-            if intent == "booking":
-                # Start a fresh booking
-                booking_data = BookingData()
-                next_state = "booking_reason"
-                system_prompt = build_booking_start_prompt(clinic, available_slots)
-                response_override = reply_booking_start()
-            else:
-                next_state = "booking_complete"
-                system_prompt = build_faq_prompt(clinic, user_message)
-
-        # ── UNKNOWN STATE → FALLBACK ──────────────────────────────────────────
-        else:
-            next_state = "fallback"
-            system_prompt = build_fallback_prompt(clinic)
-            response_override = reply_fallback(clinic)
-
-    except StopIteration:
-        # Controlled short-circuit when answering FAQ during booking flow.
-        pass
+        context = ChatContext(
+            db=db,
+            clinic=clinic,
+            clinic_id=clinic_id,
+            conversation_id=conversation_id,
+            session_id=session_id,
+            user_message=user_message,
+            booking_data=booking_data,
+            available_slots=available_slots,
+            slot_options=slot_options,
+        )
+        transition = resolve_chat_transition(state, context)
+        next_state = transition.next_state
+        system_prompt = transition.system_prompt
+        response_override = transition.response_override
+        lead_created = transition.lead_created
+        lead_id = transition.lead_id
 
     except Exception as e:
         logger.error(f"State machine error for session {session_id}: {e}")
@@ -1193,37 +1409,17 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
         response_override = reply_fallback(clinic)
 
     # ── Generate AI response ─────────────────────────────────────────────────
-    if response_override is not None:
-        ai_reply = response_override
-    else:
-        try:
-            ai_reply = await ai.generate_response(system_prompt, messages)
-        except Exception as e:
-            logger.error(f"OpenAI error: {e}")
-            ai_reply = clinic.get(
-                "fallback_message",
-                "I apologize for the inconvenience. Please call the clinic directly for assistance.",
-            )
+    ai_reply = await generate_chat_reply(clinic, system_prompt, messages, response_override)
 
     # ── Persist updated state ────────────────────────────────────────────────
     save_state(db, conversation_id, next_state, booking_data)
 
     # ── Save assistant message ───────────────────────────────────────────────
-    db.table("conversation_messages").insert({
-        "conversation_id": conversation_id,
-        "role": "assistant",
-        "content": ai_reply,
-    }).execute()
+    persist_assistant_message(db, conversation_id, ai_reply)
 
     logger.info(
         f"Session {session_id[:8]} | {state} → {next_state} | "
         f"Lead: {lead_id or 'none'}"
     )
 
-    return {
-        "reply": ai_reply,
-        "session_id": session_id,
-        "intent": next_state,
-        "lead_created": lead_created,
-        "lead_id": lead_id,
-    }
+    return build_chat_result(ai_reply, session_id, next_state, lead_created, lead_id)

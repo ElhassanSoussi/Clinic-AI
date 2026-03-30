@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Bot, ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Privacy Policy — Clinic AI" };
+export const metadata: Metadata = { title: "Privacy Policy — Clinic AI" };
 
 export default function PrivacyPage() {
   return (

@@ -106,8 +106,9 @@ Once the first Render and Vercel deployments are live:
 2. Set `CORS_ORIGINS` on Render to the exact Vercel and custom domain origins.
 3. In Supabase Auth, set the Site URL to the frontend domain.
 4. In Supabase Auth, add redirect URLs for:
-  - `https://your-frontend-domain/auth/callback`
-  - any Vercel preview or alternate production domains you intend to support
+
+- `https://your-frontend-domain/auth/callback`
+- any Vercel preview or alternate production domains you intend to support
 
 OAuth redirect consistency requirements:
 

@@ -13,7 +13,7 @@ interface AccountDrawerProps {
   onClose: () => void;
 }
 
-export function AccountDrawer({ open, onClose }: AccountDrawerProps) {
+export function AccountDrawer({ open, onClose }: Readonly<AccountDrawerProps>) {
   const { user } = useAuth();
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [savingProfile, setSavingProfile] = useState(false);
@@ -138,7 +138,7 @@ export function AccountDrawer({ open, onClose }: AccountDrawerProps) {
                   <p className="text-xs text-slate-400 mt-1">Email cannot be changed. Contact support if needed.</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Role</label>
+                  <span className="block text-sm font-medium text-slate-700 mb-1.5">Role</span>
                   <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-teal-700 bg-teal-50 rounded-lg">Owner</span>
                 </div>
                 <div className="pt-2">
@@ -202,7 +202,7 @@ export function AccountDrawer({ open, onClose }: AccountDrawerProps) {
   );
 }
 
-function Feedback({ state }: { state: NonNullable<FeedbackState> }) {
+function Feedback({ state }: Readonly<{ state: NonNullable<FeedbackState> }>) {
   return (
     <div className={`mb-4 p-3 text-sm rounded-lg border flex items-center gap-2 ${
       state.type === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-700 border-red-100"

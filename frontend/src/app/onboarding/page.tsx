@@ -59,6 +59,829 @@ const DEFAULT_HOURS: Record<string, string> = {
   sunday: "Closed",
 };
 
+function validateOnboardingStep(
+  step: number,
+  form: { name: string; phone: string; email: string; services: string[] }
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+
+  if (step === 1) {
+    if (form.name.trim() === "") errors.name = "Clinic name is required";
+    if (form.phone.trim() === "") errors.phone = "Phone number is required";
+    if (form.email.trim() === "") {
+      errors.email = "Email is required";
+    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) === false) {
+      errors.email = "Enter a valid email address";
+    }
+  }
+
+  if (step === 2 && form.services.length === 0) {
+    errors.services = "Add at least one service";
+  }
+
+  return errors;
+}
+
+type ChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
+function onboardingStepColorClass(isDone: boolean, isCurrent: boolean): string {
+  if (isDone) return "bg-teal-600 text-white";
+  if (isCurrent) return "bg-teal-100 text-teal-700 ring-2 ring-teal-600";
+  return "bg-slate-100 text-slate-400";
+}
+
+function onboardingStepContainerClass(targetStep: number, currentStep: number): string {
+  return targetStep > currentStep
+    ? "opacity-40 cursor-not-allowed"
+    : "cursor-pointer";
+}
+
+function onboardingStepLabelClass(isCurrent: boolean): string {
+  return isCurrent ? "text-teal-700" : "text-slate-500";
+}
+
+function nextStepLabel(step: number): string {
+  return step === 4 || step === 5 ? "Continue" : "Save & Continue";
+}
+
+function FaqStepContent({
+  faq,
+  addFaq,
+  removeFaq,
+  updateFaq,
+}: Readonly<{
+  faq: FaqEntry[];
+  addFaq: () => void;
+  removeFaq: (index: number) => void;
+  updateFaq: (index: number, field: "question" | "answer", value: string) => void;
+}>) {
+  return (
+    <div className="p-6 sm:p-8">
+      <h2 className="text-xl font-bold text-slate-900 mb-1">
+        Frequently Asked Questions
+      </h2>
+      <p className="text-sm text-slate-500 mb-6">
+        Add questions patients commonly ask. The AI will use these to
+        provide accurate answers. You can skip this and add them later.
+      </p>
+      <div className="max-w-lg">
+        {faq.length === 0 ? (
+          <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-100">
+            <HelpCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-sm text-slate-500 mb-4">
+              No FAQs yet. Add common questions like:
+            </p>
+            <div className="space-y-2 text-sm text-slate-600">
+              <p>&quot;Do you accept insurance?&quot;</p>
+              <p>&quot;What is your cancellation policy?&quot;</p>
+              <p>&quot;Do you offer evening appointments?&quot;</p>
+            </div>
+            <button
+              onClick={addFaq}
+              className="mt-4 px-4 py-2 text-sm font-medium text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50"
+            >
+              <Plus className="w-4 h-4 inline mr-1" />
+              Add FAQ
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {faq.map((item, i) => (
+              <div
+                key={`faq-${i}-${item.question.slice(0, 20)}`}
+                className="p-4 border border-slate-100 rounded-lg bg-slate-50"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs font-medium text-slate-500">
+                    FAQ #{i + 1}
+                  </span>
+                  <button
+                    onClick={() => removeFaq(i)}
+                    aria-label={`Remove FAQ ${i + 1}`}
+                    className="text-slate-400 hover:text-red-500"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={item.question}
+                  onChange={(e) =>
+                    updateFaq(i, "question", e.target.value)
+                  }
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 mb-3"
+                  placeholder="Question"
+                />
+                <textarea
+                  value={item.answer}
+                  onChange={(e) =>
+                    updateFaq(i, "answer", e.target.value)
+                  }
+                  rows={2}
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                  placeholder="Answer"
+                />
+              </div>
+            ))}
+            <button
+              onClick={addFaq}
+              className="w-full py-2.5 text-sm font-medium text-teal-600 border border-dashed border-teal-300 rounded-lg hover:bg-teal-50"
+            >
+              <Plus className="w-4 h-4 inline mr-1" />
+              Add Another FAQ
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function GoogleSheetsStepContent({
+  googleSheetId,
+  setGoogleSheetId,
+  setSheetsValidation,
+  googleSheetTab,
+  setGoogleSheetTab,
+  availabilityEnabled,
+  setAvailabilityEnabled,
+  availabilitySheetTab,
+  setAvailabilitySheetTab,
+  notificationsEnabled,
+  setNotificationsEnabled,
+  notificationEmail,
+  setNotificationEmail,
+  validatingSheets,
+  validateSheets,
+  sheetsValidation,
+  email,
+}: Readonly<{
+  googleSheetId: string;
+  setGoogleSheetId: (value: string) => void;
+  setSheetsValidation: (value: SheetsValidation | null) => void;
+  googleSheetTab: string;
+  setGoogleSheetTab: (value: string) => void;
+  availabilityEnabled: boolean;
+  setAvailabilityEnabled: (value: boolean) => void;
+  availabilitySheetTab: string;
+  setAvailabilitySheetTab: (value: string) => void;
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (value: boolean) => void;
+  notificationEmail: string;
+  setNotificationEmail: (value: string) => void;
+  validatingSheets: boolean;
+  validateSheets: () => void;
+  sheetsValidation: SheetsValidation | null;
+  email: string;
+}>) {
+  return (
+    <div className="p-6 sm:p-8">
+      <h2 className="text-xl font-bold text-slate-900 mb-1">
+        Connect Google Sheets
+      </h2>
+      <p className="text-sm text-slate-500 mb-6">
+        Sync leads to a spreadsheet and optionally manage appointment
+        availability. You can skip this and set it up later.
+      </p>
+
+      <div className="max-w-lg space-y-6">
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+            Setup Instructions
+          </h4>
+          <ol className="text-xs text-blue-700 space-y-1.5 list-decimal list-inside">
+            <li>Create a Google Sheet (or use an existing one)</li>
+            <li>
+              <span>Click <b>Share</b> and add this email as an <b>Editor</b>:</span>
+              <code className="block mt-1 bg-white/80 px-2 py-1 rounded text-blue-900 select-all break-all">
+                clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
+              </code>
+            </li>
+            <li>Paste the spreadsheet link or ID below</li>
+          </ol>
+        </div>
+
+        <div>
+          <label htmlFor="ob-sheet-id" className="block text-sm font-medium text-slate-700 mb-1.5">
+            Spreadsheet ID or URL
+          </label>
+          <input
+            id="ob-sheet-id"
+            type="text"
+            value={googleSheetId}
+            onChange={(e) => {
+              setGoogleSheetId(e.target.value);
+              setSheetsValidation(null);
+            }}
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+          />
+        </div>
+
+        <div>
+          <label htmlFor="ob-leads-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
+            Leads Tab Name
+          </label>
+          <input
+            id="ob-leads-tab"
+            type="text"
+            value={googleSheetTab}
+            onChange={(e) => setGoogleSheetTab(e.target.value)}
+            className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            placeholder="Sheet1"
+          />
+        </div>
+
+        <label className="flex items-center gap-3 cursor-pointer">
+          <div className="relative">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={availabilityEnabled}
+              onChange={(e) =>
+                setAvailabilityEnabled(e.target.checked)
+              }
+            />
+            <div
+              className={`block w-10 h-6 rounded-full transition-colors ${
+                availabilityEnabled ? "bg-teal-500" : "bg-slate-200"
+              }`}
+            />
+            <div
+              className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
+                availabilityEnabled ? "translate-x-4" : ""
+              }`}
+            />
+          </div>
+          <span className="text-sm font-medium text-slate-700">
+            Enable appointment availability
+          </span>
+        </label>
+
+        {availabilityEnabled && (
+          <div className="space-y-4 pl-1">
+            <div>
+              <label htmlFor="ob-avail-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
+                Availability Tab Name
+              </label>
+              <input
+                id="ob-avail-tab"
+                type="text"
+                value={availabilitySheetTab}
+                onChange={(e) =>
+                  setAvailabilitySheetTab(e.target.value)
+                }
+                className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                placeholder="Availability"
+              />
+            </div>
+            <div className="p-3 bg-teal-50 rounded-lg border border-teal-100 text-xs text-teal-700">
+              Required headers:{" "}
+              <code className="bg-white/80 px-1 py-0.5 rounded">
+                Date | Time | Status | Patient Name | Lead ID
+              </code>
+            </div>
+          </div>
+        )}
+
+        <div className="border-t border-slate-100 pt-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={notificationsEnabled}
+                onChange={(e) =>
+                  setNotificationsEnabled(e.target.checked)
+                }
+              />
+              <div
+                className={`block w-10 h-6 rounded-full transition-colors ${
+                  notificationsEnabled
+                    ? "bg-indigo-500"
+                    : "bg-slate-200"
+                }`}
+              />
+              <div
+                className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
+                  notificationsEnabled ? "translate-x-4" : ""
+                }`}
+              />
+            </div>
+            <span className="text-sm font-medium text-slate-700">
+              Email me when a new lead arrives
+            </span>
+          </label>
+          {notificationsEnabled && (
+            <div className="mt-3 pl-1">
+              <input
+                type="email"
+                value={notificationEmail}
+                onChange={(e) => setNotificationEmail(e.target.value)}
+                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                placeholder={email || "your@email.com"}
+              />
+            </div>
+          )}
+        </div>
+
+        {googleSheetId.trim() && (
+          <button
+            onClick={validateSheets}
+            disabled={validatingSheets}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+          >
+            {validatingSheets ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sheet className="w-4 h-4" />
+            )}
+            Test Connection
+          </button>
+        )}
+
+        {sheetsValidation && (
+          <div
+            className={`p-4 rounded-lg border ${
+              sheetsValidation.connected
+                ? "bg-emerald-50 border-emerald-200"
+                : "bg-red-50 border-red-200"
+            }`}
+          >
+            <div className="flex items-start gap-2">
+              {sheetsValidation.connected ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+              )}
+              <div className="space-y-1 text-sm">
+                {sheetsValidation.connected ? (
+                  <>
+                    <p className="font-medium text-emerald-800">
+                      Connected to &quot;{sheetsValidation.sheet_title}
+                      &quot;
+                    </p>
+                    <p className="text-emerald-700">
+                      Leads tab ({googleSheetTab}):{" "}
+                      {sheetsValidation.tab_found ? "Found" : "Not found"}
+                    </p>
+                    {availabilityEnabled && (
+                      <p className="text-emerald-700">
+                        Availability tab ({availabilitySheetTab}):{" "}
+                        {(() => {
+                          if (!sheetsValidation.availability_tab_found) return "Not found";
+                          if (sheetsValidation.availability_headers_ok) return "Found with correct headers";
+                          return "Found but missing required headers";
+                        })()}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-red-700">
+                    {sheetsValidation.error}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TestChatStepContent({
+  assistantName,
+  name,
+  chatMessages,
+  chatSending,
+  chatInput,
+  setChatInput,
+  sendChatMessage,
+  chatEndRef,
+}: Readonly<{
+  assistantName: string;
+  name: string;
+  chatMessages: ChatMessage[];
+  chatSending: boolean;
+  chatInput: string;
+  setChatInput: (value: string) => void;
+  sendChatMessage: () => void;
+  chatEndRef: React.RefObject<HTMLDivElement | null>;
+}>) {
+  return (
+    <div className="p-6 sm:p-8">
+      <h2 className="text-xl font-bold text-slate-900 mb-1">
+        Test your AI assistant
+      </h2>
+      <p className="text-sm text-slate-500 mb-6">
+        Try a conversation to see how patients will experience your
+        assistant. Try saying &quot;I want to book an appointment.&quot;
+      </p>
+      <div className="max-w-lg mx-auto border border-slate-200 rounded-xl overflow-hidden">
+        <div
+          className="onboarding-chat-header px-4 py-3 text-white flex items-center gap-2"
+        >
+          <Bot className="w-5 h-5" />
+          <span className="text-sm font-medium">
+            {assistantName || name || "AI Assistant"}
+          </span>
+        </div>
+
+        <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50">
+          {chatMessages.length === 0 && (
+            <div className="text-center py-12 text-sm text-slate-400">
+              Send a message to start testing
+            </div>
+          )}
+          {chatMessages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${
+                  msg.role === "user"
+                    ? "bg-teal-600 text-white rounded-br-md"
+                    : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
+                }`}
+              >
+                {msg.content}
+              </div>
+            </div>
+          ))}
+          {chatSending && (
+            <div className="flex justify-start">
+              <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3">
+                <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+              </div>
+            </div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="border-t border-slate-200 p-3 bg-white flex gap-2">
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+              }
+            }}
+            className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            placeholder="Type a message..."
+          />
+          <button
+            onClick={sendChatMessage}
+            disabled={chatSending || !chatInput.trim()}
+            aria-label="Send chat message"
+            className="px-3 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmbedWidgetStepContent({
+  embedCode,
+  copied,
+  copyEmbed,
+  directChatLink,
+  clinic,
+}: Readonly<{
+  embedCode: string;
+  copied: boolean;
+  copyEmbed: () => void;
+  directChatLink: string;
+  clinic: Clinic | null;
+}>) {
+  return (
+    <div className="p-6 sm:p-8">
+      <h2 className="text-xl font-bold text-slate-900 mb-1">
+        Add the chat widget to your website
+      </h2>
+      <p className="text-sm text-slate-500 mb-6">
+        Copy the code below and paste it into your website to start
+        receiving real patient leads.
+      </p>
+
+      <div className="max-w-lg space-y-6">
+        <div>
+          <span className="block text-sm font-medium text-slate-700 mb-2">
+            Embed Code
+          </span>
+          <div className="relative group">
+            <pre className="bg-slate-900 text-emerald-400 p-4 rounded-lg text-sm overflow-x-auto font-mono">
+              {embedCode}
+            </pre>
+            <button
+              onClick={copyEmbed}
+              className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-slate-700 rounded-md hover:bg-slate-600 transition-colors"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <h4 className="text-sm font-semibold text-blue-800 mb-2">
+            Installation Steps
+          </h4>
+          <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+            <li>
+              Copy the code above
+            </li>
+            <li>
+              Open your website&apos;s HTML
+            </li>
+            <li>
+              Paste the code just before the{" "}
+              <code className="bg-white/80 px-1 py-0.5 rounded">
+                &lt;/body&gt;
+              </code>{" "}
+              closing tag
+            </li>
+            <li>Save and deploy your website</li>
+          </ol>
+        </div>
+
+        <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+          <h4 className="text-sm font-semibold text-slate-700 mb-2">
+            Compatible with
+          </h4>
+          <p className="text-sm text-slate-500">
+            WordPress, Squarespace, Wix, Webflow, Shopify, custom HTML,
+            and any website that supports custom code.
+          </p>
+        </div>
+
+        {clinic && (
+          <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
+            <h4 className="text-sm font-semibold text-teal-800 mb-2">
+              Direct Chat Link
+            </h4>
+            <p className="text-sm text-teal-700 mb-2">
+              You can also share this link directly with patients:
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-sm bg-white/80 px-3 py-2 rounded border border-teal-200 text-teal-900 truncate">
+                {directChatLink}
+              </code>
+              <a
+                href={`/chat/${clinic.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open chat page in new tab"
+                className="p-2 text-teal-600 hover:text-teal-800"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+async function validateOnboardingSheets({
+  googleSheetId,
+  googleSheetTab,
+  availabilityEnabled,
+  availabilitySheetTab,
+  setValidatingSheets,
+  setSheetsValidation,
+}: Readonly<{
+  googleSheetId: string;
+  googleSheetTab: string;
+  availabilityEnabled: boolean;
+  availabilitySheetTab: string;
+  setValidatingSheets: (value: boolean) => void;
+  setSheetsValidation: (value: SheetsValidation | null) => void;
+}>): Promise<void> {
+  if (!googleSheetId.trim()) return;
+
+  setValidatingSheets(true);
+  setSheetsValidation(null);
+  try {
+    const result = await api.clinics.validateSheets({
+      sheet_id: googleSheetId,
+      tab_name: googleSheetTab,
+      availability_tab: availabilityEnabled ? availabilitySheetTab : "",
+    });
+    setSheetsValidation(result);
+  } catch {
+    setSheetsValidation({
+      connected: false,
+      tab_found: false,
+      availability_tab_found: false,
+      availability_headers_ok: false,
+      error: "Failed to validate. Check your connection.",
+    });
+  } finally {
+    setValidatingSheets(false);
+  }
+}
+
+async function sendOnboardingChatMessage({
+  text,
+  chatInput,
+  chatSending,
+  clinic,
+  chatSessionId,
+  setChatInput,
+  setChatMessages,
+  setChatSending,
+}: Readonly<{
+  text?: string;
+  chatInput: string;
+  chatSending: boolean;
+  clinic: Clinic | null;
+  chatSessionId: string;
+  setChatInput: (value: string) => void;
+  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  setChatSending: (value: boolean) => void;
+}>): Promise<void> {
+  if (!clinic || chatSending) return;
+
+  const message = (text || chatInput).trim();
+  if (!message) return;
+
+  setChatInput("");
+  setChatMessages((prev) => [
+    ...prev,
+    { id: crypto.randomUUID(), role: "user", content: message },
+  ]);
+  setChatSending(true);
+
+  try {
+    const res = await api.chat.send({
+      clinic_slug: clinic.slug,
+      session_id: chatSessionId,
+      message,
+    });
+    setChatMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "assistant", content: res.reply },
+    ]);
+  } catch {
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Sorry, something went wrong. Please try again.",
+      },
+    ]);
+  } finally {
+    setChatSending(false);
+  }
+}
+
+function OnboardingPageProgress({
+  step,
+  onSelectStep,
+}: Readonly<{
+  step: number;
+  onSelectStep: (step: number) => void;
+}>) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        {STEPS.map((s) => {
+          const StepIcon = s.icon;
+          const isDone = step > s.id;
+          const isCurrent = step === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => {
+                if (s.id < step) onSelectStep(s.id);
+              }}
+              disabled={s.id > step}
+              className={`flex flex-col items-center gap-1.5 transition-colors ${onboardingStepContainerClass(s.id, step)}`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${onboardingStepColorClass(isDone, isCurrent)}`}
+              >
+                {isDone ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <StepIcon className="w-5 h-5" />
+                )}
+              </div>
+              <span
+                className={`text-[10px] sm:text-xs font-medium hidden sm:block ${onboardingStepLabelClass(isCurrent)}`}
+              >
+                {s.title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="w-full bg-slate-200 rounded-full h-1.5">
+        <div className="onboarding-progress bg-teal-600 h-1.5 rounded-full transition-all duration-300" />
+      </div>
+    </div>
+  );
+}
+
+function OnboardingPageNavigation({
+  step,
+  saving,
+  onBack,
+  onNext,
+  onFinish,
+}: Readonly<{
+  step: number;
+  saving: boolean;
+  onBack: () => void;
+  onNext: () => void;
+  onFinish: () => void;
+}>) {
+  if (step < 7) {
+    return (
+      <div className="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between">
+        {step > 1 ? (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </button>
+        ) : (
+          <div />
+        )}
+
+        <button
+          onClick={onNext}
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+        >
+          {saving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              {nextStepLabel(step)}
+              <ChevronRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Back
+      </button>
+
+      <button
+        onClick={onFinish}
+        disabled={saving}
+        className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 shadow-sm"
+      >
+        {saving ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            Launch Your Assistant
+            <Sparkles className="w-4 h-4" />
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -102,7 +925,7 @@ export default function OnboardingPage() {
 
   // Step 6 - Chat test
   const [chatMessages, setChatMessages] = useState<
-    { id: string; role: "user" | "assistant"; content: string }[]
+    ChatMessage[]
   >([]);
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
@@ -202,22 +1025,9 @@ export default function OnboardingPage() {
   };
 
   const validateStep = (): boolean => {
-    const errs: Record<string, string> = {};
-
-    if (step === 1) {
-      if (!name.trim()) errs.name = "Clinic name is required";
-      if (!phone.trim()) errs.phone = "Phone number is required";
-      if (!email.trim()) errs.email = "Email is required";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        errs.email = "Enter a valid email address";
-    }
-
-    if (step === 2) {
-      if (services.length === 0) errs.services = "Add at least one service";
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    const nextErrors = validateOnboardingStep(step, { name, phone, email, services });
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const goNext = async () => {
@@ -265,58 +1075,27 @@ export default function OnboardingPage() {
 
   // Sheets validation
   const validateSheets = async () => {
-    if (!googleSheetId.trim()) return;
-    setValidatingSheets(true);
-    setSheetsValidation(null);
-    try {
-      const result = await api.clinics.validateSheets({
-        sheet_id: googleSheetId,
-        tab_name: googleSheetTab,
-        availability_tab: availabilityEnabled ? availabilitySheetTab : "",
-      });
-      setSheetsValidation(result);
-    } catch {
-      setSheetsValidation({
-        connected: false,
-        tab_found: false,
-        availability_tab_found: false,
-        availability_headers_ok: false,
-        error: "Failed to validate. Check your connection.",
-      });
-    } finally {
-      setValidatingSheets(false);
-    }
+    await validateOnboardingSheets({
+      googleSheetId,
+      googleSheetTab,
+      availabilityEnabled,
+      availabilitySheetTab,
+      setValidatingSheets,
+      setSheetsValidation,
+    });
   };
 
   // Chat test
   const sendChatMessage = async () => {
-    if (!chatInput.trim() || chatSending || !clinic) return;
-    const msg = chatInput.trim();
-    setChatInput("");
-    setChatMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: msg }]);
-    setChatSending(true);
-    try {
-      const res = await api.chat.send({
-        clinic_slug: clinic.slug,
-        session_id: chatSessionId,
-        message: msg,
-      });
-      setChatMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: "assistant", content: res.reply },
-      ]);
-    } catch {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
-        },
-      ]);
-    } finally {
-      setChatSending(false);
-    }
+    await sendOnboardingChatMessage({
+      chatInput,
+      chatSending,
+      clinic,
+      chatSessionId,
+      setChatInput,
+      setChatMessages,
+      setChatSending,
+    });
   };
 
   // Copy embed code
@@ -324,6 +1103,8 @@ export default function OnboardingPage() {
   const embedCode = clinic
     ? `<script src="${origin}/widget.js" data-clinic="${clinic.slug}"></script>`
     : "";
+  const directChatLink = clinic ? `${origin}/chat/${clinic.slug}` : "";
+  const stepProgressWidth = `${((step - 1) / 6) * 100}%`;
 
   const copyEmbed = () => {
     navigator.clipboard.writeText(embedCode);
@@ -355,61 +1136,7 @@ export default function OnboardingPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            {STEPS.map((s) => {
-              const StepIcon = s.icon;
-              const isDone = step > s.id;
-              const isCurrent = step === s.id;
-              let stepColorClass: string;
-              if (isDone) {
-                stepColorClass = "bg-teal-600 text-white";
-              } else if (isCurrent) {
-                stepColorClass = "bg-teal-100 text-teal-700 ring-2 ring-teal-600";
-              } else {
-                stepColorClass = "bg-slate-100 text-slate-400";
-              }
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    if (s.id < step) setStep(s.id);
-                  }}
-                  disabled={s.id > step}
-                  className={`flex flex-col items-center gap-1.5 transition-colors ${
-                    s.id > step
-                      ? "opacity-40 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${stepColorClass}`}
-                  >
-                    {isDone ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <StepIcon className="w-5 h-5" />
-                    )}
-                  </div>
-                  <span
-                    className={`text-[10px] sm:text-xs font-medium hidden sm:block ${
-                      isCurrent ? "text-teal-700" : "text-slate-500"
-                    }`}
-                  >
-                    {s.title}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="w-full bg-slate-200 rounded-full h-1.5">
-            <div
-              className="bg-teal-600 h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${((step - 1) / 6) * 100}%` }}
-            />
-          </div>
-        </div>
+        <OnboardingPageProgress step={step} onSelectStep={setStep} />
 
         {/* Step content */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -546,10 +1273,7 @@ export default function OnboardingPage() {
                           className="w-28 px-3 py-2 text-sm border border-slate-200 rounded-lg font-mono"
                           placeholder="#0d9488"
                         />
-                        <div
-                          className="h-10 flex-1 rounded-lg"
-                          style={{ backgroundColor: primaryColor }}
-                        />
+                        <div className="onboarding-color-preview h-10 flex-1 rounded-lg" />
                       </div>
                     </div>
                   </div>
@@ -689,549 +1413,80 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* ==================== STEP 4: FAQ ==================== */}
           {step === 4 && (
-            <div className="p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Add questions patients commonly ask. The AI will use these to
-                provide accurate answers. You can skip this and add them later.
-              </p>
-              <div className="max-w-lg">
-                {faq.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-100">
-                    <HelpCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-500 mb-4">
-                      No FAQs yet. Add common questions like:
-                    </p>
-                    <div className="space-y-2 text-sm text-slate-600">
-                      <p>&quot;Do you accept insurance?&quot;</p>
-                      <p>&quot;What is your cancellation policy?&quot;</p>
-                      <p>&quot;Do you offer evening appointments?&quot;</p>
-                    </div>
-                    <button
-                      onClick={addFaq}
-                      className="mt-4 px-4 py-2 text-sm font-medium text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50"
-                    >
-                      <Plus className="w-4 h-4 inline mr-1" />
-                      Add FAQ
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {faq.map((item, i) => (
-                      <div
-                        key={`faq-${i}-${item.question.slice(0, 20)}`}
-                        className="p-4 border border-slate-100 rounded-lg bg-slate-50"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-xs font-medium text-slate-500">
-                            FAQ #{i + 1}
-                          </span>
-                          <button
-                            onClick={() => removeFaq(i)}
-                            aria-label={`Remove FAQ ${i + 1}`}
-                            className="text-slate-400 hover:text-red-500"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          value={item.question}
-                          onChange={(e) =>
-                            updateFaq(i, "question", e.target.value)
-                          }
-                          className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 mb-3"
-                          placeholder="Question"
-                        />
-                        <textarea
-                          value={item.answer}
-                          onChange={(e) =>
-                            updateFaq(i, "answer", e.target.value)
-                          }
-                          rows={2}
-                          className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
-                          placeholder="Answer"
-                        />
-                      </div>
-                    ))}
-                    <button
-                      onClick={addFaq}
-                      className="w-full py-2.5 text-sm font-medium text-teal-600 border border-dashed border-teal-300 rounded-lg hover:bg-teal-50"
-                    >
-                      <Plus className="w-4 h-4 inline mr-1" />
-                      Add Another FAQ
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <FaqStepContent
+              faq={faq}
+              addFaq={addFaq}
+              removeFaq={removeFaq}
+              updateFaq={updateFaq}
+            />
           )}
 
-          {/* ==================== STEP 5: Google Sheets + Integrations ==================== */}
           {step === 5 && (
-            <div className="p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Connect Google Sheets
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Sync leads to a spreadsheet and optionally manage appointment
-                availability. You can skip this and set it up later.
-              </p>
-
-              <div className="max-w-lg space-y-6">
-                {/* Setup instructions */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-2">
-                    Setup Instructions
-                  </h4>
-                  <ol className="text-xs text-blue-700 space-y-1.5 list-decimal list-inside">
-                    <li>Create a Google Sheet (or use an existing one)</li>
-                    <li>
-                      <span>Click <b>Share</b> and add this email as an <b>Editor</b>:</span>
-                      <code className="block mt-1 bg-white/80 px-2 py-1 rounded text-blue-900 select-all break-all">
-                        clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
-                      </code>
-                    </li>
-                    <li>Paste the spreadsheet link or ID below</li>
-                  </ol>
-                </div>
-
-                {/* Sheet ID */}
-                <div>
-                  <label htmlFor="ob-sheet-id" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Spreadsheet ID or URL
-                  </label>
-                  <input
-                    id="ob-sheet-id"
-                    type="text"
-                    value={googleSheetId}
-                    onChange={(e) => {
-                      setGoogleSheetId(e.target.value);
-                      setSheetsValidation(null);
-                    }}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                    placeholder="https://docs.google.com/spreadsheets/d/..."
-                  />
-                </div>
-
-                {/* Leads tab */}
-                <div>
-                  <label htmlFor="ob-leads-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Leads Tab Name
-                  </label>
-                  <input
-                    id="ob-leads-tab"
-                    type="text"
-                    value={googleSheetTab}
-                    onChange={(e) => setGoogleSheetTab(e.target.value)}
-                    className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                    placeholder="Sheet1"
-                  />
-                </div>
-
-                {/* Availability toggle */}
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={availabilityEnabled}
-                      onChange={(e) =>
-                        setAvailabilityEnabled(e.target.checked)
-                      }
-                    />
-                    <div
-                      className={`block w-10 h-6 rounded-full transition-colors ${
-                        availabilityEnabled ? "bg-teal-500" : "bg-slate-200"
-                      }`}
-                    />
-                    <div
-                      className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                        availabilityEnabled ? "translate-x-4" : ""
-                      }`}
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">
-                    Enable appointment availability
-                  </span>
-                </label>
-
-                {availabilityEnabled && (
-                  <div className="space-y-4 pl-1">
-                    <div>
-                      <label htmlFor="ob-avail-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Availability Tab Name
-                      </label>
-                      <input
-                        id="ob-avail-tab"
-                        type="text"
-                        value={availabilitySheetTab}
-                        onChange={(e) =>
-                          setAvailabilitySheetTab(e.target.value)
-                        }
-                        className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                        placeholder="Availability"
-                      />
-                    </div>
-                    <div className="p-3 bg-teal-50 rounded-lg border border-teal-100 text-xs text-teal-700">
-                      Required headers:{" "}
-                      <code className="bg-white/80 px-1 py-0.5 rounded">
-                        Date | Time | Status | Patient Name | Lead ID
-                      </code>
-                    </div>
-                  </div>
-                )}
-
-                {/* Notifications */}
-                <div className="border-t border-slate-100 pt-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={notificationsEnabled}
-                        onChange={(e) =>
-                          setNotificationsEnabled(e.target.checked)
-                        }
-                      />
-                      <div
-                        className={`block w-10 h-6 rounded-full transition-colors ${
-                          notificationsEnabled
-                            ? "bg-indigo-500"
-                            : "bg-slate-200"
-                        }`}
-                      />
-                      <div
-                        className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                          notificationsEnabled ? "translate-x-4" : ""
-                        }`}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-slate-700">
-                      Email me when a new lead arrives
-                    </span>
-                  </label>
-                  {notificationsEnabled && (
-                    <div className="mt-3 pl-1">
-                      <input
-                        type="email"
-                        value={notificationEmail}
-                        onChange={(e) => setNotificationEmail(e.target.value)}
-                        className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        placeholder={email || "your@email.com"}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Validate button */}
-                {googleSheetId.trim() && (
-                  <button
-                    onClick={validateSheets}
-                    disabled={validatingSheets}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
-                  >
-                    {validatingSheets ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Sheet className="w-4 h-4" />
-                    )}
-                    Test Connection
-                  </button>
-                )}
-
-                {/* Validation result */}
-                {sheetsValidation && (
-                  <div
-                    className={`p-4 rounded-lg border ${
-                      sheetsValidation.connected
-                        ? "bg-emerald-50 border-emerald-200"
-                        : "bg-red-50 border-red-200"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      {sheetsValidation.connected ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                      ) : (
-                        <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                      )}
-                      <div className="space-y-1 text-sm">
-                        {sheetsValidation.connected ? (
-                          <>
-                            <p className="font-medium text-emerald-800">
-                              Connected to &quot;{sheetsValidation.sheet_title}
-                              &quot;
-                            </p>
-                            <p className="text-emerald-700">
-                              Leads tab ({googleSheetTab}):{" "}
-                              {sheetsValidation.tab_found ? "Found" : "Not found"}
-                            </p>
-                            {availabilityEnabled && (
-                              <p className="text-emerald-700">
-                                Availability tab ({availabilitySheetTab}):{" "}
-                                {(() => {
-                                  if (!sheetsValidation.availability_tab_found) return "Not found";
-                                  if (sheetsValidation.availability_headers_ok) return "Found with correct headers";
-                                  return "Found but missing required headers";
-                                })()}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p className="text-red-700">
-                            {sheetsValidation.error}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <GoogleSheetsStepContent
+              googleSheetId={googleSheetId}
+              setGoogleSheetId={setGoogleSheetId}
+              setSheetsValidation={setSheetsValidation}
+              googleSheetTab={googleSheetTab}
+              setGoogleSheetTab={setGoogleSheetTab}
+              availabilityEnabled={availabilityEnabled}
+              setAvailabilityEnabled={setAvailabilityEnabled}
+              availabilitySheetTab={availabilitySheetTab}
+              setAvailabilitySheetTab={setAvailabilitySheetTab}
+              notificationsEnabled={notificationsEnabled}
+              setNotificationsEnabled={setNotificationsEnabled}
+              notificationEmail={notificationEmail}
+              setNotificationEmail={setNotificationEmail}
+              validatingSheets={validatingSheets}
+              validateSheets={validateSheets}
+              sheetsValidation={sheetsValidation}
+              email={email}
+            />
           )}
 
-          {/* ==================== STEP 6: Test Chat ==================== */}
           {step === 6 && (
-            <div className="p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Test your AI assistant
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Try a conversation to see how patients will experience your
-                assistant. Try saying &quot;I want to book an appointment.&quot;
-              </p>
-              <div className="max-w-lg mx-auto border border-slate-200 rounded-xl overflow-hidden">
-                {/* Chat header */}
-                <div
-                  className="px-4 py-3 text-white flex items-center gap-2"
-                  style={{ backgroundColor: primaryColor || "#0d9488" }}
-                >
-                  <Bot className="w-5 h-5" />
-                  <span className="text-sm font-medium">
-                    {assistantName || name || "AI Assistant"}
-                  </span>
-                </div>
-
-                {/* Chat messages */}
-                <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                  {chatMessages.length === 0 && (
-                    <div className="text-center py-12 text-sm text-slate-400">
-                      Send a message to start testing
-                    </div>
-                  )}
-                  {chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${
-                          msg.role === "user"
-                            ? "bg-teal-600 text-white rounded-br-md"
-                            : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))}
-                  {chatSending && (
-                    <div className="flex justify-start">
-                      <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3">
-                        <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                      </div>
-                    </div>
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Chat input */}
-                <div className="border-t border-slate-200 p-3 bg-white flex gap-2">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendChatMessage();
-                      }
-                    }}
-                    className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                    placeholder="Type a message..."
-                  />
-                  <button
-                    onClick={sendChatMessage}
-                    disabled={chatSending || !chatInput.trim()}
-                    aria-label="Send chat message"
-                    className="px-3 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <TestChatStepContent
+              assistantName={assistantName}
+              name={name}
+              chatMessages={chatMessages}
+              chatSending={chatSending}
+              chatInput={chatInput}
+              setChatInput={setChatInput}
+              sendChatMessage={sendChatMessage}
+              chatEndRef={chatEndRef}
+            />
           )}
 
-          {/* ==================== STEP 7: Embed Widget ==================== */}
           {step === 7 && (
-            <div className="p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Add the chat widget to your website
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Copy the code below and paste it into your website to start
-                receiving real patient leads.
-              </p>
-
-              <div className="max-w-lg space-y-6">
-                {/* Code snippet */}
-                <div>
-                  <span className="block text-sm font-medium text-slate-700 mb-2">
-                    Embed Code
-                  </span>
-                  <div className="relative group">
-                    <pre className="bg-slate-900 text-emerald-400 p-4 rounded-lg text-sm overflow-x-auto font-mono">
-                      {embedCode}
-                    </pre>
-                    <button
-                      onClick={copyEmbed}
-                      className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-slate-700 rounded-md hover:bg-slate-600 transition-colors"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-2">
-                    Installation Steps
-                  </h4>
-                  <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
-                    <li>
-                      Copy the code above
-                    </li>
-                    <li>
-                      Open your website&apos;s HTML
-                    </li>
-                    <li>
-                      Paste the code just before the{" "}
-                      <code className="bg-white/80 px-1 py-0.5 rounded">
-                        &lt;/body&gt;
-                      </code>{" "}
-                      closing tag
-                    </li>
-                    <li>Save and deploy your website</li>
-                  </ol>
-                </div>
-
-                {/* Works with */}
-                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                  <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                    Compatible with
-                  </h4>
-                  <p className="text-sm text-slate-500">
-                    WordPress, Squarespace, Wix, Webflow, Shopify, custom HTML,
-                    and any website that supports custom code.
-                  </p>
-                </div>
-
-                {/* Direct chat link */}
-                {clinic && (
-                  <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
-                    <h4 className="text-sm font-semibold text-teal-800 mb-2">
-                      Direct Chat Link
-                    </h4>
-                    <p className="text-sm text-teal-700 mb-2">
-                      You can also share this link directly with patients:
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-sm bg-white/80 px-3 py-2 rounded border border-teal-200 text-teal-900 truncate">
-                        {globalThis.window === undefined
-                          ? `/chat/${clinic.slug}`
-                          : `${globalThis.location.origin}/chat/${clinic.slug}`}
-                      </code>
-                      <a
-                        href={`/chat/${clinic.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Open chat page in new tab"
-                        className="p-2 text-teal-600 hover:text-teal-800"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <EmbedWidgetStepContent
+              embedCode={embedCode}
+              copied={copied}
+              copyEmbed={copyEmbed}
+              directChatLink={directChatLink}
+              clinic={clinic}
+            />
           )}
 
-          {/* Navigation buttons */}
-          <div className="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between">
-            {step > 1 ? (
-              <button
-                onClick={goBack}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </button>
-            ) : (
-              <div />
-            )}
-
-            {step < 7 ? (
-              <button
-                onClick={goNext}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    {step === 4 || step === 5 ? "Continue" : "Save & Continue"}
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={finishOnboarding}
-                disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 shadow-sm"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    Launch Your Assistant
-                    <Sparkles className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
+          <OnboardingPageNavigation
+            step={step}
+            saving={saving}
+            onBack={goBack}
+            onNext={goNext}
+            onFinish={finishOnboarding}
+          />
         </div>
       </div>
+
+      <style jsx>{`
+        .onboarding-progress {
+          width: ${stepProgressWidth};
+        }
+
+        .onboarding-color-preview,
+        .onboarding-chat-header {
+          background-color: ${primaryColor || "#0d9488"};
+        }
+      `}</style>
     </div>
   );
 }

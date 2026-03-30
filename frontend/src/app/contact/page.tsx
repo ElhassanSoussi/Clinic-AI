@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { Bot, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 import { getPublicApiUrl } from "@/lib/api-url";
+
+type ContactFormSubmitEvent = Parameters<
+  NonNullable<ComponentProps<"form">["onSubmit"]>
+>[0];
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -17,7 +21,7 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: ContactFormSubmitEvent) => {
     e.preventDefault();
     setError("");
 

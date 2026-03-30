@@ -33,13 +33,32 @@ const PROVIDER_ICONS: Record<string, React.FC> = {
   azure: MicrosoftIcon,
 };
 
+function renderProviderIcon(
+  isLoading: boolean,
+  Icon: React.FC | undefined,
+): React.ReactNode {
+  if (isLoading) {
+    return <Loader2 className="w-5 h-5 animate-spin text-slate-400" />;
+  }
+
+  if (!Icon) {
+    return null;
+  }
+
+  return (
+    <span className="w-5 h-5 flex items-center justify-center">
+      <Icon />
+    </span>
+  );
+}
+
 export default function OAuthButtons({
   disabled,
   nextPath,
-}: {
+}: Readonly<{
   disabled?: boolean;
   nextPath?: string;
-}) {
+}>) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [providerError, setProviderError] = useState("");
 
@@ -50,8 +69,8 @@ export default function OAuthButtons({
     try {
       const supabase = createClient();
       const redirectTo = nextPath
-        ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
-        : `${window.location.origin}/auth/callback`;
+        ? `${globalThis.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+        : `${globalThis.location.origin}/auth/callback`;
 
       await supabase.auth.signInWithOAuth({
         provider: provider.id,
@@ -90,6 +109,7 @@ export default function OAuthButtons({
           const Icon = PROVIDER_ICONS[provider.id];
           const providerDisabled =
             disabled || isAnyLoading || provider.enabled === false;
+          const providerIcon = renderProviderIcon(isLoading, Icon);
           return (
             <div key={provider.id} className="space-y-1.5">
               <button
@@ -98,13 +118,7 @@ export default function OAuthButtons({
                 onClick={() => handleOAuth(provider)}
                 className="w-full flex items-center justify-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-                ) : Icon ? (
-                  <span className="w-5 h-5 flex items-center justify-center">
-                    <Icon />
-                  </span>
-                ) : null}
+                {providerIcon}
                 {provider.label}
               </button>
               {provider.enabled === false && provider.helpText ? (

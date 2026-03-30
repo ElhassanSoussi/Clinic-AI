@@ -9,6 +9,8 @@ SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 
 db = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+STANDARD_WEEKDAY_HOURS = "8:00 AM - 6:00 PM"
+
 # ── Clinic ─────────────────────────────────────────────────────
 
 DEMO_CLINIC = {
@@ -20,9 +22,9 @@ DEMO_CLINIC = {
     "greeting_message": "Hi there! Welcome to Bright Smile Dental. I can help you book an appointment, answer questions about our services, or check our hours. How can I help you today?",
     "fallback_message": "I'd be happy to take down your details so our team can get back to you. Could I get your name to start?",
     "business_hours": json.dumps({
-        "monday": "8:00 AM - 6:00 PM",
-        "tuesday": "8:00 AM - 6:00 PM",
-        "wednesday": "8:00 AM - 6:00 PM",
+        "monday": STANDARD_WEEKDAY_HOURS,
+        "tuesday": STANDARD_WEEKDAY_HOURS,
+        "wednesday": STANDARD_WEEKDAY_HOURS,
         "thursday": "8:00 AM - 7:00 PM",
         "friday": "8:00 AM - 5:00 PM",
         "saturday": "9:00 AM - 2:00 PM",
@@ -278,4 +280,4 @@ db.table("clinics").update({"monthly_leads_used": len(DEMO_LEADS)}).eq("id", cli
 print("Demo clinic ready: Bright Smile Dental (slug: demo)")
 print(f"  - {len(DEMO_LEADS)} leads (4 new, 3 contacted, 2 booked + 1 new)")
 print(f"  - {len(DEMO_CONVERSATIONS)} conversation records")
-print(f"  - Plan: Professional, notifications enabled")
+print("  - Plan: Professional, notifications enabled")

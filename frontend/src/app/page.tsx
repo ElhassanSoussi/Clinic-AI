@@ -505,20 +505,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                {plan.id !== "trial" ? (
-                  <button
-                    type="button"
-                    onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
-                    disabled={checkoutLoading !== null}
-                    className={`block w-full text-center px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
-                      plan.highlighted
-                        ? "text-white bg-teal-600 hover:bg-teal-700"
-                        : "text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100"
-                    }`}
-                  >
-                    {checkoutLoading === plan.id ? "Starting checkout..." : plan.cta}
-                  </button>
-                ) : (
+                {plan.id === "trial" ? (
                   <Link
                     href={
                       plan.id === "trial" ? plan.href : `/register?plan=${plan.id}`
@@ -531,6 +518,19 @@ export default function LandingPage() {
                   >
                     {plan.cta}
                   </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
+                    disabled={checkoutLoading !== null}
+                    className={`block w-full text-center px-5 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
+                      plan.highlighted
+                        ? "text-white bg-teal-600 hover:bg-teal-700"
+                        : "text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100"
+                    }`}
+                  >
+                    {checkoutLoading === plan.id ? "Starting checkout..." : plan.cta}
+                  </button>
                 )}
               </div>
             ))}

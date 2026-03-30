@@ -6,6 +6,8 @@ client = TestClient(app)
 passed = 0
 failed = 0
 
+CHAT_ENDPOINT = "/api/chat"
+
 
 def check(name, status, expected):
     global passed, failed
@@ -29,13 +31,13 @@ r = client.get("/api/clinics/nonexistent/branding")
 check("GET /api/clinics/:slug/branding (404)", r.status_code, 404)
 
 # Chat validation
-r = client.post("/api/chat", json={"clinic_slug": "test", "session_id": "s1", "message": ""})
+r = client.post(CHAT_ENDPOINT, json={"clinic_slug": "test", "session_id": "s1", "message": ""})
 check("POST /api/chat (empty msg → 400)", r.status_code, 400)
 
-r = client.post("/api/chat", json={"clinic_slug": "", "session_id": "s1", "message": "hi"})
+r = client.post(CHAT_ENDPOINT, json={"clinic_slug": "", "session_id": "s1", "message": "hi"})
 check("POST /api/chat (empty slug → 400)", r.status_code, 400)
 
-r = client.post("/api/chat", json={"clinic_slug": "test", "session_id": "", "message": "hi"})
+r = client.post(CHAT_ENDPOINT, json={"clinic_slug": "test", "session_id": "", "message": "hi"})
 check("POST /api/chat (empty session → 400)", r.status_code, 400)
 
 # Auth-required endpoints must return 403 (HTTPBearer returns 403 when no auth header)

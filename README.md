@@ -49,7 +49,7 @@ cp .env.example .env
 
 API docs are available locally at `http://127.0.0.1:7001/api/docs`.
 
-### Frontend
+### Frontend Environment
 
 ```bash
 cd frontend
@@ -75,7 +75,7 @@ Optional:
 - `API_INTERNAL_URL`
 - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH`
 
-### Backend
+### Backend Environment
 
 Required:
 

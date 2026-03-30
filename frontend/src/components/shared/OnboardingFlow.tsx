@@ -67,10 +67,239 @@ interface OnboardingFlowProps {
   onComplete: () => void;
 }
 
+function serviceSummaryDetail(clinic: Clinic): string {
+  if (Array.isArray(clinic.services) === false || clinic.services.length === 0) {
+    return "None added";
+  }
+
+  const suffix = clinic.services.length === 1 ? "" : "s";
+  return `${clinic.services.length} service${suffix} configured`;
+}
+
+function stepButtonClass(isDone: boolean, isCurrent: boolean): string {
+  if (isDone) return "bg-teal-600 text-white shadow-sm";
+  if (isCurrent) return "bg-teal-50 text-teal-700 ring-2 ring-teal-600 ring-offset-1";
+  return "bg-slate-100 text-slate-400";
+}
+
+function stepLabelClass(isDone: boolean, isCurrent: boolean): string {
+  if (isCurrent) return "text-teal-700";
+  if (isDone) return "text-slate-600";
+  return "text-slate-400";
+}
+
+function nextButtonLabel(step: number, saving: boolean, saved: boolean): string {
+  if (saving) return "Saving…";
+  if (saved) return "Saved";
+  if (step === 5) return "Looks good, continue";
+  if (step === 4) return "Continue";
+  return "Save & continue";
+}
+
+type OnboardingFlowFormState = {
+  name: string;
+  phone: string;
+  email: string;
+  services: string[];
+  hours: Record<string, string>;
+  notificationsEnabled: boolean;
+  notificationEmail: string;
+};
+
+type SummaryItem = {
+  label: string;
+  detail: string;
+  done: boolean;
+};
+
+function buildStepUpdates(step: number, state: OnboardingFlowFormState): Partial<Clinic> {
+  if (step === 1) return { name: state.name, phone: state.phone, email: state.email };
+  if (step === 2) return { services: state.services };
+  if (step === 3) return { business_hours: state.hours };
+  if (step === 4) {
+    return {
+      notifications_enabled: state.notificationsEnabled,
+      notification_email: state.notificationEmail,
+    };
+  }
+
+  return {};
+}
+
+function validateStepState(step: number, state: Pick<OnboardingFlowFormState, "name" | "phone" | "email" | "services">): Record<string, string> {
+  const errs: Record<string, string> = {};
+
+  if (step === 1) {
+    if (!state.name.trim()) errs.name = "Clinic name is required";
+    if (!state.phone.trim()) errs.phone = "Phone number is required";
+    if (!state.email.trim()) errs.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) errs.email = "Enter a valid email";
+  }
+
+  if (step === 2 && state.services.length === 0) {
+    errs.services = "Add at least one service";
+  }
+
+  return errs;
+}
+
+function createSummaryItems(clinic: Clinic): SummaryItem[] {
+  return [
+    {
+      label: "Clinic info",
+      detail: clinic.name || "Not set",
+      done: !!(clinic.name && clinic.phone && clinic.email),
+    },
+    {
+      label: "Services",
+      detail: serviceSummaryDetail(clinic),
+      done: Array.isArray(clinic.services) && clinic.services.length > 0,
+    },
+    {
+      label: "Business hours",
+      detail: "Schedule set",
+      done:
+        typeof clinic.business_hours === "object" &&
+        Object.keys(clinic.business_hours).length > 0,
+    },
+    {
+      label: "Email notifications",
+      detail: clinic.notifications_enabled ? "Enabled" : "Skipped",
+      done: !!clinic.notifications_enabled,
+    },
+    {
+      label: "Google Sheets",
+      detail: clinic.google_sheet_id ? "Connected" : "Not connected",
+      done: !!clinic.google_sheet_id,
+    },
+  ];
+}
+
+function canJumpToStep(targetStep: number, currentStep: number): boolean {
+  return targetStep < currentStep;
+}
+
+function stepContainerClass(targetStep: number, currentStep: number): string {
+  return targetStep > currentStep
+    ? "opacity-25 cursor-not-allowed"
+    : "cursor-pointer";
+}
+
+function shouldPersistStep(step: number): boolean {
+  return step <= 4;
+}
+
+function OnboardingFlowProgress({
+  step,
+  onSelectStep,
+}: Readonly<{
+  step: number;
+  onSelectStep: (step: number) => void;
+}>) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        {STEPS.map((s) => {
+          const isDone = step > s.id;
+          const isCurrent = step === s.id;
+          const StepIcon = s.icon;
+          return (
+            <button
+              key={s.id}
+              onClick={() => {
+                if (canJumpToStep(s.id, step)) onSelectStep(s.id);
+              }}
+              disabled={s.id > step}
+              className={`flex flex-col items-center gap-1.5 transition-opacity ${stepContainerClass(s.id, step)}`}
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${stepButtonClass(isDone, isCurrent)}`}>
+                {isDone ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <StepIcon className="w-4 h-4" />
+                )}
+              </div>
+              <span className={`text-[10px] font-medium hidden sm:block ${stepLabelClass(isDone, isCurrent)}`}>
+                {s.title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="w-full bg-slate-200 rounded-full h-1.5">
+        <div className="onboarding-flow-progress bg-teal-600 h-1.5 rounded-full transition-all duration-500 ease-out" />
+      </div>
+    </div>
+  );
+}
+
+function OnboardingFlowNavigation({
+  step,
+  saving,
+  saved,
+  nextButtonIcon,
+  nextLabel,
+  showNextChevron,
+  onBack,
+  onNext,
+}: Readonly<{
+  step: number;
+  saving: boolean;
+  saved: boolean;
+  nextButtonIcon: React.ReactNode;
+  nextLabel: string;
+  showNextChevron: boolean;
+  onBack: () => void;
+  onNext: () => void;
+}>) {
+  if (step === 6) {
+    return (
+      <div className="px-6 sm:px-8 py-4 border-t border-slate-100">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between">
+      {step > 1 ? (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </button>
+      ) : (
+        <div />
+      )}
+      <button
+        onClick={onNext}
+        disabled={saving}
+        className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${
+          saved
+            ? "bg-emerald-600 hover:bg-emerald-700"
+            : "bg-teal-600 hover:bg-teal-700"
+        } disabled:opacity-50`}
+      >
+        {nextButtonIcon}
+        {nextLabel}
+        {showNextChevron && <ChevronRight className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
 export function OnboardingFlow({
   clinic: initialClinic,
   onComplete,
-}: OnboardingFlowProps) {
+}: Readonly<OnboardingFlowProps>) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -137,16 +366,15 @@ export function OnboardingFlow({
     setSaving(true);
     setSaved(false);
     try {
-      let updates: Partial<Clinic> = {};
-      if (step === 1) updates = { name, phone, email };
-      else if (step === 2) updates = { services };
-      else if (step === 3) updates = { business_hours: hours };
-      else if (step === 4) {
-        updates = {
-          notifications_enabled: notificationsEnabled,
-          notification_email: notificationEmail,
-        };
-      }
+      const updates = buildStepUpdates(step, {
+        name,
+        phone,
+        email,
+        services,
+        hours,
+        notificationsEnabled,
+        notificationEmail,
+      });
 
       if (Object.keys(updates).length > 0) {
         const result = await api.clinics.updateMyClinic(updates);
@@ -162,24 +390,14 @@ export function OnboardingFlow({
   };
 
   const validate = (): boolean => {
-    const errs: Record<string, string> = {};
-    if (step === 1) {
-      if (!name.trim()) errs.name = "Clinic name is required";
-      if (!phone.trim()) errs.phone = "Phone number is required";
-      if (!email.trim()) errs.email = "Email is required";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        errs.email = "Enter a valid email";
-    }
-    if (step === 2 && services.length === 0) {
-      errs.services = "Add at least one service";
-    }
+    const errs = validateStepState(step, { name, phone, email, services });
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const goNext = async () => {
     if (!validate()) return;
-    if (step <= 4) {
+    if (shouldPersistStep(step)) {
       const saved = await saveStep();
       if (!saved) return;
     }
@@ -264,39 +482,18 @@ export function OnboardingFlow({
   };
 
   // ── Summary data for step 6 ─────────────────────────────────────
-  const summaryItems = [
-    {
-      label: "Clinic info",
-      detail: clinic.name || "Not set",
-      done: !!(clinic.name && clinic.phone && clinic.email),
-    },
-    {
-      label: "Services",
-      detail: Array.isArray(clinic.services) && clinic.services.length > 0
-        ? `${clinic.services.length} service${clinic.services.length !== 1 ? "s" : ""} configured`
-        : "None added",
-      done: Array.isArray(clinic.services) && clinic.services.length > 0,
-    },
-    {
-      label: "Business hours",
-      detail: "Schedule set",
-      done:
-        typeof clinic.business_hours === "object" &&
-        Object.keys(clinic.business_hours).length > 0,
-    },
-    {
-      label: "Email notifications",
-      detail: clinic.notifications_enabled ? "Enabled" : "Skipped",
-      done: !!clinic.notifications_enabled,
-    },
-    {
-      label: "Google Sheets",
-      detail: clinic.google_sheet_id ? "Connected" : "Not connected",
-      done: !!clinic.google_sheet_id,
-    },
-  ];
+  const summaryItems = createSummaryItems(clinic);
 
   const completedSummary = summaryItems.filter((i) => i.done).length;
+  const progressWidth = `${((step - 1) / 5) * 100}%`;
+  const nextLabel = nextButtonLabel(step, saving, saved);
+  const showNextChevron = saving === false && saved === false;
+  let nextButtonIcon: React.ReactNode = null;
+  if (saving) {
+    nextButtonIcon = <Loader2 className="w-4 h-4 animate-spin" />;
+  } else if (saved) {
+    nextButtonIcon = <Check className="w-4 h-4" />;
+  }
 
   // ── Render: activated success ────────────────────────────────────
   if (activated) {
@@ -337,63 +534,7 @@ export function OnboardingFlow({
       </header>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        {/* Progress */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            {STEPS.map((s) => {
-              const isDone = step > s.id;
-              const isCurrent = step === s.id;
-              const StepIcon = s.icon;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    if (s.id < step) setStep(s.id);
-                  }}
-                  disabled={s.id > step}
-                  className={`flex flex-col items-center gap-1.5 transition-opacity ${
-                    s.id > step
-                      ? "opacity-25 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                >
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
-                      isDone
-                        ? "bg-teal-600 text-white shadow-sm"
-                        : isCurrent
-                          ? "bg-teal-50 text-teal-700 ring-2 ring-teal-600 ring-offset-1"
-                          : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    {isDone ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <StepIcon className="w-4 h-4" />
-                    )}
-                  </div>
-                  <span
-                    className={`text-[10px] font-medium hidden sm:block ${
-                      isCurrent
-                        ? "text-teal-700"
-                        : isDone
-                          ? "text-slate-600"
-                          : "text-slate-400"
-                    }`}
-                  >
-                    {s.title}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="w-full bg-slate-200 rounded-full h-1.5">
-            <div
-              className="bg-teal-600 h-1.5 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${((step - 1) / 5) * 100}%` }}
-            />
-          </div>
-        </div>
+        <OnboardingFlowProgress step={step} onSelectStep={setStep} />
 
         {/* Step card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -606,6 +747,7 @@ export function OnboardingFlow({
                       </p>
                     </div>
                     <label className="relative shrink-0 cursor-pointer">
+                      <span className="sr-only">Enable email notifications</span>
                       <input
                         type="checkbox"
                         className="sr-only"
@@ -744,9 +886,9 @@ export function OnboardingFlow({
                   {chatSending && (
                     <div className="flex justify-start">
                       <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        <span className="typing-dot-1 w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                        <span className="typing-dot-2 w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                        <span className="typing-dot-3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
                       </div>
                     </div>
                   )}
@@ -874,59 +1016,36 @@ export function OnboardingFlow({
           )}
 
           {/* ── Navigation ── */}
-          {step < 6 && (() => {
-            const nextLabel =
-              saving ? "Saving\u2026" :
-              saved ? "Saved" :
-              step === 5 ? "Looks good, continue" :
-              step === 4 ? "Continue" :
-              "Save & continue";
-            return (
-            <div className="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between">
-              {step > 1 ? (
-                <button
-                  onClick={goBack}
-                  className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Back
-                </button>
-              ) : (
-                <div />
-              )}
-              <button
-                onClick={goNext}
-                disabled={saving}
-                className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${
-                  saved
-                    ? "bg-emerald-600 hover:bg-emerald-700"
-                    : "bg-teal-600 hover:bg-teal-700"
-                } disabled:opacity-50`}
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : saved ? (
-                  <Check className="w-4 h-4" />
-                ) : null}
-                {nextLabel}
-                {!saving && !saved && <ChevronRight className="w-4 h-4" />}
-              </button>
-            </div>
-            );
-          })()}
-          {step === 6 && (
-            <div className="px-6 sm:px-8 py-4 border-t border-slate-100">
-              <button
-                onClick={goBack}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </button>
-            </div>
-          )}
+          <OnboardingFlowNavigation
+            step={step}
+            saving={saving}
+            saved={saved}
+            nextButtonIcon={nextButtonIcon}
+            nextLabel={nextLabel}
+            showNextChevron={showNextChevron}
+            onBack={goBack}
+            onNext={goNext}
+          />
         </div>
       </div>
+
+      <style jsx>{`
+        .onboarding-flow-progress {
+          width: ${progressWidth};
+        }
+
+        .typing-dot-1 {
+          animation-delay: 0ms;
+        }
+
+        .typing-dot-2 {
+          animation-delay: 150ms;
+        }
+
+        .typing-dot-3 {
+          animation-delay: 300ms;
+        }
+      `}</style>
     </div>
   );
 }
@@ -941,7 +1060,7 @@ function Field({
   placeholder,
   type = "text",
   required,
-}: {
+}: Readonly<{
   id: string;
   label: string;
   value: string;
@@ -950,7 +1069,7 @@ function Field({
   placeholder?: string;
   type?: string;
   required?: boolean;
-}) {
+}>) {
   return (
     <div>
       <label

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { Bot, Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -13,8 +13,12 @@ import { OAUTH_PROVIDERS } from "@/lib/oauth-providers";
 
 const AUTH_ERROR_COOKIE = "clinic_ai_auth_error";
 
+type LoginFormSubmitEvent = Parameters<
+  NonNullable<ComponentProps<"form">["onSubmit"]>
+>[0];
+
 function decodeOAuthError(raw: string): string {
-  let value = raw.replace(/\+/g, " ");
+  let value = raw.replaceAll("+", " ");
 
   for (let i = 0; i < 2; i += 1) {
     try {
@@ -82,9 +86,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     const searchParams =
-      globalThis.window !== undefined
-        ? new URLSearchParams(globalThis.location.search)
-        : new URLSearchParams();
+      globalThis.window === undefined
+        ? new URLSearchParams()
+        : new URLSearchParams(globalThis.location.search);
 
     setSelectedPlan(getPaidPlanId(searchParams.get("plan")));
 
@@ -106,7 +110,7 @@ export default function LoginPage() {
 
   const visibleError = error || oauthError;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: LoginFormSubmitEvent) => {
     e.preventDefault();
     setError("");
 

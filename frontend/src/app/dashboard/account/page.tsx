@@ -151,9 +151,9 @@ export default function AccountPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <span className="block text-sm font-medium text-slate-700 mb-1.5">
                     Role
-                  </label>
+                  </span>
                   <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-teal-700 bg-teal-50 rounded-lg">
                     Owner
                   </span>
@@ -256,7 +256,7 @@ export default function AccountPage() {
   );
 }
 
-function Feedback({ state }: { state: NonNullable<FeedbackState> }) {
+function Feedback({ state }: Readonly<{ state: NonNullable<FeedbackState> }>) {
   return (
     <div
       className={`mb-4 p-3 text-sm rounded-lg border flex items-center gap-2 ${

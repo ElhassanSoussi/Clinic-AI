@@ -40,6 +40,27 @@ function bookingStep(intent: string | null | undefined): number | null {
 
 const STEP_LABELS = ["Reason", "Time", "Name", "Phone", "Email", "Confirm"];
 
+
+function progressBarClass(index: number, step: number): string {
+  if (index + 1 < step) return "bg-teal-500";
+  if (index + 1 == step) return "bg-teal-400";
+  return "bg-slate-200";
+}
+
+
+function buildInputPlaceholder(
+  bootstrapped: boolean,
+  leadCaptured: boolean,
+  step: number | null,
+): string {
+  if (bootstrapped === false) return "Connecting...";
+  if (leadCaptured) return "Need anything else?";
+  if (step !== null) {
+    return `Enter your ${STEP_LABELS[(step || 1) - 1]?.toLowerCase() || "response"}...`;
+  }
+  return "Type a message...";
+}
+
 export default function ChatPage({
   params,
 }: Readonly<{
@@ -176,9 +197,12 @@ export default function ChatPage({
   };
 
   const step = bookingStep(currentIntent);
+  const inputDisabled = sending || bootstrapped === false;
+  const sendDisabled = sending || !input.trim() || bootstrapped === false;
+  const inputPlaceholder = buildInputPlaceholder(bootstrapped, leadCaptured, step);
 
   return (
-    <div className={isEmbedded ? "h-dvh bg-transparent flex flex-col" : "min-h-screen bg-slate-50 flex items-center justify-center p-4"}>
+    <div className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "min-h-screen bg-slate-50 flex items-center justify-center p-4"}`}>
       {/* Demo banner above chat */}
       {isDemo && !isEmbedded && (
         <div className="w-full max-w-lg mb-4">
@@ -201,7 +225,7 @@ export default function ChatPage({
 
       <div className={`w-full flex flex-col bg-white overflow-hidden ${isEmbedded ? "h-full" : "max-w-lg h-175 rounded-2xl border border-slate-200 shadow-xl"}`}>
         {/* Header */}
-        <div className="px-5 py-4 flex items-center gap-3" style={{ backgroundColor: brandColor }}>
+        <div className="brand-header px-5 py-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold text-white select-none">
             {(clinicName?.[0] || assistantLabel?.[0] || "C").toUpperCase()}
           </div>
@@ -229,9 +253,7 @@ export default function ChatPage({
               {STEP_LABELS.map((label, i) => (
                 <div key={label} className="flex-1 flex flex-col items-center gap-0.5">
                   <div
-                    className={`h-1 w-full rounded-full transition-colors ${
-                      i + 1 < step ? "bg-teal-500" : i + 1 === step ? "bg-teal-400" : "bg-slate-200"
-                    }`}
+                    className={`h-1 w-full rounded-full transition-colors ${progressBarClass(i, step)}`}
                   />
                 </div>
               ))}
@@ -257,10 +279,9 @@ export default function ChatPage({
               <div
                 className={`max-w-[82%] text-[13.5px] leading-relaxed ${
                   msg.role === "user"
-                    ? "rounded-2xl rounded-br-sm px-4 py-2.5 text-white"
+                    ? "brand-user-message rounded-2xl rounded-br-sm px-4 py-2.5 text-white"
                     : "rounded-2xl rounded-bl-sm px-4 py-3 bg-slate-50 text-slate-800 border border-slate-100"
                 }`}
-                style={msg.role === "user" ? { backgroundColor: brandColor } : undefined}
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
               </div>
@@ -274,12 +295,7 @@ export default function ChatPage({
                 <button
                   key={s.label}
                   onClick={() => sendMessage(s.label)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium rounded-full border transition-colors hover:shadow-sm"
-                  style={{
-                    color: brandColor,
-                    borderColor: `${brandColor}33`,
-                    backgroundColor: `${brandColor}0a`,
-                  }}
+                  className="brand-suggestion inline-flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium rounded-full border transition-colors hover:shadow-sm"
                 >
                   <s.icon className="w-3.5 h-3.5" />
                   {s.label}
@@ -337,7 +353,7 @@ export default function ChatPage({
             <div className="flex justify-start">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: brandColor }} />
+                  <Loader2 className="brand-spinner w-3.5 h-3.5 animate-spin" />
                   <span className="text-xs text-slate-400">Typing...</span>
                 </div>
               </div>
@@ -356,24 +372,15 @@ export default function ChatPage({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               maxLength={2000}
-              placeholder={
-                !bootstrapped
-                  ? "Connecting..."
-                  : leadCaptured
-                    ? "Need anything else?"
-                    : step !== null
-                      ? `Enter your ${STEP_LABELS[(step || 1) - 1]?.toLowerCase() || "response"}...`
-                      : "Type a message..."
-              }
-              disabled={sending || !bootstrapped}
+              placeholder={inputPlaceholder}
+              disabled={inputDisabled}
               className="flex-1 px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-full focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             />
             <button
               onClick={handleSend}
-              disabled={sending || !input.trim() || !bootstrapped}
+              disabled={sendDisabled}
               aria-label="Send message"
-              className="w-10 h-10 rounded-full text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{ backgroundColor: sending || !input.trim() || !bootstrapped ? "#94a3b8" : brandColor }}
+              className={`w-10 h-10 rounded-full text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed ${sendDisabled ? "bg-slate-400" : "brand-send-button"}`}
             >
               {sending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -387,6 +394,30 @@ export default function ChatPage({
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        .brand-header {
+          background-color: ${brandColor};
+        }
+
+        .brand-user-message {
+          background-color: ${brandColor};
+        }
+
+        .brand-suggestion {
+          color: ${brandColor};
+          border-color: ${brandColor}33;
+          background-color: ${brandColor}0a;
+        }
+
+        .brand-spinner {
+          color: ${brandColor};
+        }
+
+        .brand-send-button {
+          background-color: ${brandColor};
+        }
+      `}</style>
 
       {/* Demo CTA below chat */}
       {isDemo && !isEmbedded && (

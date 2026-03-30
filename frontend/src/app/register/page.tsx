@@ -34,11 +34,22 @@ export default function RegisterPage() {
     );
   }, []);
 
+  let submitLabel = "Create Account";
+  if (loading && selectedPlan) {
+    submitLabel = "Preparing checkout...";
+  } else if (loading) {
+    submitLabel = "Creating account...";
+  } else if (selectedPlan) {
+    submitLabel = "Continue to Checkout";
+  }
+
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function submitRegistration(
+    e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]
+  ) {
     e.preventDefault();
     setError("");
 
@@ -80,6 +91,12 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  const handleSubmit = (
+    e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]
+  ) => {
+    void submitRegistration(e);
   };
 
   return (
@@ -207,10 +224,10 @@ export default function RegisterPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {selectedPlan ? "Preparing checkout..." : "Creating account..."}
+                {submitLabel}
               </>
             ) : (
-              selectedPlan ? "Continue to Checkout" : "Create Account"
+              submitLabel
             )}
           </button>
 

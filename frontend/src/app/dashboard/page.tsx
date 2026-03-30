@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Users, Clock, CheckCircle2, Phone, ArrowRight, MessageSquare, Settings, AlertTriangle, Zap, UserPlus, ArrowRightLeft } from "lucide-react";
 import { api } from "@/lib/api";
@@ -17,9 +18,9 @@ const EVENT_CONFIG: Record<ActivityEvent["type"], { icon: typeof UserPlus; color
   conversation_started: { icon: MessageSquare, color: "text-teal-600", bg: "bg-teal-50", label: "Chat" },
 };
 
-/** Dispatch event to open the settings drawer (handled by layout) */
-function openSettingsDrawer(section?: string | null) {
-  window.dispatchEvent(new CustomEvent("open-settings-drawer", { detail: section ?? null }));
+function settingsHref(section?: string | null): string {
+  if (!section) return "/dashboard/settings";
+  return `/dashboard/settings?section=${encodeURIComponent(section)}`;
 }
 
 interface Stats {
@@ -30,6 +31,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [firstLead] = useState(
     () =>
       globalThis.window !== undefined &&
@@ -85,6 +87,54 @@ export default function DashboardPage() {
   };
 
   const newLeads = leads.filter((l) => l.status === "new");
+  const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
+
+  let emptyActivityState: React.ReactNode;
+  if (clinic && systemStatus === "LIVE") {
+    emptyActivityState = (
+      <EmptyState
+        icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
+        title="No activity yet"
+        description="Your assistant is live. Events will appear here as patients interact with your clinic."
+        action={
+          clinic.slug ? (
+            <a
+              href={`/chat/${clinic.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> Test your assistant
+            </a>
+          ) : undefined
+        }
+      />
+    );
+  } else if (clinic && systemStatus === "READY") {
+    emptyActivityState = (
+      <EmptyState
+        icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
+        title="Ready to go live"
+        description="Setup is complete. Go live to start receiving patient requests."
+      />
+    );
+  } else {
+    emptyActivityState = (
+      <EmptyState
+        icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
+        title="System not live yet"
+        description="Complete your setup to start receiving patient requests."
+        action={
+          <button
+            onClick={() => router.push(settingsHref())}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+          >
+            <Settings className="w-3.5 h-3.5" /> Complete setup
+          </button>
+        }
+      />
+    );
+  }
 
   const statCards = [
     {
@@ -287,45 +337,7 @@ export default function DashboardPage() {
 
         {activity.length === 0 ? (
           <div className="px-5 py-10">
-            {clinic && computeSystemStatus(clinic).status === "LIVE" ? (
-              <EmptyState
-                icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
-                title="No activity yet"
-                description="Your assistant is live. Events will appear here as patients interact with your clinic."
-                action={
-                  clinic?.slug ? (
-                    <a
-                      href={`/chat/${clinic.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> Test your assistant
-                    </a>
-                  ) : undefined
-                }
-              />
-            ) : clinic && computeSystemStatus(clinic).status === "READY" ? (
-              <EmptyState
-                icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
-                title="Ready to go live"
-                description="Setup is complete. Go live to start receiving patient requests."
-              />
-            ) : (
-              <EmptyState
-                icon={<MessageSquare className="w-6 h-6 text-slate-400" />}
-                title="System not live yet"
-                description="Complete your setup to start receiving patient requests."
-                action={
-                  <button
-                    onClick={() => openSettingsDrawer()}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-                  >
-                    <Settings className="w-3.5 h-3.5" /> Complete setup
-                  </button>
-                }
-              />
-            )}
+            {emptyActivityState}
           </div>
         ) : (
           <div className="divide-y divide-slate-50">

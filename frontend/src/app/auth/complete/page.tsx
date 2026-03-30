@@ -42,11 +42,11 @@ export default function AuthCompletePage() {
         }
 
         const selectedPlan =
-          globalThis.window !== undefined
-            ? getPaidPlanId(
+          globalThis.window === undefined
+            ? null
+            : getPaidPlanId(
                 new URLSearchParams(globalThis.location.search).get("plan")
-              )
-            : null;
+              );
 
         const session = await waitForSession();
 

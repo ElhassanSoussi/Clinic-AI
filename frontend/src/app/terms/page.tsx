@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Bot, ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Terms of Service — Clinic AI" };
+export const metadata: Metadata = { title: "Terms of Service — Clinic AI" };
 
 export default function TermsPage() {
   return (

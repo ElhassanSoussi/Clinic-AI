@@ -1,7 +1,7 @@
 import re
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from typing import Annotated, cast
 from pydantic import BaseModel
 
 from app.dependencies import get_current_user, get_supabase
@@ -10,6 +10,8 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+USER_WITH_CLINIC_SELECT = "*, clinics(*)"
 
 
 def slugify(text: str) -> str:
@@ -42,6 +44,16 @@ def normalize_clinic_relation(value: object) -> dict:
 
 def response_data(response: object) -> object:
     return getattr(response, "data", None) if response is not None else None
+
+
+def get_user_profile(db: object, user_id: object) -> object:
+    return (
+        db.table("users")
+        .select(USER_WITH_CLINIC_SELECT)
+        .eq("id", user_id)
+        .maybe_single()
+        .execute()
+    )
 
 
 @router.post("/register", response_model=AuthResponse)
@@ -140,13 +152,7 @@ async def login(req: LoginRequest):
 
     user_id = auth_response.user.id
 
-    user_result = (
-        db.table("users")
-        .select("*, clinics(*)")
-        .eq("id", user_id)
-        .single()
-        .execute()
-    )
+    user_result = get_user_profile(db, user_id)
 
     if not user_result.data:
         raise HTTPException(
@@ -230,17 +236,29 @@ class OAuthCompleteResponse(BaseModel):
     is_new: bool
 
 
-@router.post("/oauth-complete", response_model=OAuthCompleteResponse)
-async def oauth_complete(req: OAuthCompleteRequest):
-    """
-    Called after OAuth callback. Validates the Supabase access token,
-    looks up or creates the backend user + clinic records.
-    """
-    db = get_supabase()
+def build_oauth_response(
+    access_token: str,
+    user_id: object,
+    email: object,
+    full_name: object,
+    clinic_id: object,
+    clinic_slug: object,
+    is_new: bool,
+) -> OAuthCompleteResponse:
+    return OAuthCompleteResponse(
+        access_token=access_token,
+        user_id=str(user_id),
+        email=as_text(email),
+        full_name=as_text(full_name),
+        clinic_id=as_text(clinic_id),
+        clinic_slug=as_text(clinic_slug),
+        is_new=is_new,
+    )
 
-    # Validate the token and get the Supabase user
+
+def get_authenticated_oauth_user(db: object, access_token: str) -> tuple[object, str, str]:
     try:
-        user_response = db.auth.get_user(req.access_token)
+        user_response = db.auth.get_user(access_token)
         if not user_response or not user_response.user:
             raise ValueError("No user")
     except Exception as e:
@@ -250,19 +268,21 @@ async def oauth_complete(req: OAuthCompleteRequest):
             detail="Invalid or expired session.",
         )
 
-    su_user = user_response.user
-    user_id = su_user.id
-    email = su_user.email or ""
+    user = user_response.user
+    return user, user.id, user.email or ""
 
-    # Check if the user already has a backend profile
+
+def get_oauth_full_name(supabase_user: object, email: str) -> str:
+    metadata = getattr(supabase_user, "user_metadata", None) or {}
+    return as_text(
+        metadata.get("full_name") or metadata.get("name"),
+        email.split("@")[0] if email else "Clinic User",
+    )
+
+
+def lookup_existing_oauth_profile(db: object, user_id: str, email: str, supabase_user: object) -> OAuthCompleteResponse | None:
     try:
-        existing = (
-            db.table("users")
-            .select("*, clinics(*)")
-            .eq("id", user_id)
-            .maybe_single()
-            .execute()
-        )
+        existing = get_user_profile(db, user_id)
     except Exception as e:
         logger.error(f"OAuth complete: failed to query user profile for {user_id}: {e}")
         raise HTTPException(
@@ -270,41 +290,30 @@ async def oauth_complete(req: OAuthCompleteRequest):
             detail="Failed to load your account. Please try again.",
         )
 
-    existing_data = response_data(existing)
+    user = response_data(existing)
+    if not user:
+        return None
 
-    if existing_data:
-        # Existing user — return their profile
-        user = existing_data
-        clinic = normalize_clinic_relation(user.get("clinics"))
-        full_name = as_text(user.get("full_name"), as_text(su_user.user_metadata.get("full_name") if su_user.user_metadata else None, email.split("@")[0] if email else "Clinic User"))
-        logger.info(f"OAuth login for existing user {user_id}")
-        return OAuthCompleteResponse(
-            access_token=req.access_token,
-            user_id=str(user_id),
-            email=as_text(user.get("email"), email),
-            full_name=full_name,
-            clinic_id=as_text(user.get("clinic_id")),
-            clinic_slug=as_text(clinic.get("slug")),
-            is_new=False,
-        )
-
-    # New user — derive a name from the OAuth profile
-    meta = su_user.user_metadata or {}
-    full_name = as_text(
-        meta.get("full_name") or meta.get("name"),
-        email.split("@")[0] if email else "Clinic User",
+    clinic = normalize_clinic_relation(user.get("clinics"))
+    full_name = as_text(user.get("full_name"), get_oauth_full_name(supabase_user, email))
+    logger.info(f"OAuth login for existing user {user_id}")
+    return build_oauth_response(
+        access_token="",
+        user_id=user_id,
+        email=as_text(user.get("email"), email),
+        full_name=full_name,
+        clinic_id=user.get("clinic_id"),
+        clinic_slug=clinic.get("slug"),
+        is_new=False,
     )
 
-    # Create clinic + user
-    clinic_name = f"{full_name}'s Clinic"
+
+def generate_available_slug(db: object, clinic_name: str, user_id: str) -> str:
     base_slug = slugify(clinic_name)
     slug = base_slug or f"clinic-{str(uuid.uuid4())[:8]}"
 
     try:
         slug_check = db.table("clinics").select("slug").eq("slug", slug).execute()
-        if response_data(slug_check):
-            prefix = base_slug or "clinic"
-            slug = f"{prefix}-{str(uuid.uuid4())[:6]}"
     except Exception as e:
         logger.error(f"OAuth complete: failed to check clinic slug for {user_id}: {e}")
         raise HTTPException(
@@ -312,7 +321,41 @@ async def oauth_complete(req: OAuthCompleteRequest):
             detail="Failed to prepare your clinic profile. Please try again.",
         )
 
-    clinic = None
+    if response_data(slug_check):
+        prefix = base_slug or "clinic"
+        return f"{prefix}-{str(uuid.uuid4())[:6]}"
+    return slug
+
+
+def retry_oauth_profile_lookup(db: object, user_id: str, access_token: str, email: str, full_name: str) -> OAuthCompleteResponse | None:
+    try:
+        existing_retry = get_user_profile(db, user_id)
+    except Exception as retry_error:
+        logger.error(f"OAuth retry lookup failed for {user_id}: {retry_error}")
+        return None
+
+    user = response_data(existing_retry)
+    if not user:
+        return None
+
+    clinic = normalize_clinic_relation(user.get("clinics"))
+    logger.info(f"OAuth profile already existed after retry for {user_id}")
+    return build_oauth_response(
+        access_token=access_token,
+        user_id=user_id,
+        email=as_text(user.get("email"), email),
+        full_name=as_text(user.get("full_name"), full_name),
+        clinic_id=user.get("clinic_id"),
+        clinic_slug=clinic.get("slug"),
+        is_new=False,
+    )
+
+
+def create_oauth_clinic_and_user(db: object, user_id: str, email: str, full_name: str) -> tuple[dict, str]:
+    clinic_name = f"{full_name}'s Clinic"
+    slug = generate_available_slug(db, clinic_name, user_id)
+    clinic: dict = {}
+
     try:
         clinic_result = db.table("clinics").insert({
             "name": clinic_name,
@@ -322,10 +365,14 @@ async def oauth_complete(req: OAuthCompleteRequest):
             "monthly_lead_limit": 25,
             "monthly_leads_used": 0,
         }).execute()
-        clinic_rows = response_data(clinic_result)
-        if not isinstance(clinic_rows, list) or not clinic_rows:
+        clinic_rows_data = response_data(clinic_result)
+        if not isinstance(clinic_rows_data, list):
+            raise ValueError("Clinic insert returned invalid rows")
+
+        clinic_rows: list[object] = cast(list[object], clinic_rows_data)
+        clinic = next((row for row in clinic_rows if isinstance(row, dict)), {})
+        if not clinic:
             raise ValueError("Clinic insert returned no rows")
-        clinic = clinic_rows[0]
 
         db.table("users").insert({
             "id": user_id,
@@ -336,32 +383,11 @@ async def oauth_complete(req: OAuthCompleteRequest):
         }).execute()
     except Exception as e:
         logger.error(f"OAuth profile creation failed for {user_id}: {e}")
-        try:
-            existing_retry = (
-                db.table("users")
-                .select("*, clinics(*)")
-                .eq("id", user_id)
-                .maybe_single()
-                .execute()
-            )
-            retry_data = response_data(existing_retry)
-            if retry_data:
-                user = retry_data
-                clinic_retry = normalize_clinic_relation(user.get("clinics"))
-                logger.info(f"OAuth profile already existed after retry for {user_id}")
-                return OAuthCompleteResponse(
-                    access_token=req.access_token,
-                    user_id=str(user_id),
-                    email=as_text(user.get("email"), email),
-                    full_name=as_text(user.get("full_name"), full_name),
-                    clinic_id=as_text(user.get("clinic_id")),
-                    clinic_slug=as_text(clinic_retry.get("slug")),
-                    is_new=False,
-                )
-        except Exception as retry_error:
-            logger.error(f"OAuth retry lookup failed for {user_id}: {retry_error}")
+        existing_profile = retry_oauth_profile_lookup(db, user_id, "", email, full_name)
+        if existing_profile:
+            return {"id": existing_profile.clinic_id, "slug": existing_profile.clinic_slug}, existing_profile.full_name
 
-        if clinic and clinic.get("id"):
+        if clinic.get("id"):
             try:
                 db.table("clinics").delete().eq("id", clinic["id"]).execute()
             except Exception as cleanup_error:
@@ -371,14 +397,33 @@ async def oauth_complete(req: OAuthCompleteRequest):
             detail="Failed to create profile. Please try again.",
         )
 
-    logger.info(f"OAuth registered new user {user_id} with clinic {clinic['id']}")
+    return clinic, full_name
 
-    return OAuthCompleteResponse(
+
+@router.post("/oauth-complete", response_model=OAuthCompleteResponse)
+async def oauth_complete(req: OAuthCompleteRequest):
+    """
+    Called after OAuth callback. Validates the Supabase access token,
+    looks up or creates the backend user + clinic records.
+    """
+    db = get_supabase()
+    supabase_user, user_id, email = get_authenticated_oauth_user(db, req.access_token)
+
+    existing_profile = lookup_existing_oauth_profile(db, user_id, email, supabase_user)
+    if existing_profile:
+        existing_profile.access_token = req.access_token
+        return existing_profile
+
+    full_name = get_oauth_full_name(supabase_user, email)
+    clinic, resolved_full_name = create_oauth_clinic_and_user(db, user_id, email, full_name)
+
+    logger.info(f"OAuth registered new user {user_id} with clinic {clinic['id']}")
+    return build_oauth_response(
         access_token=req.access_token,
-        user_id=str(user_id),
-        email=as_text(email),
-        full_name=full_name,
-        clinic_id=as_text(clinic["id"]),
-        clinic_slug=slug,
+        user_id=user_id,
+        email=email,
+        full_name=resolved_full_name,
+        clinic_id=clinic["id"],
+        clinic_slug=clinic["slug"],
         is_new=True,
     )

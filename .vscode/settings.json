@@ -1,14 +1,16 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
   "python.analysis.diagnosticMode": "openFilesOnly",
-  "python.analysis.exclude": [
-    "**/backend/venv/**",
-    "**/node_modules/**",
-    "**/.next/**",
-    "**/__pycache__/**"
-  ],
   "python.analysis.ignore": [
-    "/opt/homebrew/**"
+    "/opt/homebrew/**",
+    "**/backend/venv/**",
+    "**/.next/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+    "**/.tox/**",
+    "**/.nox/**",
+    "**/.direnv/**"
   ],
   "eslint.workingDirectories": [
     {
@@ -16,7 +18,19 @@
       "changeProcessCWD": true
     }
   ],
-  "typescript.tsdk": "frontend/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "json.schemaDownload.enable": false,
+  "js/ts.tsdk.path": "frontend/node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "files.associations": {
+    "*.sql": "plaintext",
+    "20260327_add_onboarding_branding.sql": "plaintext",
+    "backend/migrations/*.sql": "plaintext",
+    "**/backend/migrations/*.sql": "plaintext"
+  },
+  "problems.exclude": {
+    "**/backend/migrations/20260327_add_onboarding_branding.sql": true
+  },
+  "mssql.intelliSense.enableIntelliSense": false,
+  "mssql.intelliSense.enableErrorChecking": false,
   "dbcode.enableLinting": false
 }

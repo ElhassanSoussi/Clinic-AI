@@ -13,8 +13,8 @@ interface DrawerProps {
   headerAction?: React.ReactNode;
 }
 
-export function Drawer({ open, onClose, title, subtitle, children, headerAction }: DrawerProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
+export function Drawer({ open, onClose, title, subtitle, children, headerAction }: Readonly<DrawerProps>) {
+  const panelRef = useRef<HTMLDialogElement>(null);
 
   // Escape key
   useEffect(() => {
@@ -48,12 +48,12 @@ export function Drawer({ open, onClose, title, subtitle, children, headerAction 
       />
 
       {/* Panel */}
-      <div
+      <dialog
         ref={panelRef}
-        role="dialog"
-        aria-modal="true"
+        open={open}
         aria-label={title}
-        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] bg-white shadow-2xl rounded-l-2xl flex flex-col transition-transform duration-250 ease-out ${
+        onCancel={onClose}
+        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-120 bg-white shadow-2xl rounded-l-2xl flex flex-col transition-transform duration-250 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -79,7 +79,7 @@ export function Drawer({ open, onClose, title, subtitle, children, headerAction 
         <div className="flex-1 overflow-y-auto">
           {children}
         </div>
-      </div>
+      </dialog>
     </>
   );
 }

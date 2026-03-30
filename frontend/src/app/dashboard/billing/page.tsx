@@ -45,6 +45,12 @@ function formatDate(iso: string | undefined): string {
   });
 }
 
+function usageBarClass(isAtLimit: boolean, usagePercent: number): string {
+  if (isAtLimit) return "bg-red-500";
+  if (usagePercent > 80) return "bg-amber-500";
+  return "bg-teal-500";
+}
+
 export default function BillingPage() {
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [plans, setPlans] = useState<PlanInfo[]>([]);
@@ -79,9 +85,9 @@ export default function BillingPage() {
   // Handle success/canceled return from Stripe Checkout
   useEffect(() => {
     const searchParams =
-      globalThis.window !== undefined
-        ? new URLSearchParams(globalThis.location.search)
-        : new URLSearchParams();
+      globalThis.window === undefined
+        ? new URLSearchParams()
+        : new URLSearchParams(globalThis.location.search);
 
     if (searchParams.get("success")) {
       setSuccessMsg("Payment successful! Your plan has been upgraded.");
@@ -138,6 +144,8 @@ export default function BillingPage() {
   const trialEndsStr = billing.trial_ends_at ? formatDate(billing.trial_ends_at) : "";
   const isTrialExpired =
     isTrial && billing.trial_ends_at && new Date(billing.trial_ends_at) < new Date();
+  const usageWidth = `${usagePercent}%`;
+  const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
     <div className="max-w-4xl">
@@ -225,18 +233,7 @@ export default function BillingPage() {
         {billing.monthly_lead_limit !== -1 && (
           <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={(() => {
-                let barColor: string;
-                if (isAtLimit) {
-                  barColor = "bg-red-500";
-                } else if (usagePercent > 80) {
-                  barColor = "bg-amber-500";
-                } else {
-                  barColor = "bg-teal-500";
-                }
-                return `h-full rounded-full transition-all ${barColor}`;
-              })()}
-              style={{ width: `${usagePercent}%` }}
+              className={`billing-usage-bar h-full rounded-full transition-all ${usageBarColor}`}
             />
           </div>
         )}
@@ -247,6 +244,12 @@ export default function BillingPage() {
           <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             <div>
+
+            <style jsx>{`
+              .billing-usage-bar {
+                width: ${usageWidth};
+              }
+            `}</style>
               <p className="font-medium">Lead limit reached</p>
               <p className="text-red-600">
                 New patient conversations will be paused. Upgrade your plan to continue capturing leads.
