@@ -75,6 +75,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthError, setOauthError] = useState("");
+  const [queryReady, setQueryReady] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"professional" | "premium" | null>(null);
   const supabaseConfigError =
     typeof getSupabasePublicEnvError === "function"
@@ -106,6 +107,8 @@ export default function LoginPage() {
         : globalThis.location.pathname;
       globalThis.history.replaceState(null, "", nextUrl);
     }
+
+    setQueryReady(true);
   }, [microsoftEnabled]);
 
   const visibleError = error || oauthError;
@@ -250,7 +253,7 @@ export default function LoginPage() {
           </button>
 
           <OAuthButtons
-            disabled={loading || !!supabaseConfigError}
+            disabled={loading || !!supabaseConfigError || !queryReady}
             nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
           />
 

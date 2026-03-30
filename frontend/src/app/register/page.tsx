@@ -20,6 +20,7 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [queryReady, setQueryReady] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"professional" | "premium" | null>(null);
   const supabaseConfigError =
     typeof getSupabasePublicEnvError === "function"
@@ -27,11 +28,13 @@ export default function RegisterPage() {
       : "";
 
   useEffect(() => {
-    if (globalThis.window === undefined) return;
+    if (globalThis.window !== undefined) {
+      setSelectedPlan(
+        getPaidPlanId(new URLSearchParams(globalThis.location.search).get("plan"))
+      );
+    }
 
-    setSelectedPlan(
-      getPaidPlanId(new URLSearchParams(globalThis.location.search).get("plan"))
-    );
+    setQueryReady(true);
   }, []);
 
   let submitLabel = "Create Account";
@@ -232,7 +235,7 @@ export default function RegisterPage() {
           </button>
 
           <OAuthButtons
-            disabled={loading || !!supabaseConfigError}
+            disabled={loading || !!supabaseConfigError || !queryReady}
             nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
           />
 

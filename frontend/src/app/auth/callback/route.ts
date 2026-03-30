@@ -4,6 +4,14 @@ import { getSupabasePublicEnv, isFrontendEnvError } from "@/lib/env";
 
 const AUTH_ERROR_COOKIE = "clinic_ai_auth_error";
 
+function normalizeNextPath(nextPath: string | null): string {
+  if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
+    return "/auth/complete";
+  }
+
+  return nextPath;
+}
+
 function redirectToLoginWithError(
   origin: string,
   errorDescription: string
@@ -13,6 +21,7 @@ function redirectToLoginWithError(
     path: "/",
     maxAge: 60,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   });
   return response;
 }
@@ -20,7 +29,7 @@ function redirectToLoginWithError(
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/auth/complete";
+  const next = normalizeNextPath(searchParams.get("next"));
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
@@ -32,8 +41,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    const redirectUrl = `${origin}${next}`;
-    const response = NextResponse.redirect(redirectUrl);
+    const response = NextResponse.redirect(new URL(next, origin));
     let supabaseUrl: string;
     let supabaseKey: string;
 
