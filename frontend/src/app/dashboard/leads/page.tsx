@@ -81,6 +81,7 @@ function buildEmptyStateConfig(
   statusFilter: string,
   clinic: Clinic | null,
   embedCopied: boolean,
+  router: ReturnType<typeof useRouter>,
   setEmbedCopied: React.Dispatch<React.SetStateAction<boolean>>
 ): EmptyStateConfig {
   if (search) {
@@ -321,7 +322,7 @@ export default function LeadsPage() {
     : leads;
 
   const usageWarningBanner = buildUsageWarningBanner(clinic);
-  const emptyState = buildEmptyStateConfig(search, statusFilter, clinic, embedCopied, setEmbedCopied);
+  const emptyState = buildEmptyStateConfig(search, statusFilter, clinic, embedCopied, router, setEmbedCopied);
   const content = renderLeadsContent({ loading, error, filtered, emptyState, loadLeads, router, updatingId, handleInlineStatus });
 
   return (

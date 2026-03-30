@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useEffect,
   useContext,
   useState,
   useMemo,
@@ -33,22 +34,31 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
-  const [user, setUser] = useState<AuthResponse | null>(() => {
-    if (globalThis.window === undefined) return null;
-    const stored = localStorage.getItem("auth_user");
-    const token = localStorage.getItem("access_token");
-    if (stored && token) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        localStorage.removeItem("auth_user");
-        localStorage.removeItem("access_token");
-      }
-    }
-    return null;
-  });
-  const [isLoading] = useState(false);
+  const [user, setUser] = useState<AuthResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {
+      if (globalThis.window !== undefined) {
+        const stored = localStorage.getItem("auth_user");
+        const token = localStorage.getItem("access_token");
+
+        if (stored && token) {
+          try {
+            setUser(JSON.parse(stored));
+          } catch {
+            localStorage.removeItem("auth_user");
+            localStorage.removeItem("access_token");
+          }
+        }
+      }
+
+      setIsLoading(false);
+    }, 0);
+
+    return () => globalThis.clearTimeout(timeoutId);
+  }, []);
 
   const setAuthenticatedUser = useCallback((data: AuthResponse) => {
     localStorage.setItem("access_token", data.access_token);
