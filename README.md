@@ -114,9 +114,10 @@ See [frontend/.env.example](frontend/.env.example) and [backend/.env.example](ba
 
 - frontend production build passes with `npm run build`
 - backend starts with `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- `GET /api/health` returns healthy
-- frontend points to deployed backend URL, not localhost
+- `GET /api/health` returns `{ "status": "ok" }`
+- frontend points to the deployed backend URL through `NEXT_PUBLIC_API_URL`
 - backend `CORS_ORIGINS` contains only real frontend domains in production
+- production startup fails fast if required deployment env vars are missing
 
 ## Notes
 

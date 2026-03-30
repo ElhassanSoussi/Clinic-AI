@@ -54,7 +54,7 @@ app.include_router(contact.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": settings.app_name}
+    return {"status": "ok"}
 
 
 logger.info(f"{settings.app_name} API initialized (env={settings.environment}, cors={origins})")

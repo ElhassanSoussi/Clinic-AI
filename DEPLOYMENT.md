@@ -1,100 +1,42 @@
 # Deployment Guide
 
-This repository is structured as a small monorepo:
+Clinic AI deploys as a monorepo with:
 
-- `frontend/` -> Next.js app -> deploy to Vercel
-- `backend/` -> FastAPI app -> deploy to Render
-- Supabase -> database, auth, storage
+- `backend/` on Render as a Python web service
+- `frontend/` on Vercel as a Next.js app
+- Supabase for database, auth, and storage
 
-Use this guide after the code is pushed to GitHub.
+This document is the production deployment runbook.
 
-## 1. Frontend on Vercel
+## 1. Render Backend
 
-### Project setup
-
-- Import the GitHub repository into Vercel
-- Framework preset: `Next.js`
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Install command: `npm install`
-- Output directory: leave blank, Vercel will detect `.next`
-
-### Required frontend environment variables
-
-Set these in the Vercel project:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_API_URL`
-
-Optional:
-
-- `API_INTERNAL_URL`
-- `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH`
-
-Recommended values:
-
-- `NEXT_PUBLIC_API_URL=https://YOUR-RENDER-SERVICE.onrender.com/api`
-- `API_INTERNAL_URL=https://YOUR-RENDER-SERVICE.onrender.com/api`
-
-### Domain notes
-
-- Add your production domain in Vercel after the first successful deploy
-- If you add a custom domain later, update:
-  - Supabase Auth Site URL
-  - Supabase Auth Redirect URLs
-  - backend `CORS_ORIGINS`
-  - backend `FRONTEND_APP_URL`
-
-## 2. Backend on Render
-
-### Service setup
+### Service configuration
 
 - Service type: `Web Service`
 - Root directory: `backend`
 - Runtime: `Python`
-- Build command:
-
-```bash
-pip install -r requirements.txt
-```
-
-- Start command:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-- Health check path:
-
-```text
-/api/health
-```
+- Build command: `pip install -r requirements.txt`
+- Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Health check path: `/api/health`
 
 ### Required backend environment variables
 
-Always set:
+Set all of these on Render:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_KEY`
 - `OPENAI_API_KEY`
-- `ENVIRONMENT=production`
-- `CORS_ORIGINS`
-- `FRONTEND_APP_URL`
-
-Billing:
-
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_PROFESSIONAL`
 - `STRIPE_PRICE_PREMIUM`
-
-Email:
-
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
+- `FRONTEND_APP_URL`
+- `CORS_ORIGINS`
+- `ENVIRONMENT=production`
 
-Optional / advanced:
+Optional backend variables:
 
 - `RESEND_FROM_DOMAIN`
 - `GOOGLE_CREDENTIALS_B64`
@@ -102,84 +44,115 @@ Optional / advanced:
 - `GOOGLE_CREDENTIALS_PATH`
 - `ADMIN_SECRET`
 
-### Production notes
+### Backend production rules
 
-- `CORS_ORIGINS` must contain only real public frontend origins in production
-- Do not leave `localhost` or `127.0.0.1` in `CORS_ORIGINS` for production
-- `FRONTEND_APP_URL` should be your canonical frontend URL, for example:
+- `CORS_ORIGINS` must contain only real frontend origins in production
+- `FRONTEND_APP_URL` must be the canonical Vercel or custom domain URL
+- Production startup now fails fast if required production variables are missing
+- Production startup also fails if `CORS_ORIGINS` or `FRONTEND_APP_URL` point to localhost or another loopback host
+
+Example production values:
 
 ```text
-https://your-app.vercel.app
+FRONTEND_APP_URL=https://clinic-ai.vercel.app
+CORS_ORIGINS=https://clinic-ai.vercel.app,https://www.clinic-ai.com
 ```
 
-- API docs are disabled automatically when `ENVIRONMENT=production`
-- For hosted deployments, prefer `GOOGLE_CREDENTIALS_B64` instead of `GOOGLE_CREDENTIALS_PATH`
+## 2. Vercel Frontend
 
-## 3. Supabase
+### Project configuration
 
-### Required project values
+- Framework preset: `Next.js`
+- Root directory: `frontend`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Output directory: leave empty
+
+### Required frontend environment variables
+
+Set all of these on Vercel:
+
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Optional frontend variables:
+
+- `API_INTERNAL_URL`
+- `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH`
+
+Example production values:
+
+```text
+NEXT_PUBLIC_API_URL=https://your-render-service.onrender.com/api
+API_INTERNAL_URL=https://your-render-service.onrender.com/api
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
+NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=false
+```
+
+### Frontend production rules
+
+- The frontend API client reads `NEXT_PUBLIC_API_URL` only from environment variables
+- There is no localhost runtime fallback anymore
+- Missing public env vars now fail clearly instead of silently defaulting
+- OAuth completion is proxied through a Next.js route, so browser-to-backend CORS is not part of the auth completion path
+
+## 3. Domain and Auth Configuration
+
+Once the first Render and Vercel deployments are live:
+
+1. Set `FRONTEND_APP_URL` on Render to the final frontend URL.
+2. Set `CORS_ORIGINS` on Render to the exact Vercel and custom domain origins.
+3. In Supabase Auth, set the Site URL to the frontend domain.
+4. In Supabase Auth, add redirect URLs for:
+  - `https://your-frontend-domain/auth/callback`
+  - any Vercel preview or alternate production domains you intend to support
+
+OAuth redirect consistency requirements:
+
+- Supabase Site URL must match the deployed frontend domain
+- Supabase redirect URLs must include `/auth/callback`
+- `FRONTEND_APP_URL` and `CORS_ORIGINS` must align with the same domain set
+
+## 4. Supabase Setup
+
+### Required values
 
 Copy these from Supabase project settings:
 
-- Project URL -> `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_URL`
-- Anon key -> `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Service role key -> `SUPABASE_SERVICE_KEY`
+- Project URL to `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_URL`
+- Anon key to `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Service role key to `SUPABASE_SERVICE_KEY`
 
-### Schema and migrations
+### Database bootstrap
 
-Run these in Supabase SQL Editor:
+Apply in Supabase SQL Editor:
 
 1. `backend/schema.sql`
-2. every file in `backend/migrations/` in timestamp order:
-   - `20260326_add_slot_columns.sql`
-   - `20260327_add_billing.sql`
-   - `20260327_add_onboarding_branding.sql`
-   - `20260328_add_increment_leads_rpc.sql`
-   - `20260328_add_sheets_notifications_availability.sql`
-   - `20260329_add_events_and_sales_leads.sql`
-   - `20260329_add_is_live.sql`
+2. Every file in `backend/migrations/` in timestamp order
 
-### Auth configuration
+### OAuth providers
 
-In Supabase Auth:
+- Configure Google in Supabase if Google sign-in is required
+- Configure Microsoft only after the Azure tenant and app registration are verified
+- If `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true`, the Microsoft provider must be fully configured in Supabase and Azure AD
 
-- Site URL:
+## 5. Stripe Setup
 
-```text
-https://YOUR-FRONTEND-DOMAIN
-```
-
-- Redirect URLs should include:
-
-```text
-https://YOUR-FRONTEND-DOMAIN/auth/callback
-```
-
-Add both the Vercel preview/default domain and the final custom domain if you use both.
-
-If you use Google or Microsoft OAuth:
-
-- configure the provider in Supabase
-- make sure the provider callback returns to Supabase, and Supabase redirects to `/auth/callback`
-- keep redirect URLs aligned with the Vercel domain you actually use
-
-## 4. Stripe
-
-### Required Stripe variables
-
-For test mode or live mode, set the matching values on Render:
+### Backend variables
 
 - `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_PROFESSIONAL`
 - `STRIPE_PRICE_PREMIUM`
-- `STRIPE_WEBHOOK_SECRET`
 
-### Webhook setup
+### Webhook endpoint
 
-Create a Stripe webhook endpoint pointing to:
+Point Stripe webhooks to:
 
 ```text
-https://YOUR-RENDER-SERVICE.onrender.com/api/billing/webhook
+https://your-render-service.onrender.com/api/billing/webhook
 ```
 
 Subscribe at minimum to:
@@ -191,74 +164,27 @@ Subscribe at minimum to:
 - `invoice.paid`
 - `invoice.payment_failed`
 
-## 5. Google Sheets / Resend
+## 6. Final Verification Checklist
 
-### Google Sheets
+Verify this exact flow after deployment:
 
-If you want availability sync or lead sync:
+1. Landing page loads without runtime env errors
+2. Register works
+3. Login works
+4. Onboarding flow completes
+5. Public chat works
+6. Dashboard loads
+7. Stripe checkout works
+8. Stripe webhook updates billing state
+9. No browser console errors on core flows
+10. `GET /api/health` returns `{ "status": "ok" }`
 
-- create a Google Cloud service account
-- enable Google Sheets API
-- share the target sheet with the service account email
-- store credentials using one of:
-  - `GOOGLE_CREDENTIALS_B64`
-  - `GOOGLE_CREDENTIALS_JSON`
-  - `GOOGLE_CREDENTIALS_PATH` (local/dev only)
+## 7. Deployment Order
 
-### Resend
-
-If you want email notifications:
-
-- verify a sender domain in Resend
-- set:
-  - `RESEND_API_KEY`
-  - `RESEND_FROM_EMAIL`
-
-Recommended sender format:
-
-```text
-notifications@yourdomain.com
-```
-
-## 6. Deployment Order
-
-1. Push repository to GitHub
+1. Apply Supabase schema and migrations
 2. Deploy backend to Render
-3. Confirm `GET /api/health` is healthy
+3. Verify backend health endpoint
 4. Deploy frontend to Vercel
-5. Update Supabase Auth URLs to the Vercel URL
-6. Configure Stripe webhook to the Render backend
-7. Add custom domains
-8. Update:
-   - Vercel env vars if domain-related
-   - Render `CORS_ORIGINS`
-   - Render `FRONTEND_APP_URL`
-   - Supabase Site URL / Redirect URLs
-
-## 7. Post-deploy verification
-
-Run these checks in order:
-
-1. Open the frontend landing page
-2. Register a new clinic account
-3. Complete onboarding
-4. Open the public chat route for the clinic slug
-5. Create a lead and confirm it appears in the dashboard
-6. Test Stripe checkout from the dashboard billing page
-7. Confirm Stripe webhook events update the plan in Supabase
-8. If enabled, test:
-   - Google Sheets sync
-   - email notifications
-   - OAuth sign-in
-
-## 8. Known manual items
-
-These are not code changes and must still be done manually:
-
-- create the Supabase project
-- apply the SQL schema and migrations
-- configure Supabase Auth providers
-- create Stripe products/prices/webhook
-- configure Render environment variables
-- configure Vercel environment variables
-- connect custom domains
+5. Set production domains in Render, Vercel, and Supabase Auth
+6. Configure Stripe webhook
+7. Run the final verification checklist

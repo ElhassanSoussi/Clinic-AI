@@ -1,5 +1,3 @@
-const DEFAULT_DEV_API_URL = "http://127.0.0.1:7001/api";
-
 const PUBLIC_ENV = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -82,10 +80,6 @@ export function getSupabasePublicEnv() {
 export function getPublicApiEnv(): string {
   const value = readPublicEnv("NEXT_PUBLIC_API_URL");
   if (value) return value;
-
-  if (process.env.NODE_ENV !== "production") {
-    return DEFAULT_DEV_API_URL;
-  }
 
   throw new FrontendEnvError(
     "Missing NEXT_PUBLIC_API_URL. Set it to your deployed backend API URL, for example https://your-backend.onrender.com/api."
