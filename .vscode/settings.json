@@ -1,0 +1,22 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "python.analysis.exclude": [
+    "**/backend/venv/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/__pycache__/**"
+  ],
+  "python.analysis.ignore": [
+    "/opt/homebrew/**"
+  ],
+  "eslint.workingDirectories": [
+    {
+      "directory": "frontend",
+      "changeProcessCWD": true
+    }
+  ],
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "dbcode.enableLinting": false
+}
