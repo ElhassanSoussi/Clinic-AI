@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useState, type ComponentProps } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Bot, Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
 import { getSupabasePublicEnvError } from "@/lib/env";
-import { createClient } from "@/utils/supabase/client";
-import OAuthButtons from "@/components/shared/OAuthButtons";
 import { OAUTH_PROVIDERS } from "@/lib/oauth-providers";
+
+const OAuthButtons = dynamic(() => import("@/components/shared/OAuthButtons"), {
+  ssr: false,
+});
 
 const AUTH_ERROR_COOKIE = "clinic_ai_auth_error";
 
@@ -130,13 +133,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await api.auth.login({ email, password });
-      
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (authError) throw authError;
 
       if (selectedPlan) {
         setAuthenticatedUser(res);

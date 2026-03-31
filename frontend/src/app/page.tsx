@@ -156,9 +156,9 @@ export default function LandingPage() {
             <span className="text-teal-600">again.</span>
           </h1>
           <p className="text-xl text-slate-500 leading-relaxed max-w-2xl mx-auto mb-10">
-            Your AI receptionist answers patient questions, captures appointment
-            requests, and saves every lead — so your staff can focus on care, not
-            phone calls.
+            Your AI front desk answers patient questions, captures appointment
+            requests, organizes conversations in one inbox, and gives your team
+            a clearer view of follow-up opportunities.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
@@ -201,8 +201,8 @@ export default function LandingPage() {
               },
               {
                 icon: <LayoutDashboard className="w-6 h-6" />,
-                title: "Lead Dashboard",
-                desc: "View, manage, and track every patient request in one place. No leads slip through.",
+                title: "Inbox & Request Management",
+                desc: "Review patient conversations, open linked requests, and keep follow-up work from slipping through.",
               },
               {
                 icon: <Shield className="w-6 h-6" />,
@@ -216,8 +216,8 @@ export default function LandingPage() {
               },
               {
                 icon: <CheckCircle2 className="w-6 h-6" />,
-                title: "Easy Setup",
-                desc: "Add your clinic details, services, and hours. Your AI assistant is ready in minutes.",
+                title: "AI Training Workspace",
+                desc: "Manage services, FAQs, hours, assistant tone, and custom knowledge notes in one training area.",
               },
               {
                 icon: <Bot className="w-6 h-6" />,
@@ -285,18 +285,18 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Card 2: Lead Dashboard */}
+            {/* Card 2: Inbox */}
             <div className="rounded-2xl border border-slate-200 overflow-hidden">
               <div className="bg-white px-5 py-3 border-b border-slate-100">
-                <span className="text-sm font-medium text-slate-900">Patient Requests</span>
-                <span className="ml-2 text-xs text-slate-400">10 total</span>
+                <span className="text-sm font-medium text-slate-900">Operator Inbox</span>
+                <span className="ml-2 text-xs text-slate-400">Needs follow-up: 2</span>
               </div>
               <div className="bg-white px-4 py-3 space-y-2.5">
                 {[
-                  { name: "Maria Santos", reason: "Teeth cleaning", status: "Booked", statusColor: "text-emerald-700 bg-emerald-50" },
-                  { name: "James O'Brien", reason: "Chipped tooth", status: "Booked", statusColor: "text-emerald-700 bg-emerald-50" },
-                  { name: "Priya Patel", reason: "Whitening consult", status: "Contacted", statusColor: "text-amber-700 bg-amber-50" },
-                  { name: "Sarah Mitchell", reason: "Molar sensitivity", status: "New", statusColor: "text-blue-700 bg-blue-50" },
+                  { name: "Maria Santos", reason: "Booked after chat", status: "Booked", statusColor: "text-emerald-700 bg-emerald-50" },
+                  { name: "James O'Brien", reason: "Needs follow-up", status: "Open", statusColor: "text-amber-700 bg-amber-50" },
+                  { name: "Priya Patel", reason: "Insurance question", status: "Handled", statusColor: "text-slate-700 bg-slate-100" },
+                  { name: "Sarah Mitchell", reason: "Whitening consult", status: "Open", statusColor: "text-blue-700 bg-blue-50" },
                 ].map((lead) => (
                   <div key={lead.name} className="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
                     <div className="flex-1 min-w-0">
@@ -310,15 +310,15 @@ export default function LandingPage() {
                 ))}
               </div>
               <div className="bg-white border-t border-slate-100 px-4 py-3">
-                <p className="text-xs font-medium text-slate-900 mb-1">Lead Dashboard</p>
-                <p className="text-xs text-slate-500 leading-relaxed">Every request in one place. Filter, update status, and follow up.</p>
+                <p className="text-xs font-medium text-slate-900 mb-1">Conversations-first inbox</p>
+                <p className="text-xs text-slate-500 leading-relaxed">See the latest message, linked request, and follow-up status in one operator view.</p>
               </div>
             </div>
 
-            {/* Card 3: Setup / Settings */}
+            {/* Card 3: AI Training */}
             <div className="rounded-2xl border border-slate-200 overflow-hidden">
               <div className="bg-white px-5 py-3 border-b border-slate-100">
-                <span className="text-sm font-medium text-slate-900">Clinic Settings</span>
+                <span className="text-sm font-medium text-slate-900">AI Training</span>
               </div>
               <div className="bg-white px-4 py-4 space-y-3">
                 <div>
@@ -338,18 +338,15 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-1">Notifications</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-4.5 rounded-full bg-teal-600 relative">
-                      <div className="absolute right-0.5 top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow-sm" />
-                    </div>
-                    <span className="text-[11px] text-slate-600">Email alerts on</span>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-1">Custom notes</p>
+                  <div className="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2 text-[11px] text-slate-600">
+                    Emergency visits should always mention same-day callback priority.
                   </div>
                 </div>
               </div>
               <div className="bg-white border-t border-slate-100 px-4 py-3">
-                <p className="text-xs font-medium text-slate-900 mb-1">Quick Setup</p>
-                <p className="text-xs text-slate-500 leading-relaxed">Add your info once. The assistant uses it to answer accurately.</p>
+                <p className="text-xs font-medium text-slate-900 mb-1">Training workspace</p>
+                <p className="text-xs text-slate-500 leading-relaxed">Keep your assistant accurate with clinic knowledge, FAQs, and custom front-desk notes.</p>
               </div>
             </div>
           </div>
@@ -441,7 +438,7 @@ export default function LandingPage() {
               "Never miss a patient inquiry — even after hours",
               "No medical advice, no made-up answers",
               "Collect appointment requests 24/7",
-              "Organize every lead in one dashboard",
+              "Organize every conversation and request in one place",
             ].map((b) => (
               <div key={b} className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
@@ -542,7 +539,7 @@ export default function LandingPage() {
       <section className="py-20 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            Stop losing patients to missed calls
+            Stop losing patient requests after hours
           </h2>
           <p className="text-lg text-slate-500 mb-8">
             Start capturing every inquiry — even after hours.

@@ -21,6 +21,8 @@ class ClinicResponse(BaseModel):
     notification_email: Optional[str] = ""
     availability_enabled: Optional[bool] = False
     availability_sheet_tab: Optional[str] = "Availability"
+    reminder_enabled: Optional[bool] = False
+    reminder_lead_hours: Optional[int] = 24
     onboarding_completed: Optional[bool] = False
     onboarding_step: Optional[int] = 0
     assistant_name: Optional[str] = ""
@@ -55,6 +57,8 @@ class ClinicUpdateRequest(BaseModel):
     notification_email: Optional[str] = None
     availability_enabled: Optional[bool] = None
     availability_sheet_tab: Optional[str] = None
+    reminder_enabled: Optional[bool] = None
+    reminder_lead_hours: Optional[int] = None
     onboarding_completed: Optional[bool] = None
     onboarding_step: Optional[int] = None
     assistant_name: Optional[str] = None

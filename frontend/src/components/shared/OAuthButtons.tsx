@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Loader2 } from "lucide-react";
 import { isFrontendEnvError } from "@/lib/env";
 import { createClient } from "@/utils/supabase/client";
@@ -59,6 +59,11 @@ export default function OAuthButtons({
   disabled?: boolean;
   nextPath?: string;
 }>) {
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [providerError, setProviderError] = useState("");
 
@@ -108,7 +113,7 @@ export default function OAuthButtons({
           const isLoading = loadingProvider === provider.id;
           const Icon = PROVIDER_ICONS[provider.id];
           const providerDisabled =
-            disabled || isAnyLoading || provider.enabled === false;
+            !mounted || !!disabled || isAnyLoading || provider.enabled === false;
           const providerIcon = renderProviderIcon(isLoading, Icon);
           return (
             <div key={provider.id} className="space-y-1.5">

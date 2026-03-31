@@ -9,6 +9,17 @@ import type {
   BillingStatus,
   PlanInfo,
   ActivityEvent,
+  InboxConversation,
+  ConversationDetail,
+  CustomerProfileSummary,
+  CustomerProfileDetail,
+  Opportunity,
+  FrontdeskAnalytics,
+  FollowUpTask,
+  OperationsOverview,
+  TrainingOverview,
+  TrainingKnowledgeSource,
+  WaitlistEntry,
 } from "@/types";
 import { getPublicApiUrl } from "@/lib/api-url";
 
@@ -241,6 +252,155 @@ export const api = {
   activity: {
     list(limit = 30): Promise<ActivityEvent[]> {
       return request(`/activity?limit=${limit}`);
+    },
+  },
+
+  frontdesk: {
+    listConversations(limit = 100): Promise<InboxConversation[]> {
+      return request(`/frontdesk/conversations?limit=${limit}`);
+    },
+
+    getConversation(id: string): Promise<ConversationDetail> {
+      return request(`/frontdesk/conversations/${id}`);
+    },
+
+    listCustomers(): Promise<CustomerProfileSummary[]> {
+      return request("/frontdesk/customers");
+    },
+
+    getCustomer(key: string): Promise<CustomerProfileDetail> {
+      return request(`/frontdesk/customers/${key}`);
+    },
+
+    listOpportunities(): Promise<Opportunity[]> {
+      return request("/frontdesk/opportunities");
+    },
+
+    listFollowUps(): Promise<FollowUpTask[]> {
+      return request("/frontdesk/follow-ups");
+    },
+
+    createFollowUp(data: {
+      source_key: string;
+      task_type: string;
+      priority: "high" | "medium" | "low";
+      title: string;
+      detail?: string;
+      customer_key?: string | null;
+      customer_name: string;
+      lead_id?: string | null;
+      conversation_id?: string | null;
+      due_at?: string;
+      note?: string;
+      status?: "open" | "snoozed" | "completed";
+    }): Promise<FollowUpTask> {
+      return request("/frontdesk/follow-ups", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateFollowUp(
+      id: string,
+      data: {
+        status?: "open" | "snoozed" | "completed";
+        due_at?: string;
+        note?: string;
+        lead_status?: "new" | "contacted" | "booked" | "closed";
+      }
+    ): Promise<FollowUpTask> {
+      return request(`/frontdesk/follow-ups/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    getAnalytics(): Promise<FrontdeskAnalytics> {
+      return request("/frontdesk/analytics");
+    },
+
+    getOperations(): Promise<OperationsOverview> {
+      return request("/frontdesk/operations");
+    },
+
+    updateLeadOperations(
+      id: string,
+      data: {
+        appointment_status?: "request_open" | "confirmed" | "cancel_requested" | "reschedule_requested" | "cancelled" | "completed" | "no_show";
+        appointment_starts_at?: string | null;
+        appointment_ends_at?: string | null;
+        reminder_status?: "not_ready" | "ready" | "scheduled" | "sent";
+        reminder_note?: string;
+        deposit_required?: boolean;
+        deposit_amount_cents?: number | null;
+        deposit_status?: "not_required" | "pending" | "paid" | "waived";
+      }
+    ): Promise<Lead> {
+      return request(`/frontdesk/leads/${id}/operations`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    createWaitlistEntry(data: {
+      lead_id?: string | null;
+      customer_key?: string | null;
+      patient_name: string;
+      patient_phone?: string;
+      patient_email?: string;
+      service_requested?: string;
+      preferred_times?: string;
+      notes?: string;
+    }): Promise<WaitlistEntry> {
+      return request("/frontdesk/waitlist", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateWaitlistEntry(
+      id: string,
+      data: {
+        status?: "waiting" | "contacted" | "booked" | "closed";
+        notes?: string;
+        service_requested?: string;
+        preferred_times?: string;
+      }
+    ): Promise<WaitlistEntry> {
+      return request(`/frontdesk/waitlist/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    getTraining(): Promise<TrainingOverview> {
+      return request("/frontdesk/training");
+    },
+
+    createKnowledgeSource(data: {
+      title: string;
+      content: string;
+    }): Promise<TrainingKnowledgeSource> {
+      return request("/frontdesk/training/sources", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateKnowledgeSource(
+      id: string,
+      data: { title?: string; content?: string }
+    ): Promise<TrainingKnowledgeSource> {
+      return request(`/frontdesk/training/sources/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    deleteKnowledgeSource(id: string): Promise<{ success: boolean }> {
+      return request(`/frontdesk/training/sources/${id}`, {
+        method: "DELETE",
+      });
     },
   },
 

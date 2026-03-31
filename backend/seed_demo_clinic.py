@@ -1,13 +1,10 @@
 """Seed (or update) the demo clinic with realistic leads, conversations, and activity."""
-import os
 import json
 from datetime import datetime, timedelta, timezone
-from supabase import create_client
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+from app.dependencies import get_supabase
 
-db = create_client(SUPABASE_URL, SUPABASE_KEY)
+db = get_supabase()
 
 STANDARD_WEEKDAY_HOURS = "8:00 AM - 6:00 PM"
 
@@ -89,6 +86,10 @@ def ago(**kwargs):
     """Return ISO timestamp for (now - timedelta)."""
     return (now - timedelta(**kwargs)).isoformat()
 
+
+def ahead(**kwargs):
+    return (now + timedelta(**kwargs)).isoformat()
+
 # Clear old demo leads so reruns stay clean
 db.table("leads").delete().eq("clinic_id", clinic_id).execute()
 
@@ -100,6 +101,13 @@ DEMO_LEADS = [
         "reason_for_visit": "Teeth cleaning — it's been about 6 months",
         "preferred_datetime_text": "Tuesday morning",
         "status": "booked",
+        "appointment_status": "confirmed",
+        "appointment_starts_at": ahead(days=2, hours=14),
+        "reminder_status": "ready",
+        "reminder_scheduled_for": ahead(days=1, hours=14),
+        "deposit_required": True,
+        "deposit_amount_cents": 2500,
+        "deposit_status": "pending",
         "source": "web_chat",
         "notes": "Confirmed for Tue 10 AM. Has Delta Dental insurance.",
         "created_at": ago(days=6, hours=3),
@@ -112,6 +120,9 @@ DEMO_LEADS = [
         "reason_for_visit": "Chipped front tooth — happened yesterday",
         "preferred_datetime_text": "As soon as possible",
         "status": "booked",
+        "appointment_status": "reschedule_requested",
+        "appointment_starts_at": ahead(days=1, hours=11),
+        "reminder_status": "not_ready",
         "source": "web_chat",
         "notes": "Emergency slot — seen same day.",
         "created_at": ago(days=4, hours=8),

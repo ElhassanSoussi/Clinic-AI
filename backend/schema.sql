@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS clinics (
     notification_email TEXT DEFAULT '',
     availability_enabled BOOLEAN DEFAULT false,
     availability_sheet_tab TEXT DEFAULT 'Availability',
+    reminder_enabled BOOLEAN DEFAULT false,
+    reminder_lead_hours INTEGER DEFAULT 24,
     onboarding_completed BOOLEAN DEFAULT false,
     onboarding_step INTEGER DEFAULT 0,
     assistant_name TEXT DEFAULT '',
@@ -69,6 +71,15 @@ CREATE TABLE IF NOT EXISTS leads (
     slot_row_index INTEGER,
     slot_source TEXT DEFAULT 'manual' CHECK (slot_source IN ('manual', 'availability')),
     status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'booked', 'closed')),
+    appointment_status TEXT DEFAULT 'request_open' CHECK (appointment_status IN ('request_open', 'confirmed', 'cancel_requested', 'reschedule_requested', 'cancelled', 'completed', 'no_show')),
+    appointment_starts_at TIMESTAMPTZ,
+    appointment_ends_at TIMESTAMPTZ,
+    reminder_status TEXT DEFAULT 'not_ready' CHECK (reminder_status IN ('not_ready', 'ready', 'scheduled', 'sent')),
+    reminder_scheduled_for TIMESTAMPTZ,
+    reminder_note TEXT DEFAULT '',
+    deposit_required BOOLEAN DEFAULT false,
+    deposit_amount_cents INTEGER,
+    deposit_status TEXT DEFAULT 'not_required' CHECK (deposit_status IN ('not_required', 'pending', 'paid', 'waived')),
     source TEXT DEFAULT 'web_chat',
     notes TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -96,13 +107,65 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS knowledge_sources (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
+    source_type TEXT NOT NULL DEFAULT 'manual_note' CHECK (source_type IN ('manual_note', 'document_upload')),
+    title TEXT NOT NULL,
+    content TEXT DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS follow_up_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
+    source_key TEXT NOT NULL,
+    task_type TEXT NOT NULL CHECK (task_type IN ('abandoned_conversation', 'new_lead_stale', 'follow_up_needed', 'cancel_request', 'reschedule_request', 'no_show_risk')),
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'snoozed', 'completed')),
+    priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('high', 'medium', 'low')),
+    title TEXT NOT NULL,
+    detail TEXT DEFAULT '',
+    customer_key TEXT DEFAULT '',
+    customer_name TEXT DEFAULT '',
+    lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+    conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+    due_at TIMESTAMPTZ DEFAULT now(),
+    note TEXT DEFAULT '',
+    last_action_at TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (clinic_id, source_key)
+);
+
+CREATE TABLE IF NOT EXISTS waitlist_entries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
+    lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+    customer_key TEXT DEFAULT '',
+    patient_name TEXT NOT NULL,
+    patient_phone TEXT DEFAULT '',
+    patient_email TEXT DEFAULT '',
+    service_requested TEXT DEFAULT '',
+    preferred_times TEXT DEFAULT '',
+    notes TEXT DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting', 'contacted', 'booked', 'closed')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_clinic ON users(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_leads_clinic ON leads(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(clinic_id, status);
+CREATE INDEX IF NOT EXISTS idx_leads_appointment_status ON leads(clinic_id, appointment_status);
 CREATE INDEX IF NOT EXISTS idx_conversations_clinic ON conversations(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_session ON conversations(session_id);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON conversation_messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_sources_clinic ON knowledge_sources(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_follow_up_tasks_clinic_status ON follow_up_tasks(clinic_id, status, due_at);
+CREATE INDEX IF NOT EXISTS idx_waitlist_entries_clinic_status ON waitlist_entries(clinic_id, status, created_at);
 
 -- Updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -130,12 +193,27 @@ DROP TRIGGER IF EXISTS tr_conversations_updated_at ON conversations;
 CREATE TRIGGER tr_conversations_updated_at BEFORE UPDATE ON conversations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS tr_knowledge_sources_updated_at ON knowledge_sources;
+CREATE TRIGGER tr_knowledge_sources_updated_at BEFORE UPDATE ON knowledge_sources
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS tr_follow_up_tasks_updated_at ON follow_up_tasks;
+CREATE TRIGGER tr_follow_up_tasks_updated_at BEFORE UPDATE ON follow_up_tasks
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS tr_waitlist_entries_updated_at ON waitlist_entries;
+CREATE TRIGGER tr_waitlist_entries_updated_at BEFORE UPDATE ON waitlist_entries
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- Row Level Security (enable but keep permissive for service-role access)
 ALTER TABLE clinics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE knowledge_sources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE follow_up_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE waitlist_entries ENABLE ROW LEVEL SECURITY;
 
 -- Service-role policies (backend uses service key, bypasses RLS automatically)
 -- Public read for clinics by slug (for chat widget)
@@ -179,6 +257,29 @@ CREATE POLICY "Authenticated users can read own clinic leads"
     ON leads FOR SELECT
     USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can read own clinic knowledge sources" ON knowledge_sources;
+CREATE POLICY "Authenticated users can read own clinic knowledge sources"
+    ON knowledge_sources FOR SELECT
+    USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can manage own clinic knowledge sources" ON knowledge_sources;
+CREATE POLICY "Authenticated users can manage own clinic knowledge sources"
+    ON knowledge_sources FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can manage own clinic follow up tasks" ON follow_up_tasks;
+CREATE POLICY "Authenticated users can manage own clinic follow up tasks"
+    ON follow_up_tasks FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can manage own clinic waitlist entries" ON waitlist_entries;
+CREATE POLICY "Authenticated users can manage own clinic waitlist entries"
+    ON waitlist_entries FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
 DROP POLICY IF EXISTS "Authenticated users can update own clinic leads" ON leads;
 CREATE POLICY "Authenticated users can update own clinic leads"
     ON leads FOR UPDATE
@@ -216,6 +317,39 @@ ALTER TABLE IF EXISTS leads
 ALTER TABLE IF EXISTS leads
     ADD COLUMN IF NOT EXISTS slot_source TEXT DEFAULT 'manual';
 
+ALTER TABLE IF EXISTS clinics
+    ADD COLUMN IF NOT EXISTS reminder_enabled BOOLEAN DEFAULT false;
+
+ALTER TABLE IF EXISTS clinics
+    ADD COLUMN IF NOT EXISTS reminder_lead_hours INTEGER DEFAULT 24;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS appointment_status TEXT DEFAULT 'request_open';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS appointment_starts_at TIMESTAMPTZ;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS appointment_ends_at TIMESTAMPTZ;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS reminder_status TEXT DEFAULT 'not_ready';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS reminder_scheduled_for TIMESTAMPTZ;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS reminder_note TEXT DEFAULT '';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_required BOOLEAN DEFAULT false;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_amount_cents INTEGER;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_status TEXT DEFAULT 'not_required';
+
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -226,6 +360,42 @@ BEGIN
         ALTER TABLE leads
         ADD CONSTRAINT leads_slot_source_check
         CHECK (slot_source IN ('manual', 'availability'));
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'leads_appointment_status_check'
+    ) THEN
+        ALTER TABLE leads
+        ADD CONSTRAINT leads_appointment_status_check
+        CHECK (appointment_status IN ('request_open', 'confirmed', 'cancel_requested', 'reschedule_requested', 'cancelled', 'completed', 'no_show'));
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'leads_reminder_status_check'
+    ) THEN
+        ALTER TABLE leads
+        ADD CONSTRAINT leads_reminder_status_check
+        CHECK (reminder_status IN ('not_ready', 'ready', 'scheduled', 'sent'));
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'leads_deposit_status_check'
+    ) THEN
+        ALTER TABLE leads
+        ADD CONSTRAINT leads_deposit_status_check
+        CHECK (deposit_status IN ('not_required', 'pending', 'paid', 'waived'));
     END IF;
 END
 $$;

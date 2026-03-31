@@ -16,6 +16,10 @@ import {
   Activity,
   Rocket,
   CheckCircle2,
+  Inbox,
+  BrainCircuit,
+  AlertTriangle,
+  CalendarClock,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -24,8 +28,13 @@ import type { BillingStatus, Clinic } from "@/types";
 
 const sidebarNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
+  { href: "/dashboard/customers", label: "Customers", icon: UserCircle },
+  { href: "/dashboard/opportunities", label: "Opportunities", icon: AlertTriangle },
+  { href: "/dashboard/operations", label: "Operations", icon: CalendarClock },
   { href: "/dashboard/activity", label: "Activity", icon: Activity },
+  { href: "/dashboard/training", label: "AI Training", icon: BrainCircuit },
 ];
 
 function settingsHref(section?: string | null): string {

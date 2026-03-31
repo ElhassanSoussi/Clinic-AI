@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.routers import auth, clinics, leads, conversations, chat, billing, activity, admin, events, contact
+from app.routers import auth, clinics, leads, conversations, chat, billing, activity, admin, events, contact, frontdesk
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -50,6 +50,7 @@ app.include_router(activity.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
 app.include_router(contact.router, prefix="/api")
+app.include_router(frontdesk.router, prefix="/api")
 
 
 @app.get("/api/health")

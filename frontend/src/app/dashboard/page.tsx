@@ -3,14 +3,34 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Users, Clock, CheckCircle2, Phone, ArrowRight, MessageSquare, Settings, AlertTriangle, Zap, UserPlus, ArrowRightLeft } from "lucide-react";
+import {
+  Users,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  MessageSquare,
+  Settings,
+  AlertTriangle,
+  Zap,
+  UserPlus,
+  ArrowRightLeft,
+  Inbox,
+  BrainCircuit,
+  TrendingUp,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
-import type { Lead, Clinic, BillingStatus, ActivityEvent } from "@/types";
+import type {
+  Clinic,
+  BillingStatus,
+  ActivityEvent,
+  FrontdeskAnalytics,
+  Opportunity,
+} from "@/types";
 
 const EVENT_CONFIG: Record<ActivityEvent["type"], { icon: typeof UserPlus; color: string; bg: string; label: string }> = {
   lead_created: { icon: UserPlus, color: "text-blue-600", bg: "bg-blue-50", label: "New Lead" },
@@ -23,13 +43,6 @@ function settingsHref(section?: string | null): string {
   return `/dashboard/settings?section=${encodeURIComponent(section)}`;
 }
 
-interface Stats {
-  total: number;
-  new: number;
-  contacted: number;
-  booked: number;
-}
-
 export default function DashboardPage() {
   const router = useRouter();
   const [firstLead] = useState(
@@ -37,10 +50,11 @@ export default function DashboardPage() {
       globalThis.window !== undefined &&
       new URLSearchParams(globalThis.location.search).get("first_lead") === "true"
   );
-  const [leads, setLeads] = useState<Lead[]>([]);
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [analytics, setAnalytics] = useState<FrontdeskAnalytics | null>(null);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showFirstLeadSuccess, setShowFirstLeadSuccess] = useState(false);
@@ -49,16 +63,18 @@ export default function DashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const [data, clinicData, billingData, activityData] = await Promise.all([
-        api.leads.list(),
+      const [clinicData, billingData, activityData, analyticsData, opportunitiesData] = await Promise.all([
         api.clinics.getMyClinic(),
         api.billing.getStatus(),
         api.activity.list(8),
+        api.frontdesk.getAnalytics(),
+        api.frontdesk.listOpportunities(),
       ]);
-      setLeads(data);
       setClinic(clinicData);
       setBilling(billingData);
       setActivity(activityData);
+      setAnalytics(analyticsData);
+      setOpportunities(opportunitiesData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load dashboard");
     } finally {
@@ -78,15 +94,16 @@ export default function DashboardPage() {
 
   if (loading) return <LoadingState message="Loading dashboard..." />;
   if (error) return <ErrorState message={error} onRetry={loadDashboard} />;
+  if (!analytics) {
+    return (
+      <ErrorState
+        title="Analytics unavailable"
+        message="The dashboard could not load the latest front desk metrics."
+        onRetry={loadDashboard}
+      />
+    );
+  }
 
-  const stats: Stats = {
-    total: leads.length,
-    new: leads.filter((l) => l.status === "new").length,
-    contacted: leads.filter((l) => l.status === "contacted").length,
-    booked: leads.filter((l) => l.status === "booked").length,
-  };
-
-  const newLeads = leads.filter((l) => l.status === "new");
   const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
 
   let emptyActivityState: React.ReactNode;
@@ -138,32 +155,49 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: "Total Requests",
-      value: stats.total,
-      icon: Users,
+      label: "Conversations",
+      value: analytics.conversations_total,
+      icon: Inbox,
       color: "text-slate-700",
       bg: "bg-slate-100",
     },
     {
-      label: "New",
-      value: stats.new,
-      icon: Clock,
+      label: "Leads Captured",
+      value: analytics.leads_created,
+      icon: Users,
       color: "text-blue-700",
       bg: "bg-blue-50",
     },
     {
-      label: "Contacted",
-      value: stats.contacted,
-      icon: Phone,
-      color: "text-amber-700",
-      bg: "bg-amber-50",
-    },
-    {
-      label: "Booked",
-      value: stats.booked,
+      label: "Booked Requests",
+      value: analytics.booked_requests,
       icon: CheckCircle2,
       color: "text-emerald-700",
       bg: "bg-emerald-50",
+    },
+    {
+      label: "Follow-Up Needed",
+      value: analytics.follow_up_needed_count,
+      icon: Clock,
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+    },
+  ];
+
+  const performanceCards = [
+    {
+      label: "Conversation Capture Rate",
+      value: `${analytics.lead_capture_rate}%`,
+      icon: TrendingUp,
+      color: "text-teal-700",
+      bg: "bg-teal-50",
+    },
+    {
+      label: "AI Resolution Estimate",
+      value: `${analytics.ai_resolution_estimate}%`,
+      icon: BrainCircuit,
+      color: "text-violet-700",
+      bg: "bg-violet-50",
     },
   ];
 
@@ -172,7 +206,7 @@ export default function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <p className="text-slate-500 text-sm mt-1">
-          Overview of your appointment requests and leads
+          See how the front desk is performing, what needs follow-up, and when patients reach out most often.
         </p>
       </div>
 
@@ -199,7 +233,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Stats */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-slate-700">Overview</h2>
         {billing && billing.plan !== "premium" && (
@@ -230,6 +263,107 @@ export default function DashboardPage() {
             <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">
+                Performance snapshot
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Practical metrics derived from real conversation and request data.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/inbox"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-800 transition-colors"
+            >
+              Open inbox
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {performanceCards.map((card) => (
+              <div
+                key={card.label}
+                className="rounded-xl border border-slate-100 p-4"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-slate-500">
+                    {card.label}
+                  </span>
+                  <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center`}>
+                    <card.icon className={`w-5 h-5 ${card.color}`} />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-slate-900">{card.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Estimate note
+            </p>
+            <p className="text-sm text-slate-600 mt-1">
+              {analytics.ai_resolution_estimate_label}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">
+                Busiest contact hours
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Based on incoming patient messages.
+              </p>
+            </div>
+            <Clock className="w-4 h-4 text-slate-400" />
+          </div>
+
+          {analytics.busiest_contact_hours.length === 0 ? (
+            <EmptyState
+              icon={<Clock className="w-6 h-6 text-slate-400" />}
+              title="Not enough conversation data yet"
+              description="Once patients start chatting, you'll see which hours are busiest."
+            />
+          ) : (
+            <div className="space-y-3">
+              {analytics.busiest_contact_hours.map((bucket) => (
+                <div key={bucket.hour} className="flex items-center gap-3">
+                  <div className="w-20 text-sm font-medium text-slate-700">
+                    {bucket.label}
+                  </div>
+                  <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full bg-teal-500 rounded-full"
+                      style={{
+                        width: `${Math.max(
+                          20,
+                          (bucket.count /
+                            Math.max(
+                              ...analytics.busiest_contact_hours.map(
+                                (item) => item.count
+                              ),
+                              1
+                            )) *
+                            100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs text-slate-500">{bucket.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Critical billing alerts */}
@@ -273,52 +407,71 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Needs Attention */}
-      {stats.new > 0 && (
-        <div className="bg-white rounded-xl border-2 border-blue-300 mb-8 shadow-sm">
-          <div className="px-6 py-4 border-b border-blue-100 flex items-center justify-between bg-blue-50/50 rounded-t-xl">
-            <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              <div className="relative">
-                <Clock className="w-4.5 h-4.5 text-blue-600" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
-              </div>
-              Needs Attention
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold">
-                {stats.new} new
-              </span>
-            </h2>
-            <Link
-              href="/dashboard/leads?status=new"
-              className="text-sm font-medium text-teal-600 hover:text-teal-700 flex items-center gap-1"
-            >
-              View All New
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="divide-y divide-blue-50">
-            {newLeads.slice(0, 5).map((lead) => (
-              <Link
-                key={lead.id}
-                href={`/dashboard/leads/${lead.id}`}
-                className="flex items-center gap-4 px-6 py-3.5 hover:bg-blue-50/50 transition-colors"
-              >
-                <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">
-                    {lead.patient_name}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate">
-                    {lead.reason_for_visit || "No reason specified"}
-                  </p>
-                </div>
-                <span className="text-xs text-slate-400 whitespace-nowrap">
-                  {timeAgo(lead.created_at)}
-                </span>
-              </Link>
-            ))}
-          </div>
+      <div className="bg-white rounded-xl border border-slate-200 mb-8">
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-700">
+            Opportunities
+          </h2>
+          <Link
+            href="/dashboard/opportunities"
+            className="text-xs font-medium text-teal-600 hover:text-teal-700 flex items-center gap-1"
+          >
+            View All
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
-      )}
+
+        {opportunities.length === 0 ? (
+          <div className="px-5 py-10">
+            <EmptyState
+              icon={<AlertTriangle className="w-6 h-6 text-slate-400" />}
+              title="No follow-up risk detected"
+              description="When conversations stall or requests sit too long without a booked outcome, they will appear here."
+            />
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {opportunities.slice(0, 5).map((opportunity) => {
+              const href = opportunity.conversation_id
+                ? `/dashboard/inbox/${opportunity.conversation_id}`
+                : opportunity.lead_id
+                  ? `/dashboard/leads/${opportunity.lead_id}`
+                  : opportunity.customer_key
+                    ? `/dashboard/customers/${opportunity.customer_key}`
+                    : "/dashboard/opportunities";
+
+              return (
+                <Link
+                  key={opportunity.id}
+                  href={href}
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                      opportunity.priority === "high"
+                        ? "bg-rose-50 text-rose-600"
+                        : "bg-amber-50 text-amber-600"
+                    }`}
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900">
+                      {opportunity.title}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                      {opportunity.customer_name} · {opportunity.detail}
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap">
+                    {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Recent Activity */}
       <div className="bg-white rounded-xl border border-slate-200 mb-8">
@@ -387,10 +540,12 @@ export default function DashboardPage() {
       </div>
 
       {/* All caught up */}
-      {leads.length > 0 && stats.new === 0 && (
+      {analytics.conversations_total > 0 &&
+        analytics.follow_up_needed_count === 0 &&
+        analytics.unresolved_count === 0 && (
         <div className="flex items-center justify-center gap-2 py-6 text-sm text-emerald-600">
           <CheckCircle2 className="w-4 h-4" />
-          You&apos;re all caught up! No new requests need attention.
+          You&apos;re all caught up. No unresolved requests currently need attention.
         </div>
       )}
     </div>

@@ -16,6 +16,8 @@ export interface Clinic {
   notification_email?: string;
   availability_enabled?: boolean;
   availability_sheet_tab?: string;
+  reminder_enabled?: boolean;
+  reminder_lead_hours?: number;
   onboarding_completed?: boolean;
   onboarding_step?: number;
   assistant_name?: string;
@@ -60,6 +62,15 @@ export interface Lead {
   reason_for_visit: string;
   preferred_datetime_text: string;
   status: LeadStatus;
+  appointment_status?: "request_open" | "confirmed" | "cancel_requested" | "reschedule_requested" | "cancelled" | "completed" | "no_show";
+  appointment_starts_at?: string | null;
+  appointment_ends_at?: string | null;
+  reminder_status?: "not_ready" | "ready" | "scheduled" | "sent";
+  reminder_scheduled_for?: string | null;
+  reminder_note?: string;
+  deposit_required?: boolean;
+  deposit_amount_cents?: number | null;
+  deposit_status?: "not_required" | "pending" | "paid" | "waived";
   source: string;
   notes: string;
   slot_row_index?: number;
@@ -85,6 +96,193 @@ export interface ConversationMessage {
   role: "user" | "assistant" | "system";
   content: string;
   created_at: string;
+}
+
+export interface InboxConversation {
+  id: string;
+  session_id: string;
+  customer_key?: string | null;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string;
+  channel: string;
+  lead_id?: string | null;
+  lead_status?: string | null;
+  derived_status: "open" | "needs_follow_up" | "booked" | "handled";
+  last_intent?: string | null;
+  summary?: string | null;
+  last_message_preview: string;
+  last_message_role?: string | null;
+  last_message_at?: string | null;
+  conversation_started_at?: string | null;
+  updated_at?: string | null;
+  requires_attention: boolean;
+  unlinked: boolean;
+}
+
+export interface ConversationDetail {
+  conversation: InboxConversation;
+  messages: ConversationMessage[];
+  lead: Lead | null;
+}
+
+export interface CustomerProfileSummary {
+  key: string;
+  name: string;
+  phone: string;
+  email: string;
+  conversation_count: number;
+  lead_count: number;
+  booked_count: number;
+  open_request_count: number;
+  last_interaction_at?: string | null;
+  latest_note: string;
+}
+
+export interface CustomerConversationSummary {
+  id: string;
+  derived_status: "open" | "needs_follow_up" | "booked" | "handled";
+  last_message_preview: string;
+  last_message_at?: string | null;
+  updated_at?: string | null;
+  lead_id?: string | null;
+}
+
+export interface CustomerProfileDetail extends CustomerProfileSummary {
+  recent_conversations: CustomerConversationSummary[];
+  recent_requests: Lead[];
+}
+
+export interface Opportunity {
+  id: string;
+  type: string;
+  title: string;
+  detail: string;
+  priority: "high" | "medium" | "low";
+  customer_key?: string | null;
+  customer_name: string;
+  occurred_at?: string | null;
+  conversation_id?: string | null;
+  lead_id?: string | null;
+  derived_status?: string | null;
+  follow_up_task_id?: string | null;
+  follow_up_task_status?: "open" | "snoozed" | "completed" | null;
+}
+
+export interface AnalyticsHourBucket {
+  hour: number;
+  label: string;
+  count: number;
+}
+
+export interface FrontdeskAnalytics {
+  conversations_total: number;
+  leads_created: number;
+  booked_requests: number;
+  unresolved_count: number;
+  follow_up_needed_count: number;
+  lead_capture_rate: number;
+  ai_resolution_estimate: number;
+  ai_resolution_estimate_label: string;
+  busiest_contact_hours: AnalyticsHourBucket[];
+}
+
+export interface FollowUpTask {
+  id: string;
+  source_key: string;
+  task_type: string;
+  status: "open" | "snoozed" | "completed";
+  priority: "high" | "medium" | "low";
+  title: string;
+  detail: string;
+  customer_key?: string | null;
+  customer_name: string;
+  lead_id?: string | null;
+  conversation_id?: string | null;
+  due_at?: string | null;
+  note: string;
+  last_action_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface OperationsLead {
+  lead_id: string;
+  patient_name: string;
+  patient_phone: string;
+  patient_email: string;
+  reason_for_visit: string;
+  preferred_datetime_text: string;
+  lead_status: LeadStatus;
+  appointment_status: "request_open" | "confirmed" | "cancel_requested" | "reschedule_requested" | "cancelled" | "completed" | "no_show";
+  appointment_starts_at?: string | null;
+  appointment_ends_at?: string | null;
+  reminder_status: "not_ready" | "ready" | "scheduled" | "sent";
+  reminder_scheduled_for?: string | null;
+  reminder_preview?: string | null;
+  reminder_ready: boolean;
+  deposit_required: boolean;
+  deposit_amount_cents?: number | null;
+  deposit_status: "not_required" | "pending" | "paid" | "waived";
+  updated_at?: string | null;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  lead_id?: string | null;
+  customer_key?: string | null;
+  patient_name: string;
+  patient_phone: string;
+  patient_email: string;
+  service_requested: string;
+  preferred_times: string;
+  notes: string;
+  status: "waiting" | "contacted" | "booked" | "closed";
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface DepositSummary {
+  required_count: number;
+  pending_count: number;
+  configured_count: number;
+  note: string;
+}
+
+export interface OperationsOverview {
+  reminder_enabled: boolean;
+  reminder_lead_hours: number;
+  reminder_candidates: OperationsLead[];
+  action_required_requests: OperationsLead[];
+  waitlist_entries: WaitlistEntry[];
+  deposit_summary: DepositSummary;
+}
+
+export interface TrainingKnowledgeSource {
+  id: string;
+  source_type: string;
+  title: string;
+  content: string;
+  status: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface TrainingReadinessItem {
+  key: string;
+  label: string;
+  configured: boolean;
+  detail: string;
+}
+
+export interface TrainingOverview {
+  clinic_name: string;
+  assistant_name: string;
+  knowledge_score: number;
+  knowledge_status: string;
+  readiness_items: TrainingReadinessItem[];
+  knowledge_gaps: string[];
+  custom_sources: TrainingKnowledgeSource[];
 }
 
 export interface AuthResponse {
