@@ -9,6 +9,8 @@ import type {
   BillingStatus,
   PlanInfo,
   ActivityEvent,
+  AppointmentRecord,
+  AppointmentDepositRequestResult,
   InboxConversation,
   ConversationDetail,
   CustomerProfileSummary,
@@ -17,13 +19,121 @@ import type {
   FrontdeskAnalytics,
   FollowUpTask,
   OperationsOverview,
+  ReminderPreview,
+  SystemReadiness,
+  AutoFollowUpRunResult,
   TrainingOverview,
   TrainingKnowledgeSource,
   WaitlistEntry,
+  ChannelReadiness,
+  CommunicationEvent,
+  CommunicationSendPassResult,
 } from "@/types";
 import { getPublicApiUrl } from "@/lib/api-url";
 
 import { createClient } from "@/utils/supabase/client";
+
+function isNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.message === "Not Found" || error.message === "Request failed: 404";
+}
+
+function normalizeAppointmentSource(source: string | undefined): AppointmentRecord["source"] {
+  if (
+    source === "web_chat" ||
+    source === "sms" ||
+    source === "whatsapp" ||
+    source === "missed_call" ||
+    source === "callback_request" ||
+    source === "manual"
+  ) {
+    return source;
+  }
+  return "manual";
+}
+
+function appointmentNeedsAttention(lead: Lead): boolean {
+  const appointmentStatus = lead.appointment_status || "request_open";
+  const reminderStatus = lead.reminder_status || "not_ready";
+  const depositStatus = lead.deposit_status || "not_required";
+  const appointmentStartsAt = lead.appointment_starts_at ? new Date(lead.appointment_starts_at) : null;
+  const now = new Date();
+  if (appointmentStatus === "cancel_requested" || appointmentStatus === "reschedule_requested" || appointmentStatus === "no_show") {
+    return true;
+  }
+  if (lead.deposit_required && !["paid", "waived", "not_required"].includes(depositStatus)) {
+    return true;
+  }
+  if (lead.status === "booked" && appointmentStatus === "confirmed" && reminderStatus !== "sent") {
+    return true;
+  }
+  if (lead.status === "booked" && appointmentStatus === "confirmed" && appointmentStartsAt && appointmentStartsAt < now) {
+    return true;
+  }
+  return false;
+}
+
+function matchesAppointmentView(lead: Lead, view: string): boolean {
+  const appointmentStatus = lead.appointment_status || "request_open";
+  const appointmentStartsAt = lead.appointment_starts_at ? new Date(lead.appointment_starts_at) : null;
+  const now = new Date();
+  if (view === "upcoming") {
+    return appointmentStatus === "confirmed" && appointmentStartsAt !== null && appointmentStartsAt >= now;
+  }
+  if (view === "attention") {
+    return appointmentNeedsAttention(lead);
+  }
+  if (view === "past") {
+    return appointmentStatus === "completed" || (appointmentStatus === "confirmed" && appointmentStartsAt !== null && appointmentStartsAt < now);
+  }
+  if (view === "cancelled") {
+    return appointmentStatus === "cancel_requested" || appointmentStatus === "reschedule_requested" || appointmentStatus === "cancelled" || appointmentStatus === "no_show";
+  }
+  return true;
+}
+
+function leadToAppointmentRecord(lead: Lead): AppointmentRecord {
+  const reminderReady =
+    lead.reminder_status === "ready" || lead.reminder_status === "scheduled" || lead.reminder_status === "sent";
+  return {
+    lead_id: lead.id,
+    customer_key: "",
+    thread_id: null,
+    patient_name: lead.patient_name,
+    patient_phone: lead.patient_phone,
+    patient_email: lead.patient_email,
+    reason_for_visit: lead.reason_for_visit,
+    preferred_datetime_text: lead.preferred_datetime_text,
+    source: normalizeAppointmentSource(lead.source),
+    lead_status: lead.status,
+    appointment_status: lead.appointment_status || "request_open",
+    appointment_starts_at: lead.appointment_starts_at || null,
+    appointment_ends_at: lead.appointment_ends_at || null,
+    reminder_status: lead.reminder_status || "not_ready",
+    reminder_scheduled_for: lead.reminder_scheduled_for || null,
+    reminder_ready: reminderReady,
+    reminder_blocked_reason: reminderReady ? "" : "Detailed reminder readiness is available after the appointments API is live on the backend.",
+    deposit_required: Boolean(lead.deposit_required),
+    deposit_amount_cents: lead.deposit_amount_cents ?? null,
+    deposit_status: lead.deposit_status || "not_required",
+    deposit_requested_at: lead.deposit_requested_at || null,
+    deposit_paid_at: lead.deposit_paid_at || null,
+    deposit_request_delivery_status: "",
+    deposit_request_delivery_reason: "",
+    follow_up_open: false,
+    follow_up_task_id: null,
+    notes: lead.notes || "",
+    updated_at: lead.updated_at || lead.created_at || null,
+  };
+}
+
+async function listAppointmentsFallback(view: string): Promise<AppointmentRecord[]> {
+  const leads = await api.leads.list();
+  return leads
+    .filter((lead) => lead.status === "booked" || (lead.appointment_status || "request_open") !== "request_open")
+    .filter((lead) => matchesAppointmentView(lead, view))
+    .map(leadToAppointmentRecord);
+}
 
 async function getToken(): Promise<string | null> {
   try {
@@ -264,6 +374,65 @@ export const api = {
       return request(`/frontdesk/conversations/${id}`);
     },
 
+    updateThreadControl(
+      id: string,
+      data: { manual_takeover: boolean }
+    ): Promise<{
+      conversation_id: string;
+      manual_takeover: boolean;
+      ai_auto_reply_enabled: boolean;
+      ai_auto_reply_ready: boolean;
+    }> {
+      return request(`/frontdesk/conversations/${id}/thread-control`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    convertConversationToLead(
+      id: string,
+      data: {
+        patient_name?: string;
+        patient_phone?: string;
+        patient_email?: string;
+        reason_for_visit?: string;
+        preferred_datetime_text?: string;
+        notes?: string;
+      } = {}
+    ): Promise<Lead> {
+      return request(`/frontdesk/conversations/${id}/convert-to-lead`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateThreadWorkflow(
+      id: string,
+      data: {
+        status: "contacted" | "booked" | "closed";
+        appointment_starts_at?: string;
+        appointment_ends_at?: string;
+        reason_for_visit?: string;
+        preferred_datetime_text?: string;
+        note?: string;
+      }
+    ): Promise<Lead> {
+      return request(`/frontdesk/conversations/${id}/workflow`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    createThreadNote(
+      id: string,
+      data: { note: string }
+    ): Promise<CommunicationEvent> {
+      return request(`/frontdesk/conversations/${id}/notes`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
     listCustomers(): Promise<CustomerProfileSummary[]> {
       return request("/frontdesk/customers");
     },
@@ -278,6 +447,12 @@ export const api = {
 
     listFollowUps(): Promise<FollowUpTask[]> {
       return request("/frontdesk/follow-ups");
+    },
+
+    runAutoFollowUps(): Promise<AutoFollowUpRunResult> {
+      return request("/frontdesk/follow-ups/auto-run", {
+        method: "POST",
+      });
     },
 
     createFollowUp(data: {
@@ -319,8 +494,171 @@ export const api = {
       return request("/frontdesk/analytics");
     },
 
+    listAppointments(view = "all"): Promise<AppointmentRecord[]> {
+      return request<AppointmentRecord[]>(`/frontdesk/appointments?view=${encodeURIComponent(view)}`).catch((error) => {
+        if (isNotFoundError(error)) {
+          return listAppointmentsFallback(view);
+        }
+        throw error;
+      });
+    },
+
+    updateAppointment(
+      leadId: string,
+      data: {
+        status?: "new" | "contacted" | "booked" | "closed";
+        appointment_status?: "request_open" | "confirmed" | "cancel_requested" | "reschedule_requested" | "cancelled" | "completed" | "no_show";
+        appointment_starts_at?: string | null;
+        appointment_ends_at?: string | null;
+        reason_for_visit?: string;
+        preferred_datetime_text?: string;
+        note?: string;
+      }
+    ): Promise<Lead> {
+      return request<Lead>(`/frontdesk/appointments/${leadId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }).catch((error) => {
+        if (isNotFoundError(error)) {
+          return api.leads.update(leadId, data);
+        }
+        throw error;
+      });
+    },
+
+    requestAppointmentDeposit(
+      leadId: string,
+      data: {
+        amount_cents: number;
+        send_sms?: boolean;
+      }
+    ): Promise<AppointmentDepositRequestResult> {
+      return request(`/frontdesk/appointments/${leadId}/deposit-request`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    markAppointmentDepositNotRequired(leadId: string): Promise<Lead> {
+      return request(`/frontdesk/appointments/${leadId}/deposit-not-required`, {
+        method: "POST",
+      });
+    },
+
     getOperations(): Promise<OperationsOverview> {
       return request("/frontdesk/operations");
+    },
+
+    getReminderPreview(): Promise<ReminderPreview[]> {
+      return request("/frontdesk/reminders/preview");
+    },
+
+    sendDueReminders(): Promise<CommunicationSendPassResult> {
+      return request("/frontdesk/reminders/send-due", {
+        method: "POST",
+      });
+    },
+
+    sendReminder(leadId: string): Promise<CommunicationEvent> {
+      return request(`/frontdesk/reminders/${leadId}/send`, {
+        method: "POST",
+      });
+    },
+
+    listChannels(): Promise<ChannelReadiness[]> {
+      return request("/frontdesk/channels");
+    },
+
+    getSystemReadiness(): Promise<SystemReadiness> {
+      return request("/frontdesk/system-readiness");
+    },
+
+    updateChannel(
+      channel: string,
+      data: {
+        provider?: string;
+        display_name?: string;
+        contact_value?: string;
+        automation_enabled?: boolean;
+        notes?: string;
+      }
+    ): Promise<ChannelReadiness> {
+      return request(`/frontdesk/channels/${channel}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    listCommunications(): Promise<CommunicationEvent[]> {
+      return request("/frontdesk/communications");
+    },
+
+    createCommunicationEvent(data: {
+      channel: "missed_call" | "callback_request";
+      customer_name?: string;
+      customer_phone?: string;
+      customer_email?: string;
+      summary?: string;
+      content?: string;
+      lead_id?: string | null;
+      conversation_id?: string | null;
+    }): Promise<CommunicationEvent> {
+      return request("/frontdesk/communications", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateCommunicationEvent(
+      id: string,
+      data: {
+        status?: "new" | "queued" | "attempted" | "sent" | "delivered" | "failed" | "skipped" | "completed" | "dismissed";
+        summary?: string;
+        content?: string;
+      }
+    ): Promise<CommunicationEvent> {
+      return request(`/frontdesk/communications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+
+    sendTextBack(id: string): Promise<CommunicationEvent> {
+      return request(`/frontdesk/communications/${id}/send-text-back`, {
+        method: "POST",
+      });
+    },
+
+    sendSms(data: {
+      customer_name?: string;
+      customer_phone: string;
+      customer_email?: string;
+      body: string;
+      lead_id?: string | null;
+      conversation_id?: string | null;
+      follow_up_task_id?: string | null;
+      source_event_id?: string | null;
+    }): Promise<CommunicationEvent> {
+      return request("/frontdesk/communications/send-sms", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    sendSuggestedReply(
+      id: string,
+      data: { body?: string } = {}
+    ): Promise<CommunicationEvent> {
+      return request(`/frontdesk/communications/${id}/suggested-reply/send`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    discardSuggestedReply(id: string): Promise<CommunicationEvent> {
+      return request(`/frontdesk/communications/${id}/suggested-reply/discard`, {
+        method: "POST",
+      });
     },
 
     updateLeadOperations(
@@ -333,7 +671,7 @@ export const api = {
         reminder_note?: string;
         deposit_required?: boolean;
         deposit_amount_cents?: number | null;
-        deposit_status?: "not_required" | "pending" | "paid" | "waived";
+        deposit_status?: "not_required" | "required" | "requested" | "paid" | "failed" | "expired" | "waived";
       }
     ): Promise<Lead> {
       return request(`/frontdesk/leads/${id}/operations`, {

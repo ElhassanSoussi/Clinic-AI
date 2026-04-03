@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Bot, Loader2 } from "lucide-react";
@@ -12,6 +12,10 @@ import { getSupabasePublicEnvError } from "@/lib/env";
 const OAuthButtons = dynamic(() => import("@/components/shared/OAuthButtons"), {
   ssr: false,
 });
+
+type RegisterFormSubmitEvent = Parameters<
+  NonNullable<ComponentProps<"form">["onSubmit"]>
+>[0];
 
 export default function RegisterPage() {
   const { loginWithOnboarding, setAuthenticatedUser } = useAuth();
@@ -54,7 +58,7 @@ export default function RegisterPage() {
   };
 
   async function submitRegistration(
-    e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]
+    e: RegisterFormSubmitEvent
   ) {
     e.preventDefault();
     setError("");
@@ -78,6 +82,13 @@ export default function RegisterPage() {
     try {
       const res = await api.auth.register(form);
 
+      if (!res.access_token) {
+        setError(
+          res.message || "Account created. Check your email to confirm your address before signing in."
+        );
+        return;
+      }
+
       if (selectedPlan) {
         setAuthenticatedUser(res);
         await startCheckoutForPlan(selectedPlan);
@@ -93,7 +104,7 @@ export default function RegisterPage() {
   }
 
   const handleSubmit = (
-    e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]
+    e: RegisterFormSubmitEvent
   ) => {
     void submitRegistration(e);
   };

@@ -201,8 +201,8 @@ export default function LandingPage() {
               },
               {
                 icon: <LayoutDashboard className="w-6 h-6" />,
-                title: "Inbox & Request Management",
-                desc: "Review patient conversations, open linked requests, and keep follow-up work from slipping through.",
+                title: "Inbox & Recovery Workflow",
+                desc: "Review patient conversations, track missed-call recovery, and handle SMS replies with either Clinic AI or your staff when Twilio is connected.",
               },
               {
                 icon: <Shield className="w-6 h-6" />,

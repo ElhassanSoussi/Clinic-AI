@@ -20,6 +20,53 @@ def _get_stripe():
     return stripe
 
 
+def stripe_ready_for_payments() -> tuple[bool, str]:
+    settings = get_settings()
+    if not settings.stripe_secret_key:
+        return False, "Stripe is not configured on the server yet."
+    if not settings.frontend_app_url:
+        return False, "The frontend app URL is not configured for Stripe checkout."
+    return True, ""
+
+
+def stripe_readiness_summary() -> dict[str, str | bool | list[str]]:
+    settings = get_settings()
+    missing: list[str] = []
+    partial: list[str] = []
+
+    if not settings.stripe_secret_key:
+        missing.append("STRIPE_SECRET_KEY")
+    if not settings.stripe_webhook_secret:
+        partial.append("STRIPE_WEBHOOK_SECRET")
+    if not settings.stripe_price_professional:
+        partial.append("STRIPE_PRICE_PROFESSIONAL")
+    if not settings.stripe_price_premium:
+        partial.append("STRIPE_PRICE_PREMIUM")
+    if not settings.frontend_app_url:
+        partial.append("FRONTEND_APP_URL")
+
+    if missing:
+        status = "missing"
+        summary = "Stripe billing is not configured yet."
+        detail = "Add the Stripe secret key before billing checkout or deposit requests can run."
+    elif partial:
+        status = "partially_configured"
+        summary = "Stripe is connected, but billing setup is incomplete."
+        detail = "Finish the remaining Stripe env values so checkout, webhooks, and deposit links all work predictably."
+    else:
+        status = "configured"
+        summary = "Stripe billing is configured."
+        detail = "Checkout, deposit requests, and webhook-driven payment state updates are ready to run."
+
+    return {
+        "configured": not missing and not partial,
+        "status": status,
+        "summary": summary,
+        "detail": detail,
+        "missing": missing + partial,
+    }
+
+
 def _get_price_id(plan_id: str) -> str:
     """Resolve the Stripe price ID for a given plan."""
     settings = get_settings()
@@ -54,6 +101,9 @@ def ensure_stripe_customer(clinic: dict) -> str:
 
 def create_checkout_session(clinic: dict, plan_id: str, success_url: str, cancel_url: str) -> str:
     """Create a Stripe Checkout session for upgrading to a paid plan."""
+    settings = get_settings()
+    if not settings.stripe_secret_key:
+        raise ValueError("Billing checkout is not configured on the server yet.")
     s = _get_stripe()
     price_id = _get_price_id(plan_id)
     if not price_id:
@@ -76,6 +126,9 @@ def create_checkout_session(clinic: dict, plan_id: str, success_url: str, cancel
 
 def create_portal_session(clinic: dict, return_url: str) -> str:
     """Create a Stripe Customer Portal session for managing billing."""
+    settings = get_settings()
+    if not settings.stripe_secret_key:
+        raise ValueError("Billing portal is not configured on the server yet.")
     s = _get_stripe()
     customer_id = ensure_stripe_customer(clinic)
 
@@ -87,8 +140,70 @@ def create_portal_session(clinic: dict, return_url: str) -> str:
     return session.url
 
 
+def create_deposit_checkout_session(
+    clinic: dict,
+    lead: dict,
+    amount_cents: int,
+    success_url: str,
+    cancel_url: str,
+) -> dict:
+    if amount_cents <= 0:
+        raise ValueError("Deposit amount must be greater than zero.")
+
+    ready, reason = stripe_ready_for_payments()
+    if not ready:
+        raise ValueError(reason)
+
+    s = _get_stripe()
+    session = s.checkout.Session.create(
+        mode="payment",
+        customer_email=lead.get("patient_email") or None,
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "kind": "appointment_deposit",
+            "clinic_id": clinic["id"],
+            "lead_id": lead["id"],
+            "deposit_amount_cents": str(amount_cents),
+        },
+        payment_intent_data={
+            "metadata": {
+                "kind": "appointment_deposit",
+                "clinic_id": clinic["id"],
+                "lead_id": lead["id"],
+                "deposit_amount_cents": str(amount_cents),
+            }
+        },
+        line_items=[
+            {
+                "quantity": 1,
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": amount_cents,
+                    "product_data": {
+                        "name": f"{clinic.get('name', 'Clinic')} appointment deposit",
+                        "description": lead.get("reason_for_visit") or "Appointment deposit request",
+                    },
+                },
+            }
+        ],
+    )
+    logger.info(f"Deposit checkout session created for clinic {clinic['id']} and lead {lead['id']}")
+    return {
+        "checkout_session_id": session.id,
+        "checkout_url": session.url,
+        "payment_intent_id": session.get("payment_intent") or "",
+        "payment_status": session.get("payment_status") or "",
+    }
+
+
 def handle_checkout_completed(session: dict):
     """Handle checkout.session.completed — link subscription to clinic."""
+    metadata = session.get("metadata", {}) or {}
+    if metadata.get("kind") == "appointment_deposit":
+        handle_deposit_checkout_completed(session)
+        return
+
     db = get_supabase()
     clinic_id = session.get("metadata", {}).get("clinic_id")
     plan_id = session.get("metadata", {}).get("plan_id", "professional")
@@ -109,6 +224,105 @@ def handle_checkout_completed(session: dict):
     }
     db.table("clinics").update(updates).eq("id", clinic_id).execute()
     logger.info(f"Checkout completed: clinic {clinic_id} → plan {plan_id}")
+
+
+def _update_lead_deposit_state(
+    *,
+    lead_id: str,
+    clinic_id: str,
+    deposit_status: str,
+    checkout_session_id: str = "",
+    payment_intent_id: str = "",
+    deposit_paid_at: str = "",
+) -> None:
+    updates = {
+        "deposit_required": deposit_status not in {"not_required", "waived"},
+        "deposit_status": deposit_status,
+    }
+    if checkout_session_id:
+        updates["deposit_checkout_session_id"] = checkout_session_id
+    if payment_intent_id:
+        updates["deposit_payment_intent_id"] = payment_intent_id
+    if deposit_paid_at:
+        updates["deposit_paid_at"] = deposit_paid_at
+    get_supabase().table("leads").update(updates).eq("clinic_id", clinic_id).eq("id", lead_id).execute()
+
+
+def handle_deposit_checkout_completed(session: dict):
+    metadata = session.get("metadata", {}) or {}
+    clinic_id = metadata.get("clinic_id")
+    lead_id = metadata.get("lead_id")
+    if not clinic_id or not lead_id:
+        logger.warning("deposit checkout.session.completed missing clinic_id or lead_id")
+        return
+
+    payment_status = session.get("payment_status") or ""
+    deposit_status = "paid" if payment_status == "paid" else "requested"
+    _update_lead_deposit_state(
+        clinic_id=clinic_id,
+        lead_id=lead_id,
+        deposit_status=deposit_status,
+        checkout_session_id=session.get("id", "") or "",
+        payment_intent_id=session.get("payment_intent", "") or "",
+        deposit_paid_at=datetime.now(timezone.utc).isoformat() if deposit_status == "paid" else "",
+    )
+    logger.info(f"Deposit checkout completed: clinic {clinic_id} lead {lead_id} → {deposit_status}")
+
+
+def handle_deposit_checkout_expired(session: dict):
+    metadata = session.get("metadata", {}) or {}
+    if metadata.get("kind") != "appointment_deposit":
+        return
+    clinic_id = metadata.get("clinic_id")
+    lead_id = metadata.get("lead_id")
+    if not clinic_id or not lead_id:
+        logger.warning("deposit checkout.session.expired missing clinic_id or lead_id")
+        return
+    _update_lead_deposit_state(
+        clinic_id=clinic_id,
+        lead_id=lead_id,
+        deposit_status="expired",
+        checkout_session_id=session.get("id", "") or "",
+        payment_intent_id=session.get("payment_intent", "") or "",
+    )
+    logger.info(f"Deposit checkout expired: clinic {clinic_id} lead {lead_id}")
+
+
+def handle_payment_intent_succeeded(payment_intent: dict):
+    metadata = payment_intent.get("metadata", {}) or {}
+    if metadata.get("kind") != "appointment_deposit":
+        return
+    clinic_id = metadata.get("clinic_id")
+    lead_id = metadata.get("lead_id")
+    if not clinic_id or not lead_id:
+        logger.warning("deposit payment_intent.succeeded missing clinic_id or lead_id")
+        return
+    _update_lead_deposit_state(
+        clinic_id=clinic_id,
+        lead_id=lead_id,
+        deposit_status="paid",
+        payment_intent_id=payment_intent.get("id", "") or "",
+        deposit_paid_at=datetime.now(timezone.utc).isoformat(),
+    )
+    logger.info(f"Deposit payment succeeded: clinic {clinic_id} lead {lead_id}")
+
+
+def handle_payment_intent_failed(payment_intent: dict):
+    metadata = payment_intent.get("metadata", {}) or {}
+    if metadata.get("kind") != "appointment_deposit":
+        return
+    clinic_id = metadata.get("clinic_id")
+    lead_id = metadata.get("lead_id")
+    if not clinic_id or not lead_id:
+        logger.warning("deposit payment_intent.payment_failed missing clinic_id or lead_id")
+        return
+    _update_lead_deposit_state(
+        clinic_id=clinic_id,
+        lead_id=lead_id,
+        deposit_status="failed",
+        payment_intent_id=payment_intent.get("id", "") or "",
+    )
+    logger.info(f"Deposit payment failed: clinic {clinic_id} lead {lead_id}")
 
 
 def handle_subscription_updated(subscription: dict):

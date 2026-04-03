@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     stripe_price_premium: str = ""
     admin_secret: str = ""
     frontend_app_url: str = ""
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""
+    twilio_messaging_service_sid: str = ""
 
     model_config = SettingsConfigDict(
         env_file=str(Path(__file__).resolve().parents[1] / ".env"),
@@ -50,6 +54,56 @@ class Settings(BaseSettings):
             for origin in self.cors_origins.split(",")
             if origin.strip()
         ]
+
+    @property
+    def development_cors_origin_regex(self) -> str | None:
+        if self.is_production:
+            return None
+        return (
+            r"^https?://("
+            r"localhost|127\.0\.0\.1|"
+            r"10\.\d+\.\d+\.\d+|"
+            r"192\.168\.\d+\.\d+|"
+            r"172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+"
+            r"):(1201|3000)$"
+        )
+
+    @property
+    def google_credentials_configured(self) -> bool:
+        return bool(
+            self.google_credentials_b64
+            or self.google_credentials_json
+            or self.google_credentials_path
+        )
+
+    @property
+    def resend_sender_configured(self) -> bool:
+        return bool(self.resend_from_email or self.resend_from_domain)
+
+    @property
+    def resend_configured(self) -> bool:
+        return bool(self.resend_api_key and self.resend_sender_configured)
+
+    @property
+    def stripe_billing_configured(self) -> bool:
+        return bool(
+            self.stripe_secret_key
+            and self.stripe_webhook_secret
+            and self.stripe_price_professional
+            and self.stripe_price_premium
+        )
+
+    @property
+    def twilio_configured(self) -> bool:
+        return bool(
+            self.twilio_account_sid
+            and self.twilio_auth_token
+            and (self.twilio_from_number or self.twilio_messaging_service_sid)
+        )
+
+    @property
+    def admin_tools_configured(self) -> bool:
+        return bool(self.admin_secret)
 
 
 def _is_loopback_host(hostname: str) -> bool:
@@ -95,16 +149,11 @@ def _validate_settings(settings: Settings) -> None:
         logger.error(str(exc))
         sys.exit(1)
 
-    if not any([settings.google_credentials_b64, settings.google_credentials_json, settings.google_credentials_path]):
+    if not settings.google_credentials_configured:
         logger.warning("No Google credentials set — Sheets sync disabled")
 
     if settings.is_production:
         required_production_vars = {
-            "STRIPE_SECRET_KEY": settings.stripe_secret_key,
-            "STRIPE_WEBHOOK_SECRET": settings.stripe_webhook_secret,
-            "RESEND_API_KEY": settings.resend_api_key,
-            "RESEND_FROM_EMAIL": settings.resend_from_email,
-            "FRONTEND_APP_URL": settings.frontend_app_url,
             "CORS_ORIGINS": settings.cors_origins,
             "ENVIRONMENT": settings.environment,
         }
@@ -114,6 +163,25 @@ def _validate_settings(settings: Settings) -> None:
                 "Missing required production environment variables: " + ", ".join(missing)
             )
             sys.exit(1)
+
+        if not settings.frontend_app_url:
+            logger.warning("FRONTEND_APP_URL is not set — Stripe deposit links and dashboard email links will stay disabled.")
+        if not settings.stripe_secret_key:
+            logger.warning("STRIPE_SECRET_KEY is not set — billing checkout and deposit requests will stay disabled.")
+        if settings.stripe_secret_key and not settings.stripe_webhook_secret:
+            logger.warning("STRIPE_WEBHOOK_SECRET is not set — Stripe payment status updates will not be confirmed.")
+        if settings.stripe_secret_key and (
+            not settings.stripe_price_professional or not settings.stripe_price_premium
+        ):
+            logger.warning("Stripe price IDs are incomplete — paid plan checkout will stay disabled for one or more plans.")
+        if not settings.resend_api_key:
+            logger.warning("RESEND_API_KEY is not set — email notifications will stay disabled.")
+        elif not settings.resend_sender_configured:
+            logger.warning("Resend sender identity is not configured — email notifications will stay disabled.")
+        if not settings.twilio_configured:
+            logger.warning("Twilio is not fully configured — SMS sending and inbound replies will stay disabled.")
+        if not settings.admin_tools_configured:
+            logger.warning("ADMIN_SECRET is not set — protected admin routes will stay unavailable.")
 
 
 @lru_cache

@@ -22,7 +22,7 @@ async def create_bypassed_user():
         
         # 2. Tell Supabase Auth to forcefully create an account 
         # (Using the service role key bypasses rate limits)
-        email = "admin@clinic.local"
+        email = "admin@clinicai.com"
         password = "password123"
         print(f"Creating user account for {email}...")
         

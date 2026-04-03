@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS clinics (
     availability_sheet_tab TEXT DEFAULT 'Availability',
     reminder_enabled BOOLEAN DEFAULT false,
     reminder_lead_hours INTEGER DEFAULT 24,
+    follow_up_automation_enabled BOOLEAN DEFAULT false,
+    follow_up_delay_minutes INTEGER DEFAULT 45,
     onboarding_completed BOOLEAN DEFAULT false,
     onboarding_step INTEGER DEFAULT 0,
     assistant_name TEXT DEFAULT '',
@@ -79,7 +81,11 @@ CREATE TABLE IF NOT EXISTS leads (
     reminder_note TEXT DEFAULT '',
     deposit_required BOOLEAN DEFAULT false,
     deposit_amount_cents INTEGER,
-    deposit_status TEXT DEFAULT 'not_required' CHECK (deposit_status IN ('not_required', 'pending', 'paid', 'waived')),
+    deposit_status TEXT DEFAULT 'not_required' CHECK (deposit_status IN ('not_required', 'required', 'requested', 'paid', 'failed', 'expired', 'waived')),
+    deposit_checkout_session_id TEXT DEFAULT '',
+    deposit_payment_intent_id TEXT DEFAULT '',
+    deposit_requested_at TIMESTAMPTZ,
+    deposit_paid_at TIMESTAMPTZ,
     source TEXT DEFAULT 'web_chat',
     notes TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -92,6 +98,8 @@ CREATE TABLE IF NOT EXISTS conversations (
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
     session_id TEXT NOT NULL,
     lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+    channel TEXT DEFAULT 'web_chat',
+    manual_takeover BOOLEAN DEFAULT false,
     last_intent TEXT DEFAULT 'general',
     summary TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -131,6 +139,7 @@ CREATE TABLE IF NOT EXISTS follow_up_tasks (
     customer_name TEXT DEFAULT '',
     lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
     conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+    auto_generated BOOLEAN DEFAULT false,
     due_at TIMESTAMPTZ DEFAULT now(),
     note TEXT DEFAULT '',
     last_action_at TIMESTAMPTZ DEFAULT now(),
@@ -155,6 +164,52 @@ CREATE TABLE IF NOT EXISTS waitlist_entries (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS channel_connections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
+    channel TEXT NOT NULL CHECK (channel IN ('web_chat', 'sms', 'whatsapp', 'missed_call', 'callback_request', 'manual')),
+    provider TEXT DEFAULT '',
+    connection_status TEXT NOT NULL DEFAULT 'not_connected' CHECK (connection_status IN ('not_connected', 'ready_for_setup', 'connected')),
+    display_name TEXT DEFAULT '',
+    contact_value TEXT DEFAULT '',
+    automation_enabled BOOLEAN DEFAULT false,
+    notes TEXT DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (clinic_id, channel)
+);
+
+CREATE TABLE IF NOT EXISTS communication_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE NOT NULL,
+    thread_key TEXT DEFAULT '',
+    channel TEXT NOT NULL CHECK (channel IN ('web_chat', 'sms', 'whatsapp', 'missed_call', 'callback_request', 'manual')),
+    direction TEXT NOT NULL DEFAULT 'inbound' CHECK (direction IN ('inbound', 'outbound', 'internal')),
+    event_type TEXT NOT NULL CHECK (event_type IN ('message', 'missed_call', 'text_back', 'callback_request', 'note', 'reminder', 'deposit_request')),
+    status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'queued', 'attempted', 'sent', 'delivered', 'failed', 'skipped', 'completed', 'dismissed')),
+    customer_key TEXT DEFAULT '',
+    customer_name TEXT DEFAULT '',
+    customer_phone TEXT DEFAULT '',
+    customer_email TEXT DEFAULT '',
+    summary TEXT DEFAULT '',
+    content TEXT DEFAULT '',
+    lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+    conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+    waitlist_entry_id UUID REFERENCES waitlist_entries(id) ON DELETE SET NULL,
+    follow_up_task_id UUID REFERENCES follow_up_tasks(id) ON DELETE SET NULL,
+    provider TEXT DEFAULT '',
+    external_id TEXT DEFAULT '',
+    provider_message_id TEXT DEFAULT '',
+    failure_reason TEXT DEFAULT '',
+    skipped_reason TEXT DEFAULT '',
+    sent_at TIMESTAMPTZ,
+    delivered_at TIMESTAMPTZ,
+    payload JSONB DEFAULT '{}'::jsonb,
+    occurred_at TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_clinic ON users(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_leads_clinic ON leads(clinic_id);
@@ -162,10 +217,15 @@ CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(clinic_id, status);
 CREATE INDEX IF NOT EXISTS idx_leads_appointment_status ON leads(clinic_id, appointment_status);
 CREATE INDEX IF NOT EXISTS idx_conversations_clinic ON conversations(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_conversations_session ON conversations(session_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_channel ON conversations(clinic_id, channel);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON conversation_messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_knowledge_sources_clinic ON knowledge_sources(clinic_id);
 CREATE INDEX IF NOT EXISTS idx_follow_up_tasks_clinic_status ON follow_up_tasks(clinic_id, status, due_at);
 CREATE INDEX IF NOT EXISTS idx_waitlist_entries_clinic_status ON waitlist_entries(clinic_id, status, created_at);
+CREATE INDEX IF NOT EXISTS idx_channel_connections_clinic_channel ON channel_connections(clinic_id, channel);
+CREATE INDEX IF NOT EXISTS idx_communication_events_clinic_occurred ON communication_events(clinic_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_communication_events_clinic_channel_status ON communication_events(clinic_id, channel, status);
+CREATE INDEX IF NOT EXISTS idx_communication_events_clinic_thread_key ON communication_events(clinic_id, thread_key, occurred_at DESC);
 
 -- Updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -205,6 +265,14 @@ DROP TRIGGER IF EXISTS tr_waitlist_entries_updated_at ON waitlist_entries;
 CREATE TRIGGER tr_waitlist_entries_updated_at BEFORE UPDATE ON waitlist_entries
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS tr_channel_connections_updated_at ON channel_connections;
+CREATE TRIGGER tr_channel_connections_updated_at BEFORE UPDATE ON channel_connections
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS tr_communication_events_updated_at ON communication_events;
+CREATE TRIGGER tr_communication_events_updated_at BEFORE UPDATE ON communication_events
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- Row Level Security (enable but keep permissive for service-role access)
 ALTER TABLE clinics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -214,6 +282,8 @@ ALTER TABLE conversation_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE knowledge_sources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follow_up_tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE waitlist_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE channel_connections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE communication_events ENABLE ROW LEVEL SECURITY;
 
 -- Service-role policies (backend uses service key, bypasses RLS automatically)
 -- Public read for clinics by slug (for chat widget)
@@ -280,6 +350,18 @@ CREATE POLICY "Authenticated users can manage own clinic waitlist entries"
     USING (true)
     WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Authenticated users can manage own clinic channel connections" ON channel_connections;
+CREATE POLICY "Authenticated users can manage own clinic channel connections"
+    ON channel_connections FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Authenticated users can manage own clinic communication events" ON communication_events;
+CREATE POLICY "Authenticated users can manage own clinic communication events"
+    ON communication_events FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
 DROP POLICY IF EXISTS "Authenticated users can update own clinic leads" ON leads;
 CREATE POLICY "Authenticated users can update own clinic leads"
     ON leads FOR UPDATE
@@ -317,6 +399,9 @@ ALTER TABLE IF EXISTS leads
 ALTER TABLE IF EXISTS leads
     ADD COLUMN IF NOT EXISTS slot_source TEXT DEFAULT 'manual';
 
+ALTER TABLE IF EXISTS conversations
+    ADD COLUMN IF NOT EXISTS channel TEXT DEFAULT 'web_chat';
+
 ALTER TABLE IF EXISTS clinics
     ADD COLUMN IF NOT EXISTS reminder_enabled BOOLEAN DEFAULT false;
 
@@ -349,6 +434,37 @@ ALTER TABLE IF EXISTS leads
 
 ALTER TABLE IF EXISTS leads
     ADD COLUMN IF NOT EXISTS deposit_status TEXT DEFAULT 'not_required';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_checkout_session_id TEXT DEFAULT '';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_payment_intent_id TEXT DEFAULT '';
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_requested_at TIMESTAMPTZ;
+
+ALTER TABLE IF EXISTS leads
+    ADD COLUMN IF NOT EXISTS deposit_paid_at TIMESTAMPTZ;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'leads_deposit_status_check'
+    ) THEN
+        ALTER TABLE leads
+            DROP CONSTRAINT leads_deposit_status_check;
+    END IF;
+END
+$$;
+
+UPDATE leads
+SET deposit_status = CASE
+    WHEN deposit_status = 'pending' THEN 'requested'
+    WHEN deposit_status IN ('not_required', 'required', 'requested', 'paid', 'failed', 'expired', 'waived') THEN deposit_status
+    ELSE 'not_required'
+END
+WHERE COALESCE(deposit_status, '') NOT IN ('not_required', 'required', 'requested', 'paid', 'failed', 'expired', 'waived');
 
 DO $$
 BEGIN
@@ -388,17 +504,39 @@ BEGIN
 END
 $$;
 
+ALTER TABLE leads
+    ADD CONSTRAINT leads_deposit_status_check
+    CHECK (deposit_status IN ('not_required', 'required', 'requested', 'paid', 'failed', 'expired', 'waived'));
+
 DO $$
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'leads_deposit_status_check'
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'communication_events_event_type_check'
     ) THEN
-        ALTER TABLE leads
-        ADD CONSTRAINT leads_deposit_status_check
-        CHECK (deposit_status IN ('not_required', 'pending', 'paid', 'waived'));
+        ALTER TABLE communication_events
+            DROP CONSTRAINT communication_events_event_type_check;
     END IF;
 END
 $$;
+
+ALTER TABLE communication_events
+    ADD CONSTRAINT communication_events_event_type_check
+    CHECK (event_type IN ('message', 'missed_call', 'text_back', 'callback_request', 'note', 'reminder', 'deposit_request'));
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'communication_events_status_check'
+    ) THEN
+        ALTER TABLE communication_events
+            DROP CONSTRAINT communication_events_status_check;
+    END IF;
+END
+$$;
+
+ALTER TABLE communication_events
+    ADD CONSTRAINT communication_events_status_check
+    CHECK (status IN ('new', 'queued', 'attempted', 'sent', 'delivered', 'failed', 'skipped', 'completed', 'dismissed'));
 
 -- Events: lightweight tracking for demo engagement
 CREATE TABLE IF NOT EXISTS events (

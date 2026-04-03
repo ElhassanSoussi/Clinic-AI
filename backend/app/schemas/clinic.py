@@ -23,6 +23,8 @@ class ClinicResponse(BaseModel):
     availability_sheet_tab: Optional[str] = "Availability"
     reminder_enabled: Optional[bool] = False
     reminder_lead_hours: Optional[int] = 24
+    follow_up_automation_enabled: Optional[bool] = False
+    follow_up_delay_minutes: Optional[int] = 45
     onboarding_completed: Optional[bool] = False
     onboarding_step: Optional[int] = 0
     assistant_name: Optional[str] = ""
@@ -59,6 +61,8 @@ class ClinicUpdateRequest(BaseModel):
     availability_sheet_tab: Optional[str] = None
     reminder_enabled: Optional[bool] = None
     reminder_lead_hours: Optional[int] = None
+    follow_up_automation_enabled: Optional[bool] = None
+    follow_up_delay_minutes: Optional[int] = None
     onboarding_completed: Optional[bool] = None
     onboarding_step: Optional[int] = None
     assistant_name: Optional[str] = None

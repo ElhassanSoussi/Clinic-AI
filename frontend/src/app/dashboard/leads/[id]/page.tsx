@@ -67,6 +67,10 @@ const QUICK_ACTIONS: {
 function sourceLabel(source: string, slotSource?: string): string {
   if (slotSource === "availability") return "Availability Slot";
   if (source === "web_chat") return "AI Chat";
+  if (source === "sms") return "SMS";
+  if (source === "whatsapp") return "WhatsApp";
+  if (source === "missed_call") return "Missed Call";
+  if (source === "callback_request") return "Callback Request";
   if (source === "manual") return "Manual Entry";
   return source;
 }

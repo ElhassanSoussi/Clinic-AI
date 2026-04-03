@@ -137,6 +137,12 @@ def detect_intent(message: str) -> str:
     text = message.lower().strip()
     if any(kw in text for kw in BOOKING_INTENT_KEYWORDS):
         return "booking"
+    if looks_like_custom_datetime(text) and any(
+        kw in text for kw in ["come", "appointment", "schedule", "visit", "available"]
+    ):
+        return "booking"
+    if text in {"where", "when", "hours", "price", "cost", "address", "location"}:
+        return "faq"
     if any(kw in text for kw in FAQ_INTENT_KEYWORDS):
         return "faq"
     return "unclear"
@@ -804,6 +810,7 @@ class ChatContext:
     booking_data: BookingData
     available_slots: list
     slot_options: list[dict]
+    source: str = "web_chat"
 
 
 @dataclass
@@ -960,7 +967,7 @@ def save_confirmed_lead(context: ChatContext) -> ChatTransition:
         "preferred_datetime_text": context.booking_data.datetime,
         "slot_row_index": context.booking_data.slot_row_index,
         "slot_source": context.booking_data.slot_source,
-        "source": "web_chat",
+        "source": context.source,
         "notes": "Selected from availability" if context.booking_data.slot_source == "availability" else "Manual preferred time",
     }
     lead = create_lead(context.clinic_id, intake_data)
@@ -1267,7 +1274,13 @@ def enforce_chat_access(clinic: dict, session_id: str) -> Optional[dict]:
     return None
 
 
-def load_or_create_conversation(db: Any, clinic_id: str, session_id: str) -> dict:
+def load_or_create_conversation(
+    db: Any,
+    clinic_id: str,
+    session_id: str,
+    *,
+    channel: str = "web_chat",
+) -> dict:
     conv_result = (
         db.table("conversations")
         .select("*")
@@ -1278,11 +1291,25 @@ def load_or_create_conversation(db: Any, clinic_id: str, session_id: str) -> dic
         .execute()
     )
     if conv_result.data:
-        return conv_result.data[0]
+        conversation = conv_result.data[0]
+        if conversation.get("channel") != channel:
+            try:
+                updated = (
+                    db.table("conversations")
+                    .update({"channel": channel})
+                    .eq("id", conversation["id"])
+                    .execute()
+                )
+                if updated.data:
+                    return updated.data[0]
+            except Exception:
+                pass
+        return conversation
 
     conv_insert = db.table("conversations").insert({
         "clinic_id": clinic_id,
         "session_id": session_id,
+        "channel": channel,
         "last_intent": "general",
         "summary": "",
     }).execute()
@@ -1348,24 +1375,20 @@ def persist_assistant_message(db: Any, conversation_id: str, ai_reply: str) -> N
     }).execute()
 
 
-# Main orchestrator
-
-async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> dict:
-    db = get_supabase()
-
-    clinic, clinic_error = load_clinic_for_chat(db, clinic_slug, session_id)
-    if clinic_error:
-        return clinic_error
-
+async def process_conversation_turn(
+    db: Any,
+    clinic: dict,
+    conversation: dict,
+    session_id: str,
+    user_message: str,
+    *,
+    source: str = "web_chat",
+    persist_state: bool = True,
+    persist_assistant: bool = True,
+) -> dict:
     clinic_id = clinic["id"]
-
-    access_error = enforce_chat_access(clinic, session_id)
-    if access_error:
-        return access_error
-
-    conversation = load_or_create_conversation(db, clinic_id, session_id)
-
     conversation_id = conversation["id"]
+
     persist_user_message(db, conversation_id, user_message)
 
     state, booking_data = load_state(conversation)
@@ -1394,6 +1417,7 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
             booking_data=booking_data,
             available_slots=available_slots,
             slot_options=slot_options,
+            source=source,
         )
         transition = resolve_chat_transition(state, context)
         next_state = transition.next_state
@@ -1408,18 +1432,57 @@ async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> 
         system_prompt = build_fallback_prompt(clinic)
         response_override = reply_fallback(clinic)
 
-    # ── Generate AI response ─────────────────────────────────────────────────
     ai_reply = await generate_chat_reply(clinic, system_prompt, messages, response_override)
 
-    # ── Persist updated state ────────────────────────────────────────────────
-    save_state(db, conversation_id, next_state, booking_data)
-
-    # ── Save assistant message ───────────────────────────────────────────────
-    persist_assistant_message(db, conversation_id, ai_reply)
+    if persist_state:
+        save_state(db, conversation_id, next_state, booking_data)
+    if persist_assistant:
+        persist_assistant_message(db, conversation_id, ai_reply)
 
     logger.info(
         f"Session {session_id[:8]} | {state} → {next_state} | "
         f"Lead: {lead_id or 'none'}"
     )
 
-    return build_chat_result(ai_reply, session_id, next_state, lead_created, lead_id)
+    return {
+        "reply": ai_reply,
+        "session_id": session_id,
+        "intent": next_state,
+        "lead_created": lead_created,
+        "lead_id": lead_id,
+        "conversation_id": conversation_id,
+        "booking_data": booking_data.to_dict(),
+    }
+
+
+# Main orchestrator
+
+async def process_chat(clinic_slug: str, session_id: str, user_message: str) -> dict:
+    db = get_supabase()
+
+    clinic, clinic_error = load_clinic_for_chat(db, clinic_slug, session_id)
+    if clinic_error:
+        return clinic_error
+
+    clinic_id = clinic["id"]
+
+    access_error = enforce_chat_access(clinic, session_id)
+    if access_error:
+        return access_error
+
+    conversation = load_or_create_conversation(db, clinic_id, session_id, channel="web_chat")
+    result = await process_conversation_turn(
+        db,
+        clinic,
+        conversation,
+        session_id,
+        user_message,
+        source="web_chat",
+    )
+    return build_chat_result(
+        result["reply"],
+        session_id,
+        result["intent"],
+        result["lead_created"],
+        result["lead_id"],
+    )

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 PORT=1201
 PASS=0
 FAIL=0
@@ -44,6 +45,7 @@ test_route GET "/dashboard/settings" "200" "Settings page (client-side auth)"
 test_route GET "/dashboard/billing" "200" "Billing page (client-side auth)"
 
 # 404 for non-existent routes
+echo "INFO  Expected behavior checks (non-200 by design):"
 test_route GET "/this-does-not-exist" "404" "404 for unknown route"
 
 # Static assets
@@ -54,6 +56,8 @@ echo ""
 echo "Results: $PASS passed, $FAIL failed out of $((PASS+FAIL))"
 if [ "$FAIL" -eq 0 ]; then
   echo "ALL TESTS PASSED"
+  exit 0
 else
   echo "SOME TESTS FAILED"
+  exit 1
 fi

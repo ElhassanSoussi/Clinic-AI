@@ -2,40 +2,65 @@
 
 ## Pre-Deploy
 
-- [ ] **Backend env vars** — All required vars set in hosting platform:
+- [ ] **Core backend env vars**:
   - `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `OPENAI_API_KEY`
   - `ENVIRONMENT=production`
-  - `CORS_ORIGINS=https://your-frontend-domain.com`
+  - `CORS_ORIGINS=https://clinicaireply.com`
 - [ ] **Frontend env vars** — Set in Vercel/hosting:
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api`
+  - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
+- [ ] **Stripe env vars** if billing or deposits are live:
+  - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+  - `STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_PREMIUM`
+  - `FRONTEND_APP_URL=https://clinicaireply.com`
+- [ ] **Twilio env vars** if SMS is live:
+  - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`
+  - `TWILIO_FROM_NUMBER` or `TWILIO_MESSAGING_SERVICE_SID`
+- [ ] **Resend env vars** if email notifications are live:
+  - `RESEND_API_KEY`
+  - `RESEND_FROM_EMAIL` or `RESEND_FROM_DOMAIN`
+- [ ] **Google Sheets credentials** if sheet sync is live:
+  - `GOOGLE_CREDENTIALS_B64` or `GOOGLE_CREDENTIALS_JSON` or `GOOGLE_CREDENTIALS_PATH`
+- [ ] **Admin secret** only if protected admin routes are intentionally enabled:
+  - `ADMIN_SECRET`
 - [ ] **Supabase** — Schema applied, Auth configured:
   - Email/password enabled
-  - Site URL = production frontend URL
-  - Redirect URLs include production frontend
+  - Site URL = `https://clinicaireply.com`
+  - Redirect URLs include `https://clinicaireply.com/auth/callback`
+- [ ] **Migrations applied**:
+  - `20260331_add_channel_foundation.sql`
+  - `20260331_add_frontdesk_automation.sql`
+  - `20260331_add_sms_delivery.sql`
+  - `20260331_add_sms_threads.sql`
+  - `20260331_add_sms_ai_takeover.sql`
+  - `20260402_add_appointment_deposits.sql`
 - [ ] **Stripe** — Live mode configured:
   - Live secret key set (`sk_live_...`)
   - Two price IDs created (Professional, Premium)
-  - Webhook endpoint added: `https://backend/api/billing/webhook`
+  - Webhook endpoint added: `https://api.clinicaireply.com/api/billing/webhook`
   - Webhook events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
   - Webhook signing secret set
 - [ ] **Email** — Resend domain verified, API key set
 - [ ] **Google Sheets** (if used) — `GOOGLE_CREDENTIALS_B64` set with base64 JSON
 - [ ] **Frontend builds** — `npm run build` succeeds locally with production env vars
 - [ ] **No localhost** — Grep for `localhost` in production env vars (should be zero)
+- [ ] **Readiness surface reviewed** — Operations → System readiness shows only the expected blocked or partial items
 
 ## Deploy
 
 1. Push backend to hosting platform (Railway/Render/Fly.io)
 2. Push frontend to Vercel
 3. Wait for both to be live
+4. Attach `api.clinicaireply.com` to the backend service
+5. Attach `clinicaireply.com` to the Vercel frontend
 
 ## Post-Deploy Verification
 
 ### Core Health
 
-- [ ] `GET https://backend/api/health` → `{"status": "healthy"}`
-- [ ] Frontend loads at production URL (no blank screen)
+- [ ] `GET https://api.clinicaireply.com/api/health` → `{"status": "ok"}`
+- [ ] `GET https://api.clinicaireply.com/api/frontdesk/system-readiness` reflects the expected launch configuration
+- [ ] Frontend loads at `https://clinicaireply.com` (no blank screen)
 - [ ] `/api/docs` returns 404 (disabled in production)
 
 ### Auth Flow
@@ -44,6 +69,7 @@
 - [ ] Verify email received (if enabled)
 - [ ] Login works, redirects to dashboard
 - [ ] Logout works, redirects to login
+- [ ] Repeated failed sign-up attempts show a clear rate-limit or confirmation message and do not leave a fake session behind
 
 ### Onboarding
 
@@ -60,7 +86,7 @@
 
 ### Widget Embed
 
-- [ ] Add `<script src="https://frontend/widget.js" data-clinic="YOUR_SLUG"></script>` to a test page
+- [ ] Add `<script src="https://clinicaireply.com/widget.js" data-clinic="YOUR_SLUG"></script>` to a test page
 - [ ] Widget appears in bottom-right corner
 - [ ] Chat works through the widget
 
@@ -72,6 +98,8 @@
 - [ ] Complete payment with **real card** (small amount test)
 - [ ] Webhook fires → plan updates in dashboard
 - [ ] Cancel subscription → downgrade works
+- [ ] Deposit request for a booked appointment creates a real checkout link
+- [ ] Deposit status remains pending until Stripe confirms payment
 
 ### Google Sheets Sync
 
@@ -81,6 +109,31 @@
 ### Email Notifications
 
 - [ ] New lead triggers email notification
+
+### SMS
+
+- [ ] Inbound SMS reaches the inbox
+- [ ] AI/manual thread behavior matches clinic settings
+- [ ] Outbound delivery is allowed by Twilio account and carrier rules
+- [ ] Twilio inbound webhook points to `https://api.clinicaireply.com/api/frontdesk/communications/twilio/inbound`
+
+## Smoke Script
+
+Run:
+
+```bash
+cd backend
+CLINIC_AI_BACKEND_URL=https://api.clinicaireply.com/api \
+CLINIC_AI_FRONTEND_URL=https://clinicaireply.com \
+CLINIC_AI_SMOKE_EMAIL=owner@clinic.com \
+CLINIC_AI_SMOKE_PASSWORD='your-password' \
+python scripts/launch_readiness_smoke.py
+```
+
+Known external limitations to account for:
+
+- Supabase sign-up rate limits can temporarily block repeated registration attempts
+- US Twilio delivery can be blocked by trial restrictions, sender registration, or carrier filtering
 
 ## Demo Flow (for presentations)
 

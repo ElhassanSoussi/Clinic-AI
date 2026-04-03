@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   title: "Clinic AI Front Desk",
   description:
     "AI-powered front desk assistant for clinics. Reduce missed calls, capture appointment requests, and manage patient inquiries.",
+  metadataBase: new URL("https://clinicaireply.com"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Clinic AI Front Desk",
+    description:
+      "AI-powered front desk assistant for clinics. Reduce missed calls, capture appointment requests, and manage patient inquiries.",
+    url: "https://clinicaireply.com",
+    siteName: "Clinic AI",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

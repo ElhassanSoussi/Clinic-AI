@@ -63,6 +63,10 @@ DEMO_CLINIC = {
     "primary_color": "#0d9488",
     "notifications_enabled": True,
     "notification_email": "hello@brightsmile.demo",
+    "reminder_enabled": True,
+    "reminder_lead_hours": 24,
+    "follow_up_automation_enabled": True,
+    "follow_up_delay_minutes": 45,
 }
 
 # Upsert clinic
@@ -107,7 +111,7 @@ DEMO_LEADS = [
         "reminder_scheduled_for": ahead(days=1, hours=14),
         "deposit_required": True,
         "deposit_amount_cents": 2500,
-        "deposit_status": "pending",
+        "deposit_status": "requested",
         "source": "web_chat",
         "notes": "Confirmed for Tue 10 AM. Has Delta Dental insurance.",
         "created_at": ago(days=6, hours=3),
@@ -284,6 +288,74 @@ for conv_data in DEMO_CONVERSATIONS:
     db.table("conversations").insert(conv_data).execute()
 
 print(f"Seeded {len(DEMO_CONVERSATIONS)} demo conversations")
+
+try:
+    db.table("channel_connections").delete().eq("clinic_id", clinic_id).execute()
+    db.table("channel_connections").insert([
+        {
+            "clinic_id": clinic_id,
+            "channel": "web_chat",
+            "provider": "Built-in widget",
+            "connection_status": "connected",
+            "display_name": "Website chat widget",
+            "contact_value": "",
+            "automation_enabled": True,
+            "notes": "",
+        },
+        {
+            "clinic_id": clinic_id,
+            "channel": "missed_call",
+            "provider": "Phone recovery workflow",
+            "connection_status": "ready_for_setup",
+            "display_name": "Missed-call recovery",
+            "contact_value": DEMO_CLINIC["phone"],
+            "automation_enabled": False,
+            "notes": "Phone line is ready to connect once a provider is chosen.",
+        },
+        {
+            "clinic_id": clinic_id,
+            "channel": "callback_request",
+            "provider": "Front desk workflow",
+            "connection_status": "ready_for_setup",
+            "display_name": "Callback requests",
+            "contact_value": DEMO_CLINIC["phone"],
+            "automation_enabled": False,
+            "notes": "Callbacks are logged manually today and ready for future automation.",
+        },
+    ]).execute()
+
+    db.table("communication_events").delete().eq("clinic_id", clinic_id).execute()
+    db.table("communication_events").insert([
+        {
+            "clinic_id": clinic_id,
+            "channel": "missed_call",
+            "direction": "inbound",
+            "event_type": "missed_call",
+            "status": "new",
+            "customer_name": "Nina Brooks",
+            "customer_phone": "(555) 410-1122",
+            "customer_email": "",
+            "summary": "Missed an inbound call right after lunch. Patient likely needs a text-back.",
+            "content": "Call lasted 14 seconds and no voicemail was left.",
+            "occurred_at": ago(hours=6),
+        },
+        {
+            "clinic_id": clinic_id,
+            "channel": "callback_request",
+            "direction": "inbound",
+            "event_type": "callback_request",
+            "status": "queued",
+            "customer_name": "Trevor Miles",
+            "customer_phone": "(555) 250-1188",
+            "customer_email": "trevor.miles@email.com",
+            "summary": "Patient asked for a callback about whitening options.",
+            "content": "Best after 4 PM today.",
+            "occurred_at": ago(hours=3),
+        },
+    ]).execute()
+    print("Seeded channel readiness and communication events")
+except Exception:
+    print("Skipped channel readiness seed — latest channel migration is not applied yet")
 
 # Update monthly_leads_used to match
 db.table("clinics").update({"monthly_leads_used": len(DEMO_LEADS)}).eq("id", clinic_id).execute()

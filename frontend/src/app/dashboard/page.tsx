@@ -28,6 +28,7 @@ import type {
   Clinic,
   BillingStatus,
   ActivityEvent,
+  AppointmentRecord,
   FrontdeskAnalytics,
   Opportunity,
 } from "@/types";
@@ -43,6 +44,14 @@ function settingsHref(section?: string | null): string {
   return `/dashboard/settings?section=${encodeURIComponent(section)}`;
 }
 
+function formatMoney(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [firstLead] = useState(
@@ -55,6 +64,8 @@ export default function DashboardPage() {
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [analytics, setAnalytics] = useState<FrontdeskAnalytics | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<AppointmentRecord[]>([]);
+  const [attentionAppointments, setAttentionAppointments] = useState<AppointmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showFirstLeadSuccess, setShowFirstLeadSuccess] = useState(false);
@@ -63,18 +74,39 @@ export default function DashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const [clinicData, billingData, activityData, analyticsData, opportunitiesData] = await Promise.all([
+      const optional = async <T,>(loader: Promise<T>, fallback: T): Promise<T> => {
+        try {
+          return await loader;
+        } catch {
+          return fallback;
+        }
+      };
+
+      const [
+        clinicData,
+        analyticsData,
+        billingData,
+        activityData,
+        opportunitiesData,
+        upcomingAppointmentsData,
+        attentionAppointmentsData,
+      ] = await Promise.all([
         api.clinics.getMyClinic(),
-        api.billing.getStatus(),
-        api.activity.list(8),
         api.frontdesk.getAnalytics(),
-        api.frontdesk.listOpportunities(),
+        optional(api.billing.getStatus(), null),
+        optional(api.activity.list(8), []),
+        optional(api.frontdesk.listOpportunities(), []),
+        optional(api.frontdesk.listAppointments("upcoming"), []),
+        optional(api.frontdesk.listAppointments("attention"), []),
       ]);
+
       setClinic(clinicData);
+      setAnalytics(analyticsData);
       setBilling(billingData);
       setActivity(activityData);
-      setAnalytics(analyticsData);
       setOpportunities(opportunitiesData);
+      setUpcomingAppointments(upcomingAppointmentsData);
+      setAttentionAppointments(attentionAppointmentsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load dashboard");
     } finally {
@@ -162,13 +194,6 @@ export default function DashboardPage() {
       bg: "bg-slate-100",
     },
     {
-      label: "Leads Captured",
-      value: analytics.leads_created,
-      icon: Users,
-      color: "text-blue-700",
-      bg: "bg-blue-50",
-    },
-    {
       label: "Booked Requests",
       value: analytics.booked_requests,
       icon: CheckCircle2,
@@ -176,28 +201,70 @@ export default function DashboardPage() {
       bg: "bg-emerald-50",
     },
     {
-      label: "Follow-Up Needed",
-      value: analytics.follow_up_needed_count,
+      label: "Potential Lost Patients",
+      value: analytics.potential_lost_patients,
       icon: Clock,
       color: "text-amber-700",
       bg: "bg-amber-50",
+    },
+    {
+      label: "Recovered Opportunities",
+      value: analytics.recovered_opportunities,
+      icon: Users,
+      color: "text-blue-700",
+      bg: "bg-blue-50",
     },
   ];
 
   const performanceCards = [
     {
-      label: "Conversation Capture Rate",
-      value: `${analytics.lead_capture_rate}%`,
+      label: "Estimated Value Recovered",
+      value: formatMoney(analytics.estimated_value_recovered_cents),
       icon: TrendingUp,
       color: "text-teal-700",
       bg: "bg-teal-50",
     },
     {
-      label: "AI Resolution Estimate",
-      value: `${analytics.ai_resolution_estimate}%`,
+      label: "AI Auto-handled",
+      value: analytics.ai_auto_handled_count,
       icon: BrainCircuit,
       color: "text-violet-700",
       bg: "bg-violet-50",
+    },
+    {
+      label: "Human Review Required",
+      value: analytics.human_review_required_count,
+      icon: AlertTriangle,
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+    },
+    {
+      label: "Suggested Replies Sent",
+      value: analytics.suggested_replies_sent_count,
+      icon: MessageSquare,
+      color: "text-blue-700",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "Deposits Requested",
+      value: analytics.deposits_requested_count,
+      icon: ArrowRightLeft,
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+    },
+    {
+      label: "Deposits Paid",
+      value: analytics.deposits_paid_count,
+      icon: CheckCircle2,
+      color: "text-emerald-700",
+      bg: "bg-emerald-50",
+    },
+    {
+      label: "Waiting on Deposit",
+      value: analytics.appointments_waiting_on_deposit_count,
+      icon: AlertTriangle,
+      color: "text-rose-700",
+      bg: "bg-rose-50",
     },
   ];
 
@@ -265,6 +332,56 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">
+              Upcoming Appointments
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-teal-700" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-slate-900">{upcomingAppointments.length}</p>
+          <p className="text-sm text-slate-500 mt-2">
+            Confirmed bookings currently scheduled in Clinic AI.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">
+              Needs Booking Attention
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-amber-700" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-slate-900">{attentionAppointments.length}</p>
+          <p className="text-sm text-slate-500 mt-2">
+            Reschedules, cancellations, reminder prep, and follow-up items waiting on staff.
+          </p>
+        </div>
+
+        <Link
+          href="/dashboard/appointments"
+          className="bg-white rounded-xl border border-slate-200 p-5 hover:border-teal-200 hover:bg-teal-50/40 transition-colors"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-500">
+              Appointments Workspace
+            </span>
+            <ArrowRight className="w-4 h-4 text-slate-400" />
+          </div>
+          <p className="text-lg font-semibold text-slate-900">
+            Manage booked requests in one operational view
+          </p>
+          <p className="text-sm text-slate-500 mt-2">
+            Review timing, reminder readiness, and booking lifecycle without implying external calendar sync.
+          </p>
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6 mb-8">
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center justify-between gap-4 mb-4">
@@ -309,8 +426,13 @@ export default function DashboardPage() {
               Estimate note
             </p>
             <p className="text-sm text-slate-600 mt-1">
-              {analytics.ai_resolution_estimate_label}
+              {analytics.estimated_value_recovered_label}
             </p>
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-500">
+              <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
+              <span>Blocked for review: {analytics.blocked_for_review_count}</span>
+              <span>AI resolution estimate: {analytics.ai_resolution_estimate}%</span>
+            </div>
           </div>
         </div>
 

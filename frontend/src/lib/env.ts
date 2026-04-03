@@ -82,7 +82,7 @@ export function getPublicApiEnv(): string {
   if (value) return value;
 
   throw new FrontendEnvError(
-    "Missing NEXT_PUBLIC_API_URL. Set it to your deployed backend API URL, for example https://your-backend.onrender.com/api."
+    "Missing NEXT_PUBLIC_API_URL. Set it to your backend API URL, for example https://api.clinicaireply.com/api."
   );
 }
 

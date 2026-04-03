@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -21,12 +21,21 @@ class LeadResponse(BaseModel):
     deposit_required: Optional[bool] = False
     deposit_amount_cents: Optional[int] = None
     deposit_status: Optional[str] = None
+    deposit_requested_at: Optional[datetime] = None
+    deposit_paid_at: Optional[datetime] = None
     source: str
     notes: str
     slot_row_index: Optional[int] = None
     slot_source: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+    @field_validator("deposit_status", mode="before")
+    @classmethod
+    def normalize_deposit_status(cls, value: Optional[str]) -> Optional[str]:
+        if value == "pending":
+            return "requested"
+        return value
 
 
 class LeadUpdateRequest(BaseModel):
@@ -40,12 +49,21 @@ class LeadUpdateRequest(BaseModel):
     deposit_required: Optional[bool] = None
     deposit_amount_cents: Optional[int] = None
     deposit_status: Optional[str] = None
+    deposit_requested_at: Optional[datetime] = None
+    deposit_paid_at: Optional[datetime] = None
     notes: Optional[str] = None
     patient_name: Optional[str] = None
     patient_phone: Optional[str] = None
     patient_email: Optional[str] = None
     reason_for_visit: Optional[str] = None
     preferred_datetime_text: Optional[str] = None
+
+    @field_validator("deposit_status", mode="before")
+    @classmethod
+    def normalize_deposit_status(cls, value: Optional[str]) -> Optional[str]:
+        if value == "pending":
+            return "requested"
+        return value
 
 
 class LeadCreateRequest(BaseModel):
@@ -65,5 +83,14 @@ class LeadCreateRequest(BaseModel):
     deposit_required: Optional[bool] = None
     deposit_amount_cents: Optional[int] = None
     deposit_status: Optional[str] = None
+    deposit_requested_at: Optional[datetime] = None
+    deposit_paid_at: Optional[datetime] = None
     slot_row_index: Optional[int] = None
     slot_source: Optional[str] = None
+
+    @field_validator("deposit_status", mode="before")
+    @classmethod
+    def normalize_deposit_status(cls, value: Optional[str]) -> Optional[str]:
+        if value == "pending":
+            return "requested"
+        return value

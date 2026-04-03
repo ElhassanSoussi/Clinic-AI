@@ -21,6 +21,8 @@ class AuthResponse(BaseModel):
     full_name: str
     clinic_id: str
     clinic_slug: str
+    requires_email_confirmation: bool = False
+    message: str = ""
 
 
 class UpdateProfileRequest(BaseModel):

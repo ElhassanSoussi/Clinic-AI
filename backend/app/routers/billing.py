@@ -13,6 +13,9 @@ from app.services.billing_service import (
     create_checkout_session,
     create_portal_session,
     handle_checkout_completed,
+    handle_deposit_checkout_expired,
+    handle_payment_intent_failed,
+    handle_payment_intent_succeeded,
     handle_subscription_updated,
     handle_subscription_deleted,
     handle_invoice_paid,
@@ -156,11 +159,14 @@ async def stripe_webhook(request: Request):
 
     handlers = {
         "checkout.session.completed": handle_checkout_completed,
+        "checkout.session.expired": handle_deposit_checkout_expired,
         "customer.subscription.created": handle_subscription_updated,
         "customer.subscription.updated": handle_subscription_updated,
         "customer.subscription.deleted": handle_subscription_deleted,
         "invoice.paid": handle_invoice_paid,
         "invoice.payment_failed": handle_invoice_payment_failed,
+        "payment_intent.succeeded": handle_payment_intent_succeeded,
+        "payment_intent.payment_failed": handle_payment_intent_failed,
     }
 
     handler = handlers.get(event_type)

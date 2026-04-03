@@ -26,8 +26,24 @@ function redirectToLoginWithError(
   return response;
 }
 
+function getRequestOrigin(request: NextRequest): string {
+  const requestUrl = new URL(request.url);
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = request.headers.get("host");
+  const resolvedHost = forwardedHost || host;
+
+  if (resolvedHost) {
+    const protocol = forwardedProto || (requestUrl.protocol === "https:" ? "https" : "http");
+    return `${protocol}://${resolvedHost}`;
+  }
+
+  return requestUrl.origin;
+}
+
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const origin = getRequestOrigin(request);
   const code = searchParams.get("code");
   const next = normalizeNextPath(searchParams.get("next"));
   const error = searchParams.get("error");

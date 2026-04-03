@@ -9,7 +9,7 @@ import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import type { FollowUpTask, Opportunity } from "@/types";
+import type { Clinic, FollowUpTask, Opportunity } from "@/types";
 
 function opportunityHref(opportunity: Opportunity): string | null {
   if (opportunity.conversation_id) {
@@ -58,16 +58,23 @@ function taskStatusClass(status: FollowUpTask["status"]): string {
 }
 
 export default function OpportunitiesPage() {
+  const [clinic, setClinic] = useState<Clinic | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [followUps, setFollowUps] = useState<FollowUpTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState("");
+  const [savingAutomation, setSavingAutomation] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
+      const clinicData = await api.clinics.getMyClinic();
+      setClinic(clinicData);
+      if (clinicData.follow_up_automation_enabled) {
+        await api.frontdesk.runAutoFollowUps();
+      }
       const [opportunityData, followUpData] = await Promise.all([
         api.frontdesk.listOpportunities(),
         api.frontdesk.listFollowUps(),
@@ -136,6 +143,21 @@ export default function OpportunitiesPage() {
     }
   };
 
+  const toggleAutomation = async (enabled: boolean) => {
+    setSavingAutomation(true);
+    try {
+      const updatedClinic = await api.clinics.updateMyClinic({
+        follow_up_automation_enabled: enabled,
+      });
+      setClinic(updatedClinic);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update automation settings");
+    } finally {
+      setSavingAutomation(false);
+    }
+  };
+
   if (loading) return <LoadingState message="Loading opportunities..." />;
   if (error && opportunities.length === 0 && followUps.length === 0) {
     return <ErrorState message={error} onRetry={loadData} />;
@@ -146,7 +168,7 @@ export default function OpportunitiesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Opportunities</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Work the follow-up queue, triage stalled requests, and keep abandoned conversations from turning into missed revenue.
+          Work the follow-up queue, triage stalled requests, and keep abandoned conversations or missed-call recovery work from turning into missed revenue.
         </p>
       </div>
 
@@ -155,6 +177,27 @@ export default function OpportunitiesPage() {
           {error}
         </div>
       )}
+
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">Auto follow-up</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              When enabled, the front desk creates follow-up tasks from stalled conversations and aging new requests using your clinic settings.
+            </p>
+          </div>
+          <label className="inline-flex items-center gap-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={Boolean(clinic?.follow_up_automation_enabled)}
+              onChange={(event) => toggleAutomation(event.target.checked)}
+              disabled={savingAutomation}
+              className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            />
+            {savingAutomation ? "Saving..." : "Enable auto follow-up"}
+          </label>
+        </div>
+      </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
         <div className="flex items-center justify-between gap-4 mb-4">
@@ -192,6 +235,11 @@ export default function OpportunitiesPage() {
                         <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${taskStatusClass(task.status)}`}>
                           {task.status === "snoozed" ? "Snoozed" : "Queued"}
                         </span>
+                        {task.auto_generated && (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-violet-50 text-violet-700 border-violet-200">
+                            Auto-generated
+                          </span>
+                        )}
                         <span className="text-xs text-slate-500">{task.customer_name}</span>
                       </div>
 

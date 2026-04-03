@@ -20,6 +20,7 @@ import {
   BrainCircuit,
   AlertTriangle,
   CalendarClock,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -30,6 +31,7 @@ const sidebarNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
+  { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/dashboard/customers", label: "Customers", icon: UserCircle },
   { href: "/dashboard/opportunities", label: "Opportunities", icon: AlertTriangle },
   { href: "/dashboard/operations", label: "Operations", icon: CalendarClock },

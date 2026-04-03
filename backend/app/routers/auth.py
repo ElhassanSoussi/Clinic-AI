@@ -56,6 +56,55 @@ def get_user_profile(db: object, user_id: object) -> object:
     )
 
 
+def get_session_access_token(db: object, email: str, password: str) -> str:
+    try:
+        sign_in_response = db.auth.sign_in_with_password({
+            "email": email,
+            "password": password,
+        })
+    except Exception:
+        return ""
+
+    session = getattr(sign_in_response, "session", None)
+    access_token = getattr(session, "access_token", "")
+    return cast(str, access_token or "")
+
+
+def _normalized_auth_error(exc: Exception, *, action: str) -> tuple[int, str]:
+    message = str(exc).strip()
+    lower = message.lower()
+
+    if "rate limit" in lower:
+        return (
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many sign-up attempts right now. Please wait a minute and try again.",
+        )
+    if "user already registered" in lower or "already been registered" in lower:
+        return (
+            status.HTTP_400_BAD_REQUEST,
+            "An account with this email already exists. Try signing in instead.",
+        )
+    if "email not confirmed" in lower:
+        return (
+            status.HTTP_403_FORBIDDEN,
+            "Check your email to confirm your address before signing in.",
+        )
+    if "invalid login credentials" in lower:
+        return (
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid email or password.",
+        )
+    if action == "register":
+        return (
+            status.HTTP_400_BAD_REQUEST,
+            f"Registration failed: {message}",
+        )
+    return (
+        status.HTTP_401_UNAUTHORIZED,
+        "Invalid email or password.",
+    )
+
+
 @router.post("/register", response_model=AuthResponse)
 async def register(req: RegisterRequest):
     db = get_supabase()
@@ -66,9 +115,10 @@ async def register(req: RegisterRequest):
         })
     except Exception as e:
         logger.error(f"Supabase auth sign_up error: {e}")
+        status_code, detail = _normalized_auth_error(e, action="register")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Registration failed: {str(e)}",
+            status_code=status_code,
+            detail=detail,
         )
 
     if not auth_response.user:
@@ -116,6 +166,8 @@ async def register(req: RegisterRequest):
         )
 
     access_token = auth_response.session.access_token if auth_response.session else ""
+    if not access_token:
+        access_token = get_session_access_token(db, req.email, req.password)
 
     logger.info(f"Registered user {user_id} with clinic {clinic['id']}")
 
@@ -126,6 +178,12 @@ async def register(req: RegisterRequest):
         full_name=req.full_name,
         clinic_id=clinic["id"],
         clinic_slug=slug,
+        requires_email_confirmation=not bool(access_token),
+        message=(
+            "Account created. Check your email to confirm your address before signing in."
+            if not access_token
+            else ""
+        ),
     )
 
 
@@ -139,9 +197,10 @@ async def login(req: LoginRequest):
         })
     except Exception as e:
         logger.error(f"Login error: {e}")
+        status_code, detail = _normalized_auth_error(e, action="login")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
+            status_code=status_code,
+            detail=detail,
         )
 
     if not auth_response.user or not auth_response.session:
@@ -172,6 +231,8 @@ async def login(req: LoginRequest):
         full_name=user["full_name"],
         clinic_id=user["clinic_id"],
         clinic_slug=clinic.get("slug", ""),
+        requires_email_confirmation=False,
+        message="",
     )
 
 

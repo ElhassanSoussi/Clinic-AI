@@ -46,7 +46,13 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
         if (stored && token) {
           try {
-            setUser(JSON.parse(stored));
+            const parsed = JSON.parse(stored) as AuthResponse;
+            if (token.trim() && parsed.access_token.trim()) {
+              setUser(parsed);
+            } else {
+              localStorage.removeItem("auth_user");
+              localStorage.removeItem("access_token");
+            }
           } catch {
             localStorage.removeItem("auth_user");
             localStorage.removeItem("access_token");
@@ -61,6 +67,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, []);
 
   const setAuthenticatedUser = useCallback((data: AuthResponse) => {
+    if (!data.access_token.trim()) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("auth_user");
+      setUser(null);
+      return;
+    }
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("auth_user", JSON.stringify(data));
     setUser(data);

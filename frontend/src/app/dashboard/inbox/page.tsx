@@ -14,8 +14,8 @@ import { timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { ChannelBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
-import type { InboxConversation } from "@/types";
+import { ChannelBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
+import type { ChannelType, InboxConversation } from "@/types";
 
 const STATUS_FILTERS: {
   value: "all" | "open" | "needs_follow_up" | "booked" | "handled";
@@ -35,6 +35,7 @@ export default function InboxPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
+  const [channelFilter, setChannelFilter] = useState<"all" | ChannelType>("all");
 
   const loadInbox = useCallback(async () => {
     setLoading(true);
@@ -58,15 +59,17 @@ export default function InboxPage() {
     return threads.filter((thread) => {
       const matchesStatus =
         statusFilter === "all" || thread.derived_status === statusFilter;
+      const matchesChannel =
+        channelFilter === "all" || thread.channel === channelFilter;
       const matchesSearch =
         !needle ||
         thread.customer_name.toLowerCase().includes(needle) ||
         thread.customer_phone.includes(needle) ||
         thread.customer_email.toLowerCase().includes(needle) ||
         thread.last_message_preview.toLowerCase().includes(needle);
-      return matchesStatus && matchesSearch;
+      return matchesStatus && matchesChannel && matchesSearch;
     });
-  }, [search, statusFilter, threads]);
+  }, [channelFilter, search, statusFilter, threads]);
 
   const counts = useMemo(
     () => ({
@@ -78,6 +81,20 @@ export default function InboxPage() {
     }),
     [threads]
   );
+
+  const channelCounts = useMemo(() => {
+    const values: Record<string, number> = { all: threads.length };
+    for (const thread of threads) {
+      values[thread.channel] = (values[thread.channel] ?? 0) + 1;
+    }
+    return values;
+  }, [threads]);
+
+  const channelOptions = useMemo(() => {
+    const channels = Array.from(new Set(threads.map((thread) => thread.channel))) as ChannelType[];
+    channels.sort((left, right) => getChannelConfig(left).label.localeCompare(getChannelConfig(right).label));
+    return channels;
+  }, [threads]);
 
   if (loading) return <LoadingState message="Loading conversations..." />;
   if (error) return <ErrorState message={error} onRetry={loadInbox} />;
@@ -162,6 +179,42 @@ export default function InboxPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        <button
+          onClick={() => setChannelFilter("all")}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            channelFilter === "all"
+              ? "bg-slate-900 text-white"
+              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          All channels
+          <span className={`ml-2 text-xs ${channelFilter === "all" ? "text-white/80" : "text-slate-400"}`}>
+            {channelCounts.all}
+          </span>
+        </button>
+        {channelOptions.map((channel) => {
+          const active = channelFilter === channel;
+          const config = getChannelConfig(channel);
+          return (
+            <button
+              key={channel}
+              onClick={() => setChannelFilter(channel)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                active
+                  ? config.className
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {config.label}
+              <span className={`ml-2 text-xs ${active ? "opacity-80" : "text-slate-400"}`}>
+                {channelCounts[channel] ?? 0}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {filtered.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-xl">
           <EmptyState
@@ -169,8 +222,10 @@ export default function InboxPage() {
             title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
             description={
               threads.length === 0
-                ? "Once patients start chatting with your assistant, the inbox will show active threads, linked requests, and follow-up risk."
-                : "Try adjusting the search or status filter to see more conversations."
+                ? "Once patient threads start coming in, the inbox will show web chat today and other channels as they are connected."
+                : channelFilter === "all"
+                  ? "Try adjusting the search or status filter to see more conversations."
+                  : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match the current filters.`
             }
           />
         </div>
@@ -188,7 +243,7 @@ export default function InboxPage() {
                     <p className="text-sm font-semibold text-slate-900">
                       {thread.customer_name}
                     </p>
-                    <ChannelBadge channel={thread.channel} />
+                    <ChannelBadge channel={thread.channel} withIcon />
                     <FrontdeskStatusBadge status={thread.derived_status} />
                     {thread.unlinked && (
                       <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border bg-rose-50 text-rose-700 border-rose-200">
@@ -215,6 +270,11 @@ export default function InboxPage() {
                     )}
                     {thread.last_message_role && (
                       <span className="capitalize">{thread.last_message_role} replied last</span>
+                    )}
+                    {thread.thread_type === "event" && (
+                      <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                        Recovery thread
+                      </span>
                     )}
                   </div>
                 </div>
