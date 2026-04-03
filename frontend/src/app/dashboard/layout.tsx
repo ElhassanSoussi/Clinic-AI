@@ -165,21 +165,20 @@ export default function DashboardLayout({
   }, [isAuthenticated, onboardingChecked]);
 
   useEffect(() => {
-    if (isAuthenticated && onboardingChecked) {
-      const timeoutId = globalThis.setTimeout(() => {
+    if (isAuthenticated) {
+      globalThis.queueMicrotask(() => {
         void fetchNewLeadCount();
         void fetchBilling();
         void fetchClinic();
-      }, 0);
+      });
       const interval = globalThis.setInterval(() => {
         void fetchNewLeadCount();
       }, 60000);
       return () => {
-        globalThis.clearTimeout(timeoutId);
         globalThis.clearInterval(interval);
       };
     }
-  }, [isAuthenticated, onboardingChecked, fetchNewLeadCount, fetchBilling, fetchClinic]);
+  }, [isAuthenticated, fetchNewLeadCount, fetchBilling, fetchClinic]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -224,7 +223,7 @@ export default function DashboardLayout({
     }
   }, [showSetupFlow, router]);
 
-  if (isLoading || !onboardingChecked || showSetupFlow) {
+  if (isLoading || showSetupFlow) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />

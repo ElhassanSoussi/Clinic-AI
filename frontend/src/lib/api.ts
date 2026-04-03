@@ -33,6 +33,8 @@ import { getPublicApiUrl } from "@/lib/api-url";
 
 import { createClient } from "@/utils/supabase/client";
 
+let accessTokenPromise: Promise<string | null> | null = null;
+
 function isNotFoundError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
   return error.message === "Not Found" || error.message === "Request failed: 404";
@@ -142,12 +144,19 @@ async function getToken(): Promise<string | null> {
     if (storedToken) {
       return storedToken;
     }
+    if (accessTokenPromise) return accessTokenPromise;
 
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
+    accessTokenPromise = (async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    })();
+
+    return await accessTokenPromise;
   } catch {
     return null;
+  } finally {
+    accessTokenPromise = null;
   }
 }
 

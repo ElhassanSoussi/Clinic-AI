@@ -39,31 +39,27 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();
 
   useEffect(() => {
-    const timeoutId = globalThis.setTimeout(() => {
-      if (globalThis.window !== undefined) {
-        const stored = localStorage.getItem("auth_user");
-        const token = localStorage.getItem("access_token");
+    if (globalThis.window !== undefined) {
+      const stored = localStorage.getItem("auth_user");
+      const token = localStorage.getItem("access_token");
 
-        if (stored && token) {
-          try {
-            const parsed = JSON.parse(stored) as AuthResponse;
-            if (token.trim() && parsed.access_token.trim()) {
-              setUser(parsed);
-            } else {
-              localStorage.removeItem("auth_user");
-              localStorage.removeItem("access_token");
-            }
-          } catch {
+      if (stored && token) {
+        try {
+          const parsed = JSON.parse(stored) as AuthResponse;
+          if (token.trim() && parsed.access_token.trim()) {
+            globalThis.queueMicrotask(() => setUser(parsed));
+          } else {
             localStorage.removeItem("auth_user");
             localStorage.removeItem("access_token");
           }
+        } catch {
+          localStorage.removeItem("auth_user");
+          localStorage.removeItem("access_token");
         }
       }
+    }
 
-      setIsLoading(false);
-    }, 0);
-
-    return () => globalThis.clearTimeout(timeoutId);
+    globalThis.queueMicrotask(() => setIsLoading(false));
   }, []);
 
   const setAuthenticatedUser = useCallback((data: AuthResponse) => {
