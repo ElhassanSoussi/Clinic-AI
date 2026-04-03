@@ -566,7 +566,7 @@ export default function DashboardPage() {
                 <Link
                   key={opportunity.id}
                   href={href}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
                 >
                   <div
                     className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
@@ -585,7 +585,7 @@ export default function DashboardPage() {
                       {opportunity.customer_name} · {opportunity.detail}
                     </p>
                   </div>
-                  <span className="text-xs text-slate-400 whitespace-nowrap">
+                  <span className="text-xs text-slate-400 whitespace-nowrap self-start sm:self-auto">
                     {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
                   </span>
                 </Link>
@@ -624,7 +624,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={`${event.type}-${event.resource_id}-${i}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3 hover:bg-slate-50/50 transition-colors"
                 >
                   <div className={`w-7 h-7 rounded-lg ${config.bg} flex items-center justify-center shrink-0`}>
                     <Icon className={`w-3.5 h-3.5 ${config.color}`} />
@@ -646,7 +646,7 @@ export default function DashboardPage() {
                       {event.detail}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}>
                       {config.label}
                     </span>

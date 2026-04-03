@@ -21,6 +21,8 @@ import {
   AlertTriangle,
   CalendarClock,
   CalendarDays,
+  Menu,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -102,6 +104,7 @@ export default function DashboardLayout({
   const [newLeadCount, setNewLeadCount] = useState(0);
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [goLiveModal, setGoLiveModal] = useState(false);
   const [goLiveLoading, setGoLiveLoading] = useState(false);
@@ -190,6 +193,15 @@ export default function DashboardLayout({
   }, [menuOpen]);
 
   useEffect(() => {
+    if (!sidebarOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     if (!menuOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
@@ -236,141 +248,203 @@ export default function DashboardLayout({
     openSettingsPage,
   );
 
+  const activeNavItem =
+    sidebarNav.find(
+      (item) => pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
+    ) ?? null;
+
+  const sidebarContent = (
+    <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+      {sidebarNav.map((item) => {
+        const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+              isActive ? "bg-teal-50 text-teal-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <item.icon className="w-4.5 h-4.5" />
+            {item.label}
+            {item.label === "Leads" && newLeadCount > 0 && (
+              <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500 text-white font-semibold min-w-5 text-center">
+                {newLeadCount}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+
+      {user?.clinic_slug && (
+        <Link
+          href={`/chat/${user.clinic_slug}`}
+          target="_blank"
+          onClick={() => setSidebarOpen(false)}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+        >
+          <MessageSquare className="w-4.5 h-4.5" />
+          Patient Chat
+          <ExternalLink className="w-3.5 h-3.5 ml-auto text-slate-400" />
+        </Link>
+      )}
+    </nav>
+  );
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full">
+      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200 flex-col fixed inset-y-0 left-0">
         <div className="h-14 px-5 flex items-center gap-2.5 border-b border-slate-100">
           <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <span className="font-semibold text-slate-900">Clinic AI</span>
         </div>
-
-        <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
-          {sidebarNav.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                  isActive ? "bg-teal-50 text-teal-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <item.icon className="w-4.5 h-4.5" />
-                {item.label}
-                {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500 text-white font-semibold min-w-5 text-center">
-                    {newLeadCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-
-          {user?.clinic_slug && (
-            <Link
-              href={`/chat/${user.clinic_slug}`}
-              target="_blank"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-            >
-              <MessageSquare className="w-4.5 h-4.5" />
-              Patient Chat
-              <ExternalLink className="w-3.5 h-3.5 ml-auto text-slate-400" />
-            </Link>
-          )}
-        </nav>
+        {sidebarContent}
       </aside>
 
-      <div className="flex-1 ml-64 flex flex-col h-screen">
-        <header className="shrink-0 h-14 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center justify-end px-8 z-30">
-          {systemStatusAction}
-          <div ref={menuRef} className="relative">
+      <div
+        className={`lg:hidden fixed inset-0 z-40 transition-opacity ${
+          sidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        aria-hidden={!sidebarOpen}
+      >
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="absolute inset-0 bg-slate-950/45"
+          aria-label="Close navigation"
+        />
+        <aside
+          className={`relative flex h-full w-72 max-w-[85vw] flex-col bg-white border-r border-slate-200 shadow-xl transition-transform ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold text-slate-900">Clinic AI</span>
+            </div>
             <button
-              onClick={() => setMenuOpen((value) => !value)}
-              className="flex items-center gap-2.5 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-              aria-haspopup="true"
+              onClick={() => setSidebarOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+              aria-label="Close menu"
             >
-              <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold select-none">
-                {userInitial}
-              </div>
+              <X className="w-5 h-5" />
             </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
+        </aside>
+      </div>
 
-            <div
-              className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 p-2 transition-all origin-top-right ${
-                menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-              }`}
-              role="menu"
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <header className="shrink-0 h-14 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-30">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors lg:hidden"
+              aria-label="Open navigation"
             >
-              <div className="px-3 py-2.5 mb-1">
-                <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
-                <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-                {planLabel && (
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                      {planLabel}
-                    </span>
-                    {billing?.plan !== "premium" && (
-                      <Link
-                        href="/dashboard/billing"
-                        onClick={() => setMenuOpen(false)}
-                        className="px-2 py-0.5 text-[10px] font-medium text-teal-700 border border-teal-200 rounded-full hover:bg-teal-50 transition-colors"
-                      >
-                        Upgrade
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="border-t border-slate-100 my-1" />
-
-              <Link
-                href="/dashboard/account"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                role="menuitem"
-              >
-                <UserCircle className="w-4 h-4" />
-                Account
-              </Link>
-              <Link
-                href="/dashboard/settings"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                role="menuitem"
-              >
-                <Settings className="w-4 h-4" />
-                Settings
-              </Link>
-              <Link
-                href="/dashboard/billing"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                role="menuitem"
-              >
-                <CreditCard className="w-4 h-4" />
-                Billing
-              </Link>
-              <div className="border-t border-slate-100 my-1" />
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="lg:hidden min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">
+                {activeNavItem?.label ?? "Clinic AI"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden sm:flex">{systemStatusAction}</div>
+            <div ref={menuRef} className="relative">
               <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  logout().catch(() => {
-                    // Keep the menu state stable if logout fails.
-                  });
-                }}
-                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
-                role="menuitem"
+                onClick={() => setMenuOpen((value) => !value)}
+                className="flex items-center gap-2.5 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                aria-haspopup="true"
               >
-                <LogOut className="w-4 h-4" />
-                Sign Out
+                <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold select-none">
+                  {userInitial}
+                </div>
               </button>
+
+              <div
+                className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 p-2 transition-all origin-top-right ${
+                  menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                }`}
+                role="menu"
+              >
+                <div className="px-3 py-2.5 mb-1">
+                  <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
+                  <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                  {planLabel && (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                        {planLabel}
+                      </span>
+                      {billing?.plan !== "premium" && (
+                        <Link
+                          href="/dashboard/billing"
+                          onClick={() => setMenuOpen(false)}
+                          className="px-2 py-0.5 text-[10px] font-medium text-teal-700 border border-teal-200 rounded-full hover:bg-teal-50 transition-colors"
+                        >
+                          Upgrade
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="border-t border-slate-100 my-1" />
+
+                <Link
+                  href="/dashboard/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  role="menuitem"
+                >
+                  <UserCircle className="w-4 h-4" />
+                  Account
+                </Link>
+                <Link
+                  href="/dashboard/settings"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  role="menuitem"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </Link>
+                <Link
+                  href="/dashboard/billing"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  role="menuitem"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Billing
+                </Link>
+                <div className="border-t border-slate-100 my-1" />
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout().catch(() => {
+                      // Keep the menu state stable if logout fails.
+                    });
+                  }}
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                  role="menuitem"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="p-8">{children}</div>
+          <div className="sm:hidden px-4 pt-4">{systemStatusAction}</div>
+          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
         </main>
       </div>
 

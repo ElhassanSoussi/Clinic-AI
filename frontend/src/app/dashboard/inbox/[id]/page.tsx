@@ -351,7 +351,7 @@ export default function InboxThreadPage({
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100">
+            <div className="px-4 sm:px-6 py-5 border-b border-slate-100">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1 className="text-2xl font-bold text-slate-900">
                   {conversation.customer_name}
@@ -444,7 +444,7 @@ export default function InboxThreadPage({
               </div>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            <div className="px-4 sm:px-6 py-5 space-y-4">
               {isEventThread ? (
                 <div className="space-y-4">
                   {relatedEvents.length === 0 ? (
@@ -622,11 +622,11 @@ export default function InboxThreadPage({
         </div>
 
         <aside className="w-full xl:w-84 shrink-0 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Customer
             </h2>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3 text-sm min-w-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
                   <UserRound className="w-4 h-4 text-slate-500" />
@@ -674,7 +674,7 @@ export default function InboxThreadPage({
           </div>
 
             {conversation.customer_phone && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
               {isEventThread && conversation.channel === "sms" && (
                 <div className="mb-4 pb-4 border-b border-slate-100">
                   <h2 className="text-sm font-semibold text-slate-900 mb-2">
@@ -799,7 +799,7 @@ export default function InboxThreadPage({
           )}
 
           {!isEventThread && relatedEvents.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
               <h2 className="text-sm font-semibold text-slate-900 mb-4">
                 SMS activity
               </h2>
@@ -833,7 +833,7 @@ export default function InboxThreadPage({
             </div>
           )}
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Front desk actions
             </h2>
@@ -929,7 +929,7 @@ export default function InboxThreadPage({
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
                       type="date"
                       value={bookingDate}

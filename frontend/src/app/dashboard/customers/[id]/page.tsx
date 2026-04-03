@@ -134,8 +134,8 @@ export default function CustomerProfilePage({
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-start justify-between gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">{profile.name}</h1>
                 <p className="text-sm text-slate-500 mt-1">
@@ -145,7 +145,7 @@ export default function CustomerProfilePage({
                     : "not recorded"}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 text-center">
                 <div className="px-4 py-3 rounded-xl bg-slate-50">
                   <p className="text-[11px] uppercase tracking-wide text-slate-400">Conversations</p>
                   <p className="text-xl font-bold text-slate-900 mt-1">{profile.conversation_count}</p>
@@ -274,7 +274,7 @@ export default function CustomerProfilePage({
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Recent requests
             </h2>
@@ -309,7 +309,7 @@ export default function CustomerProfilePage({
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 h-fit">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 h-fit">
           <h2 className="text-sm font-semibold text-slate-900 mb-4">
             Recent conversation history
           </h2>
