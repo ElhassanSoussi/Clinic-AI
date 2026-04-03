@@ -28,6 +28,7 @@
   - Email/password enabled
   - Site URL = `https://clinicaireply.com`
   - Redirect URLs include `https://clinicaireply.com/auth/callback`
+  - `www.clinicaireply.com` redirects to `https://clinicaireply.com`
 - [ ] **Migrations applied**:
   - `20260331_add_channel_foundation.sql`
   - `20260331_add_frontdesk_automation.sql`

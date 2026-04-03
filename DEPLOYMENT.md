@@ -65,6 +65,7 @@ Feature-specific backend env vars:
 4. Attach the custom domain:
    - `clinicaireply.com`
 5. Verify the site loads and can reach the backend API.
+6. Keep `clinicaireply.com` as the canonical frontend host. If `www.clinicaireply.com` is attached, it should redirect to the apex domain.
 
 If Vercel shows `No fastapi entrypoint found`, the project is building the repo root instead of `frontend`. Update the Vercel project `Root Directory` to `frontend` and redeploy.
 
