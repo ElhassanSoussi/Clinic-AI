@@ -6,6 +6,7 @@
   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`
   - `ENVIRONMENT=production`
   - `CORS_ORIGINS=https://clinicaireply.com`
+  - `PYTHON_VERSION=3.11.15`
 - [ ] **Frontend env vars** — Set in Vercel/hosting:
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
@@ -53,6 +54,7 @@
 3. Wait for both to be live
 4. Attach `api.clinicaireply.com` to the backend service
 5. Attach `clinicaireply.com` to the Vercel frontend
+6. Confirm the Vercel project `Root Directory` is `frontend`
 
 ## Post-Deploy Verification
 

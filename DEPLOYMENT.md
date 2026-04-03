@@ -25,6 +25,7 @@ Production domains:
    - `OPENAI_API_KEY`
    - `ENVIRONMENT=production`
    - `CORS_ORIGINS=https://clinicaireply.com`
+   - `PYTHON_VERSION=3.11.15`
 5. Add production app URL env:
    - `FRONTEND_APP_URL=https://clinicaireply.com`
 6. Attach the custom domain:
@@ -64,6 +65,8 @@ Feature-specific backend env vars:
 4. Attach the custom domain:
    - `clinicaireply.com`
 5. Verify the site loads and can reach the backend API.
+
+If Vercel shows `No fastapi entrypoint found`, the project is building the repo root instead of `frontend`. Update the Vercel project `Root Directory` to `frontend` and redeploy.
 
 ## Supabase
 
@@ -106,6 +109,7 @@ Feature-specific backend env vars:
 - `GET /api/health` returns `{"status":"ok"}`
 - required env vars are present
 - `NEXT_PUBLIC_API_URL` points to `https://api.clinicaireply.com/api`
+- Render backend uses Python `3.11.15`
 
 ## Smoke Check
 
