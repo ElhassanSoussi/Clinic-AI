@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlparse
 
+from pydantic import AliasChoices, Field, ValidationError
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
@@ -11,7 +12,9 @@ from pydantic_settings import SettingsConfigDict
 class Settings(BaseSettings):
     # Required — app will not start without these
     supabase_url: str
-    supabase_service_key: str
+    supabase_service_key: str = Field(
+        validation_alias=AliasChoices("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY")
+    )
     openai_api_key: str
 
     # Server config
@@ -186,6 +189,31 @@ def _validate_settings(settings: Settings) -> None:
 
 @lru_cache
 def get_settings() -> Settings:
-    settings = Settings()
+    try:
+        settings = Settings()
+    except ValidationError as exc:
+        import logging
+
+        logger = logging.getLogger("clinic_ai.config")
+        env_names = {
+            "supabase_url": "SUPABASE_URL",
+            "supabase_service_key": "SUPABASE_SERVICE_ROLE_KEY",
+            "openai_api_key": "OPENAI_API_KEY",
+            "cors_origins": "CORS_ORIGINS",
+            "environment": "ENVIRONMENT",
+        }
+        missing = sorted(
+            {
+                env_names.get(str(error.get("loc", ("",))[0]), str(error.get("loc", ("",))[0]).upper())
+                for error in exc.errors()
+                if error.get("type") == "missing"
+            }
+        )
+        if missing:
+            logger.error("Missing required environment variables: " + ", ".join(missing))
+        else:
+            logger.error("Invalid environment configuration.")
+        sys.exit(1)
+
     _validate_settings(settings)
     return settings

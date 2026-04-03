@@ -3,7 +3,7 @@
 ## Pre-Deploy
 
 - [ ] **Core backend env vars**:
-  - `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `OPENAI_API_KEY`
+  - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`
   - `ENVIRONMENT=production`
   - `CORS_ORIGINS=https://clinicaireply.com`
 - [ ] **Frontend env vars** — Set in Vercel/hosting:

@@ -5,7 +5,8 @@ without needing a real Stripe webhook delivery.
 import os
 from supabase import create_client
 
-db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ["SUPABASE_SERVICE_KEY"]
+db = create_client(os.environ["SUPABASE_URL"], SERVICE_KEY)
 CLINIC_ID = "133e3e0f-af5f-42d5-a2c1-dc8b3c8ccb3d"
 
 

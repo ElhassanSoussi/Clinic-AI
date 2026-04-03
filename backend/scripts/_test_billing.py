@@ -3,7 +3,7 @@ import os
 import uuid
 from supabase import create_client
 
-SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ["SUPABASE_SERVICE_KEY"]
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibXRwaG50a3R3bGZ0cGxzdmdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0ODkwNTMsImV4cCI6MjA5MDA2NTA1M30.vLkivgeWajqQhOhr1_MnOK2nIWisQUdXT0cYksBUHFM"
 

@@ -22,7 +22,7 @@ from supabase import create_client
 
 BASE = "http://localhost:7001/api"
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ["SUPABASE_SERVICE_KEY"]
 ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibXRwaG50a3R3bGZ0cGxzdmdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0ODkwNTMsImV4cCI6MjA5MDA2NTA1M30.vLkivgeWajqQhOhr1_MnOK2nIWisQUdXT0cYksBUHFM"
 
 CLINIC_ID = "133e3e0f-af5f-42d5-a2c1-dc8b3c8ccb3d"
