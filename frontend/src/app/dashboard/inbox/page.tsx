@@ -118,54 +118,47 @@ export default function InboxPage() {
         description="Review threads, spot follow-up risk, and open the right conversation without losing source, status, or operator context."
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            label: "All conversations",
-            value: counts.all,
-            tone: "slate" as const,
-          },
-          {
-            label: "Open now",
-            value: counts.open,
-            tone: "blue" as const,
-          },
-          {
-            label: "Needs follow-up",
-            value: counts.needs_follow_up,
-            tone: "amber" as const,
-          },
-          {
-            label: "Booked or handled",
-            value: counts.booked + counts.handled,
-            tone: "emerald" as const,
-          },
-        ].map((card) => (
-          <MetricCard
-            key={card.label}
-            label={card.label}
-            value={card.value}
-            icon={MessageSquareMore}
-            tone={card.tone}
-          />
-        ))}
-      </div>
-
-      <div className="app-card p-4 sm:p-5">
-        <div className="workspace-toolbar">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by patient, phone, email, or conversation text..."
-              className="app-input pl-9"
-            />
+      <div className="workspace-column-layout">
+        <aside className="workspace-side-rail">
+          <div className="app-card p-5">
+            <p className="workspace-rail-title">Conversation mix</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              {[
+                {
+                  label: "All conversations",
+                  value: counts.all,
+                  tone: "slate" as const,
+                },
+                {
+                  label: "Open now",
+                  value: counts.open,
+                  tone: "blue" as const,
+                },
+                {
+                  label: "Needs follow-up",
+                  value: counts.needs_follow_up,
+                  tone: "amber" as const,
+                },
+                {
+                  label: "Booked or handled",
+                  value: counts.booked + counts.handled,
+                  tone: "emerald" as const,
+                },
+              ].map((card) => (
+                <MetricCard
+                  key={card.label}
+                  label={card.label}
+                  value={card.value}
+                  icon={MessageSquareMore}
+                  tone={card.tone}
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            <div className="app-segmented">
+          <div className="app-card p-5">
+            <p className="workspace-rail-title">Status filters</p>
+            <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
               {STATUS_FILTERS.map((filter) => {
                 const count = counts[filter.value];
                 const active = statusFilter === filter.value;
@@ -173,11 +166,14 @@ export default function InboxPage() {
                   <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value)}
-                    className="app-segmented-item"
-                    data-active={active}
+                    className={`flex items-center justify-between rounded-[1.15rem] border px-3.5 py-3 text-sm font-semibold transition-colors xl:w-full ${
+                      active
+                        ? "border-violet-200 bg-violet-50 text-violet-700"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
                   >
-                    {filter.label}
-                    <span className={`text-[10px] ${active ? "text-white/85" : "text-slate-400"}`}>
+                    <span>{filter.label}</span>
+                    <span className={`text-[11px] ${active ? "text-violet-600" : "text-slate-400"}`}>
                       {count}
                     </span>
                   </button>
@@ -185,47 +181,68 @@ export default function InboxPage() {
               })}
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={() => setChannelFilter("all")}
-          className={`rounded-2xl px-3 py-2 text-sm font-semibold transition-colors ${
-            channelFilter === "all"
-              ? "bg-slate-900 text-white"
-              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          All channels
-          <span className={`ml-2 text-xs ${channelFilter === "all" ? "text-white/80" : "text-slate-400"}`}>
-            {channelCounts.all}
-          </span>
-        </button>
-        {channelOptions.map((channel) => {
-          const active = channelFilter === channel;
-          const config = getChannelConfig(channel);
-          return (
-            <button
-              key={channel}
-              onClick={() => setChannelFilter(channel)}
-              className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition-colors ${
-                active
-                  ? config.className
-                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              {config.label}
-              <span className={`ml-2 text-xs ${active ? "opacity-80" : "text-slate-400"}`}>
-                {channelCounts[channel] ?? 0}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+          <div className="app-card p-5">
+            <p className="workspace-rail-title">Channel filters</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => setChannelFilter("all")}
+                className={`rounded-2xl px-3 py-2 text-sm font-semibold transition-colors ${
+                  channelFilter === "all"
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                All
+                <span className={`ml-2 text-xs ${channelFilter === "all" ? "text-white/80" : "text-slate-400"}`}>
+                  {channelCounts.all}
+                </span>
+              </button>
+              {channelOptions.map((channel) => {
+                const active = channelFilter === channel;
+                const config = getChannelConfig(channel);
+                return (
+                  <button
+                    key={channel}
+                    onClick={() => setChannelFilter(channel)}
+                    className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition-colors ${
+                      active
+                        ? config.className
+                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    {config.label}
+                    <span className={`ml-2 text-xs ${active ? "opacity-80" : "text-slate-400"}`}>
+                      {channelCounts[channel] ?? 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
 
-      <div className="workspace-split">
-        <div>
+        <div className="space-y-4">
+          <div className="app-card p-5">
+            <div className="workspace-toolbar">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by patient, phone, email, or conversation text..."
+                  className="app-input pl-9"
+                />
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                <span>{filtered.length}</span>
+                <span>visible threads</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
           {filtered.length === 0 ? (
             <div className="app-card">
               <EmptyState
@@ -297,6 +314,7 @@ export default function InboxPage() {
               ))}
             </div>
           )}
+        </div>
         </div>
 
         <aside className="workspace-side-rail">

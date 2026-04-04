@@ -81,6 +81,29 @@ a {
     linear-gradient(180deg, #f7f7ff 0%, #f3f5fb 40%, #f7f8fc 100%);
 }
 
+.workspace-main-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(229, 232, 244, 0.94);
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(248, 250, 255, 0.92) 100%);
+  box-shadow:
+    0 28px 60px rgba(22, 28, 45, 0.06),
+    0 10px 24px rgba(91, 67, 143, 0.05);
+}
+
+.workspace-main-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 12rem;
+  background:
+    radial-gradient(circle at top left, rgba(127, 86, 217, 0.1), transparent 52%),
+    radial-gradient(circle at top right, rgba(13, 148, 136, 0.08), transparent 48%);
+  pointer-events: none;
+}
+
 .workspace-sidebar {
   background:
     linear-gradient(180deg, rgba(249, 246, 255, 0.96) 0%, rgba(242, 238, 255, 0.96) 100%);
@@ -99,11 +122,40 @@ a {
   box-shadow: 0 16px 40px rgba(91, 67, 143, 0.08);
 }
 
+.workspace-sidebar-section {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(214, 208, 244, 0.72);
+  background: rgba(255, 255, 255, 0.52);
+  padding: 0.85rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.workspace-sidebar-support {
+  border-radius: 1.6rem;
+  border: 1px solid rgba(203, 213, 225, 0.85);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 248, 255, 0.96) 100%);
+  box-shadow: 0 18px 34px rgba(91, 67, 143, 0.08);
+}
+
 .workspace-topbar {
-  background: rgba(250, 251, 255, 0.78);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+  position: relative;
+  background: rgba(252, 252, 255, 0.74);
+  border-bottom: 1px solid rgba(229, 232, 244, 0.9);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
+}
+
+.workspace-header-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .workspace-header-stack {
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr) auto;
+    align-items: center;
+  }
 }
 
 .workspace-toolbar {
@@ -120,12 +172,14 @@ a {
   min-width: min(100%, 28rem);
   align-items: center;
   gap: 0.75rem;
-  border-radius: 999px;
+  border-radius: 1.2rem;
   border: 1px solid rgba(216, 222, 238, 0.92);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.85rem 1rem;
   color: #64748b;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
 .workspace-search:hover {
@@ -136,6 +190,18 @@ a {
 .workspace-section-grid {
   display: grid;
   gap: 1.5rem;
+}
+
+.workspace-column-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1280px) {
+  .workspace-column-layout {
+    grid-template-columns: minmax(15.5rem, 0.52fr) minmax(0, 1.1fr) minmax(18rem, 0.72fr);
+    align-items: start;
+  }
 }
 
 .workspace-split {
@@ -153,6 +219,14 @@ a {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.workspace-rail-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #94a3b8;
 }
 
 .app-card {

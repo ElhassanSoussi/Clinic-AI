@@ -443,14 +443,6 @@ export default function InboxThreadPage({
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={() => router.push("/dashboard/inbox")}
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Inbox
-      </button>
-
       <PageHeader
         eyebrow={
           <>
@@ -462,7 +454,104 @@ export default function InboxThreadPage({
         description="Review the full conversation, understand thread state, and move the patient forward without leaving the workspace."
       />
 
-      <div className="workspace-split">
+      <div className="workspace-column-layout">
+        <aside className="workspace-side-rail">
+          <button
+            onClick={() => router.push("/dashboard/inbox")}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Inbox
+          </button>
+
+          <div className="app-card p-4 sm:p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-4">
+              Customer
+            </h2>
+            <div className="space-y-3 text-sm min-w-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+                  <UserRound className="w-4 h-4 text-slate-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Name</p>
+                  <p className="font-medium text-slate-900">{conversation.customer_name}</p>
+                </div>
+              </div>
+
+              {conversation.customer_phone && (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+                    <Phone className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Phone</p>
+                    <p className="font-medium text-slate-900">{conversation.customer_phone}</p>
+                  </div>
+                </div>
+              )}
+
+              {conversation.customer_email && (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Email</p>
+                    <p className="font-medium text-slate-900">{conversation.customer_email}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {conversation.customer_key && (
+              <Link
+                href={`/dashboard/customers/${conversation.customer_key}`}
+                className="inline-flex items-center gap-2 mt-5 text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
+              >
+                <UserRound className="w-4 h-4" />
+                Open customer profile
+              </Link>
+            )}
+          </div>
+
+          <div className="app-card p-4 sm:p-5">
+            <p className="workspace-rail-title">Thread summary</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">State</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {isEventThread ? "Operational event thread" : "Live conversation thread"}
+                </p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Lead link</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {lead ? "Request linked" : "Still unlinked"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {internalNotes.length > 0 && (
+            <div className="app-card p-5">
+              <h2 className="text-sm font-semibold text-slate-900 mb-4">
+                Internal notes
+              </h2>
+              <div className="space-y-3">
+                {internalNotes.slice(0, 5).map((event) => (
+                  <div key={event.id} className="rounded-xl border border-slate-200 px-4 py-3">
+                    <p className="text-sm text-slate-700 leading-relaxed">{event.content || event.summary}</p>
+                    <p className="text-[11px] text-slate-400 mt-2">
+                      {event.occurred_at ? formatDateTime(event.occurred_at) : ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+
         <div className="flex-1 min-w-0">
           <div className="app-card overflow-hidden">
             <div className="border-b border-slate-100 px-5 py-6 sm:px-6">
@@ -718,58 +807,7 @@ export default function InboxThreadPage({
         </div>
 
         <aside className="workspace-side-rail">
-          <div className="app-card p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4">
-              Customer
-            </h2>
-            <div className="space-y-3 text-sm min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <UserRound className="w-4 h-4 text-slate-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Name</p>
-                  <p className="font-medium text-slate-900">{conversation.customer_name}</p>
-                </div>
-              </div>
-
-              {conversation.customer_phone && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <Phone className="w-4 h-4 text-slate-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500">Phone</p>
-                    <p className="font-medium text-slate-900">{conversation.customer_phone}</p>
-                  </div>
-                </div>
-              )}
-
-              {conversation.customer_email && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <Mail className="w-4 h-4 text-slate-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500">Email</p>
-                    <p className="font-medium text-slate-900">{conversation.customer_email}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {conversation.customer_key && (
-              <Link
-                href={`/dashboard/customers/${conversation.customer_key}`}
-                className="inline-flex items-center gap-2 mt-5 text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
-              >
-                <UserRound className="w-4 h-4" />
-                Open customer profile
-              </Link>
-            )}
-          </div>
-
-            {conversation.customer_phone && (
+          {conversation.customer_phone && (
             <div className="app-card p-4 sm:p-5">
               {isEventThread && conversation.channel === "sms" && (
                 <div className="mb-4 pb-4 border-b border-slate-100">
@@ -1175,24 +1213,6 @@ export default function InboxThreadPage({
               </p>
             )}
           </div>
-
-          {internalNotes.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5">
-              <h2 className="text-sm font-semibold text-slate-900 mb-4">
-                Internal notes
-              </h2>
-              <div className="space-y-3">
-                {internalNotes.slice(0, 5).map((event) => (
-                  <div key={event.id} className="rounded-xl border border-slate-200 px-4 py-3">
-                    <p className="text-sm text-slate-700 leading-relaxed">{event.content || event.summary}</p>
-                    <p className="text-[11px] text-slate-400 mt-2">
-                      {event.occurred_at ? formatDateTime(event.occurred_at) : ""}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </aside>
       </div>
     </div>

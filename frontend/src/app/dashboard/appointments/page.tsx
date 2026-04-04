@@ -387,19 +387,6 @@ export default function AppointmentsPage() {
         description="Review appointment timing, reminder readiness, lifecycle status, and deposit handling without leaving the operator workspace."
       />
 
-      <div className="app-segmented">
-        {APPOINTMENT_VIEWS.map((view) => (
-          <button
-            key={view.value}
-            onClick={() => setActiveView(view.value)}
-            className="app-segmented-item"
-            data-active={activeView === view.value}
-          >
-            {view.label}
-          </button>
-        ))}
-      </div>
-
       {appointments.length === 0 ? (
         <EmptyState
           icon={<CalendarClock className="w-7 h-7 text-slate-400" />}
@@ -407,7 +394,54 @@ export default function AppointmentsPage() {
           description="Booked requests will appear here as soon as the front desk confirms an appointment."
         />
       ) : (
-        <div className="workspace-split">
+        <div className="workspace-column-layout">
+          <aside className="workspace-side-rail">
+            <div className="app-card p-5">
+              <p className="workspace-rail-title">Views</p>
+              <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+                {APPOINTMENT_VIEWS.map((view) => {
+                  const active = activeView === view.value;
+                  return (
+                    <button
+                      key={view.value}
+                      onClick={() => setActiveView(view.value)}
+                      className={`flex items-center justify-between rounded-[1.15rem] border px-3.5 py-3 text-sm font-semibold transition-colors xl:w-full ${
+                        active
+                          ? "border-violet-200 bg-violet-50 text-violet-700"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{view.label}</span>
+                      {active ? <span className="text-[11px] text-violet-600">Active</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="app-card p-5">
+              <p className="workspace-rail-title">Current board</p>
+              <div className="mt-4 space-y-3">
+                <div className="app-card-muted px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Appointments visible</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{appointments.length}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    This board stays grounded in the real lead/request booking fields already stored in Clinic AI.
+                  </p>
+                </div>
+                <div className="app-card-muted px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Selected view</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {APPOINTMENT_VIEWS.find((view) => view.value === activeView)?.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Review lifecycle changes, reminder readiness, and deposit follow-through from one operational workspace.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
+
           <div className="space-y-3">
             <div className="app-card p-5">
               <p className="text-sm font-semibold text-slate-900">Appointments board</p>

@@ -257,59 +257,91 @@ export default function DashboardLayout({
     ) ?? null;
 
   const sidebarContent = (
-    <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
-      {sidebarNav.map((item) => {
-        const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={() => setSidebarOpen(false)}
-            className={`group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold transition-all ${
-              isActive
-                ? "bg-white text-slate-950 shadow-[0_16px_32px_rgba(91,67,143,0.08)] ring-1 ring-violet-100/90"
-                : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
-            }`}
-          >
-            <span
-              className={`flex h-9 w-9 items-center justify-center rounded-[1rem] border ${
-                isActive
-                  ? "border-violet-100 bg-gradient-to-br from-violet-50 to-teal-50 text-violet-700"
-                  : "border-transparent bg-white/70 text-slate-500 group-hover:border-violet-100 group-hover:bg-white"
-              }`}
-            >
-              <item.icon className="h-4.5 w-4.5" />
-            </span>
-            {item.label}
-            {item.label === "Leads" && newLeadCount > 0 && (
-              <span className="ml-auto min-w-5 rounded-full bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-semibold text-white">
-                {newLeadCount}
-              </span>
-            )}
-          </Link>
-        );
-      })}
-
-      {user?.clinic_slug && (
-        <Link
-          href={`/chat/${user.clinic_slug}`}
-          target="_blank"
-          onClick={() => setSidebarOpen(false)}
-          className="group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold text-slate-600 transition-all hover:bg-white/80 hover:text-slate-900"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-[1rem] bg-white/70 text-slate-500 group-hover:bg-white">
-            <MessageSquareMore className="h-4.5 w-4.5" />
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+      <div className="workspace-sidebar-section min-h-0 flex-1">
+        <div className="mb-3 flex items-center justify-between px-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Workspace
+          </p>
+          <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-violet-700 shadow-sm">
+            Live
           </span>
-          Patient Chat
-          <ExternalLink className="w-3.5 h-3.5 ml-auto text-slate-400" />
-        </Link>
-      )}
-    </nav>
+        </div>
+        <nav className="space-y-1 overflow-y-auto">
+          {sidebarNav.map((item) => {
+            const isActive =
+              pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold transition-all ${
+                  isActive
+                    ? "bg-white text-slate-950 shadow-[0_16px_32px_rgba(91,67,143,0.1)] ring-1 ring-violet-100/90"
+                    : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
+                }`}
+              >
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-[1rem] border ${
+                    isActive
+                      ? "border-violet-100 bg-gradient-to-br from-violet-50 to-teal-50 text-violet-700"
+                      : "border-transparent bg-white/70 text-slate-500 group-hover:border-violet-100 group-hover:bg-white"
+                  }`}
+                >
+                  <item.icon className="h-4.5 w-4.5" />
+                </span>
+                {item.label}
+                {item.label === "Leads" && newLeadCount > 0 && (
+                  <span className="ml-auto min-w-5 rounded-full bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-semibold text-white">
+                    {newLeadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="workspace-sidebar-section">
+        <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          Channels
+        </p>
+        {user?.clinic_slug && (
+          <Link
+            href={`/chat/${user.clinic_slug}`}
+            target="_blank"
+            onClick={() => setSidebarOpen(false)}
+            className="group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold text-slate-600 transition-all hover:bg-white/80 hover:text-slate-900"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-[1rem] bg-white/70 text-slate-500 group-hover:bg-white">
+              <MessageSquareMore className="h-4.5 w-4.5" />
+            </span>
+            Patient Chat
+            <ExternalLink className="ml-auto h-3.5 w-3.5 text-slate-400" />
+          </Link>
+        )}
+      </div>
+
+      <div className="workspace-sidebar-support px-4 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-gradient-to-br from-violet-50 to-teal-50 text-violet-700">
+            <ShieldCheck className="h-4.5 w-4.5" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Operator control</p>
+            <p className="text-xs leading-5 text-slate-500">
+              Review, manual takeover, and visibility stay with your clinic team.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   return (
-    <div className="app-shell-bg flex min-h-screen">
-      <aside className="workspace-sidebar fixed inset-y-0 left-0 hidden w-[18.75rem] flex-col px-4 py-4 lg:flex">
+    <div className="app-shell-bg min-h-screen">
+      <aside className="fixed inset-y-3 left-3 z-30 hidden w-[19.5rem] flex-col lg:flex">
         <div className="workspace-sidebar-card px-4 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-[1.15rem] bg-gradient-to-br from-teal-600 to-violet-600 shadow-[0_18px_36px_rgba(91,67,143,0.18)]">
@@ -382,71 +414,76 @@ export default function DashboardLayout({
         </aside>
       </div>
 
-      <div className="flex min-h-screen flex-1 flex-col lg:ml-[18.75rem]">
-        <header className="workspace-topbar sticky top-0 z-30">
-          <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-500 transition-colors hover:bg-white hover:text-slate-900 lg:hidden"
-              aria-label="Open navigation"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Clinic workspace
-                </p>
-                <p className="truncate text-lg font-semibold tracking-tight text-slate-950">
-                  {activeNavItem?.label ?? "Dashboard"}
-                </p>
-              </div>
-            </div>
-            <div className="hidden xl:flex xl:flex-1 xl:justify-center">
-              <Link href="/dashboard/inbox" className="workspace-search">
-                <Search className="h-4.5 w-4.5 text-violet-500" />
-                <span className="flex-1 text-sm font-medium text-slate-500">
-                  Search inbox, requests, and patients
-                </span>
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
-                  Inbox
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden sm:flex">{systemStatusAction}</div>
-              <button
-                className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-500 shadow-sm transition-colors hover:bg-white lg:inline-flex"
-                aria-label="Notifications"
-                type="button"
-              >
-                <Bell className="h-4.5 w-4.5" />
-              </button>
-            <div ref={menuRef} className="relative">
-              <button
-                onClick={() => setMenuOpen((value) => !value)}
-                className="flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-2 py-1.5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-                aria-haspopup="true"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-600 to-violet-600 text-xs font-bold text-white select-none">
-                  {userInitial}
-                </div>
-                <div className="hidden text-left sm:block">
-                  <p className="max-w-32 truncate text-xs font-semibold text-slate-900">
-                    {user?.full_name || "Clinic user"}
-                  </p>
-                  <p className="max-w-32 truncate text-[11px] text-slate-500">
-                    {planLabel || "Workspace"}
-                  </p>
-                </div>
-              </button>
+      <div className="relative min-h-screen lg:pl-[21rem]">
+        <div className="px-3 py-3 sm:px-4 lg:px-5">
+          <div className="workspace-main-frame flex min-h-[calc(100vh-1.5rem)] flex-col">
+            <header className="workspace-topbar sticky top-0 z-30">
+              <div className="px-4 py-4 sm:px-6 lg:px-7">
+                <div className="workspace-header-stack">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <button
+                      onClick={() => setSidebarOpen(true)}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-500 transition-colors hover:bg-white hover:text-slate-900 lg:hidden"
+                      aria-label="Open navigation"
+                    >
+                      <Menu className="w-5 h-5" />
+                    </button>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                        Clinic workspace
+                      </p>
+                      <p className="truncate text-lg font-semibold tracking-tight text-slate-950">
+                        {activeNavItem?.label ?? "Dashboard"}
+                      </p>
+                    </div>
+                  </div>
 
-              <div
-                className={`absolute right-0 mt-2 w-72 origin-top-right rounded-[1.5rem] border border-slate-200 bg-white/96 p-2 shadow-2xl shadow-slate-900/8 transition-all ${
-                  menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-                }`}
-                role="menu"
-              >
+                  <Link href="/dashboard/inbox" className="workspace-search">
+                    <Search className="h-4.5 w-4.5 text-violet-500" />
+                    <span className="flex-1 text-sm font-medium text-slate-500">
+                      Search inbox, requests, and patients
+                    </span>
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+                      /
+                    </span>
+                  </Link>
+
+                  <div className="flex items-center justify-end gap-2 sm:gap-3">
+                    <div className="hidden xl:flex xl:items-center xl:gap-2">
+                      {systemStatusAction}
+                    </div>
+                    <button
+                      className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-500 shadow-sm transition-colors hover:bg-white lg:inline-flex"
+                      aria-label="Notifications"
+                      type="button"
+                    >
+                      <Bell className="h-4.5 w-4.5" />
+                    </button>
+                    <div ref={menuRef} className="relative">
+                      <button
+                        onClick={() => setMenuOpen((value) => !value)}
+                        className="flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-2 py-1.5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                        aria-haspopup="true"
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-600 to-violet-600 text-xs font-bold text-white select-none">
+                          {userInitial}
+                        </div>
+                        <div className="hidden text-left sm:block">
+                          <p className="max-w-32 truncate text-xs font-semibold text-slate-900">
+                            {user?.full_name || "Clinic user"}
+                          </p>
+                          <p className="max-w-32 truncate text-[11px] text-slate-500">
+                            {planLabel || "Workspace"}
+                          </p>
+                        </div>
+                      </button>
+
+                      <div
+                        className={`absolute right-0 mt-2 w-72 origin-top-right rounded-[1.5rem] border border-slate-200 bg-white/96 p-2 shadow-2xl shadow-slate-900/8 transition-all ${
+                          menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                        }`}
+                        role="menu"
+                      >
                 <div className="mb-1 rounded-2xl bg-slate-50 px-3.5 py-3">
                   <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
@@ -519,16 +556,19 @@ export default function DashboardLayout({
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            </div>
-          </div>
-        </header>
+            </header>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="sm:hidden px-4 pt-4">{systemStatusAction}</div>
-          <div className="px-4 pb-10 pt-6 sm:px-6 lg:px-8">{children}</div>
-        </main>
+            <main className="relative flex-1 overflow-y-auto">
+              <div className="sm:hidden px-4 pt-4">{systemStatusAction}</div>
+              <div className="px-4 pb-10 pt-6 sm:px-6 lg:px-7">{children}</div>
+            </main>
+          </div>
+        </div>
       </div>
 
       {goLiveModal && !goLiveSuccess && (

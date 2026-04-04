@@ -200,60 +200,62 @@ function renderLeadsContent({
   }
 
   return (
-    <div className="app-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-slate-100">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Patient</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reason</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Preferred Time</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Received</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filtered.map((lead) => (
-              <tr
-                key={lead.id}
-                onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
-                className={`cursor-pointer transition-colors ${lead.status === "new" ? "bg-violet-50/50 hover:bg-violet-50/70 border-l-[3px] border-l-violet-500" : "hover:bg-slate-50/70 border-l-[3px] border-l-transparent"}`}
+    <div className="app-card p-3">
+      <div className="space-y-3">
+        {filtered.map((lead) => (
+          <button
+            key={lead.id}
+            onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
+            className="app-list-row w-full px-5 py-4 text-left"
+          >
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold text-slate-900">{lead.patient_name}</p>
+                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                    {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                  </span>
+                  {lead.appointment_status ? (
+                    <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-700">
+                      {lead.appointment_status.replaceAll("_", " ")}
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-sm leading-6 text-slate-700">
+                  {lead.reason_for_visit || "No visit reason recorded yet."}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                  <span>{lead.patient_phone || lead.patient_email || "No direct contact saved"}</span>
+                  <span>{lead.preferred_datetime_text || "Preferred time still open"}</span>
+                  <span>Received {timeAgo(lead.created_at)}</span>
+                </div>
+              </div>
+              <div
+                className="flex shrink-0 flex-col gap-2 xl:min-w-[11rem]"
+                onClick={(event) => event.stopPropagation()}
               >
-                <td className="px-6 py-4">
-                  <p className="text-sm font-medium text-slate-900">{lead.patient_name}</p>
-                  <p className="text-xs text-slate-500">{lead.patient_phone || lead.patient_email || "—"}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm text-slate-600 max-w-50 truncate">{lead.reason_for_visit || "—"}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm text-slate-600">{lead.preferred_datetime_text || "—"}</p>
-                </td>
-                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                  {updatingId === lead.id ? (
-                    <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
-                  ) : (
-                    <select
-                      aria-label="Change lead status"
-                      value={lead.status}
-                      onChange={(e) => handleInlineStatus(lead.id, e.target.value as LeadStatus)}
-                      className="text-xs font-medium px-2 py-1.5 rounded-lg border border-slate-200 bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                    >
-                      {INLINE_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-slate-500">{timeAgo(lead.created_at)}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {updatingId === lead.id ? (
+                  <div className="flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                  </div>
+                ) : (
+                  <select
+                    aria-label="Change lead status"
+                    value={lead.status}
+                    onChange={(event) => handleInlineStatus(lead.id, event.target.value as LeadStatus)}
+                    className="app-input py-3 text-sm font-semibold"
+                  >
+                    {INLINE_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -351,51 +353,6 @@ export default function LeadsPage() {
         description="See every request, update status in-line, and keep the handoff between conversation, customer, and appointment work visible."
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="All requests" value={counts.all} icon={Users} tone="slate" />
-        <MetricCard label="New" value={counts.new} icon={AlertTriangle} tone="amber" />
-        <MetricCard label="Contacted" value={counts.contacted} icon={ContactRound} tone="blue" />
-        <MetricCard label="Booked" value={counts.booked} icon={CalendarDays} tone="emerald" />
-      </div>
-
-      <div className="app-card p-4 sm:p-5">
-        <div className="workspace-toolbar">
-          <div className="relative flex-1 w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, phone, or email..."
-            className="app-input pl-9"
-          />
-        </div>
-
-          <div className="app-segmented">
-            {STATUS_OPTIONS.map((opt) => {
-              const count =
-                opt.value === ""
-                  ? counts.all
-                  : counts[opt.value as keyof typeof counts] ?? 0;
-              const active = statusFilter === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => setStatusFilter(opt.value)}
-                  className="app-segmented-item"
-                  data-active={active}
-                >
-                  {opt.label}
-                  <span className={`text-[10px] ${active ? "text-white/85" : "text-slate-400"}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {usageWarningBanner}
 
       {updateError && (
@@ -405,8 +362,69 @@ export default function LeadsPage() {
         </div>
       )}
 
-      <div className="workspace-split">
-        <div>{content}</div>
+      <div className="workspace-column-layout">
+        <aside className="workspace-side-rail">
+          <div className="app-card p-5">
+            <p className="workspace-rail-title">Request mix</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <MetricCard label="All requests" value={counts.all} icon={Users} tone="slate" />
+              <MetricCard label="New" value={counts.new} icon={AlertTriangle} tone="amber" />
+              <MetricCard label="Contacted" value={counts.contacted} icon={ContactRound} tone="blue" />
+              <MetricCard label="Booked" value={counts.booked} icon={CalendarDays} tone="emerald" />
+            </div>
+          </div>
+
+          <div className="app-card p-5">
+            <p className="workspace-rail-title">Status filters</p>
+            <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+              {STATUS_OPTIONS.map((opt) => {
+                const count =
+                  opt.value === ""
+                    ? counts.all
+                    : counts[opt.value as keyof typeof counts] ?? 0;
+                const active = statusFilter === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setStatusFilter(opt.value)}
+                    className={`flex items-center justify-between rounded-[1.15rem] border px-3.5 py-3 text-sm font-semibold transition-colors xl:w-full ${
+                      active
+                        ? "border-violet-200 bg-violet-50 text-violet-700"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    <span className={`text-[11px] ${active ? "text-violet-600" : "text-slate-400"}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+
+        <div className="space-y-4">
+          <div className="app-card p-5">
+            <div className="workspace-toolbar">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by name, phone, email, or visit reason..."
+                  className="app-input pl-9"
+                />
+              </div>
+              <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                {filtered.length} visible
+              </div>
+            </div>
+          </div>
+
+          {content}
+        </div>
 
         <aside className="workspace-side-rail">
           <div className="app-card p-5">
