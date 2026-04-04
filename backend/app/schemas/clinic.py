@@ -15,8 +15,12 @@ class ClinicResponse(BaseModel):
     business_hours: Any
     services: Any
     faq: Any
+    spreadsheet_provider: Optional[str] = ""
     google_sheet_id: Optional[str] = ""
     google_sheet_tab: Optional[str] = "Sheet1"
+    excel_workbook_id: Optional[str] = ""
+    excel_workbook_name: Optional[str] = ""
+    excel_workbook_url: Optional[str] = ""
     notifications_enabled: Optional[bool] = False
     notification_email: Optional[str] = ""
     availability_enabled: Optional[bool] = False

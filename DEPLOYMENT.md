@@ -51,6 +51,10 @@ Feature-specific backend env vars:
   - `GOOGLE_CREDENTIALS_B64` or `GOOGLE_CREDENTIALS_JSON` or `GOOGLE_CREDENTIALS_PATH`
   - `GOOGLE_OAUTH_CLIENT_ID`
   - `GOOGLE_OAUTH_CLIENT_SECRET`
+- Microsoft Excel:
+  - `MICROSOFT_OAUTH_CLIENT_ID`
+  - `MICROSOFT_OAUTH_CLIENT_SECRET`
+  - `MICROSOFT_OAUTH_TENANT=common`
 - Admin:
   - `ADMIN_SECRET`
 
@@ -99,7 +103,16 @@ If Vercel shows `No fastapi entrypoint found`, the project is building the repo 
      - `GOOGLE_OAUTH_CLIENT_ID`
      - `GOOGLE_OAUTH_CLIENT_SECRET`
    - keep a service account configured too, because Clinic AI still uses it for ongoing sheet sync after setup
-7. If Microsoft sign-in is live:
+7. If Microsoft Excel quick connect is live:
+   - create a Microsoft Entra app registration
+   - add backend callback URL:
+     - `https://api.clinicaireply.com/api/clinics/microsoft-excel/callback`
+   - set Render env vars:
+     - `MICROSOFT_OAUTH_CLIENT_ID`
+     - `MICROSOFT_OAUTH_CLIENT_SECRET`
+     - `MICROSOFT_OAUTH_TENANT=common`
+   - make sure the app registration allows OneDrive / Microsoft Graph file access for workbook creation
+8. If Microsoft sign-in is live:
    - enable the Azure provider in Supabase Auth
    - use the Supabase callback URL in the Azure app registration:
      - `https://<your-project-ref>.supabase.co/auth/v1/callback`

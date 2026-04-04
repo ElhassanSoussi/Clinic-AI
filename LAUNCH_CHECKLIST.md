@@ -25,6 +25,10 @@
 - [ ] **Google Sheets credentials** if sheet sync is live:
   - `GOOGLE_CREDENTIALS_B64` or `GOOGLE_CREDENTIALS_JSON` or `GOOGLE_CREDENTIALS_PATH`
   - `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` if Google quick connect is live
+- [ ] **Microsoft Excel quick connect** if Excel sync is live:
+  - `MICROSOFT_OAUTH_CLIENT_ID`
+  - `MICROSOFT_OAUTH_CLIENT_SECRET`
+  - `MICROSOFT_OAUTH_TENANT=common`
 - [ ] **Admin secret** only if protected admin routes are intentionally enabled:
   - `ADMIN_SECRET`
 - [ ] **Supabase** — Schema applied, Auth configured:
@@ -53,6 +57,8 @@
 - [ ] **Google Sheets** (if used) — `GOOGLE_CREDENTIALS_B64` set with base64 JSON
 - [ ] **Google Sheets quick connect** (if used) — Google OAuth web app includes:
   - `https://api.clinicaireply.com/api/clinics/google-sheets/callback`
+- [ ] **Microsoft Excel quick connect** (if used) — Microsoft Entra app registration includes:
+  - `https://api.clinicaireply.com/api/clinics/microsoft-excel/callback`
 - [ ] **Frontend builds** — `npm run build` succeeds locally with production env vars
 - [ ] **No localhost** — Grep for `localhost` in production env vars (should be zero)
 - [ ] **Readiness surface reviewed** — Operations → System readiness shows only the expected blocked or partial items

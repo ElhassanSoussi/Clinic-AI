@@ -61,6 +61,7 @@ type SettingsStatusInput = {
   hours: Record<string, string>;
   faq: FaqEntry[];
   googleSheetId: string;
+  excelWorkbookId: string;
   notificationsEnabled: boolean;
   notificationEmail: string;
   availabilityEnabled: boolean;
@@ -74,7 +75,7 @@ const SETTINGS_STATUS_RESOLVERS: Record<string, (state: SettingsStatusInput) => 
   services: (state) => (state.services.length > 0 ? "completed" : "not-configured"),
   hours: (state) => (Object.values(state.hours).some((value) => value?.trim()) ? "completed" : "not-configured"),
   faq: (state) => (state.faq.length > 0 ? "completed" : "not-configured"),
-  "google-sheets": (state) => (state.googleSheetId ? "completed" : "not-configured"),
+  "google-sheets": (state) => (state.googleSheetId || state.excelWorkbookId ? "completed" : "not-configured"),
   "email-notifications": (state) => {
     if (state.notificationsEnabled === false) return "not-configured";
     return state.notificationEmail ? "completed" : "incomplete";
@@ -462,6 +463,12 @@ function GoogleSheetsSectionContent({
   startGoogleConnect,
   googleConnectMessage,
   googleConnectTone,
+  excelWorkbookId,
+  excelWorkbookUrl,
+  connectingExcel,
+  startMicrosoftConnect,
+  excelConnectMessage,
+  excelConnectTone,
   showManualSetup,
   setShowManualSetup,
 }: Readonly<{
@@ -478,6 +485,12 @@ function GoogleSheetsSectionContent({
   startGoogleConnect: () => Promise<void>;
   googleConnectMessage: string;
   googleConnectTone: "success" | "error" | "";
+  excelWorkbookId: string;
+  excelWorkbookUrl: string;
+  connectingExcel: boolean;
+  startMicrosoftConnect: () => Promise<void>;
+  excelConnectMessage: string;
+  excelConnectTone: "success" | "error" | "";
   showManualSetup: boolean;
   setShowManualSetup: Dispatch<SetStateAction<boolean>>;
 }>) {
@@ -540,13 +553,45 @@ function GoogleSheetsSectionContent({
             <div>
               <h4 className="text-sm font-semibold text-slate-900 mb-1">Microsoft Excel</h4>
               <p className="text-sm text-slate-500">
-                Excel quick connect is planned next. Google Sheets is live first so clinics can get running in one click.
+                Sign in with Microsoft and let Clinic AI create a starter Excel workbook in your OneDrive automatically.
               </p>
             </div>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
-              Coming soon
-            </span>
+            <Sheet className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
           </div>
+          <button
+            onClick={startMicrosoftConnect}
+            disabled={connectingExcel}
+            className="mt-4 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {connectingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Connect with Microsoft
+          </button>
+          {excelConnectMessage ? (
+            <p
+              className={`mt-3 text-sm ${
+                excelConnectTone === "error" ? "text-red-700" : "text-slate-700"
+              }`}
+            >
+              {excelConnectMessage}
+            </p>
+          ) : null}
+          {excelWorkbookId ? (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800">
+              Microsoft Excel is connected.
+              {excelWorkbookUrl ? (
+                <div className="mt-2">
+                  <a
+                    href={excelWorkbookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-slate-700 hover:text-slate-900"
+                  >
+                    Open workbook
+                  </a>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-slate-50">
@@ -927,6 +972,8 @@ export default function SettingsPage() {
   const [faq, setFaq] = useState<FaqEntry[]>([]);
   const [googleSheetId, setGoogleSheetId] = useState("");
   const [googleSheetTab, setGoogleSheetTab] = useState("Sheet1");
+  const [excelWorkbookId, setExcelWorkbookId] = useState("");
+  const [excelWorkbookUrl, setExcelWorkbookUrl] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const [availabilityEnabled, setAvailabilityEnabled] = useState(false);
@@ -941,6 +988,9 @@ export default function SettingsPage() {
   const [connectingGoogle, setConnectingGoogle] = useState(false);
   const [googleConnectMessage, setGoogleConnectMessage] = useState("");
   const [googleConnectTone, setGoogleConnectTone] = useState<"success" | "error" | "">("");
+  const [connectingExcel, setConnectingExcel] = useState(false);
+  const [excelConnectMessage, setExcelConnectMessage] = useState("");
+  const [excelConnectTone, setExcelConnectTone] = useState<"success" | "error" | "">("");
   const [showManualSetup, setShowManualSetup] = useState(false);
   const [queryParams, setQueryParams] = useState<URLSearchParams | null>(null);
 
@@ -974,6 +1024,8 @@ export default function SettingsPage() {
       setFaq(Array.isArray(data.faq) ? data.faq : []);
       setGoogleSheetId(data.google_sheet_id || "");
       setGoogleSheetTab(data.google_sheet_tab || "Sheet1");
+      setExcelWorkbookId(data.excel_workbook_id || "");
+      setExcelWorkbookUrl(data.excel_workbook_url || "");
       setNotificationsEnabled(!!data.notifications_enabled);
       setNotificationEmail(data.notification_email || "");
       setAvailabilityEnabled(!!data.availability_enabled);
@@ -1010,7 +1062,9 @@ export default function SettingsPage() {
   useEffect(() => {
     const connected = queryParams?.get("google_sheets_connected");
     const errorValue = queryParams?.get("google_sheets_error");
-    if (!connected && !errorValue) {
+    const excelConnected = queryParams?.get("excel_connected");
+    const excelError = queryParams?.get("excel_connect_error");
+    if (!connected && !errorValue && !excelConnected && !excelError) {
       return;
     }
 
@@ -1028,11 +1082,22 @@ export default function SettingsPage() {
       setGoogleConnectTone("error");
       setGoogleConnectMessage(errorValue);
     }
+    if (excelConnected === "1") {
+      setExcelConnectTone("success");
+      setExcelConnectMessage("Microsoft Excel connected. Your starter workbook is ready.");
+      void loadClinic();
+    } else if (excelError) {
+      setExcelConnectTone("error");
+      setExcelConnectMessage(excelError);
+    }
 
     const nextParams = new URLSearchParams(queryParams?.toString() || "");
     nextParams.delete("google_sheets_connected");
     nextParams.delete("google_sheet_id");
     nextParams.delete("google_sheets_error");
+    nextParams.delete("excel_connected");
+    nextParams.delete("excel_workbook_id");
+    nextParams.delete("excel_connect_error");
     const nextQuery = nextParams.toString();
     router.replace(nextQuery ? `/dashboard/settings?${nextQuery}` : "/dashboard/settings");
     setQueryParams(nextParams);
@@ -1150,6 +1215,34 @@ export default function SettingsPage() {
     }
   };
 
+  const startMicrosoftConnect = async () => {
+    setConnectingExcel(true);
+    setExcelConnectMessage("");
+    setExcelConnectTone("");
+
+    try {
+      const result = await api.clinics.startMicrosoftExcelConnect({
+        return_to: "/dashboard/settings?section=google-sheets",
+        tab_name: googleSheetTab || "Leads",
+        availability_enabled: availabilityEnabled,
+        availability_tab: availabilitySheetTab || "Availability",
+      });
+
+      if (!result.available || !result.authorization_url) {
+        setExcelConnectTone("error");
+        setExcelConnectMessage(result.detail || "Microsoft Excel quick connect is not available yet.");
+        return;
+      }
+
+      globalThis.location.assign(result.authorization_url);
+    } catch (err) {
+      setExcelConnectTone("error");
+      setExcelConnectMessage(err instanceof Error ? err.message : "Microsoft Excel quick connect failed.");
+    } finally {
+      setConnectingExcel(false);
+    }
+  };
+
   const handleTestEmail = async () => {
     setTestingEmail(true);
     setTestEmailResult(null);
@@ -1180,6 +1273,7 @@ export default function SettingsPage() {
     hours,
     faq,
     googleSheetId,
+    excelWorkbookId,
     notificationsEnabled,
     notificationEmail,
     availabilityEnabled,
@@ -1319,7 +1413,7 @@ export default function SettingsPage() {
 
         <SettingsSection
           sectionKey="google-sheets"
-          label="Google Sheets"
+          label="Spreadsheets"
           icon={Sheet}
           openSections={openSections}
           toggleSection={toggleSection}
@@ -1339,6 +1433,12 @@ export default function SettingsPage() {
             startGoogleConnect={startGoogleConnect}
             googleConnectMessage={googleConnectMessage}
             googleConnectTone={googleConnectTone}
+            excelWorkbookId={excelWorkbookId}
+            excelWorkbookUrl={excelWorkbookUrl}
+            connectingExcel={connectingExcel}
+            startMicrosoftConnect={startMicrosoftConnect}
+            excelConnectMessage={excelConnectMessage}
+            excelConnectTone={excelConnectTone}
             showManualSetup={showManualSetup}
             setShowManualSetup={setShowManualSetup}
           />

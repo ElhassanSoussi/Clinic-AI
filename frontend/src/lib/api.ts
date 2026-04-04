@@ -29,6 +29,7 @@ import type {
   CommunicationEvent,
   CommunicationSendPassResult,
   GoogleSheetsConnectResult,
+  MicrosoftExcelConnectResult,
 } from "@/types";
 import { getPublicApiUrl } from "@/lib/api-url";
 
@@ -280,6 +281,18 @@ export const api = {
       availability_tab?: string;
     }): Promise<GoogleSheetsConnectResult> {
       return request("/clinics/me/google-sheets/connect", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    startMicrosoftExcelConnect(data: {
+      return_to?: string;
+      tab_name?: string;
+      availability_enabled?: boolean;
+      availability_tab?: string;
+    }): Promise<MicrosoftExcelConnectResult> {
+      return request("/clinics/me/microsoft-excel/connect", {
         method: "POST",
         body: JSON.stringify(data),
       });

@@ -73,7 +73,7 @@ TRIAL_DURATION_DAYS = 14
 
 # Features gated by plan
 PLAN_FEATURE_GATES: dict[str, list[str]] = {
-    "google_sheets": ["professional", "premium"],
+    "google_sheets": ["trial", "professional", "premium"],
     "email_notifications": ["professional", "premium"],
     "availability_scheduling": ["professional", "premium"],
 }

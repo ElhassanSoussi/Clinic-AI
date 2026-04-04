@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     google_credentials_path: str = ""
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
+    microsoft_oauth_client_id: str = ""
+    microsoft_oauth_client_secret: str = ""
+    microsoft_oauth_tenant: str = "common"
     resend_api_key: str = ""
     resend_from_email: str = ""
     resend_from_domain: str = ""
@@ -84,6 +87,10 @@ class Settings(BaseSettings):
     @property
     def google_oauth_configured(self) -> bool:
         return bool(self.google_oauth_client_id and self.google_oauth_client_secret)
+
+    @property
+    def microsoft_oauth_configured(self) -> bool:
+        return bool(self.microsoft_oauth_client_id and self.microsoft_oauth_client_secret)
 
     @property
     def resend_sender_configured(self) -> bool:

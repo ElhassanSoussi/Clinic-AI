@@ -945,11 +945,10 @@ def reserve_selected_slot(context: ChatContext, lead_id: str) -> None:
     if not context.booking_data.slot_row_index or not context.clinic.get("availability_enabled"):
         return
     try:
-        from app.services.google_sheets import reserve_slot_in_sheet
+        from app.services.spreadsheet_sync import reserve_slot_for_clinic
 
-        reserve_slot_in_sheet(
-            context.clinic.get("google_sheet_id"),
-            context.clinic.get("availability_sheet_tab") or "Availability",
+        reserve_slot_for_clinic(
+            context.clinic,
             int(context.booking_data.slot_row_index),
             context.booking_data.name,
             lead_id,
@@ -1327,10 +1326,9 @@ def persist_user_message(db: Any, conversation_id: str, user_message: str) -> No
 def load_slot_context(clinic: dict) -> tuple[list, list[dict]]:
     available_slots: list = []
     if clinic.get("availability_enabled"):
-        available_slots = get_available_slots(
-            clinic.get("google_sheet_id"),
-            clinic.get("availability_sheet_tab") or "Availability",
-        )
+        from app.services.spreadsheet_sync import get_available_slots_for_clinic
+
+        available_slots = get_available_slots_for_clinic(clinic)
     return available_slots, format_slot_options(available_slots, max_slots=5)
 
 

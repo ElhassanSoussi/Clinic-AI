@@ -651,8 +651,8 @@ def build_system_readiness(clinic_id: str) -> dict[str, Any]:
     clinic = _maybe_single_data(
         db.table("clinics")
         .select(
-            "id, name, email, phone, plan, google_sheet_id, notifications_enabled, "
-            "notification_email, is_live"
+            "id, name, email, phone, plan, spreadsheet_provider, google_sheet_id, excel_workbook_id, "
+            "notifications_enabled, notification_email, is_live"
         )
         .eq("id", clinic_id)
     ) or {}
@@ -729,35 +729,63 @@ def build_system_readiness(clinic_id: str) -> dict[str, Any]:
             )
         )
 
+    spreadsheet_provider = _safe_text(clinic.get("spreadsheet_provider"))
+    google_ready = settings.google_credentials_configured and bool(get_gspread_client())
+    excel_ready = settings.microsoft_oauth_configured
+
     if not has_feature(plan_id, "google_sheets"):
         items.append(
             _system_readiness_item(
                 key="google_sheets",
-                label="Google Sheets",
+                label="Spreadsheet sync",
                 status="blocked",
                 scope="feature",
-                summary="Google Sheets is blocked on the current plan.",
-                detail="Lead sync and availability checks require a Professional or Premium plan.",
-                action="Upgrade the clinic plan before connecting Google Sheets.",
+                summary="Spreadsheet sync is blocked on the current plan.",
+                detail="This clinic plan does not currently include spreadsheet sync.",
+                action="Switch to a plan that includes spreadsheet sync before connecting Google Sheets or Excel.",
             )
         )
-    elif not settings.google_credentials_configured:
+    elif spreadsheet_provider == "excel":
         items.append(
             _system_readiness_item(
                 key="google_sheets",
-                label="Google Sheets",
+                label="Spreadsheet sync",
+                status="configured" if excel_ready and _safe_text(clinic.get("excel_workbook_id")) else "missing",
+                scope="feature",
+                summary=(
+                    "Microsoft Excel is configured."
+                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
+                    else "Microsoft Excel quick connect is not configured on the server yet."
+                ),
+                detail=(
+                    "This clinic is connected to Excel and spreadsheet sync is ready."
+                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
+                    else "Set Microsoft OAuth credentials before enabling Excel quick connect."
+                ),
+                action=(
+                    "No action needed."
+                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
+                    else "Set MICROSOFT_OAUTH_CLIENT_ID and MICROSOFT_OAUTH_CLIENT_SECRET."
+                ),
+            )
+        )        
+    elif not google_ready and not excel_ready:
+        items.append(
+            _system_readiness_item(
+                key="google_sheets",
+                label="Spreadsheet sync",
                 status="missing",
                 scope="feature",
-                summary="Google Sheets is not configured on the server yet.",
-                detail="The clinic can save a sheet ID, but sync and validation stay disabled until Google credentials are added.",
-                action="Set one of GOOGLE_CREDENTIALS_B64, GOOGLE_CREDENTIALS_JSON, or GOOGLE_CREDENTIALS_PATH.",
+                summary="Spreadsheet sync is not configured on the server yet.",
+                detail="Neither Google Sheets nor Microsoft Excel quick connect is configured for this environment.",
+                action="Set Google service credentials or Microsoft OAuth credentials.",
             )
         )
-    elif not get_gspread_client():
+    elif spreadsheet_provider == "google" and not google_ready:
         items.append(
             _system_readiness_item(
                 key="google_sheets",
-                label="Google Sheets",
+                label="Spreadsheet sync",
                 status="blocked",
                 scope="feature",
                 summary="Google Sheets credentials are present, but the client could not initialize.",
@@ -765,27 +793,51 @@ def build_system_readiness(clinic_id: str) -> dict[str, Any]:
                 action="Re-check the Google credentials payload and service-account access.",
             )
         )
-    elif not _safe_text(clinic.get("google_sheet_id")):
+    elif spreadsheet_provider == "excel" and not _safe_text(clinic.get("excel_workbook_id")):
         items.append(
             _system_readiness_item(
                 key="google_sheets",
-                label="Google Sheets",
+                label="Spreadsheet sync",
+                status="partially_configured",
+                scope="feature",
+                summary="Microsoft Excel quick connect is ready, but this clinic has not connected a workbook yet.",
+                detail="The runtime can connect to Excel, but no workbook is saved for this clinic.",
+                action="Use Connect with Microsoft in onboarding or settings.",
+            )
+        )
+    elif spreadsheet_provider == "google" and not _safe_text(clinic.get("google_sheet_id")):
+        items.append(
+            _system_readiness_item(
+                key="google_sheets",
+                label="Spreadsheet sync",
                 status="partially_configured",
                 scope="feature",
                 summary="Google Sheets is ready on the server, but this clinic has not connected a sheet yet.",
                 detail="The runtime can access Google Sheets, but no spreadsheet is configured for this clinic.",
-                action="Add the Google Sheet ID in Settings and validate the shared sheet.",
+                action="Use Connect with Google in onboarding or settings.",
+            )
+        )
+    elif not spreadsheet_provider and (google_ready or excel_ready):
+        items.append(
+            _system_readiness_item(
+                key="google_sheets",
+                label="Spreadsheet sync",
+                status="partially_configured",
+                scope="feature",
+                summary="Spreadsheet sync is available, but this clinic has not connected Google Sheets or Excel yet.",
+                detail="The server is ready for quick connect, but the clinic still needs to pick a spreadsheet provider.",
+                action="Use Connect with Google or Connect with Microsoft in onboarding or settings.",
             )
         )
     else:
         items.append(
             _system_readiness_item(
                 key="google_sheets",
-                label="Google Sheets",
+                label="Spreadsheet sync",
                 status="configured",
                 scope="feature",
-                summary="Google Sheets is configured.",
-                detail="This clinic has both server credentials and a saved spreadsheet connection for lead sync or availability checks.",
+                summary="Spreadsheet sync is configured.",
+                detail="This clinic has a saved spreadsheet connection for lead sync or availability checks.",
                 action="No action needed.",
             )
         )

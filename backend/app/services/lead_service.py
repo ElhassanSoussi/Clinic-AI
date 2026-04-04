@@ -50,11 +50,10 @@ def create_lead(clinic_id: str, data: dict) -> dict:
     try:
         clinic = db.table("clinics").select("*").eq("id", clinic_id).single().execute()
         
-        # Google Sheets Sync
-        if clinic.data and clinic.data.get("google_sheet_id"):
-            from app.services.google_sheets import append_lead_to_sheet
-            # Background thread not strictly necessary here, but we could. It's fast HTTP.
-            append_lead_to_sheet(clinic.data["google_sheet_id"], clinic.data["google_sheet_tab"], result.data[0])
+        if clinic.data:
+            from app.services.spreadsheet_sync import append_lead_for_clinic
+
+            append_lead_for_clinic(clinic.data, result.data[0])
             
         # Email Notifications (Async Fire-and-Forget)
         if clinic.data and clinic.data.get("notifications_enabled"):
@@ -110,10 +109,11 @@ def update_lead(clinic_id: str, lead_id: str, updates: dict) -> dict | None:
     # Google Sheets Status Writeback
     if "status" in filtered:
         try:
-            from app.services.google_sheets import update_lead_status_in_sheet
-            clinic = db.table("clinics").select("google_sheet_id, google_sheet_tab").eq("id", clinic_id).single().execute()
-            if clinic.data and clinic.data.get("google_sheet_id"):
-                update_lead_status_in_sheet(clinic.data["google_sheet_id"], clinic.data["google_sheet_tab"], lead_id, filtered["status"])
+            from app.services.spreadsheet_sync import update_lead_status_for_clinic
+
+            clinic = db.table("clinics").select("*").eq("id", clinic_id).single().execute()
+            if clinic.data:
+                update_lead_status_for_clinic(clinic.data, lead_id, filtered["status"])
         except Exception as e:
             logger.error(f"Failed to initiate Google Sheets status sync: {e}")
 

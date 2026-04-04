@@ -10,8 +10,12 @@ export interface Clinic {
   business_hours: Record<string, string>;
   services: string[];
   faq: FaqEntry[];
+  spreadsheet_provider?: "" | "google" | "excel";
   google_sheet_id?: string;
   google_sheet_tab?: string;
+  excel_workbook_id?: string;
+  excel_workbook_name?: string;
+  excel_workbook_url?: string;
   notifications_enabled?: boolean;
   notification_email?: string;
   availability_enabled?: boolean;
@@ -39,6 +43,12 @@ export interface Clinic {
 }
 
 export interface GoogleSheetsConnectResult {
+  available: boolean;
+  authorization_url: string;
+  detail: string;
+}
+
+export interface MicrosoftExcelConnectResult {
   available: boolean;
   authorization_url: string;
   detail: string;

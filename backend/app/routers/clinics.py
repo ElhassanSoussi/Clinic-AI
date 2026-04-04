@@ -8,6 +8,14 @@ from app.dependencies import get_current_user, get_supabase
 from fastapi.responses import RedirectResponse
 from app.schemas.clinic import ClinicResponse, ClinicUpdateRequest
 from app.services.email_service import send_test_notification_email
+from app.services.excel_workbooks import (
+    build_microsoft_connect_url,
+    create_connected_workbook_for_clinic,
+    exchange_microsoft_connect_code,
+    microsoft_excel_quick_connect_available,
+    sign_microsoft_connect_state,
+    verify_microsoft_connect_state,
+)
 from app.services.google_sheets import (
     build_google_connect_url,
     create_connected_sheet_for_clinic,
@@ -163,6 +171,19 @@ class GoogleSheetsConnectResponse(BaseModel):
     detail: str = ""
 
 
+class MicrosoftExcelConnectRequest(BaseModel):
+    return_to: Optional[str] = "/dashboard/settings?section=google-sheets"
+    tab_name: Optional[str] = "Leads"
+    availability_enabled: bool = False
+    availability_tab: Optional[str] = "Availability"
+
+
+class MicrosoftExcelConnectResponse(BaseModel):
+    available: bool
+    authorization_url: str = ""
+    detail: str = ""
+
+
 def _append_query_params(url: str, **params: str) -> str:
     parsed = urlparse(url)
     query = dict(parse_qsl(parsed.query, keep_blank_values=True))
@@ -192,6 +213,17 @@ def _google_callback_url(request: Request) -> str:
     return f"{api_base}/api/clinics/google-sheets/callback"
 
 
+def _microsoft_callback_url(request: Request) -> str:
+    settings = get_settings()
+    parsed = urlparse(str(request.url))
+    api_base = f"{parsed.scheme}://{parsed.netloc}"
+    if settings.frontend_app_url:
+        forwarded_proto = request.headers.get("x-forwarded-proto") or parsed.scheme
+        forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host") or parsed.netloc
+        api_base = f"{forwarded_proto}://{forwarded_host}"
+    return f"{api_base}/api/clinics/microsoft-excel/callback"
+
+
 @router.post("/me/validate-sheets", response_model=SheetsValidateResponse)
 async def validate_google_sheets(
     req: SheetsValidateRequest,
@@ -204,7 +236,7 @@ async def validate_google_sheets(
     if not has_feature(plan_id, "google_sheets"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Google Sheets integration requires a Professional or Premium plan.",
+            detail="Spreadsheet sync is not available on the current plan.",
         )
 
     from app.services.google_sheets import get_gspread_client, extract_spreadsheet_id
@@ -269,7 +301,7 @@ async def start_google_sheets_connect(
     if not has_feature(plan_id, "google_sheets"):
         return GoogleSheetsConnectResponse(
             available=False,
-            detail="Google Sheets quick connect requires a Professional or Premium plan.",
+            detail="Spreadsheet quick connect is not available on the current plan.",
         )
 
     if not google_quick_connect_available():
@@ -344,8 +376,13 @@ async def complete_google_sheets_connect(
 
         db.table("clinics").update(
             {
+                "spreadsheet_provider": "google",
                 "google_sheet_id": created["sheet_id"],
                 "google_sheet_tab": created["lead_tab_name"],
+                "excel_workbook_id": "",
+                "excel_workbook_name": "",
+                "excel_workbook_url": "",
+                "microsoft_excel_refresh_token": "",
                 "availability_enabled": bool(payload.get("availability_enabled")),
                 "availability_sheet_tab": created["availability_tab_name"],
             }
@@ -363,5 +400,124 @@ async def complete_google_sheets_connect(
         target = _append_query_params(
             f"{frontend_base}/dashboard/settings?section=google-sheets",
             google_sheets_error=str(exc),
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+
+@router.post("/me/microsoft-excel/connect", response_model=MicrosoftExcelConnectResponse)
+async def start_microsoft_excel_connect(
+    req: MicrosoftExcelConnectRequest,
+    request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.pricing import has_feature
+
+    clinic = current_user.get("clinics", {})
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=CLINIC_NOT_FOUND)
+
+    plan_id = clinic.get("plan", "trial")
+    if not has_feature(plan_id, "google_sheets"):
+        return MicrosoftExcelConnectResponse(
+            available=False,
+            detail="Spreadsheet quick connect is not available on the current plan.",
+        )
+
+    if not microsoft_excel_quick_connect_available():
+        return MicrosoftExcelConnectResponse(
+            available=False,
+            detail="Microsoft Excel quick connect is not configured on the server yet.",
+        )
+
+    state = sign_microsoft_connect_state(
+        {
+            "clinic_id": clinic["id"],
+            "user_id": current_user["id"],
+            "return_to": req.return_to or "/dashboard/settings?section=google-sheets",
+            "tab_name": req.tab_name or "Leads",
+            "availability_enabled": req.availability_enabled,
+            "availability_tab": req.availability_tab or "Availability",
+        }
+    )
+    authorization_url = build_microsoft_connect_url(_microsoft_callback_url(request), state)
+    return MicrosoftExcelConnectResponse(
+        available=True,
+        authorization_url=authorization_url,
+        detail="Microsoft Excel quick connect is ready.",
+    )
+
+
+@router.get("/microsoft-excel/callback")
+async def complete_microsoft_excel_connect(
+    request: Request,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    error: Optional[str] = None,
+    error_description: Optional[str] = None,
+):
+    frontend_base = _frontend_redirect_base(request)
+
+    if error or error_description:
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            excel_connect_error=error_description or error or "Microsoft connection failed.",
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+    if not code or not state:
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            excel_connect_error="Missing Microsoft authorization code. Please try again.",
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+    try:
+        payload = verify_microsoft_connect_state(state)
+        token_payload = await exchange_microsoft_connect_code(code, _microsoft_callback_url(request))
+        access_token = str(token_payload.get("access_token") or "").strip()
+        refresh_token = str(token_payload.get("refresh_token") or "").strip()
+        if not access_token or not refresh_token:
+            raise RuntimeError("Microsoft did not return the required tokens.")
+
+        db = get_supabase()
+        clinic_result = db.table("clinics").select("id, name").eq("id", payload["clinic_id"]).single().execute()
+        clinic = clinic_result.data or {}
+        if not clinic:
+            raise RuntimeError("Clinic not found for Microsoft Excel connection.")
+
+        created = await create_connected_workbook_for_clinic(
+            access_token=access_token,
+            clinic_name=clinic.get("name") or "Clinic AI",
+            lead_tab_name=str(payload.get("tab_name") or "Leads"),
+            availability_enabled=bool(payload.get("availability_enabled")),
+            availability_tab_name=str(payload.get("availability_tab") or "Availability"),
+        )
+
+        db.table("clinics").update(
+            {
+                "spreadsheet_provider": "excel",
+                "google_sheet_id": "",
+                "excel_workbook_id": created["workbook_id"],
+                "excel_workbook_name": created["workbook_name"],
+                "excel_workbook_url": created["workbook_url"],
+                "microsoft_excel_refresh_token": refresh_token,
+                "google_sheet_tab": created["lead_tab_name"],
+                "availability_enabled": bool(payload.get("availability_enabled")),
+                "availability_sheet_tab": created["availability_tab_name"],
+            }
+        ).eq("id", payload["clinic_id"]).execute()
+
+        return_to = str(payload.get("return_to") or "/dashboard/settings?section=google-sheets")
+        target = _append_query_params(
+            f"{frontend_base}{return_to}",
+            excel_connected="1",
+            excel_workbook_id=created["workbook_id"],
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+    except Exception as exc:
+        logger.error(f"Microsoft Excel quick connect failed: {exc}")
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            excel_connect_error=str(exc),
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
