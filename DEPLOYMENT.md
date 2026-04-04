@@ -49,6 +49,8 @@ Feature-specific backend env vars:
   - `RESEND_FROM_EMAIL` or `RESEND_FROM_DOMAIN`
 - Google Sheets:
   - `GOOGLE_CREDENTIALS_B64` or `GOOGLE_CREDENTIALS_JSON` or `GOOGLE_CREDENTIALS_PATH`
+  - `GOOGLE_OAUTH_CLIENT_ID`
+  - `GOOGLE_OAUTH_CLIENT_SECRET`
 - Admin:
   - `ADMIN_SECRET`
 
@@ -89,7 +91,15 @@ If Vercel shows `No fastapi entrypoint found`, the project is building the repo 
      - `https://<your-project-ref>.supabase.co/auth/v1/callback`
    - add site URL / redirect URL for:
      - `https://clinicaireply.com/auth/callback`
-6. If Microsoft sign-in is live:
+6. If Google Sheets quick connect is live:
+   - create a Google OAuth web app
+   - add backend callback URL:
+     - `https://api.clinicaireply.com/api/clinics/google-sheets/callback`
+   - set Render env vars:
+     - `GOOGLE_OAUTH_CLIENT_ID`
+     - `GOOGLE_OAUTH_CLIENT_SECRET`
+   - keep a service account configured too, because Clinic AI still uses it for ongoing sheet sync after setup
+7. If Microsoft sign-in is live:
    - enable the Azure provider in Supabase Auth
    - use the Supabase callback URL in the Azure app registration:
      - `https://<your-project-ref>.supabase.co/auth/v1/callback`

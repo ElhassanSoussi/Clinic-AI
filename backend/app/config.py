@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     google_credentials_b64: str = ""
     google_credentials_json: str = ""
     google_credentials_path: str = ""
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
     resend_api_key: str = ""
     resend_from_email: str = ""
     resend_from_domain: str = ""
@@ -78,6 +80,10 @@ class Settings(BaseSettings):
             or self.google_credentials_json
             or self.google_credentials_path
         )
+
+    @property
+    def google_oauth_configured(self) -> bool:
+        return bool(self.google_oauth_client_id and self.google_oauth_client_secret)
 
     @property
     def resend_sender_configured(self) -> bool:

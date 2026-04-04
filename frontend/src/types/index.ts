@@ -38,6 +38,12 @@ export interface Clinic {
   updated_at: string;
 }
 
+export interface GoogleSheetsConnectResult {
+  available: boolean;
+  authorization_url: string;
+  detail: string;
+}
+
 export interface FaqEntry {
   question: string;
   answer: string;

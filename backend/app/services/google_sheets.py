@@ -1,9 +1,16 @@
 import base64
+import hashlib
+import hmac
 import json
+import secrets
+import time
 from pathlib import Path
+from urllib.parse import urlencode
+
 import gspread
 from google.oauth2 import credentials as oauth_credentials
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+import httpx
 from app.config import get_settings
 from app.utils.logger import get_logger
 
@@ -15,6 +22,14 @@ logger = get_logger(__name__)
 # require the Sheets scope.
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
+]
+
+GOOGLE_CONNECT_SCOPES = [
+    "openid",
+    "email",
+    "profile",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
 ]
 
 HEADERS = [
@@ -67,6 +82,12 @@ def get_gspread_client() -> gspread.Client | None:
         return None
 
 
+def get_service_account_email() -> str:
+    settings = get_settings()
+    creds_dict = _load_google_credentials_dict(settings) or {}
+    return str(creds_dict.get("client_email") or "").strip()
+
+
 def _load_google_credentials_dict(settings) -> dict | None:
     """Load Google credentials from env in priority order."""
     b64_creds = (settings.google_credentials_b64 or "").strip()
@@ -110,6 +131,162 @@ def _credentials_source(settings) -> str:
     if (settings.google_credentials_path or "").strip():
         return "GOOGLE_CREDENTIALS_PATH"
     return "none"
+
+
+def google_quick_connect_available() -> bool:
+    settings = get_settings()
+    return bool(settings.google_oauth_configured and get_service_account_email())
+
+
+def build_google_connect_url(
+    redirect_uri: str,
+    state: str,
+) -> str:
+    settings = get_settings()
+    query = urlencode(
+        {
+            "client_id": settings.google_oauth_client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "access_type": "online",
+            "prompt": "consent select_account",
+            "scope": " ".join(GOOGLE_CONNECT_SCOPES),
+            "state": state,
+        }
+    )
+    return f"https://accounts.google.com/o/oauth2/v2/auth?{query}"
+
+
+def sign_google_connect_state(payload: dict) -> str:
+    settings = get_settings()
+    secret = (settings.admin_secret or settings.supabase_service_key).encode("utf-8")
+    envelope = {
+        **payload,
+        "nonce": secrets.token_urlsafe(12),
+        "ts": int(time.time()),
+    }
+    raw = json.dumps(envelope, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    signature = hmac.new(secret, raw, hashlib.sha256).hexdigest()
+    return base64.urlsafe_b64encode(raw).decode("utf-8").rstrip("=") + "." + signature
+
+
+def verify_google_connect_state(state: str, max_age_seconds: int = 900) -> dict:
+    settings = get_settings()
+    secret = (settings.admin_secret or settings.supabase_service_key).encode("utf-8")
+
+    try:
+        encoded, signature = state.split(".", 1)
+        padded = encoded + "=" * (-len(encoded) % 4)
+        raw = base64.urlsafe_b64decode(padded.encode("utf-8"))
+        expected = hmac.new(secret, raw, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            raise ValueError("Invalid signature")
+        payload = json.loads(raw.decode("utf-8"))
+    except Exception as exc:
+        raise ValueError("Invalid Google connect state") from exc
+
+    ts = int(payload.get("ts") or 0)
+    if not ts or time.time() - ts > max_age_seconds:
+        raise ValueError("Google connect state expired")
+
+    return payload
+
+
+async def exchange_google_connect_code(
+    code: str,
+    redirect_uri: str,
+) -> dict:
+    settings = get_settings()
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        response = await client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": settings.google_oauth_client_id,
+                "client_secret": settings.google_oauth_client_secret,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            },
+            headers={"Accept": "application/json"},
+        )
+
+    payload = response.json()
+    if response.status_code >= 400:
+        detail = payload.get("error_description") or payload.get("error") or "Google token exchange failed"
+        raise RuntimeError(detail)
+
+    access_token = str(payload.get("access_token") or "").strip()
+    if not access_token:
+        raise RuntimeError("Google token exchange did not return an access token")
+
+    return payload
+
+
+def get_google_connect_client(access_token: str) -> gspread.Client:
+    credentials = oauth_credentials.Credentials(
+        token=access_token,
+        scopes=GOOGLE_CONNECT_SCOPES,
+    )
+    return gspread.authorize(credentials)
+
+
+def ensure_sheet_headers(worksheet: gspread.Worksheet) -> None:
+    existing_data = worksheet.get_all_values()
+    if not existing_data:
+        worksheet.append_row(HEADERS)
+
+
+def ensure_availability_headers(worksheet: gspread.Worksheet) -> None:
+    existing_data = worksheet.get_all_values()
+    if not existing_data:
+        worksheet.append_row(["Date", "Time", "Status", "Patient Name", "Lead ID"])
+
+
+def create_connected_sheet_for_clinic(
+    *,
+    access_token: str,
+    clinic_name: str,
+    lead_tab_name: str,
+    availability_enabled: bool,
+    availability_tab_name: str,
+) -> dict:
+    client = get_google_connect_client(access_token)
+    spreadsheet = client.create(f"{clinic_name} Leads")
+    lead_tab = lead_tab_name.strip() or "Leads"
+
+    try:
+        worksheet = spreadsheet.sheet1
+        if worksheet.title != lead_tab:
+            worksheet.update_title(lead_tab)
+    except Exception:
+        worksheet = spreadsheet.sheet1
+
+    ensure_sheet_headers(worksheet)
+
+    if availability_enabled:
+        try:
+            availability = spreadsheet.worksheet(availability_tab_name or "Availability")
+        except gspread.WorksheetNotFound:
+            availability = spreadsheet.add_worksheet(
+                title=availability_tab_name or "Availability",
+                rows=200,
+                cols=5,
+            )
+        ensure_availability_headers(availability)
+
+    service_account_email = get_service_account_email()
+    if not service_account_email:
+        raise RuntimeError("Clinic AI Google service account is not configured on the server")
+
+    spreadsheet.share(service_account_email, perm_type="user", role="writer", notify=False)
+
+    return {
+        "sheet_id": spreadsheet.id,
+        "sheet_title": spreadsheet.title,
+        "sheet_url": f"https://docs.google.com/spreadsheets/d/{spreadsheet.id}/edit",
+        "lead_tab_name": lead_tab,
+        "availability_tab_name": availability_tab_name or "Availability",
+    }
 
 def extract_spreadsheet_id(url_or_id: str) -> str:
     # If it's a full URL, extract the ID

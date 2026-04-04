@@ -28,6 +28,7 @@ import type {
   ChannelReadiness,
   CommunicationEvent,
   CommunicationSendPassResult,
+  GoogleSheetsConnectResult,
 } from "@/types";
 import { getPublicApiUrl } from "@/lib/api-url";
 
@@ -267,6 +268,18 @@ export const api = {
       availability_tab?: string;
     }): Promise<SheetsValidation> {
       return request("/clinics/me/validate-sheets", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    startGoogleSheetsConnect(data: {
+      return_to?: string;
+      tab_name?: string;
+      availability_enabled?: boolean;
+      availability_tab?: string;
+    }): Promise<GoogleSheetsConnectResult> {
+      return request("/clinics/me/google-sheets/connect", {
         method: "POST",
         body: JSON.stringify(data),
       });

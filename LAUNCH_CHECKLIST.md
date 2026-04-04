@@ -24,6 +24,7 @@
   - `RESEND_FROM_EMAIL` or `RESEND_FROM_DOMAIN`
 - [ ] **Google Sheets credentials** if sheet sync is live:
   - `GOOGLE_CREDENTIALS_B64` or `GOOGLE_CREDENTIALS_JSON` or `GOOGLE_CREDENTIALS_PATH`
+  - `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` if Google quick connect is live
 - [ ] **Admin secret** only if protected admin routes are intentionally enabled:
   - `ADMIN_SECRET`
 - [ ] **Supabase** — Schema applied, Auth configured:
@@ -50,6 +51,8 @@
   - Webhook signing secret set
 - [ ] **Email** — Resend domain verified, API key set
 - [ ] **Google Sheets** (if used) — `GOOGLE_CREDENTIALS_B64` set with base64 JSON
+- [ ] **Google Sheets quick connect** (if used) — Google OAuth web app includes:
+  - `https://api.clinicaireply.com/api/clinics/google-sheets/callback`
 - [ ] **Frontend builds** — `npm run build` succeeds locally with production env vars
 - [ ] **No localhost** — Grep for `localhost` in production env vars (should be zero)
 - [ ] **Readiness surface reviewed** — Operations → System readiness shows only the expected blocked or partial items
@@ -114,7 +117,8 @@
 
 ### Google Sheets Sync
 
-- [ ] Settings page → test sheet connection
+- [ ] Onboarding or Settings → Connect with Google creates a starter sheet
+- [ ] Settings page → test manual sheet connection if advanced setup is used
 - [ ] New lead syncs to Google Sheet
 
 ### Email Notifications

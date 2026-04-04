@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   Save,
   Loader2,
@@ -23,12 +24,14 @@ import {
   Send,
   ExternalLink,
   ChevronDown,
+  ChevronRight,
   Building2,
   MessageCircle,
   Stethoscope,
   Clock,
   HelpCircle,
   Code,
+  Sparkles,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
@@ -455,6 +458,12 @@ function GoogleSheetsSectionContent({
   sheetsValidation,
   availabilityEnabled,
   availabilitySheetTab,
+  connectingGoogle,
+  startGoogleConnect,
+  googleConnectMessage,
+  googleConnectTone,
+  showManualSetup,
+  setShowManualSetup,
 }: Readonly<{
   googleSheetId: string;
   setGoogleSheetId: (value: string) => void;
@@ -465,91 +474,185 @@ function GoogleSheetsSectionContent({
   sheetsValidation: SheetsValidation | null;
   availabilityEnabled: boolean;
   availabilitySheetTab: string;
+  connectingGoogle: boolean;
+  startGoogleConnect: () => Promise<void>;
+  googleConnectMessage: string;
+  googleConnectTone: "success" | "error" | "";
+  showManualSetup: boolean;
+  setShowManualSetup: Dispatch<SetStateAction<boolean>>;
 }>) {
+  const connectedSheetUrl = googleSheetId
+    ? `https://docs.google.com/spreadsheets/d/${googleSheetId}/edit`
+    : "";
+
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">
-        Automatically sync new leads to your Google Sheet. Share as <b>Editor</b> with: <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 select-all">clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com</code>
-      </p>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="google-sheet-id" className="block text-sm font-medium text-slate-700 mb-1.5">
-            Spreadsheet ID or URL
-          </label>
-          <input
-            id="google-sheet-id"
-            type="text"
-            value={googleSheetId}
-            onChange={(e) => setGoogleSheetId(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-            placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRYFa..."
-          />
-        </div>
-        <div>
-          <label htmlFor="google-sheet-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
-            Tab / Sheet Name
-          </label>
-          <input
-            id="google-sheet-tab"
-            type="text"
-            value={googleSheetTab}
-            onChange={(e) => setGoogleSheetTab(e.target.value)}
-            className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-            placeholder="Sheet1"
-          />
-        </div>
-        {googleSheetId.trim() && (
+      <div className="space-y-6">
+        <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-800 mb-1">
+                Google Sheets quick connect
+              </h4>
+              <p className="text-sm text-emerald-700">
+                Sign in with Google and let Clinic AI create a starter spreadsheet for your clinic automatically.
+              </p>
+            </div>
+            <Sheet className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          </div>
           <button
-            onClick={handleValidateSheets}
-            disabled={validatingSheets}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+            onClick={startGoogleConnect}
+            disabled={connectingGoogle}
+            className="mt-4 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            {validatingSheets ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Sheet className="w-4 h-4" />
-            )}
-            Test Connection
+            {connectingGoogle ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Connect with Google
           </button>
-        )}
-        {sheetsValidation && (
-          <div
-            className={`p-4 rounded-lg border ${
-              sheetsValidation.connected
-                ? "bg-emerald-50 border-emerald-200"
-                : "bg-red-50 border-red-200"
-            }`}
-          >
-            <div className="flex items-start gap-2">
-              {sheetsValidation.connected ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-              )}
-              <div className="space-y-1 text-sm">
-                {sheetsValidation.connected ? (
-                  <>
-                    <p className="font-medium text-emerald-800">
-                      Connected to &quot;{sheetsValidation.sheet_title}&quot;
-                    </p>
-                    <p className="text-emerald-700">
-                      Leads tab ({googleSheetTab}):{" "}
-                      {sheetsValidation.tab_found ? "Found" : "Not found"}
-                    </p>
-                    {availabilityEnabled && (
-                      <p className="text-emerald-700">
-                        Availability tab ({availabilitySheetTab}):{" "}
-                        {availabilityValidationLabel(sheetsValidation)}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-red-700">{sheetsValidation.error}</p>
-                )}
+          {googleConnectMessage ? (
+            <p
+              className={`mt-3 text-sm ${
+                googleConnectTone === "error" ? "text-red-700" : "text-emerald-800"
+              }`}
+            >
+              {googleConnectMessage}
+            </p>
+          ) : null}
+          {googleSheetId ? (
+            <div className="mt-4 rounded-lg border border-emerald-200 bg-white p-3 text-sm text-emerald-800">
+              Google Sheets is connected.
+              <div className="mt-2 flex flex-wrap gap-3">
+                <code className="rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-900">{googleSheetId}</code>
+                <a
+                  href={connectedSheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-emerald-700 hover:text-emerald-800"
+                >
+                  Open sheet
+                </a>
               </div>
             </div>
+          ) : null}
+        </div>
+
+        <div className="p-4 rounded-xl border border-slate-200 bg-white">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h4 className="text-sm font-semibold text-slate-900 mb-1">Microsoft Excel</h4>
+              <p className="text-sm text-slate-500">
+                Excel quick connect is planned next. Google Sheets is live first so clinics can get running in one click.
+              </p>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+              Coming soon
+            </span>
           </div>
-        )}
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50">
+          <button
+            onClick={() => setShowManualSetup((current) => !current)}
+            className="w-full flex items-center justify-between px-4 py-3 text-left"
+          >
+            <div>
+              <h4 className="text-sm font-semibold text-slate-900">Advanced manual setup</h4>
+              <p className="text-xs text-slate-500 mt-1">
+                Use your own spreadsheet ID if you do not want quick connect.
+              </p>
+            </div>
+            <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${showManualSetup ? "rotate-90" : ""}`} />
+          </button>
+
+          {showManualSetup ? (
+            <div className="border-t border-slate-200 px-4 py-4 space-y-4 bg-white rounded-b-xl">
+              <p className="text-xs text-slate-500">
+                If you prefer manual setup, share your sheet as <b>Editor</b> with{" "}
+                <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 select-all">
+                  clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
+                </code>
+                {" "}and paste the sheet URL below.
+              </p>
+              <div>
+                <label htmlFor="google-sheet-id" className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Spreadsheet ID or URL
+                </label>
+                <input
+                  id="google-sheet-id"
+                  type="text"
+                  value={googleSheetId}
+                  onChange={(e) => setGoogleSheetId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRYFa..."
+                />
+              </div>
+              <div>
+                <label htmlFor="google-sheet-tab" className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Tab / Sheet Name
+                </label>
+                <input
+                  id="google-sheet-tab"
+                  type="text"
+                  value={googleSheetTab}
+                  onChange={(e) => setGoogleSheetTab(e.target.value)}
+                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  placeholder="Sheet1"
+                />
+              </div>
+              {googleSheetId.trim() && (
+                <button
+                  onClick={handleValidateSheets}
+                  disabled={validatingSheets}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                >
+                  {validatingSheets ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sheet className="w-4 h-4" />
+                  )}
+                  Test Connection
+                </button>
+              )}
+              {sheetsValidation && (
+                <div
+                  className={`p-4 rounded-lg border ${
+                    sheetsValidation.connected
+                      ? "bg-emerald-50 border-emerald-200"
+                      : "bg-red-50 border-red-200"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    {sheetsValidation.connected ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-1 text-sm">
+                      {sheetsValidation.connected ? (
+                        <>
+                          <p className="font-medium text-emerald-800">
+                            Connected to &quot;{sheetsValidation.sheet_title}&quot;
+                          </p>
+                          <p className="text-emerald-700">
+                            Leads tab ({googleSheetTab}):{" "}
+                            {sheetsValidation.tab_found ? "Found" : "Not found"}
+                          </p>
+                          {availabilityEnabled && (
+                            <p className="text-emerald-700">
+                              Availability tab ({availabilitySheetTab}):{" "}
+                              {availabilityValidationLabel(sheetsValidation)}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-red-700">{sheetsValidation.error}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -805,6 +908,7 @@ function EmbedSectionContent({
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -834,6 +938,11 @@ export default function SettingsPage() {
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<{ success: boolean; message: string } | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
+  const [connectingGoogle, setConnectingGoogle] = useState(false);
+  const [googleConnectMessage, setGoogleConnectMessage] = useState("");
+  const [googleConnectTone, setGoogleConnectTone] = useState<"success" | "error" | "">("");
+  const [showManualSetup, setShowManualSetup] = useState(false);
+  const [queryParams, setQueryParams] = useState<URLSearchParams | null>(null);
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
@@ -881,6 +990,53 @@ export default function SettingsPage() {
   useEffect(() => {
     loadClinic();
   }, [loadClinic]);
+
+  useEffect(() => {
+    if (globalThis.window === undefined) return;
+    setQueryParams(new URLSearchParams(globalThis.location.search));
+  }, []);
+
+  useEffect(() => {
+    const section = queryParams?.get("section");
+    if (section) {
+      setOpenSections((current) => {
+        const next = new Set(current);
+        next.add(section);
+        return next;
+      });
+    }
+  }, [queryParams]);
+
+  useEffect(() => {
+    const connected = queryParams?.get("google_sheets_connected");
+    const errorValue = queryParams?.get("google_sheets_error");
+    if (!connected && !errorValue) {
+      return;
+    }
+
+    setOpenSections((current) => {
+      const next = new Set(current);
+      next.add("google-sheets");
+      return next;
+    });
+
+    if (connected === "1") {
+      setGoogleConnectTone("success");
+      setGoogleConnectMessage("Google Sheets connected. Your starter sheet is ready.");
+      void loadClinic();
+    } else if (errorValue) {
+      setGoogleConnectTone("error");
+      setGoogleConnectMessage(errorValue);
+    }
+
+    const nextParams = new URLSearchParams(queryParams?.toString() || "");
+    nextParams.delete("google_sheets_connected");
+    nextParams.delete("google_sheet_id");
+    nextParams.delete("google_sheets_error");
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `/dashboard/settings?${nextQuery}` : "/dashboard/settings");
+    setQueryParams(nextParams);
+  }, [loadClinic, queryParams, router]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -963,6 +1119,34 @@ export default function SettingsPage() {
       });
     } finally {
       setValidatingSheets(false);
+    }
+  };
+
+  const startGoogleConnect = async () => {
+    setConnectingGoogle(true);
+    setGoogleConnectMessage("");
+    setGoogleConnectTone("");
+
+    try {
+      const result = await api.clinics.startGoogleSheetsConnect({
+        return_to: "/dashboard/settings?section=google-sheets",
+        tab_name: googleSheetTab || "Leads",
+        availability_enabled: availabilityEnabled,
+        availability_tab: availabilitySheetTab || "Availability",
+      });
+
+      if (!result.available || !result.authorization_url) {
+        setGoogleConnectTone("error");
+        setGoogleConnectMessage(result.detail || "Google Sheets quick connect is not available yet.");
+        return;
+      }
+
+      globalThis.location.assign(result.authorization_url);
+    } catch (err) {
+      setGoogleConnectTone("error");
+      setGoogleConnectMessage(err instanceof Error ? err.message : "Google Sheets quick connect failed.");
+    } finally {
+      setConnectingGoogle(false);
     }
   };
 
@@ -1151,6 +1335,12 @@ export default function SettingsPage() {
             sheetsValidation={sheetsValidation}
             availabilityEnabled={availabilityEnabled}
             availabilitySheetTab={availabilitySheetTab}
+            connectingGoogle={connectingGoogle}
+            startGoogleConnect={startGoogleConnect}
+            googleConnectMessage={googleConnectMessage}
+            googleConnectTone={googleConnectTone}
+            showManualSetup={showManualSetup}
+            setShowManualSetup={setShowManualSetup}
           />
         </SettingsSection>
 

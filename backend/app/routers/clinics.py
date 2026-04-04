@@ -1,10 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from typing import Annotated, Optional
 
 from app.dependencies import get_current_user, get_supabase
+from fastapi.responses import RedirectResponse
 from app.schemas.clinic import ClinicResponse, ClinicUpdateRequest
 from app.services.email_service import send_test_notification_email
+from app.services.google_sheets import (
+    build_google_connect_url,
+    create_connected_sheet_for_clinic,
+    exchange_google_connect_code,
+    google_quick_connect_available,
+    sign_google_connect_state,
+    verify_google_connect_state,
+)
+from app.config import get_settings
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -138,6 +150,48 @@ class SheetsValidateResponse(BaseModel):
     error: Optional[str] = None
 
 
+class GoogleSheetsConnectRequest(BaseModel):
+    return_to: Optional[str] = "/dashboard/settings?section=google-sheets"
+    tab_name: Optional[str] = "Leads"
+    availability_enabled: bool = False
+    availability_tab: Optional[str] = "Availability"
+
+
+class GoogleSheetsConnectResponse(BaseModel):
+    available: bool
+    authorization_url: str = ""
+    detail: str = ""
+
+
+def _append_query_params(url: str, **params: str) -> str:
+    parsed = urlparse(url)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query.update({key: value for key, value in params.items() if value})
+    return urlunparse(parsed._replace(query=urlencode(query)))
+
+
+def _frontend_redirect_base(request: Request) -> str:
+    settings = get_settings()
+    frontend_url = (settings.frontend_app_url or "").strip()
+    if frontend_url:
+        return frontend_url.rstrip("/")
+
+    request_url = str(request.url)
+    parsed = urlparse(request_url)
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+def _google_callback_url(request: Request) -> str:
+    settings = get_settings()
+    parsed = urlparse(str(request.url))
+    api_base = f"{parsed.scheme}://{parsed.netloc}"
+    if settings.frontend_app_url:
+        forwarded_proto = request.headers.get("x-forwarded-proto") or parsed.scheme
+        forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host") or parsed.netloc
+        api_base = f"{forwarded_proto}://{forwarded_host}"
+    return f"{api_base}/api/clinics/google-sheets/callback"
+
+
 @router.post("/me/validate-sheets", response_model=SheetsValidateResponse)
 async def validate_google_sheets(
     req: SheetsValidateRequest,
@@ -197,3 +251,117 @@ async def validate_google_sheets(
             result.availability_tab_found = False
 
     return result
+
+
+@router.post("/me/google-sheets/connect", response_model=GoogleSheetsConnectResponse)
+async def start_google_sheets_connect(
+    req: GoogleSheetsConnectRequest,
+    request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.pricing import has_feature
+
+    clinic = current_user.get("clinics", {})
+    if not clinic:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=CLINIC_NOT_FOUND)
+
+    plan_id = clinic.get("plan", "trial")
+    if not has_feature(plan_id, "google_sheets"):
+        return GoogleSheetsConnectResponse(
+            available=False,
+            detail="Google Sheets quick connect requires a Professional or Premium plan.",
+        )
+
+    if not google_quick_connect_available():
+        return GoogleSheetsConnectResponse(
+            available=False,
+            detail="Google Sheets quick connect is not configured on the server yet.",
+        )
+
+    state = sign_google_connect_state(
+        {
+            "clinic_id": clinic["id"],
+            "user_id": current_user["id"],
+            "return_to": req.return_to or "/dashboard/settings?section=google-sheets",
+            "tab_name": req.tab_name or "Leads",
+            "availability_enabled": req.availability_enabled,
+            "availability_tab": req.availability_tab or "Availability",
+        }
+    )
+    callback_url = _google_callback_url(request)
+    authorization_url = build_google_connect_url(callback_url, state)
+    return GoogleSheetsConnectResponse(
+        available=True,
+        authorization_url=authorization_url,
+        detail="Google quick connect is ready.",
+    )
+
+
+@router.get("/google-sheets/callback")
+async def complete_google_sheets_connect(
+    request: Request,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    error: Optional[str] = None,
+    error_description: Optional[str] = None,
+):
+    frontend_base = _frontend_redirect_base(request)
+
+    if error or error_description:
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            google_sheets_error=error_description or error or "Google connection failed.",
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+    if not code or not state:
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            google_sheets_error="Missing Google authorization code. Please try again.",
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+    try:
+        payload = verify_google_connect_state(state)
+        token_payload = await exchange_google_connect_code(code, _google_callback_url(request))
+        access_token = str(token_payload.get("access_token") or "").strip()
+        if not access_token:
+            raise RuntimeError("Google did not return an access token.")
+
+        db = get_supabase()
+        clinic_result = db.table("clinics").select("id, name").eq("id", payload["clinic_id"]).single().execute()
+        clinic = clinic_result.data or {}
+        if not clinic:
+            raise RuntimeError("Clinic not found for Google Sheets connection.")
+
+        created = create_connected_sheet_for_clinic(
+            access_token=access_token,
+            clinic_name=clinic.get("name") or "Clinic AI",
+            lead_tab_name=str(payload.get("tab_name") or "Leads"),
+            availability_enabled=bool(payload.get("availability_enabled")),
+            availability_tab_name=str(payload.get("availability_tab") or "Availability"),
+        )
+
+        db.table("clinics").update(
+            {
+                "google_sheet_id": created["sheet_id"],
+                "google_sheet_tab": created["lead_tab_name"],
+                "availability_enabled": bool(payload.get("availability_enabled")),
+                "availability_sheet_tab": created["availability_tab_name"],
+            }
+        ).eq("id", payload["clinic_id"]).execute()
+
+        return_to = str(payload.get("return_to") or "/dashboard/settings?section=google-sheets")
+        target = _append_query_params(
+            f"{frontend_base}{return_to}",
+            google_sheets_connected="1",
+            google_sheet_id=created["sheet_id"],
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+    except Exception as exc:
+        logger.error(f"Google Sheets quick connect failed: {exc}")
+        target = _append_query_params(
+            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            google_sheets_error=str(exc),
+        )
+        return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
