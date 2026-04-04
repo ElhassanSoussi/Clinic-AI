@@ -38,12 +38,12 @@ export const OAUTH_PROVIDERS: OAuthProvider[] = [
     id: "azure",
     label: "Continue with Microsoft",
     icon: () => null,
-    enabled: isEnabled(process.env.NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH, false),
+    enabled: isEnabled(process.env.NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH, true),
     scopes: "openid email profile offline_access",
     queryParams: {
       prompt: "select_account",
     },
     helpText:
-      "Microsoft sign-in is hidden until the Azure provider is enabled for this environment.",
+      "Microsoft sign-in needs the Azure provider configured in Supabase before it can complete successfully.",
   },
 ];
