@@ -82,6 +82,10 @@ function appointmentStatusLabel(status: AppointmentRecord["appointment_status"])
   return "Open request";
 }
 
+function humanizeStatus(value: string): string {
+  return value.replaceAll("_", " ");
+}
+
 function appointmentStatusClass(status: AppointmentRecord["appointment_status"]): string {
   if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (status === "cancel_requested" || status === "reschedule_requested") {
@@ -438,7 +442,7 @@ export default function AppointmentsPage() {
                         </span>
                         {appointment.reminder_status !== "not_ready" && (
                           <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-                            Reminder {appointment.reminder_status.replace(/_/g, " ")}
+                            Reminder {humanizeStatus(appointment.reminder_status)}
                           </span>
                         )}
                         {appointment.follow_up_open && (
@@ -547,7 +551,7 @@ export default function AppointmentsPage() {
                     <div>
                       <p className="text-xs text-slate-500">Reminder status</p>
                       <p className="text-sm font-medium text-slate-900">
-                        {selectedAppointment.reminder_status.replace(/_/g, " ")}
+                        {humanizeStatus(selectedAppointment.reminder_status)}
                       </p>
                     </div>
                   </div>
@@ -607,7 +611,7 @@ export default function AppointmentsPage() {
                   ) : null}
                   {selectedAppointment.deposit_request_delivery_status ? (
                     <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-                      SMS {selectedAppointment.deposit_request_delivery_status.replace(/_/g, " ")}
+                      SMS {humanizeStatus(selectedAppointment.deposit_request_delivery_status)}
                     </span>
                   ) : null}
                 </div>

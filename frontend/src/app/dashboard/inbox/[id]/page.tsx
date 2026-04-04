@@ -21,6 +21,11 @@ import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } fro
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { ConversationDetail } from "@/types";
 
+function humanizeSnakeCase(value?: string | null): string {
+  if (!value) return "";
+  return value.replaceAll("_", " ");
+}
+
 function smsSenderLabel(senderKind: string, direction: string): string {
   if (direction === "inbound") return "Patient";
   if (senderKind === "assistant") return "AI assistant";
@@ -65,6 +70,109 @@ function formatAppointmentText(dateValue: string, timeValue: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   });
+}
+
+function deriveConvertName(detail: ConversationDetail): string {
+  const leadName = detail.lead?.patient_name;
+  if (leadName && leadName !== "Website chat visitor") {
+    return leadName;
+  }
+
+  const customerName = detail.conversation.customer_name;
+  if (customerName && customerName !== "Visitor") {
+    return customerName;
+  }
+
+  return "";
+}
+
+function threadFollowUpPriority(
+  isEventThread: boolean,
+  eventChannel: string | undefined,
+  derivedStatus: string
+): "high" | "medium" {
+  if (isEventThread && eventChannel === "missed_call") {
+    return "high";
+  }
+  if (derivedStatus === "needs_follow_up") {
+    return "high";
+  }
+  return "medium";
+}
+
+function appointmentBadgeClass(status: string): string {
+  if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "request_open") return "bg-slate-100 text-slate-700 border-slate-200";
+  return "bg-amber-50 text-amber-700 border-amber-200";
+}
+
+function appointmentBadgeLabel(status: string): string {
+  return status === "confirmed" ? "Booked" : humanizeSnakeCase(status);
+}
+
+function depositBadgeClass(status: string): string {
+  if (status === "paid") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "requested" || status === "required") {
+    return "bg-amber-50 text-amber-700 border-amber-200";
+  }
+  if (status === "waived") return "bg-blue-50 text-blue-700 border-blue-200";
+  return "bg-rose-50 text-rose-700 border-rose-200";
+}
+
+function depositBadgeLabel(status: string): string {
+  if (status === "requested") return "Deposit requested";
+  if (status === "required") return "Deposit required";
+  if (status === "paid") return "Deposit paid";
+  if (status === "expired") return "Deposit expired";
+  if (status === "failed") return "Deposit failed";
+  return "Deposit waived";
+}
+
+function smsAiStateClass(
+  hasPendingReview: boolean,
+  manualTakeover: boolean,
+  aiAutoReplyEnabled: boolean
+): string {
+  if (hasPendingReview) return "bg-blue-50 text-blue-700 border-blue-200";
+  if (manualTakeover) return "bg-amber-50 text-amber-700 border-amber-200";
+  if (aiAutoReplyEnabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  return "bg-slate-100 text-slate-700 border-slate-200";
+}
+
+function smsAiStateLabel(
+  hasPendingReview: boolean,
+  manualTakeover: boolean,
+  aiAutoReplyEnabled: boolean
+): string {
+  if (hasPendingReview) return "Human review needed";
+  if (manualTakeover) return "Staff handling";
+  if (aiAutoReplyEnabled) return "AI active";
+  return "AI off";
+}
+
+function smsAutomationSummary(
+  hasPendingReview: boolean,
+  manualTakeover: boolean,
+  aiAutoReplyReady: boolean
+): string {
+  if (hasPendingReview) {
+    return "Clinic AI drafted a reply but is waiting for staff review before sending anything else on this thread.";
+  }
+  if (manualTakeover) {
+    return "New inbound SMS will wait for a team reply until AI is re-enabled for this thread.";
+  }
+  if (aiAutoReplyReady) {
+    return "Clinic AI can reply automatically here while your team can still step in at any time.";
+  }
+  return "SMS auto-reply is unavailable until clinic SMS automation is ready.";
+}
+
+function eventHeaderTitle(eventType?: string): string {
+  return eventType === "missed_call" ? "Missed-call recovery" : "Callback request";
+}
+
+function deliveryStateCaption(autoReplyStatus?: string): string {
+  return autoReplyStatus === "blocked" ? "AI reply held for staff review" : "Latest delivery result";
 }
 
 export default function InboxThreadPage({
@@ -130,13 +238,7 @@ export default function InboxThreadPage({
   useEffect(() => {
     if (!detail) return;
     const nextLead = detail.lead;
-    setConvertName(
-      (nextLead?.patient_name && nextLead.patient_name !== "Website chat visitor"
-        ? nextLead.patient_name
-        : detail.conversation.customer_name && detail.conversation.customer_name !== "Visitor"
-          ? detail.conversation.customer_name
-          : "") || ""
-    );
+    setConvertName(deriveConvertName(detail));
     setConvertPhone(nextLead?.patient_phone || detail.conversation.customer_phone || "");
     setConvertEmail(nextLead?.patient_email || detail.conversation.customer_email || "");
     setConvertReason(nextLead?.reason_for_visit || detail.conversation.summary || "");
@@ -162,6 +264,12 @@ export default function InboxThreadPage({
     lead?.appointment_status === "confirmed" && lead.appointment_starts_at
       ? formatDateTime(lead.appointment_starts_at)
       : "";
+  const eventChannel = communicationEvent?.channel;
+  const followUpPriority = threadFollowUpPriority(
+    isEventThread,
+    eventChannel,
+    conversation.derived_status
+  );
 
   const createFollowUp = async () => {
     setSavingAction("follow_up");
@@ -171,16 +279,10 @@ export default function InboxThreadPage({
           ? `communication:${communicationEvent?.id ?? id}`
           : `thread:${conversation.id}`,
         task_type: conversation.unlinked ? "abandoned_conversation" : "follow_up_needed",
-        priority:
-          isEventThread && communicationEvent?.channel === "missed_call"
-            ? "high"
-            : conversation.derived_status === "needs_follow_up"
-              ? "high"
-              : "medium",
-        title:
-          isEventThread && communicationEvent?.channel === "missed_call"
-            ? "Missed call recovery"
-            : "Manual follow-up created from inbox",
+        priority: followUpPriority,
+        title: isEventThread && eventChannel === "missed_call"
+          ? "Missed call recovery"
+          : "Manual follow-up created from inbox",
         detail:
           communicationEvent?.summary ||
           conversation.summary ||
@@ -190,7 +292,7 @@ export default function InboxThreadPage({
         lead_id: lead?.id ?? null,
         conversation_id: detail.thread_type === "conversation" ? conversation.id : null,
       });
-      if (isEventThread && communicationEvent && communicationEvent.status === "new") {
+      if (communicationEvent?.status === "new" && isEventThread) {
         await api.frontdesk.updateCommunicationEvent(communicationEvent.id, { status: "queued" });
       }
       await loadConversation();
@@ -415,44 +517,18 @@ export default function InboxThreadPage({
                 </span>
                 {lead && <LeadStatusBadge status={lead.status} />}
                 {lead?.appointment_status && (
-                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
-                    lead.appointment_status === "confirmed"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : lead.appointment_status === "request_open"
-                        ? "bg-slate-100 text-slate-700 border-slate-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
-                  }`}>
-                    {lead.appointment_status === "confirmed"
-                      ? "Booked"
-                      : lead.appointment_status.replace(/_/g, " ")}
+                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${appointmentBadgeClass(lead.appointment_status)}`}>
+                    {appointmentBadgeLabel(lead.appointment_status)}
                   </span>
                 )}
                 {lead?.reminder_status && lead.reminder_status !== "not_ready" && (
                   <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-                    Reminder {lead.reminder_status.replace(/_/g, " ")}
+                    Reminder {humanizeSnakeCase(lead.reminder_status)}
                   </span>
                 )}
                 {lead?.deposit_status && lead.deposit_status !== "not_required" && (
-                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
-                    lead.deposit_status === "paid"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : lead.deposit_status === "requested" || lead.deposit_status === "required"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : lead.deposit_status === "waived"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : "bg-rose-50 text-rose-700 border-rose-200"
-                  }`}>
-                    {lead.deposit_status === "requested"
-                      ? "Deposit requested"
-                      : lead.deposit_status === "required"
-                        ? "Deposit required"
-                        : lead.deposit_status === "paid"
-                          ? "Deposit paid"
-                          : lead.deposit_status === "expired"
-                            ? "Deposit expired"
-                            : lead.deposit_status === "failed"
-                              ? "Deposit failed"
-                              : "Deposit waived"}
+                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${depositBadgeClass(lead.deposit_status)}`}>
+                    {depositBadgeLabel(lead.deposit_status)}
                   </span>
                 )}
                 {conversation.derived_status === "needs_follow_up" && (
@@ -461,22 +537,8 @@ export default function InboxThreadPage({
                   </span>
                 )}
                 {isEventThread && conversation.channel === "sms" && (
-                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
-                    pendingReviewEvent
-                      ? "bg-blue-50 text-blue-700 border-blue-200"
-                      : conversation.manual_takeover
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : conversation.ai_auto_reply_enabled
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : "bg-slate-100 text-slate-700 border-slate-200"
-                  }`}>
-                    {pendingReviewEvent
-                      ? "Human review needed"
-                      : conversation.manual_takeover
-                        ? "Staff handling"
-                        : conversation.ai_auto_reply_enabled
-                          ? "AI active"
-                          : "AI off"}
+                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${smsAiStateClass(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}`}>
+                    {smsAiStateLabel(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}
                   </span>
                 )}
               </div>
@@ -490,9 +552,7 @@ export default function InboxThreadPage({
                       <div className="flex items-center gap-2 mb-3">
                         <Clock3 className="w-4 h-4 text-slate-400" />
                         <p className="text-sm font-semibold text-slate-900">
-                          {communicationEvent?.event_type === "missed_call"
-                            ? "Missed-call recovery"
-                            : "Callback request"}
+                          {eventHeaderTitle(communicationEvent?.event_type)}
                         </p>
                       </div>
                       <p className="text-sm text-slate-700 leading-relaxed">
@@ -607,9 +667,7 @@ export default function InboxThreadPage({
                         <div className="flex flex-wrap items-center gap-2">
                           <CommunicationEventStatusBadge status={communicationEvent.status} />
                           <span className="text-xs text-slate-500">
-                            {communicationEvent.auto_reply_status === "blocked"
-                              ? "AI reply held for staff review"
-                              : "Latest delivery result"}
+                            {deliveryStateCaption(communicationEvent.auto_reply_status)}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500">{communicationEvent.auto_reply_reason}</p>
@@ -738,13 +796,11 @@ export default function InboxThreadPage({
                     )}
                   </div>
                   <p className="text-xs text-slate-500 mb-3">
-                    {pendingReviewEvent
-                      ? "Clinic AI drafted a reply but is waiting for staff review before sending anything else on this thread."
-                      : conversation.manual_takeover
-                      ? "New inbound SMS will wait for a team reply until AI is re-enabled for this thread."
-                      : conversation.ai_auto_reply_ready
-                        ? "Clinic AI can reply automatically here while your team can still step in at any time."
-                        : "SMS auto-reply is unavailable until clinic SMS automation is ready."}
+                    {smsAutomationSummary(
+                      Boolean(pendingReviewEvent),
+                      conversation.manual_takeover,
+                      conversation.ai_auto_reply_ready
+                    )}
                   </p>
                   <button
                     onClick={() => updateThreadControl(!conversation.manual_takeover)}
@@ -880,22 +936,34 @@ export default function InboxThreadPage({
                 <p className="text-sm text-slate-600">
                   Convert this thread into a request so your team can track booking progress and reminders.
                 </p>
-                <input
-                  type="text"
-                  value={convertName}
-                  onChange={(event) => setConvertName(event.target.value)}
+                    <label className="sr-only" htmlFor="convert-name">
+                      Patient name
+                    </label>
+                    <input
+                      id="convert-name"
+                      type="text"
+                      value={convertName}
+                      onChange={(event) => setConvertName(event.target.value)}
                   placeholder="Patient name"
                   className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
                 <div className="grid grid-cols-1 gap-3">
+                  <label className="sr-only" htmlFor="convert-phone">
+                    Phone number
+                  </label>
                   <input
+                    id="convert-phone"
                     type="tel"
                     value={convertPhone}
                     onChange={(event) => setConvertPhone(event.target.value)}
                     placeholder="Phone number"
                     className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
+                  <label className="sr-only" htmlFor="convert-email">
+                    Email address
+                  </label>
                   <input
+                    id="convert-email"
                     type="email"
                     value={convertEmail}
                     onChange={(event) => setConvertEmail(event.target.value)}
@@ -903,7 +971,11 @@ export default function InboxThreadPage({
                     className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
                 </div>
+                <label className="sr-only" htmlFor="convert-reason">
+                  Reason for visit
+                </label>
                 <input
+                  id="convert-reason"
                   type="text"
                   value={convertReason}
                   onChange={(event) => setConvertReason(event.target.value)}
@@ -968,27 +1040,43 @@ export default function InboxThreadPage({
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className="sr-only" htmlFor="booking-date">
+                      Appointment date
+                    </label>
                     <input
+                      id="booking-date"
                       type="date"
                       value={bookingDate}
                       onChange={(event) => setBookingDate(event.target.value)}
                       className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
+                    <label className="sr-only" htmlFor="booking-time">
+                      Appointment time
+                    </label>
                     <input
+                      id="booking-time"
                       type="time"
                       value={bookingTime}
                       onChange={(event) => setBookingTime(event.target.value)}
                       className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                   </div>
+                  <label className="sr-only" htmlFor="booking-reason">
+                    Confirm reason for visit
+                  </label>
                   <input
+                    id="booking-reason"
                     type="text"
                     value={bookingReason}
                     onChange={(event) => setBookingReason(event.target.value)}
                     placeholder="Confirm reason for visit"
                     className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
+                  <label className="sr-only" htmlFor="booking-note">
+                    Internal booking note
+                  </label>
                   <textarea
+                    id="booking-note"
                     rows={3}
                     value={bookingNote}
                     onChange={(event) => setBookingNote(event.target.value)}
@@ -1009,7 +1097,11 @@ export default function InboxThreadPage({
                   <p className="text-xs text-slate-500 mt-1">
                     Save a staff note to this thread. Notes stay internal and appear in the customer history.
                   </p>
+                  <label className="sr-only" htmlFor="internal-note">
+                    Add a short internal note
+                  </label>
                   <textarea
+                    id="internal-note"
                     rows={3}
                     value={internalNote}
                     onChange={(event) => setInternalNote(event.target.value)}
@@ -1049,14 +1141,14 @@ export default function InboxThreadPage({
                 {lead.appointment_status && (
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Booking state</p>
-                    <p>{lead.appointment_status.replace(/_/g, " ")}</p>
+                    <p>{humanizeSnakeCase(lead.appointment_status)}</p>
                   </div>
                 )}
                 {lead.reminder_status && lead.reminder_status !== "not_ready" && (
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Reminder readiness</p>
                     <p>
-                      {lead.reminder_status.replace(/_/g, " ")}
+                      {humanizeSnakeCase(lead.reminder_status)}
                       {lead.reminder_scheduled_for ? ` · ${formatDateTime(lead.reminder_scheduled_for)}` : ""}
                     </p>
                   </div>
