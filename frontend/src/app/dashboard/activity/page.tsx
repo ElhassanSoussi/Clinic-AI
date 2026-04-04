@@ -14,6 +14,7 @@ import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { timeAgo } from "@/lib/utils";
 import type { ActivityEvent } from "@/types";
 
@@ -63,18 +64,22 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadActivity()} />;
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Activity</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Recent events and changes in your clinic
-          </p>
-        </div>
+    <div className="max-w-4xl space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageHeader
+          eyebrow={
+            <>
+              <Activity className="h-3.5 w-3.5" />
+              Activity feed
+            </>
+          }
+          title="A cleaner view of what changed today."
+          description="Follow new requests, status changes, and conversation events without digging through disconnected screens."
+        />
         <button
           onClick={() => loadActivity(true)}
           disabled={refreshing}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
         >
           {refreshing ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -92,7 +97,7 @@ export default function ActivityPage() {
           description="This feed shows real-time events — new patient requests, status changes, and conversations. Activity will appear here once your assistant starts capturing leads."
         />
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+        <div className="app-card divide-y divide-slate-100">
           {events.map((event, i) => {
             const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
             const Icon = config.icon;

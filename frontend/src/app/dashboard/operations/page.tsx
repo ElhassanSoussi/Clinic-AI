@@ -17,6 +17,7 @@ import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import {
   ChannelBadge,
   ChannelConnectionStatusBadge,
@@ -400,13 +401,17 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Operations</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Send reminders, recover missed calls, manage cancel or reschedule requests, maintain a waitlist, and keep communication activity visible in one place.
-        </p>
-      </div>
+    <div className="max-w-7xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Operations board
+          </>
+        }
+        title="Run the clinic with cleaner operational visibility."
+        description="Reminders, recovery queues, readiness states, waitlist items, and action-required bookings stay visible here so staff can see what is blocked and what is moving."
+      />
 
       {error && (
         <div className="mb-6 px-4 py-3 rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700">
@@ -415,7 +420,7 @@ export default function OperationsPage() {
       )}
 
       {systemReadiness && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+        <div className="app-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck className="w-4 h-4 text-teal-600" />
             <div>

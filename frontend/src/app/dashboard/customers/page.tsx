@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, UserRound, ArrowRight } from "lucide-react";
+import { Search, UserRound, ArrowRight, ContactRound } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import type { CustomerProfileSummary } from "@/types";
 
 export default function CustomersPage() {
@@ -50,27 +51,31 @@ export default function CustomersPage() {
   if (error) return <ErrorState message={error} onRetry={loadCustomers} />;
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          View conversation history, request counts, and the most recent activity for each patient contact.
-        </p>
-      </div>
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <ContactRound className="h-3.5 w-3.5" />
+            Customer workspace
+          </>
+        }
+        title="See every patient relationship in one place."
+        description="Track conversation history, request counts, booking outcomes, and the latest internal context for each contact."
+      />
 
-      <div className="relative mb-6 max-w-md">
+      <div className="relative max-w-md">
         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search by patient, phone, or email..."
-          className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
+          className="app-input pl-9"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl">
+        <div className="app-card">
           <EmptyState
             icon={<UserRound className="w-7 h-7 text-slate-400" />}
             title={customers.length === 0 ? "No customer profiles yet" : "No customers match this search"}
@@ -82,12 +87,12 @@ export default function CustomersPage() {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {filtered.map((customer) => (
             <Link
               key={customer.key}
               href={`/dashboard/customers/${customer.key}`}
-              className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-teal-200 hover:shadow-sm transition-all"
+              className="app-card p-5 transition-all hover:-translate-y-0.5 hover:border-teal-200"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">

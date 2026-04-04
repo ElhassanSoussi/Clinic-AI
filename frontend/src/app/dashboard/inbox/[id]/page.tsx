@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { ConversationDetail } from "@/types";
@@ -339,19 +340,30 @@ export default function InboxThreadPage({
   };
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl space-y-6">
       <button
         onClick={() => router.push("/dashboard/inbox")}
-        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Inbox
       </button>
 
-      <div className="flex flex-col xl:flex-row gap-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <MessageSquare className="h-3.5 w-3.5" />
+            Thread workspace
+          </>
+        }
+        title={conversation.customer_name}
+        description="Review the full conversation, understand thread state, and move the patient forward without leaving the workspace."
+      />
+
+      <div className="flex flex-col gap-6 xl:flex-row">
         <div className="flex-1 min-w-0">
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-            <div className="px-4 sm:px-6 py-5 border-b border-slate-100">
+          <div className="app-card overflow-hidden">
+            <div className="border-b border-slate-100 px-4 py-5 sm:px-6">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1 className="text-2xl font-bold text-slate-900">
                   {conversation.customer_name}
@@ -444,7 +456,7 @@ export default function InboxThreadPage({
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-5 space-y-4">
+            <div className="space-y-4 px-4 py-5 sm:px-6">
               {isEventThread ? (
                 <div className="space-y-4">
                   {relatedEvents.length === 0 ? (
@@ -543,7 +555,7 @@ export default function InboxThreadPage({
                     })
                   )}
 
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-4">
+                    <div className="app-card-muted border-dashed px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
                       Delivery state
                     </p>
@@ -587,7 +599,7 @@ export default function InboxThreadPage({
                   </div>
                 </div>
               ) : messages.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                <div className="app-card-muted border-dashed px-4 py-5 text-sm text-slate-500">
                   {conversation.summary
                     ? conversation.summary
                     : "No message transcript is stored for this conversation yet."}
@@ -621,8 +633,8 @@ export default function InboxThreadPage({
           </div>
         </div>
 
-        <aside className="w-full xl:w-84 shrink-0 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+        <aside className="w-full shrink-0 space-y-6 xl:w-[22rem]">
+          <div className="app-card p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Customer
             </h2>
@@ -674,7 +686,7 @@ export default function InboxThreadPage({
           </div>
 
             {conversation.customer_phone && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+            <div className="app-card p-4 sm:p-5">
               {isEventThread && conversation.channel === "sms" && (
                 <div className="mb-4 pb-4 border-b border-slate-100">
                   <h2 className="text-sm font-semibold text-slate-900 mb-2">
@@ -799,7 +811,7 @@ export default function InboxThreadPage({
           )}
 
           {!isEventThread && relatedEvents.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+            <div className="app-card p-4 sm:p-5">
               <h2 className="text-sm font-semibold text-slate-900 mb-4">
                 SMS activity
               </h2>
@@ -833,7 +845,7 @@ export default function InboxThreadPage({
             </div>
           )}
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+          <div className="app-card p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Front desk actions
             </h2>

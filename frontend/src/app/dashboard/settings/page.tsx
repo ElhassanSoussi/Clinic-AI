@@ -32,10 +32,12 @@ import {
   HelpCircle,
   Code,
   Sparkles,
+  Settings,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
 
 const DAYS = [
@@ -1288,18 +1290,28 @@ export default function SettingsPage() {
   const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
-    <div className="max-w-3xl">
-      {/* Sticky header with save */}
-      <div className="sticky top-0 z-10 bg-slate-50 pb-4 -mt-2 pt-2">
+    <div className="max-w-3xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <Settings className="h-3.5 w-3.5" />
+            Clinic setup and configuration
+          </>
+        }
+        title="Keep the workspace accurate, branded, and ready."
+        description="Update the clinic information, assistant behavior, spreadsheets, notifications, and embed details that power the rest of Clinic AI."
+      />
+
+      <div className="sticky top-3 z-10 rounded-[1.5rem] bg-white/80 pb-4 pt-3 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Clinic Settings</h1>
-            <p className="text-slate-500 text-sm mt-1">{completedCount}/10 sections configured</p>
+            <p className="text-sm font-semibold text-slate-900">{completedCount}/10 sections configured</p>
+            <p className="mt-1 text-xs text-slate-500">Save changes when you’re ready to update the live workspace.</p>
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="flex items-center gap-2 rounded-2xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -1311,8 +1323,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="mb-5">
+      <div>
         <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
           <div className="settings-progress h-full bg-teal-500 rounded-full transition-all" />
         </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { User, Lock, Loader2, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 type FeedbackState = {
   type: "success" | "error";
@@ -95,13 +96,17 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Account</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Manage your profile and security settings
-        </p>
-      </div>
+    <div className="max-w-2xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <User className="h-3.5 w-3.5" />
+            Account and security
+          </>
+        }
+        title="Keep your account details and sign-in secure."
+        description="Manage your profile information, password, and the operator identity shown across the workspace."
+      />
 
       <div className="space-y-2">
         {/* Profile Section */}

@@ -16,6 +16,7 @@ import {
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import type { ChatResponse, Clinic, TrainingKnowledgeSource, TrainingOverview } from "@/types";
 
 function settingsHref(section?: string): string {
@@ -223,13 +224,17 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">AI Training</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Review what your assistant already knows, add clinic-specific notes, and test the live assistant against your current setup.
-        </p>
-      </div>
+    <div className="max-w-7xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <Sparkles className="h-3.5 w-3.5" />
+            AI training workspace
+          </>
+        }
+        title="Keep the assistant accurate, grounded, and clinic-specific."
+        description="Review readiness, add knowledge notes, and test the live assistant against the clinic information you actually trust."
+      />
 
       {error && (
         <div className="mb-6 px-4 py-3 rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700">

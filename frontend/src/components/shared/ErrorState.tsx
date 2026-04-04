@@ -14,18 +14,18 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4">
-      <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
-        <AlertTriangle className="w-7 h-7 text-red-500" />
+    <div className="flex flex-col items-center justify-center px-4 py-18 text-center">
+      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-rose-100 bg-white shadow-sm shadow-rose-500/10">
+        <AlertTriangle className="h-7 w-7 text-rose-500" />
       </div>
-      <h3 className="text-base font-semibold text-slate-800 mb-1">{title}</h3>
-      <p className="text-sm text-slate-500 text-center max-w-sm mb-4">
+      <h3 className="mb-2 text-lg font-semibold tracking-tight text-slate-900">{title}</h3>
+      <p className="mb-5 max-w-md text-sm leading-6 text-slate-500">
         {message}
       </p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+          className="rounded-2xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
         >
           Try Again
         </button>

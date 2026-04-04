@@ -20,6 +20,7 @@ import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { AppointmentRecord } from "@/types";
@@ -370,23 +371,27 @@ export default function AppointmentsPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Appointments</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Review booked requests, update appointment details, and keep reminder prep and lifecycle status in sync.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <CalendarClock className="h-3.5 w-3.5" />
+            Appointments workspace
+          </>
+        }
+        title="Manage booked requests with front-desk clarity."
+        description="Review appointment timing, reminder readiness, lifecycle status, and deposit handling without leaving the operator workspace."
+      />
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2">
         {APPOINTMENT_VIEWS.map((view) => (
           <button
             key={view.value}
             onClick={() => setActiveView(view.value)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
+            className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeView === view.value
-                ? "bg-teal-600 text-white border-teal-600"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                ? "border-teal-600 bg-teal-600 text-white shadow-sm shadow-teal-500/20"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             {view.label}
@@ -401,8 +406,8 @@ export default function AppointmentsPage() {
           description="Booked requests will appear here as soon as the front desk confirms an appointment."
         />
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-[0.95fr_1.05fr] gap-6">
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <div className="app-card overflow-hidden">
             <div className="divide-y divide-slate-100">
               {appointments.map((appointment) => (
                 <button
@@ -410,8 +415,8 @@ export default function AppointmentsPage() {
                   onClick={() => setSelectedLeadId(appointment.lead_id)}
                   className={`w-full px-5 py-4 text-left transition-colors ${
                     selectedLeadId === appointment.lead_id
-                      ? "bg-teal-50"
-                      : "hover:bg-slate-50"
+                      ? "bg-teal-50/80"
+                      : "hover:bg-slate-50/70"
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -465,7 +470,7 @@ export default function AppointmentsPage() {
 
           {selectedAppointment && selectedDraft && (
             <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="app-card p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-2">

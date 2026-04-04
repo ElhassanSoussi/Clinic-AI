@@ -5,24 +5,27 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Bot,
-  LayoutDashboard,
+  LayoutGrid,
   Users,
   Settings,
   LogOut,
-  MessageSquare,
+  MessageSquareMore,
   ExternalLink,
   CreditCard,
-  UserCircle,
+  ContactRound,
   Activity,
   Rocket,
   CheckCircle2,
   Inbox,
-  BrainCircuit,
-  AlertTriangle,
-  CalendarClock,
+  Sparkles,
+  TriangleAlert,
+  BriefcaseMedical,
   CalendarDays,
   Menu,
   X,
+  Bell,
+  ShieldCheck,
+  UserCog,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -30,15 +33,15 @@ import { computeSystemStatus, STATUS_CONFIG } from "@/lib/system-status";
 import type { BillingStatus, Clinic } from "@/types";
 
 const sidebarNav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
-  { href: "/dashboard/customers", label: "Customers", icon: UserCircle },
-  { href: "/dashboard/opportunities", label: "Opportunities", icon: AlertTriangle },
-  { href: "/dashboard/operations", label: "Operations", icon: CalendarClock },
+  { href: "/dashboard/customers", label: "Customers", icon: ContactRound },
+  { href: "/dashboard/opportunities", label: "Opportunities", icon: TriangleAlert },
+  { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical },
   { href: "/dashboard/activity", label: "Activity", icon: Activity },
-  { href: "/dashboard/training", label: "AI Training", icon: BrainCircuit },
+  { href: "/dashboard/training", label: "AI Training", icon: Sparkles },
 ];
 
 function settingsHref(section?: string | null): string {
@@ -58,7 +61,7 @@ function renderSystemStatusAction(
     return (
       <button
         onClick={onGoLive}
-        className="flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mr-4 transition-colors bg-teal-600 text-white hover:bg-teal-700 shadow-sm"
+        className="flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700"
         title="All setup complete — go live!"
       >
         <Rocket className="w-3.5 h-3.5" />
@@ -70,7 +73,7 @@ function renderSystemStatusAction(
   if (systemStatus.status === "LIVE") {
     return (
       <span
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mr-4 ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} cursor-default`}
+        className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} cursor-default`}
         title="All systems configured — you're live"
       >
         <span className={`w-2 h-2 rounded-full ${statusCfg.dot}`} /> {statusCfg.label}
@@ -84,7 +87,7 @@ function renderSystemStatusAction(
         const first = systemStatus.items.find((item) => item.completed === false);
         openSettingsPage(first?.drawerSection ?? null);
       }}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mr-4 transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
+      className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
       title={`${systemStatus.completedCount}/${systemStatus.totalCount} sections complete — click to fix`}
     >
       <span className={`w-2 h-2 rounded-full ${statusCfg.dot} animate-pulse`} /> Complete setup
@@ -253,7 +256,7 @@ export default function DashboardLayout({
     ) ?? null;
 
   const sidebarContent = (
-    <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+    <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
       {sidebarNav.map((item) => {
         const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
         return (
@@ -261,14 +264,24 @@ export default function DashboardLayout({
             key={item.href}
             href={item.href}
             onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-              isActive ? "bg-teal-50 text-teal-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[13px] font-semibold transition-all ${
+              isActive
+                ? "bg-gradient-to-r from-teal-50 to-violet-50 text-slate-950 shadow-sm ring-1 ring-slate-200/70"
+                : "text-slate-500 hover:bg-white/90 hover:text-slate-900"
             }`}
           >
-            <item.icon className="w-4.5 h-4.5" />
+            <span
+              className={`flex h-9 w-9 items-center justify-center rounded-2xl border ${
+                isActive
+                  ? "border-teal-100 bg-white text-teal-700"
+                  : "border-transparent bg-slate-100/80 text-slate-500 group-hover:border-slate-200 group-hover:bg-white"
+              }`}
+            >
+              <item.icon className="h-4.5 w-4.5" />
+            </span>
             {item.label}
             {item.label === "Leads" && newLeadCount > 0 && (
-              <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500 text-white font-semibold min-w-5 text-center">
+              <span className="ml-auto min-w-5 rounded-full bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-semibold text-white">
                 {newLeadCount}
               </span>
             )}
@@ -281,9 +294,11 @@ export default function DashboardLayout({
           href={`/chat/${user.clinic_slug}`}
           target="_blank"
           onClick={() => setSidebarOpen(false)}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          className="group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[13px] font-semibold text-slate-500 transition-all hover:bg-white/90 hover:text-slate-900"
         >
-          <MessageSquare className="w-4.5 h-4.5" />
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100/80 text-slate-500 group-hover:bg-white">
+            <MessageSquareMore className="h-4.5 w-4.5" />
+          </span>
           Patient Chat
           <ExternalLink className="w-3.5 h-3.5 ml-auto text-slate-400" />
         </Link>
@@ -292,13 +307,38 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200 flex-col fixed inset-y-0 left-0">
-        <div className="h-14 px-5 flex items-center gap-2.5 border-b border-slate-100">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-white" />
+    <div className="app-shell-bg flex min-h-screen">
+      <aside className="fixed inset-y-0 left-0 hidden w-[18.5rem] flex-col border-r border-white/60 bg-white/72 backdrop-blur-xl lg:flex">
+        <div className="border-b border-slate-200/70 px-5 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+              <Bot className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <span className="block text-base font-semibold tracking-tight text-slate-950">
+                Clinic AI
+              </span>
+              <span className="text-xs text-slate-500">Front-desk operating system</span>
+            </div>
           </div>
-          <span className="font-semibold text-slate-900">Clinic AI</span>
+          {clinic ? (
+            <div className="mt-5 app-card-muted flex items-center justify-between px-3.5 py-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Clinic status
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{clinic.name}</p>
+              </div>
+              {statusCfg ? (
+                <span
+                  className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color}`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${statusCfg.dot}`} />
+                  {statusCfg.label}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         {sidebarContent}
       </aside>
@@ -315,16 +355,19 @@ export default function DashboardLayout({
           aria-label="Close navigation"
         />
         <aside
-          className={`relative flex h-full w-72 max-w-[85vw] flex-col bg-white border-r border-slate-200 shadow-xl transition-transform ${
+          className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-white/70 bg-white/92 shadow-2xl backdrop-blur-xl transition-transform ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+                <Bot className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-slate-900">Clinic AI</span>
+              <div>
+                <span className="block font-semibold text-slate-950">Clinic AI</span>
+                <span className="text-xs text-slate-500">Operator workspace</span>
+              </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -338,54 +381,73 @@ export default function DashboardLayout({
         </aside>
       </div>
 
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-        <header className="shrink-0 h-14 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-30">
-          <div className="flex items-center gap-3 min-w-0">
+      <div className="flex min-h-screen flex-1 flex-col lg:ml-[18.5rem]">
+        <header className="sticky top-0 z-30 border-b border-white/60 bg-white/65 backdrop-blur-xl">
+          <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-500 transition-colors hover:bg-white hover:text-slate-900 lg:hidden"
               aria-label="Open navigation"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="lg:hidden min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">
-                {activeNavItem?.label ?? "Clinic AI"}
-              </p>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  Clinic workspace
+                </p>
+                <p className="truncate text-lg font-semibold tracking-tight text-slate-950">
+                  {activeNavItem?.label ?? "Dashboard"}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex">{systemStatusAction}</div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden sm:flex">{systemStatusAction}</div>
+              <button
+                className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 lg:inline-flex"
+                aria-label="Notifications"
+                type="button"
+              >
+                <Bell className="h-4.5 w-4.5" />
+              </button>
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((value) => !value)}
-                className="flex items-center gap-2.5 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-2 py-1.5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                 aria-haspopup="true"
               >
-                <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold select-none">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white select-none">
                   {userInitial}
+                </div>
+                <div className="hidden text-left sm:block">
+                  <p className="max-w-32 truncate text-xs font-semibold text-slate-900">
+                    {user?.full_name || "Clinic user"}
+                  </p>
+                  <p className="max-w-32 truncate text-[11px] text-slate-500">
+                    {planLabel || "Workspace"}
+                  </p>
                 </div>
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 p-2 transition-all origin-top-right ${
+                className={`absolute right-0 mt-2 w-72 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/8 transition-all ${
                   menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
                 }`}
                 role="menu"
               >
-                <div className="px-3 py-2.5 mb-1">
+                <div className="mb-1 rounded-2xl bg-slate-50 px-3.5 py-3">
                   <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                   {planLabel && (
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                      <span className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[10px] font-medium text-teal-700">
                         {planLabel}
                       </span>
                       {billing?.plan !== "premium" && (
                         <Link
                           href="/dashboard/billing"
                           onClick={() => setMenuOpen(false)}
-                          className="px-2 py-0.5 text-[10px] font-medium text-teal-700 border border-teal-200 rounded-full hover:bg-teal-50 transition-colors"
+                          className="rounded-full border border-teal-200 px-2 py-0.5 text-[10px] font-medium text-teal-700 transition-colors hover:bg-teal-50"
                         >
                           Upgrade
                         </Link>
@@ -398,16 +460,16 @@ export default function DashboardLayout({
                 <Link
                   href="/dashboard/account"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                   role="menuitem"
                 >
-                  <UserCircle className="w-4 h-4" />
+                  <UserCog className="w-4 h-4" />
                   Account
                 </Link>
                 <Link
                   href="/dashboard/settings"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                   role="menuitem"
                 >
                   <Settings className="w-4 h-4" />
@@ -416,11 +478,20 @@ export default function DashboardLayout({
                 <Link
                   href="/dashboard/billing"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                   role="menuitem"
                 >
                   <CreditCard className="w-4 h-4" />
                   Billing
+                </Link>
+                <Link
+                  href="/dashboard/settings?section=google-sheets"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  role="menuitem"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Security & setup
                 </Link>
                 <div className="border-t border-slate-100 my-1" />
                 <button
@@ -430,7 +501,7 @@ export default function DashboardLayout({
                       // Keep the menu state stable if logout fails.
                     });
                   }}
-                  className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
                   role="menuitem"
                 >
                   <LogOut className="w-4 h-4" />
@@ -438,21 +509,22 @@ export default function DashboardLayout({
                 </button>
               </div>
             </div>
+            </div>
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto">
           <div className="sm:hidden px-4 pt-4">{systemStatusAction}</div>
-          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="px-4 pb-8 pt-5 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
 
       {goLiveModal && !goLiveSuccess && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+          <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/15">
             <div className="px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50">
                   <Rocket className="w-5 h-5 text-teal-600" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-900">Go Live</h2>
@@ -465,7 +537,7 @@ export default function DashboardLayout({
               <button
                 onClick={() => setGoLiveModal(false)}
                 disabled={goLiveLoading}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50"
               >
                 Not yet
               </button>
@@ -484,7 +556,7 @@ export default function DashboardLayout({
                   setGoLiveLoading(false);
                 }}
                 disabled={goLiveLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-70"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-70"
               >
                 {goLiveLoading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -502,8 +574,8 @@ export default function DashboardLayout({
 
       {goLiveSuccess && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 text-center px-8 py-10">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+          <div className="mx-4 w-full max-w-sm rounded-[28px] bg-white px-8 py-10 text-center shadow-2xl shadow-slate-900/15">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
               <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
             <h2 className="text-xl font-bold text-slate-900 mb-2">You&apos;re Live! 🎉</h2>
@@ -512,7 +584,7 @@ export default function DashboardLayout({
             </p>
             <button
               onClick={() => setGoLiveSuccess(false)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
             >
               Go to Dashboard
             </button>

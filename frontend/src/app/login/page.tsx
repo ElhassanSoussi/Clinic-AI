@@ -3,7 +3,7 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Bot, Loader2, ArrowLeft } from "lucide-react";
+import { Bot, Loader2, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
@@ -121,18 +121,46 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50 relative">
+    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-12">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(127,86,217,0.12),transparent_45%)]" />
       <Link
         href="/"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+        className="absolute left-6 top-6 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm backdrop-blur transition-colors hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
       </Link>
-      <div className="w-full max-w-md">
+      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center justify-center">
+        <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="hidden lg:flex lg:flex-col lg:justify-center">
+            <div className="app-page-kicker mb-6">
+              <Sparkles className="h-3.5 w-3.5" />
+              Premium clinic workspace
+            </div>
+            <h1 className="max-w-lg text-5xl font-semibold tracking-tight text-slate-950">
+              Welcome back to the front desk command center.
+            </h1>
+            <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
+              Review patient conversations, manage booking flow, and keep your clinic responsive without losing the operator oversight your team needs.
+            </p>
+            <div className="mt-8 grid gap-3">
+              {[
+                "One inbox for chat and SMS",
+                "Manual takeover and human review when needed",
+                "Appointments, follow-up, and operations in one workspace",
+              ].map((item) => (
+                <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700">
+                  <ShieldCheck className="h-4 w-4 text-teal-600" />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full max-w-md justify-self-center lg:max-w-none">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-semibold text-slate-900">
@@ -145,24 +173,21 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm"
-        >
+        <form onSubmit={handleSubmit} className="app-card app-gradient-border p-8 sm:p-9">
           {supabaseConfigError && (
-            <div className="mb-4 p-3 bg-amber-50 text-amber-800 text-sm rounded-lg border border-amber-200">
+            <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               {supabaseConfigError}
             </div>
           )}
 
           {selectedPlan && (
-            <div className="mb-4 p-3 bg-teal-50 text-teal-800 text-sm rounded-lg border border-teal-100">
+            <div className="mb-4 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-800">
               Sign in to continue to checkout for the {selectedPlan} plan.
             </div>
           )}
 
           {visibleError && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+            <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
               {visibleError}
             </div>
           )}
@@ -180,7 +205,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
+                className="app-input"
                 placeholder="you@clinic.com"
                 required
               />
@@ -198,7 +223,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
+                className="app-input"
                 placeholder="Enter your password"
                 required
               />
@@ -208,7 +233,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || !!supabaseConfigError}
-            className="w-full mt-6 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -229,12 +254,14 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href={selectedPlan ? `/register?plan=${selectedPlan}` : "/register"}
-              className="text-teal-600 font-medium hover:text-teal-700"
+              className="font-semibold text-teal-600 hover:text-teal-700"
             >
               Create one
             </Link>
           </p>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   );

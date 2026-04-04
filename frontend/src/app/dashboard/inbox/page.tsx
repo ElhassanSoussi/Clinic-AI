@@ -7,6 +7,7 @@ import {
   Search,
   ArrowRight,
   UserRound,
+  MessageSquareMore,
 } from "lucide-react";
 
 import { api } from "@/lib/api";
@@ -14,6 +15,8 @@ import { timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
 import type { ChannelType, InboxConversation } from "@/types";
 
@@ -100,62 +103,65 @@ export default function InboxPage() {
   if (error) return <ErrorState message={error} onRetry={loadInbox} />;
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Inbox</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Review recent conversations, spot follow-up risk, and open any thread in one click.
-        </p>
-      </div>
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <Inbox className="h-3.5 w-3.5" />
+            Conversations workspace
+          </>
+        }
+        title="Work every patient conversation from one premium inbox."
+        description="Review threads, spot follow-up risk, and open the right conversation without losing source, status, or operator context."
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
             label: "All conversations",
             value: counts.all,
-            tone: "bg-slate-100 text-slate-700",
+            tone: "slate" as const,
           },
           {
             label: "Open now",
             value: counts.open,
-            tone: "bg-blue-50 text-blue-700",
+            tone: "blue" as const,
           },
           {
             label: "Needs follow-up",
             value: counts.needs_follow_up,
-            tone: "bg-amber-50 text-amber-700",
+            tone: "amber" as const,
           },
           {
             label: "Booked or handled",
             value: counts.booked + counts.handled,
-            tone: "bg-emerald-50 text-emerald-700",
+            tone: "emerald" as const,
           },
         ].map((card) => (
-          <div
+          <MetricCard
             key={card.label}
-            className="bg-white border border-slate-200 rounded-xl p-5"
-          >
-            <span className={`inline-flex px-2 py-1 rounded-full text-[11px] font-semibold ${card.tone}`}>
-              {card.label}
-            </span>
-            <p className="text-3xl font-bold text-slate-900 mt-3">{card.value}</p>
-          </div>
+            label={card.label}
+            value={card.value}
+            icon={MessageSquareMore}
+            tone={card.tone}
+          />
         ))}
       </div>
 
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 mb-6">
-        <div className="relative flex-1 w-full">
+      <div className="app-card p-4 sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by patient, phone, email, or conversation text..."
-            className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
+            className="app-input pl-9"
           />
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
           {STATUS_FILTERS.map((filter) => {
             const count = counts[filter.value];
             const active = statusFilter === filter.value;
@@ -163,10 +169,10 @@ export default function InboxPage() {
               <button
                 key={filter.value}
                 onClick={() => setStatusFilter(filter.value)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`rounded-2xl px-3 py-2 text-sm font-semibold transition-colors ${
                   active
-                    ? "bg-teal-600 text-white"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                    ? "bg-teal-600 text-white shadow-sm shadow-teal-500/20"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 {filter.label}
@@ -176,16 +182,17 @@ export default function InboxPage() {
               </button>
             );
           })}
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-6">
+      <div className="flex flex-wrap gap-1.5">
         <button
           onClick={() => setChannelFilter("all")}
-          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`rounded-2xl px-3 py-2 text-sm font-semibold transition-colors ${
             channelFilter === "all"
               ? "bg-slate-900 text-white"
-              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
           }`}
         >
           All channels
@@ -200,7 +207,7 @@ export default function InboxPage() {
             <button
               key={channel}
               onClick={() => setChannelFilter(channel)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+              className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition-colors ${
                 active
                   ? config.className
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
@@ -216,7 +223,7 @@ export default function InboxPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl">
+        <div className="app-card">
           <EmptyState
             icon={<Inbox className="w-7 h-7 text-slate-400" />}
             title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
@@ -230,12 +237,12 @@ export default function InboxPage() {
           />
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+        <div className="app-card overflow-hidden divide-y divide-slate-100/90">
           {filtered.map((thread) => (
             <button
               key={thread.id}
               onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-              className="w-full text-left px-5 py-4 hover:bg-slate-50 transition-colors"
+              className="w-full px-5 py-4 text-left transition-colors hover:bg-slate-50/70"
             >
               <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                 <div className="w-full min-w-0">

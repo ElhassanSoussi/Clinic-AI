@@ -9,6 +9,7 @@ import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import type { Clinic, FollowUpTask, Opportunity } from "@/types";
 
 function opportunityHref(opportunity: Opportunity): string | null {
@@ -164,13 +165,17 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Opportunities</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Work the follow-up queue, triage stalled requests, and keep abandoned conversations or missed-call recovery work from turning into missed revenue.
-        </p>
-      </div>
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Follow-up workspace
+          </>
+        }
+        title="Keep follow-up risk visible before it becomes lost revenue."
+        description="Work the queue, triage stalled requests, and keep missed-call recovery or abandoned conversation work moving."
+      />
 
       {error && (
         <div className="mb-6 px-4 py-3 rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700">
@@ -178,7 +183,7 @@ export default function OpportunitiesPage() {
         </div>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="app-card p-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h2 className="text-sm font-semibold text-slate-900">Auto follow-up</h2>
@@ -199,7 +204,7 @@ export default function OpportunitiesPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="app-card p-5">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="text-sm font-semibold text-slate-900">Follow-up queue</h2>
