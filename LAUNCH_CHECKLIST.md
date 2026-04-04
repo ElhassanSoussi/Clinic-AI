@@ -10,6 +10,8 @@
 - [ ] **Frontend env vars** — Set in Vercel/hosting:
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
+  - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
+  - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Azure auth is configured in Supabase
 - [ ] **Stripe env vars** if billing or deposits are live:
   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
   - `STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_PREMIUM`
@@ -29,6 +31,10 @@
   - Site URL = `https://clinicaireply.com`
   - Redirect URLs include `https://clinicaireply.com/auth/callback`
   - `www.clinicaireply.com` redirects to `https://clinicaireply.com`
+  - Google provider enabled if Google sign-in is live
+  - Azure provider enabled if Microsoft sign-in is live
+  - Google and Azure app consoles include the Supabase callback URL
+  - Azure enables `Allow users without an email` if tenant claims are inconsistent
 - [ ] **Migrations applied**:
   - `20260331_add_channel_foundation.sql`
   - `20260331_add_frontdesk_automation.sql`
@@ -71,6 +77,8 @@
 - [ ] Register a new test account
 - [ ] Verify email received (if enabled)
 - [ ] Login works, redirects to dashboard
+- [ ] Google sign-in works from `https://clinicaireply.com/login`
+- [ ] Microsoft sign-in works from `https://clinicaireply.com/login` if Azure auth is live
 - [ ] Logout works, redirects to login
 - [ ] Repeated failed sign-up attempts show a clear rate-limit or confirmation message and do not leave a fake session behind
 

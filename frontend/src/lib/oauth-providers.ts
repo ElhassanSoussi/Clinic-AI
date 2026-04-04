@@ -11,6 +11,13 @@ export interface OAuthProvider {
   queryParams?: Record<string, string>;
 }
 
+function isEnabled(value: string | undefined, defaultValue = true): boolean {
+  if (typeof value !== "string") return defaultValue;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return defaultValue;
+  return normalized === "true" || normalized === "1" || normalized === "yes";
+}
+
 /**
  * Ordered list of OAuth providers to display.
  * To disable a provider, remove it from this array.
@@ -21,19 +28,22 @@ export const OAUTH_PROVIDERS: OAuthProvider[] = [
     id: "google",
     label: "Continue with Google",
     icon: () => null, // icons rendered in OAuthButtons component
-    enabled: true,
+    enabled: isEnabled(process.env.NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH, true),
     scopes: "openid email profile",
+    queryParams: {
+      prompt: "select_account",
+    },
   },
   {
     id: "azure",
     label: "Continue with Microsoft",
     icon: () => null,
-    enabled: process.env.NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH === "true",
+    enabled: isEnabled(process.env.NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH, false),
     scopes: "openid email profile offline_access",
     queryParams: {
       prompt: "select_account",
     },
     helpText:
-      "Microsoft sign-in is temporarily unavailable until the Azure tenant is fixed in Supabase.",
+      "Microsoft sign-in is hidden until the Azure provider is enabled for this environment.",
   },
 ];

@@ -61,7 +61,8 @@ Feature-specific backend env vars:
    - `API_INTERNAL_URL=https://api.clinicaireply.com/api`
    - `NEXT_PUBLIC_SUPABASE_URL=...`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
-   - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=false` unless you have Microsoft auth ready
+   - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
+   - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Microsoft auth is configured in Supabase
 4. Attach the custom domain:
    - `clinicaireply.com`
 5. Verify the site loads and can reach the backend API.
@@ -82,6 +83,19 @@ If Vercel shows `No fastapi entrypoint found`, the project is building the repo 
    - project URL
    - anon key
    - service role key
+5. If Google sign-in is live:
+   - enable the Google provider in Supabase Auth
+   - add callback URL:
+     - `https://<your-project-ref>.supabase.co/auth/v1/callback`
+   - add site URL / redirect URL for:
+     - `https://clinicaireply.com/auth/callback`
+6. If Microsoft sign-in is live:
+   - enable the Azure provider in Supabase Auth
+   - use the Supabase callback URL in the Azure app registration:
+     - `https://<your-project-ref>.supabase.co/auth/v1/callback`
+   - set the Azure redirect URI for web auth to that callback URL
+   - enable `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` in Vercel only after the provider is working
+   - if Azure accounts do not always return email, enable `Allow users without an email` in the Supabase Azure provider settings
 
 ## Stripe
 

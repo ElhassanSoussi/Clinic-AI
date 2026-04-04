@@ -2,7 +2,6 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { Loader2 } from "lucide-react";
-import { isFrontendEnvError } from "@/lib/env";
 import { createClient } from "@/utils/supabase/client";
 import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/oauth-providers";
 
@@ -52,6 +51,32 @@ function renderProviderIcon(
   );
 }
 
+function formatProviderError(provider: OAuthProvider, message: string): string {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("unsupported provider")) {
+    return `${provider.label} is not enabled in Supabase yet.`;
+  }
+
+  if (lower.includes("provider is not enabled")) {
+    return `${provider.label} is not enabled in Supabase yet.`;
+  }
+
+  if (lower.includes("redirect_uri_mismatch")) {
+    return `${provider.label} is configured with the wrong redirect URL. Update the provider redirect/callback URLs in Supabase and the provider console.`;
+  }
+
+  if (lower.includes("invalid_client")) {
+    return `${provider.label} is configured with an invalid client ID or secret. Re-check the provider credentials in Supabase.`;
+  }
+
+  if (lower.includes("access_denied")) {
+    return `${provider.label} sign-in was cancelled or denied.`;
+  }
+
+  return message;
+}
+
 export default function OAuthButtons({
   disabled,
   nextPath,
@@ -77,7 +102,7 @@ export default function OAuthButtons({
         ? `${globalThis.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
         : `${globalThis.location.origin}/auth/callback`;
 
-      await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider.id,
         options: {
           redirectTo,
@@ -85,9 +110,22 @@ export default function OAuthButtons({
           queryParams: provider.queryParams,
         },
       });
+
+      if (error) {
+        throw new Error(formatProviderError(provider, error.message));
+      }
+
+      if (data?.url && globalThis.window !== undefined) {
+        globalThis.location.assign(data.url);
+        return;
+      }
+
+      throw new Error(`${provider.label} did not return a sign-in redirect URL.`);
     } catch (error) {
-      if (isFrontendEnvError(error)) {
+      if (error instanceof Error) {
         setProviderError(error.message);
+      } else {
+        setProviderError("Unable to start social sign-in. Please try again.");
       }
       setLoadingProvider(null);
     }
