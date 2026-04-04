@@ -154,33 +154,39 @@ export default function DashboardPage() {
 
   const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
 
-  const emptyActivityState =
-    clinic && systemStatus === "LIVE" ? (
-      <EmptyState
-        icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
-        title="No activity yet"
-        description="Your assistant is live. Events will appear here as patients interact."
-        action={
-          clinic.slug ? (
-            <a
-              href={`/chat/${clinic.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
-            >
-              <MessageSquareMore className="h-3.5 w-3.5" />
-              Test your assistant
-            </a>
-          ) : undefined
-        }
-      />
-    ) : clinic && systemStatus === "READY" ? (
-      <EmptyState
-        icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
-        title="Ready to go live"
-        description="Setup is complete. Go live to start receiving patient requests."
-      />
-    ) : (
+  function buildEmptyActivityState() {
+    if (clinic && systemStatus === "LIVE") {
+      return (
+        <EmptyState
+          icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
+          title="No activity yet"
+          description="Your assistant is live. Events will appear here as patients interact."
+          action={
+            clinic.slug ? (
+              <a
+                href={`/chat/${clinic.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
+              >
+                <MessageSquareMore className="h-3.5 w-3.5" />
+                Test your assistant
+              </a>
+            ) : undefined
+          }
+        />
+      );
+    }
+    if (clinic && systemStatus === "READY") {
+      return (
+        <EmptyState
+          icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
+          title="Ready to go live"
+          description="Setup is complete. Go live to start receiving patient requests."
+        />
+      );
+    }
+    return (
       <EmptyState
         icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
         title="System not live yet"
@@ -196,6 +202,9 @@ export default function DashboardPage() {
         }
       />
     );
+  }
+
+  const emptyActivityState = buildEmptyActivityState();
 
   const statCards = [
     { label: "Conversations", value: analytics.conversations_total, icon: Inbox, tone: "slate" as const },
@@ -432,7 +441,7 @@ export default function DashboardPage() {
                     <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
                       <div
                         className="h-full rounded-full bg-linear-to-r from-teal-500 to-violet-500"
-                        style={{
+                        style={{ // NOSONAR — dynamic percentage requires inline style
                           width: `${Math.max(
                             20,
                             (bucket.count /
@@ -476,13 +485,14 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {opportunities.slice(0, 5).map((opportunity) => {
-                    const href = opportunity.conversation_id
-                      ? `/dashboard/inbox/${opportunity.conversation_id}`
-                      : opportunity.lead_id
-                        ? `/dashboard/leads/${opportunity.lead_id}`
-                        : opportunity.customer_key
-                          ? `/dashboard/customers/${opportunity.customer_key}`
-                          : "/dashboard/opportunities";
+                    let href = "/dashboard/opportunities";
+                    if (opportunity.conversation_id) {
+                      href = `/dashboard/inbox/${opportunity.conversation_id}`;
+                    } else if (opportunity.lead_id) {
+                      href = `/dashboard/leads/${opportunity.lead_id}`;
+                    } else if (opportunity.customer_key) {
+                      href = `/dashboard/customers/${opportunity.customer_key}`;
+                    }
                     return (
                       <Link
                         key={opportunity.id}

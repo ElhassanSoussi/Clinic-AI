@@ -130,6 +130,401 @@ function draftFromAppointment(appointment: AppointmentRecord): AppointmentDraft 
   };
 }
 
+function reminderCaption(appointment: AppointmentRecord): string {
+  if (appointment.reminder_ready) {
+    return appointment.reminder_scheduled_for
+      ? `Scheduled ${formatDateTime(appointment.reminder_scheduled_for)}.`
+      : "Reminder prep complete.";
+  }
+  return appointment.reminder_blocked_reason || "Not active yet.";
+}
+
+function depositStateCaption(appointment: AppointmentRecord): string {
+  if (appointment.deposit_status === "paid") {
+    return appointment.deposit_paid_at
+      ? `Paid ${formatDateTime(appointment.deposit_paid_at)}.`
+      : "Payment confirmed.";
+  }
+  if (appointment.deposit_request_delivery_reason) {
+    return appointment.deposit_request_delivery_reason;
+  }
+  if (appointment.deposit_status === "requested") {
+    return "Link created. Payment pending.";
+  }
+  return "No deposit requested.";
+}
+
+function depositButtonLabel(appointment: AppointmentRecord, isLoading: boolean): string {
+  if (isLoading) return "Working...";
+  if (
+    appointment.deposit_status === "requested" ||
+    appointment.deposit_status === "failed" ||
+    appointment.deposit_status === "expired"
+  ) {
+    return "Resend";
+  }
+  return "Request deposit";
+}
+
+type DetailRailProps = {
+  readonly appointment: AppointmentRecord;
+  readonly draft: AppointmentDraft;
+  readonly onUpdateDraft: (patch: Partial<AppointmentDraft>) => void;
+  readonly onSaveDetails: () => void;
+  readonly onReschedule: () => void;
+  readonly onCancel: () => void;
+  readonly onMarkNoShow: () => void;
+  readonly onReopen: () => void;
+  readonly onRequestDeposit: (sendSms: boolean) => void;
+  readonly onClearDeposit: () => void;
+  readonly onCopyLink: () => void;
+  readonly depositLink: string;
+  readonly depositMessage: string;
+  readonly depositActionLeadId: string;
+  readonly savingLeadId: string;
+};
+
+function AppointmentDetailRail({
+  appointment,
+  draft,
+  onUpdateDraft,
+  onSaveDetails,
+  onReschedule,
+  onCancel,
+  onMarkNoShow,
+  onReopen,
+  onRequestDeposit,
+  onClearDeposit,
+  onCopyLink,
+  depositLink,
+  depositMessage,
+  depositActionLeadId,
+  savingLeadId,
+}: DetailRailProps) {
+  const isSaving = savingLeadId === appointment.lead_id;
+  const isDepositLoading = depositActionLeadId === appointment.lead_id;
+
+  return (
+    <div className="space-y-4">
+      {/* Patient info */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <h2 className="text-lg font-bold text-slate-900">{appointment.patient_name}</h2>
+              <ChannelBadge channel={appointment.source} withIcon />
+              <LeadStatusBadge status={appointment.lead_status} />
+            </div>
+            <p className="text-xs text-slate-400">
+              {appointment.appointment_starts_at
+                ? formatDateTime(appointment.appointment_starts_at)
+                : appointment.preferred_datetime_text || "Scheduling details still pending."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {appointment.thread_id && (
+              <Link
+                href={`/dashboard/inbox/${appointment.thread_id}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Thread</span>
+              </Link>
+            )}
+            {appointment.customer_key ? (
+              <Link
+                href={`/dashboard/customers/${appointment.customer_key}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+              >
+                <UserRound className="w-3.5 h-3.5" />
+                <span>Customer</span>
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-1.5 text-xs text-slate-400">
+                <UserRound className="w-3.5 h-3.5" />
+                <span>No customer profile</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+              <Phone className="w-3.5 h-3.5 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400">Phone</p>
+              <p className="text-xs font-semibold text-slate-900">{appointment.patient_phone || "N/A"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+              <UserRound className="w-3.5 h-3.5 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400">Email</p>
+              <p className="text-xs font-semibold text-slate-900">{appointment.patient_email || "N/A"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+              <Clock3 className="w-3.5 h-3.5 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400">Reminder</p>
+              <p className="text-xs font-semibold text-slate-900">{humanizeStatus(appointment.reminder_status)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+              <Wallet className="w-3.5 h-3.5 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400">Deposit</p>
+              <p className="text-xs font-semibold text-slate-900">{depositStatusLabel(appointment.deposit_status)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reminder readiness */}
+        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
+              {appointmentStatusLabel(appointment.appointment_status)}
+            </span>
+            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+              appointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+            }`}>
+              {appointment.reminder_ready ? "Reminder ready" : "Not ready"}
+            </span>
+          </div>
+          <p className="text-[11px] leading-relaxed text-slate-500">
+            {reminderCaption(appointment)}
+          </p>
+        </div>
+      </div>
+
+      {/* Deposit */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold text-slate-900">Booking deposit</p>
+        <p className="mt-0.5 text-[11px] text-slate-400">Request a Stripe deposit and track delivery.</p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
+            {depositStatusLabel(appointment.deposit_status)}
+          </span>
+          {appointment.deposit_amount_cents ? (
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+              {formatMoney(appointment.deposit_amount_cents)}
+            </span>
+          ) : null}
+          {appointment.deposit_request_delivery_status ? (
+            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+              SMS {humanizeStatus(appointment.deposit_request_delivery_status)}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[10rem_1fr]">
+          <div>
+            <label htmlFor="deposit-amount" className="mb-1 block text-[10px] font-semibold text-slate-400">Amount (cents)</label>
+            <input
+              id="deposit-amount"
+              type="number"
+              min={0}
+              step={100}
+              value={draft.depositAmountCents}
+              onChange={(event) => onUpdateDraft({ depositAmountCents: event.target.value })}
+              placeholder="e.g. 5000"
+              className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+            />
+            <p className="mt-1 text-[10px] text-slate-400">5000 = {formatMoney(5000)}</p>
+          </div>
+          <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">State</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+              {depositStateCaption(appointment)}
+            </p>
+            {appointment.deposit_requested_at && appointment.deposit_status !== "paid" && (
+              <p className="mt-1 text-[10px] text-slate-400">Requested {formatDateTime(appointment.deposit_requested_at)}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <button
+            onClick={() => onRequestDeposit(true)}
+            disabled={isDepositLoading || appointment.appointment_status !== "confirmed" || appointment.deposit_status === "paid"}
+            className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+          >
+            {depositButtonLabel(appointment, isDepositLoading)}
+          </button>
+          <button
+            onClick={() => onRequestDeposit(false)}
+            disabled={isDepositLoading || appointment.appointment_status !== "confirmed"}
+            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+          >
+            Link only
+          </button>
+          <button
+            onClick={onClearDeposit}
+            disabled={isDepositLoading || appointment.deposit_status === "not_required"}
+            className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
+          >
+            Not required
+          </button>
+        </div>
+
+        {depositMessage && <p className="mt-2 text-[11px] text-slate-500">{depositMessage}</p>}
+
+        {(depositLink || appointment.deposit_status === "requested") && (
+          <div className="mt-3">
+            <label htmlFor="deposit-link" className="mb-1 block text-[10px] font-semibold text-slate-400">Deposit link</label>
+            <div className="flex gap-1.5">
+              <input
+                id="deposit-link"
+                type="text"
+                value={depositLink}
+                readOnly
+                placeholder="Create or resend to generate a link"
+                className="h-9 min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-600"
+              />
+              <button
+                onClick={onCopyLink}
+                disabled={!depositLink}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Edit booking */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold text-slate-900">Edit booking</p>
+        <p className="mt-0.5 text-[11px] text-slate-400">Time, reason, and internal note.</p>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <input
+            type="date"
+            value={draft.date}
+            onChange={(event) => onUpdateDraft({ date: event.target.value })}
+            title="Appointment date"
+            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          />
+          <input
+            type="time"
+            value={draft.time}
+            onChange={(event) => onUpdateDraft({ time: event.target.value })}
+            title="Appointment time"
+            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          />
+        </div>
+
+        <input
+          type="text"
+          value={draft.reason}
+          onChange={(event) => onUpdateDraft({ reason: event.target.value })}
+          placeholder="Reason for visit"
+          className="mt-2 h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+        />
+
+        <textarea
+          rows={2}
+          value={draft.note}
+          onChange={(event) => onUpdateDraft({ note: event.target.value })}
+          placeholder="Internal booking note"
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+        />
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <button
+            onClick={onSaveDetails}
+            disabled={isSaving}
+            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save details"}
+          </button>
+          <button
+            onClick={onReschedule}
+            disabled={isSaving}
+            className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Reschedule"}
+          </button>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold text-slate-900">Actions</p>
+        <p className="mt-0.5 text-[11px] text-slate-400">Lifecycle changes — no external sync implied.</p>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <button
+            onClick={onCancel}
+            disabled={isSaving}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
+          >
+            <XCircle className="w-3.5 h-3.5" />
+            <span>Cancel</span>
+          </button>
+          <button
+            onClick={onMarkNoShow}
+            disabled={isSaving}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+          >
+            <Clock3 className="w-3.5 h-3.5" />
+            <span>No-show</span>
+          </button>
+          <button
+            onClick={onReopen}
+            disabled={isSaving}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reopen</span>
+          </button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link
+            href={`/dashboard/leads/${appointment.lead_id}`}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Request detail</span>
+          </Link>
+          {appointment.thread_id ? (
+            <Link
+              href={`/dashboard/inbox/${appointment.thread_id}`}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-2 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Inbox thread</span>
+            </Link>
+          ) : (
+            <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-2 text-xs text-slate-400">
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>No thread</span>
+            </span>
+          )}
+        </div>
+
+        {appointment.notes && (
+          <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Notes</p>
+            <p className="mt-1 whitespace-pre-wrap text-[11px] leading-relaxed text-amber-800">{appointment.notes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,6 +536,22 @@ export default function AppointmentsPage() {
   const [drafts, setDrafts] = useState<Record<string, AppointmentDraft>>({});
   const [depositLink, setDepositLink] = useState("");
   const [depositMessage, setDepositMessage] = useState("");
+
+  const updateDraft = useCallback((leadId: string, patch: Partial<AppointmentDraft>) => {
+    setDrafts((current) => ({
+      ...current,
+      [leadId]: {
+        ...(current[leadId] ?? {
+          date: "",
+          time: "",
+          reason: "",
+          note: "",
+          depositAmountCents: "",
+        }),
+        ...patch,
+      },
+    }));
+  }, []);
 
   const loadAppointments = useCallback(async (view: AppointmentView) => {
     setLoading(true);
@@ -184,22 +595,6 @@ export default function AppointmentsPage() {
     setDepositLink("");
     setDepositMessage("");
   }, [selectedAppointment?.lead_id]);
-
-  const updateDraft = (leadId: string, patch: Partial<AppointmentDraft>) => {
-    setDrafts((current) => ({
-      ...current,
-      [leadId]: {
-        ...(current[leadId] ?? {
-          date: "",
-          time: "",
-          reason: "",
-          note: "",
-          depositAmountCents: "",
-        }),
-        ...patch,
-      },
-    }));
-  };
 
   const runAppointmentUpdate = async (
     leadId: string,
@@ -509,349 +904,23 @@ export default function AppointmentsPage() {
 
           {/* Right rail — detail */}
           {selectedAppointment && selectedDraft && (
-            <div className="space-y-4">
-              {/* Patient info */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                      <h2 className="text-lg font-bold text-slate-900">{selectedAppointment.patient_name}</h2>
-                      <ChannelBadge channel={selectedAppointment.source} withIcon />
-                      <LeadStatusBadge status={selectedAppointment.lead_status} />
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      {selectedAppointment.appointment_starts_at
-                        ? formatDateTime(selectedAppointment.appointment_starts_at)
-                        : selectedAppointment.preferred_datetime_text || "Scheduling details still pending."}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedAppointment.thread_id && (
-                      <Link
-                        href={`/dashboard/inbox/${selectedAppointment.thread_id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>Thread</span>
-                      </Link>
-                    )}
-                    {selectedAppointment.customer_key ? (
-                      <Link
-                        href={`/dashboard/customers/${selectedAppointment.customer_key}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
-                      >
-                        <UserRound className="w-3.5 h-3.5" />
-                        <span>Customer</span>
-                      </Link>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-1.5 text-xs text-slate-400">
-                        <UserRound className="w-3.5 h-3.5" />
-                        <span>No customer profile</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400">Phone</p>
-                      <p className="text-xs font-semibold text-slate-900">{selectedAppointment.patient_phone || "N/A"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <UserRound className="w-3.5 h-3.5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400">Email</p>
-                      <p className="text-xs font-semibold text-slate-900">{selectedAppointment.patient_email || "N/A"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Clock3 className="w-3.5 h-3.5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400">Reminder</p>
-                      <p className="text-xs font-semibold text-slate-900">{humanizeStatus(selectedAppointment.reminder_status)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Wallet className="w-3.5 h-3.5 text-slate-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400">Deposit</p>
-                      <p className="text-xs font-semibold text-slate-900">{depositStatusLabel(selectedAppointment.deposit_status)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Reminder readiness */}
-                <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-                  <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(selectedAppointment.appointment_status)}`}>
-                      {appointmentStatusLabel(selectedAppointment.appointment_status)}
-                    </span>
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                      selectedAppointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-                    }`}>
-                      {selectedAppointment.reminder_ready ? "Reminder ready" : "Not ready"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-slate-500">
-                    {selectedAppointment.reminder_ready
-                      ? selectedAppointment.reminder_scheduled_for
-                        ? `Scheduled ${formatDateTime(selectedAppointment.reminder_scheduled_for)}.`
-                        : "Reminder prep complete."
-                      : selectedAppointment.reminder_blocked_reason || "Not active yet."}
-                  </p>
-                </div>
-              </div>
-
-              {/* Deposit */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Booking deposit</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Request a Stripe deposit and track delivery.</p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${depositStatusClass(selectedAppointment.deposit_status)}`}>
-                    {depositStatusLabel(selectedAppointment.deposit_status)}
-                  </span>
-                  {selectedAppointment.deposit_amount_cents ? (
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                      {formatMoney(selectedAppointment.deposit_amount_cents)}
-                    </span>
-                  ) : null}
-                  {selectedAppointment.deposit_request_delivery_status ? (
-                    <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                      SMS {humanizeStatus(selectedAppointment.deposit_request_delivery_status)}
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[10rem_1fr]">
-                  <div>
-                    <label htmlFor="deposit-amount" className="mb-1 block text-[10px] font-semibold text-slate-400">Amount (cents)</label>
-                    <input
-                      id="deposit-amount"
-                      type="number"
-                      min={0}
-                      step={100}
-                      value={selectedDraft.depositAmountCents}
-                      onChange={(event) => updateDraft(selectedAppointment.lead_id, { depositAmountCents: event.target.value })}
-                      placeholder="e.g. 5000"
-                      className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                    />
-                    <p className="mt-1 text-[10px] text-slate-400">5000 = {formatMoney(5000)}</p>
-                  </div>
-                  <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">State</p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                      {selectedAppointment.deposit_status === "paid"
-                        ? selectedAppointment.deposit_paid_at
-                          ? `Paid ${formatDateTime(selectedAppointment.deposit_paid_at)}.`
-                          : "Payment confirmed."
-                        : selectedAppointment.deposit_request_delivery_reason
-                          ? selectedAppointment.deposit_request_delivery_reason
-                          : selectedAppointment.deposit_status === "requested"
-                            ? "Link created. Payment pending."
-                            : "No deposit requested."}
-                    </p>
-                    {selectedAppointment.deposit_requested_at && selectedAppointment.deposit_status !== "paid" && (
-                      <p className="mt-1 text-[10px] text-slate-400">Requested {formatDateTime(selectedAppointment.deposit_requested_at)}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => requestDeposit(true)}
-                    disabled={
-                      depositActionLeadId === selectedAppointment.lead_id ||
-                      selectedAppointment.appointment_status !== "confirmed" ||
-                      selectedAppointment.deposit_status === "paid"
-                    }
-                    className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
-                  >
-                    {depositActionLeadId === selectedAppointment.lead_id
-                      ? "Working..."
-                      : selectedAppointment.deposit_status === "requested" ||
-                          selectedAppointment.deposit_status === "failed" ||
-                          selectedAppointment.deposit_status === "expired"
-                        ? "Resend"
-                        : "Request deposit"}
-                  </button>
-                  <button
-                    onClick={() => requestDeposit(false)}
-                    disabled={
-                      depositActionLeadId === selectedAppointment.lead_id ||
-                      selectedAppointment.appointment_status !== "confirmed"
-                    }
-                    className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    Link only
-                  </button>
-                  <button
-                    onClick={clearDepositRequirement}
-                    disabled={depositActionLeadId === selectedAppointment.lead_id || selectedAppointment.deposit_status === "not_required"}
-                    className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
-                  >
-                    Not required
-                  </button>
-                </div>
-
-                {depositMessage && <p className="mt-2 text-[11px] text-slate-500">{depositMessage}</p>}
-
-                {(depositLink || selectedAppointment.deposit_status === "requested") && (
-                  <div className="mt-3">
-                    <label htmlFor="deposit-link" className="mb-1 block text-[10px] font-semibold text-slate-400">Deposit link</label>
-                    <div className="flex gap-1.5">
-                      <input
-                        id="deposit-link"
-                        type="text"
-                        value={depositLink}
-                        readOnly
-                        placeholder="Create or resend to generate a link"
-                        className="h-9 min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-600"
-                      />
-                      <button
-                        onClick={copyDepositLink}
-                        disabled={!depositLink}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Edit booking */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Edit booking</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Time, reason, and internal note.</p>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <input
-                    type="date"
-                    value={selectedDraft.date}
-                    onChange={(event) => updateDraft(selectedAppointment.lead_id, { date: event.target.value })}
-                    title="Appointment date"
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                  />
-                  <input
-                    type="time"
-                    value={selectedDraft.time}
-                    onChange={(event) => updateDraft(selectedAppointment.lead_id, { time: event.target.value })}
-                    title="Appointment time"
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  value={selectedDraft.reason}
-                  onChange={(event) => updateDraft(selectedAppointment.lead_id, { reason: event.target.value })}
-                  placeholder="Reason for visit"
-                  className="mt-2 h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                />
-
-                <textarea
-                  rows={2}
-                  value={selectedDraft.note}
-                  onChange={(event) => updateDraft(selectedAppointment.lead_id, { note: event.target.value })}
-                  placeholder="Internal booking note"
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                />
-
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <button
-                    onClick={saveDetails}
-                    disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    {savingLeadId === selectedAppointment.lead_id ? "Saving..." : "Save details"}
-                  </button>
-                  <button
-                    onClick={rescheduleAppointment}
-                    disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
-                  >
-                    {savingLeadId === selectedAppointment.lead_id ? "Saving..." : "Reschedule"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Actions</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Lifecycle changes — no external sync implied.</p>
-
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <button
-                    onClick={cancelAppointment}
-                    disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
-                  >
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Cancel</span>
-                  </button>
-                  <button
-                    onClick={markNoShow}
-                    disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
-                  >
-                    <Clock3 className="w-3.5 h-3.5" />
-                    <span>No-show</span>
-                  </button>
-                  <button
-                    onClick={reopenAppointment}
-                    disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reopen</span>
-                  </button>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <Link
-                    href={`/dashboard/leads/${selectedAppointment.lead_id}`}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Request detail</span>
-                  </Link>
-                  {selectedAppointment.thread_id ? (
-                    <Link
-                      href={`/dashboard/inbox/${selectedAppointment.thread_id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-2 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Inbox thread</span>
-                    </Link>
-                  ) : (
-                    <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-2 text-xs text-slate-400">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>No thread</span>
-                    </span>
-                  )}
-                </div>
-
-                {selectedAppointment.notes && (
-                  <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Notes</p>
-                    <p className="mt-1 whitespace-pre-wrap text-[11px] leading-relaxed text-amber-800">{selectedAppointment.notes}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <AppointmentDetailRail
+              appointment={selectedAppointment}
+              draft={selectedDraft}
+              onUpdateDraft={(patch) => updateDraft(selectedAppointment.lead_id, patch)}
+              onSaveDetails={saveDetails}
+              onReschedule={rescheduleAppointment}
+              onCancel={cancelAppointment}
+              onMarkNoShow={markNoShow}
+              onReopen={reopenAppointment}
+              onRequestDeposit={requestDeposit}
+              onClearDeposit={clearDepositRequirement}
+              onCopyLink={copyDepositLink}
+              depositLink={depositLink}
+              depositMessage={depositMessage}
+              depositActionLeadId={depositActionLeadId}
+              savingLeadId={savingLeadId}
+            />
           )}
         </div>
       )}

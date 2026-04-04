@@ -228,21 +228,23 @@ export default function InboxPage() {
             })}
           </div>
 
-          {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-              <EmptyState
-                icon={<Inbox className="w-5 h-5 text-slate-400" />}
-                title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
-                description={
-                  threads.length === 0
-                    ? "Threads show up once patients start chatting via web chat or connected channels."
-                    : channelFilter === "all"
-                      ? "Try adjusting the search or status filter."
-                      : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match.`
-                }
-              />
-            </div>
-          ) : (
+          {filtered.length === 0 ? (() => {
+            let emptyDescription = "Threads show up once patients start chatting via web chat or connected channels.";
+            if (threads.length > 0) {
+              emptyDescription = channelFilter === "all"
+                ? "Try adjusting the search or status filter."
+                : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match.`;
+            }
+            return (
+              <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+                <EmptyState
+                  icon={<Inbox className="w-5 h-5 text-slate-400" />}
+                  title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
+                  description={emptyDescription}
+                />
+              </div>
+            );
+          })() : (
             <div className="space-y-2">
               {filtered.map((thread) => (
                 <button

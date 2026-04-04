@@ -517,7 +517,7 @@ export default function OperationsPage() {
                       disabled={savingChannelId === channel.channel}
                       className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                     />
-                    Enable AI SMS auto-reply
+                    <span>Enable AI SMS auto-reply</span>
                   </label>
                   <p className="mt-2 text-[11px] text-slate-500">
                     Incoming SMS can get a real assistant reply when the clinic is live and the thread is not under manual takeover.
@@ -534,7 +534,7 @@ export default function OperationsPage() {
                       disabled={savingChannelId === channel.channel}
                       className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                     />
-                    Enable automatic missed-call text-back
+                    <span>Enable automatic missed-call text-back</span>
                   </label>
                 </div>
               )}
@@ -620,7 +620,7 @@ export default function OperationsPage() {
                 onChange={(event) => setReminderEnabled(event.target.checked)}
                 className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
               />
-              Enable reminder prep
+              <span>Enable reminder prep</span>
             </label>
             <input
               type="number"
@@ -649,7 +649,7 @@ export default function OperationsPage() {
               onChange={(event) => setFollowUpAutomationEnabled(event.target.checked)}
               className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
             />
-            Enable auto follow-up
+            <span>Enable auto follow-up</span>
           </label>
           <div>
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Delay before task creation</p>
@@ -789,15 +789,16 @@ export default function OperationsPage() {
                             Review needed
                           </span>
                         )}
-                        {event.manual_takeover ? (
+                        {event.manual_takeover && (
                           <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                             Staff handling
                           </span>
-                        ) : event.ai_auto_reply_enabled ? (
+                        )}
+                        {!event.manual_takeover && event.ai_auto_reply_enabled && (
                           <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                             AI handling
                           </span>
-                        ) : null}
+                        )}
                         {event.latest_inbound_summary && (
                           <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
                             Replied
@@ -1167,7 +1168,7 @@ export default function OperationsPage() {
                             }
                             className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                           />
-                          Require deposit later
+                          <span>Require deposit later</span>
                         </label>
 
                         <div>

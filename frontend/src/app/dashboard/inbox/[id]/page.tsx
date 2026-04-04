@@ -19,7 +19,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
-import type { ConversationDetail } from "@/types";
+import type { CommunicationEvent, ConversationDetail } from "@/types";
 
 function humanizeSnakeCase(value?: string | null): string {
   if (!value) return "";
@@ -634,7 +634,7 @@ export default function InboxThreadPage({
             </div>
 
             <div className="space-y-4 px-5 py-5 sm:px-6">
-              {isEventThread ? (
+              {isEventThread && (
                 <div className="space-y-4">
                   {relatedEvents.length === 0 ? (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
@@ -734,50 +734,58 @@ export default function InboxThreadPage({
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
                       Delivery state
                     </p>
-                    {communicationEvent?.latest_outbound_status ? (
-                      <div className="space-y-2">
+                    {(() => {
+                      if (communicationEvent?.latest_outbound_status) {
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CommunicationEventStatusBadge status={communicationEvent.latest_outbound_status as CommunicationEvent["status"]} />
+                              <span className="text-xs text-slate-500">
+                                {communicationEvent.latest_outbound_summary || "Latest text-back recorded."}
+                              </span>
+                            </div>
+                            {communicationEvent.latest_outbound_reason && (
+                              <p className="text-xs text-slate-500">{communicationEvent.latest_outbound_reason}</p>
+                            )}
+                            {communicationEvent.latest_inbound_summary && (
+                              <p className="text-xs text-slate-500">
+                                Latest reply: {communicationEvent.latest_inbound_summary}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+                      if (communicationEvent?.auto_reply_reason) {
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CommunicationEventStatusBadge status={communicationEvent.status} />
+                              <span className="text-xs text-slate-500">
+                                {deliveryStateCaption(communicationEvent.auto_reply_status)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500">{communicationEvent.auto_reply_reason}</p>
+                          </div>
+                        );
+                      }
+                      return (
                         <div className="flex flex-wrap items-center gap-2">
-                          <CommunicationEventStatusBadge status={communicationEvent.latest_outbound_status as typeof communicationEvent.status} />
+                          <CommunicationEventStatusBadge status={communicationEvent?.status ?? "new"} />
                           <span className="text-xs text-slate-500">
-                            {communicationEvent.latest_outbound_summary || "Latest text-back recorded."}
+                            Two-way SMS will continue here once a patient replies. Manual send is available below.
                           </span>
                         </div>
-                        {communicationEvent.latest_outbound_reason && (
-                          <p className="text-xs text-slate-500">{communicationEvent.latest_outbound_reason}</p>
-                        )}
-                        {communicationEvent.latest_inbound_summary && (
-                          <p className="text-xs text-slate-500">
-                            Latest reply: {communicationEvent.latest_inbound_summary}
-                          </p>
-                        )}
-                      </div>
-                    ) : communicationEvent?.auto_reply_reason ? (
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <CommunicationEventStatusBadge status={communicationEvent.status} />
-                          <span className="text-xs text-slate-500">
-                            {deliveryStateCaption(communicationEvent.auto_reply_status)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500">{communicationEvent.auto_reply_reason}</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <CommunicationEventStatusBadge status={communicationEvent?.status ?? "new"} />
-                        <span className="text-xs text-slate-500">
-                          Two-way SMS will continue here once a patient replies. Manual send is available below.
-                        </span>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 </div>
-              ) : messages.length === 0 ? (
+              )}
+              {!isEventThread && messages.length === 0 && (
                 <div className="app-card-muted border-dashed px-4 py-5 text-sm text-slate-500">
-                  {conversation.summary
-                    ? conversation.summary
-                    : "No message transcript is stored for this conversation yet."}
+                  {conversation.summary || "No message transcript is stored for this conversation yet."}
                 </div>
-              ) : (
+              )}
+              {!isEventThread && messages.length > 0 && (
                 messages.map((message) => (
                   <div
                     key={message.id}
@@ -815,23 +823,34 @@ export default function InboxThreadPage({
                     AI auto-reply
                   </h2>
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    {pendingReviewEvent ? (
-                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-                        Human review needed
-                      </span>
-                    ) : conversation.manual_takeover ? (
-                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                        Manual takeover
-                      </span>
-                    ) : conversation.ai_auto_reply_enabled ? (
-                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-                        AI active
-                      </span>
-                    ) : (
-                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">
-                        AI off
-                      </span>
-                    )}
+                    {(() => {
+                      if (pendingReviewEvent) {
+                        return (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                            Human review needed
+                          </span>
+                        );
+                      }
+                      if (conversation.manual_takeover) {
+                        return (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                            Manual takeover
+                          </span>
+                        );
+                      }
+                      if (conversation.ai_auto_reply_enabled) {
+                        return (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                            AI active
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">
+                          AI off
+                        </span>
+                      );
+                    })()}
                   </div>
                   <p className="text-xs text-slate-500 mb-3">
                     {smsAutomationSummary(
@@ -849,13 +868,12 @@ export default function InboxThreadPage({
                         : "text-amber-700 border border-amber-200 hover:bg-amber-50"
                     }`}
                   >
-                    {conversation.manual_takeover
-                      ? savingAction === "resume_ai"
-                        ? "Enabling..."
-                        : "Re-enable AI replies"
-                      : savingAction === "takeover"
-                        ? "Updating..."
-                        : "Take over manually"}
+                    {(() => {
+                      if (conversation.manual_takeover) {
+                        return savingAction === "resume_ai" ? "Enabling..." : "Re-enable AI replies";
+                      }
+                      return savingAction === "takeover" ? "Updating..." : "Take over manually";
+                    })()}
                   </button>
                 </div>
               )}
@@ -879,7 +897,7 @@ export default function InboxThreadPage({
                     rows={4}
                     value={reviewReplyBody}
                     onChange={(event) => setReviewReplyBody(event.target.value)}
-                    className="app-input min-h-[7rem] resize-none"
+                    className="app-input min-h-28 resize-none"
                     placeholder="Review the drafted reply before sending"
                   />
                   <div className="flex flex-wrap gap-2 mt-3">
@@ -888,11 +906,11 @@ export default function InboxThreadPage({
                       disabled={savingAction === "send_suggested" || !reviewReplyBody.trim()}
                       className="px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
                     >
-                      {savingAction === "send_suggested"
-                        ? "Sending..."
-                        : reviewReplyBody.trim() === pendingReviewEvent.suggested_reply_text
-                          ? "Send draft"
-                          : "Send edited draft"}
+                      {(() => {
+                        if (savingAction === "send_suggested") return "Sending...";
+                        if (reviewReplyBody.trim() === pendingReviewEvent.suggested_reply_text) return "Send draft";
+                        return "Send edited draft";
+                      })()}
                     </button>
                     <button
                       onClick={discardSuggestedReply}
@@ -917,7 +935,7 @@ export default function InboxThreadPage({
                 rows={4}
                 value={smsBody}
                 onChange={(event) => setSmsBody(event.target.value)}
-                className="app-input min-h-[7rem] resize-none"
+                className="app-input min-h-28 resize-none"
                 placeholder="Write your message"
               />
               <button
@@ -969,7 +987,7 @@ export default function InboxThreadPage({
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Front desk actions
             </h2>
-            {!lead ? (
+            {lead ? null : (
               <div className="space-y-3 mb-5">
                 <p className="text-sm text-slate-600">
                   Convert this thread into a request so your team can track booking progress and reminders.
@@ -1037,7 +1055,8 @@ export default function InboxThreadPage({
                   </button>
                 </div>
               </div>
-            ) : (
+            )}
+            {lead && (
               <div className="space-y-5 mb-5">
                 <div className="flex flex-wrap gap-2">
                   <button
