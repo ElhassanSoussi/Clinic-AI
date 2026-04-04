@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bot, Loader2, AlertTriangle } from "lucide-react";
+import { normalizeAuthError } from "@/lib/auth-errors";
 import { getSupabasePublicEnvError } from "@/lib/env";
 import { createClient } from "@/utils/supabase/client";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
@@ -63,7 +64,7 @@ export default function AuthCompletePage() {
 
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
-          throw new Error(body.detail || `Server error: ${res.status}`);
+          throw new Error(normalizeAuthError(body.detail || `Server error: ${res.status}`));
         }
 
         const data = await res.json();
@@ -81,7 +82,7 @@ export default function AuthCompletePage() {
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Sign-in failed. Please try again."
+          err instanceof Error ? normalizeAuthError(err.message) : "Sign-in failed. Please try again."
         );
       }
     }

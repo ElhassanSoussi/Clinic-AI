@@ -7,6 +7,7 @@ import { Bot, Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
+import { normalizeAuthError } from "@/lib/auth-errors";
 import { getSupabasePublicEnvError } from "@/lib/env";
 import { OAUTH_PROVIDERS } from "@/lib/oauth-providers";
 
@@ -20,45 +21,8 @@ type LoginFormSubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
 >[0];
 
-function decodeOAuthError(raw: string): string {
-  let value = raw.replaceAll("+", " ");
-
-  for (let i = 0; i < 2; i += 1) {
-    try {
-      const decoded = decodeURIComponent(value);
-      if (decoded === value) break;
-      value = decoded;
-    } catch {
-      break;
-    }
-  }
-
-  return value;
-}
-
 function formatOAuthError(raw: string | null): string {
-  if (!raw) return "";
-
-  const decoded = decodeOAuthError(raw);
-  const lower = decoded.toLowerCase();
-
-  if (lower.includes("error getting user email from external provider")) {
-    return "Microsoft sign-in failed because Azure did not return an email address. Enable 'Allow users without an email' for the Azure provider in Supabase or configure the Azure app to return an email claim.";
-  }
-
-  if (lower.includes("invalid login credentials")) {
-    return "Invalid email or password.";
-  }
-
-  if (lower.includes("provider is not enabled") || lower.includes("unsupported provider")) {
-    return "That sign-in provider is not enabled in Supabase yet.";
-  }
-
-  if (lower.includes("redirect_uri_mismatch")) {
-    return "Social sign-in is configured with the wrong redirect URL. Update the provider callback URL in Supabase and the provider console.";
-  }
-
-  return decoded;
+  return normalizeAuthError(raw);
 }
 
 function readCookie(name: string): string | null {
