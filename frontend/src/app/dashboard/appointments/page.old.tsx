@@ -87,11 +87,17 @@ function humanizeStatus(value: string): string {
 }
 
 function appointmentStatusClass(status: AppointmentRecord["appointment_status"]): string {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-700";
-  if (status === "cancel_requested" || status === "reschedule_requested") return "bg-amber-50 text-amber-700";
-  if (status === "cancelled" || status === "no_show") return "bg-rose-50 text-rose-700";
-  if (status === "completed") return "bg-blue-50 text-blue-700";
-  return "bg-slate-100 text-slate-700";
+  if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "cancel_requested" || status === "reschedule_requested") {
+    return "bg-amber-50 text-amber-700 border-amber-200";
+  }
+  if (status === "cancelled" || status === "no_show") {
+    return "bg-rose-50 text-rose-700 border-rose-200";
+  }
+  if (status === "completed") {
+    return "bg-blue-50 text-blue-700 border-blue-200";
+  }
+  return "bg-slate-100 text-slate-700 border-slate-200";
 }
 
 function depositStatusLabel(status: AppointmentRecord["deposit_status"]): string {
@@ -105,11 +111,17 @@ function depositStatusLabel(status: AppointmentRecord["deposit_status"]): string
 }
 
 function depositStatusClass(status: AppointmentRecord["deposit_status"]): string {
-  if (status === "paid") return "bg-emerald-50 text-emerald-700";
-  if (status === "requested" || status === "required") return "bg-amber-50 text-amber-700";
-  if (status === "failed" || status === "expired") return "bg-rose-50 text-rose-700";
-  if (status === "waived") return "bg-blue-50 text-blue-700";
-  return "bg-slate-100 text-slate-700";
+  if (status === "paid") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "requested" || status === "required") {
+    return "bg-amber-50 text-amber-700 border-amber-200";
+  }
+  if (status === "failed" || status === "expired") {
+    return "bg-rose-50 text-rose-700 border-rose-200";
+  }
+  if (status === "waived") {
+    return "bg-blue-50 text-blue-700 border-blue-200";
+  }
+  return "bg-slate-100 text-slate-700 border-slate-200";
 }
 
 function formatMoney(cents?: number | null): string {
@@ -368,11 +380,11 @@ export default function AppointmentsPage() {
         eyebrow={
           <>
             <CalendarClock className="h-3.5 w-3.5" />
-            Appointments
+            Appointments workspace
           </>
         }
-        title="Appointment board"
-        description="Review timing, deposits, and lifecycle without leaving the workspace."
+        title="Manage booked requests with front-desk clarity."
+        description="Review appointment timing, reminder readiness, lifecycle status, and deposit handling without leaving the operator workspace."
       />
 
       {appointments.length === 0 ? (
@@ -382,293 +394,304 @@ export default function AppointmentsPage() {
           description="Booked requests will appear here as soon as the front desk confirms an appointment."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[220px_1fr_340px]">
-          {/* Left rail — views */}
-          <div className="hidden space-y-4 xl:block">
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Views</p>
-              <div className="mt-3 space-y-1.5">
+        <div className="workspace-column-layout">
+          <aside className="workspace-side-rail">
+            <div className="app-card p-5">
+              <p className="workspace-rail-title">Views</p>
+              <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
                 {APPOINTMENT_VIEWS.map((view) => {
                   const active = activeView === view.value;
                   return (
                     <button
                       key={view.value}
                       onClick={() => setActiveView(view.value)}
-                      className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                      className={`flex items-center justify-between rounded-[1.15rem] border px-3.5 py-3 text-sm font-semibold transition-colors xl:w-full ${
                         active
                           ? "border-violet-200 bg-violet-50 text-violet-700"
-                          : "border-slate-100 bg-white text-slate-600 hover:bg-slate-50"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                       }`}
                     >
                       <span>{view.label}</span>
-                      {active && <span className="text-[10px] text-violet-500">Active</span>}
+                      {active ? <span className="text-[11px] text-violet-600">Active</span> : null}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Board</p>
-              <div className="mt-3 space-y-2">
-                <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                  <p className="text-[11px] text-slate-400">Visible</p>
-                  <p className="mt-0.5 text-2xl font-bold text-slate-900">{appointments.length}</p>
+            <div className="app-card p-5">
+              <p className="workspace-rail-title">Current board</p>
+              <div className="mt-4 space-y-3">
+                <div className="app-card-muted px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Appointments visible</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{appointments.length}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    This board stays grounded in the real lead/request booking fields already stored in Clinic AI.
+                  </p>
                 </div>
-                <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                  <p className="text-[11px] text-slate-400">View</p>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-900">
-                    {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
+                <div className="app-card-muted px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Selected view</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {APPOINTMENT_VIEWS.find((view) => view.value === activeView)?.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Review lifecycle changes, reminder readiness, and deposit follow-through from one operational workspace.
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
 
-          {/* Mobile view selector */}
-          <div className="flex flex-wrap gap-2 xl:hidden">
-            {APPOINTMENT_VIEWS.map((view) => (
-              <button
-                key={view.value}
-                onClick={() => setActiveView(view.value)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  activeView === view.value
-                    ? "border-violet-200 bg-violet-50 text-violet-700"
-                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {view.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Center — appointment list */}
           <div className="space-y-3">
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold text-slate-900">Appointments</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
+            <div className="app-card p-5">
+              <p className="text-sm font-semibold text-slate-900">Appointments board</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Review timing, reminder readiness, deposit state, and the linked patient context from one operational list.
+              </p>
             </div>
-            <div className="space-y-2">
-              {appointments.map((appointment) => {
-                const active = selectedLeadId === appointment.lead_id;
-                return (
-                  <button
-                    key={appointment.lead_id}
-                    onClick={() => setSelectedLeadId(appointment.lead_id)}
-                    className={`w-full rounded-xl border p-4 text-left transition-all ${
-                      active
-                        ? "border-teal-200 bg-teal-50/30 shadow-sm"
-                        : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                          <p className="truncate text-sm font-semibold text-slate-900">{appointment.patient_name}</p>
-                          <ChannelBadge channel={appointment.source} withIcon />
-                          <LeadStatusBadge status={appointment.lead_status} />
-                        </div>
-                        <p className="truncate text-xs text-slate-500">
-                          {appointment.reason_for_visit || "No visit reason recorded"}
+            <div className="app-card overflow-hidden">
+              <div className="divide-y divide-slate-100/80 p-3">
+              {appointments.map((appointment) => (
+                <button
+                  key={appointment.lead_id}
+                  onClick={() => setSelectedLeadId(appointment.lead_id)}
+                  className="app-list-row w-full px-5 py-4 text-left"
+                  data-active={selectedLeadId === appointment.lead_id}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <p className="text-sm font-semibold text-slate-900 truncate">
+                          {appointment.patient_name}
                         </p>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
-                            {appointmentStatusLabel(appointment.appointment_status)}
-                          </span>
-                          {appointment.reminder_status !== "not_ready" && (
-                            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                              Reminder {humanizeStatus(appointment.reminder_status)}
-                            </span>
-                          )}
-                          {appointment.follow_up_open && (
-                            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Follow-up</span>
-                          )}
-                          {appointment.deposit_status !== "not_required" && (
-                            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
-                              {depositStatusLabel(appointment.deposit_status)}
-                            </span>
-                          )}
-                        </div>
+                        <ChannelBadge channel={appointment.source} withIcon />
+                        <LeadStatusBadge status={appointment.lead_status} />
                       </div>
-                      <div className="shrink-0 sm:text-right">
-                        <p className="text-xs font-semibold text-slate-900">
-                          {appointment.appointment_starts_at
-                            ? formatDateTime(appointment.appointment_starts_at)
-                            : appointment.preferred_datetime_text || "Time not set"}
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-slate-400">
-                          Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
-                        </p>
+                      <p className="text-sm text-slate-600 truncate">
+                        {appointment.reason_for_visit || "No visit reason recorded"}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${appointmentStatusClass(appointment.appointment_status)}`}>
+                          {appointmentStatusLabel(appointment.appointment_status)}
+                        </span>
+                        {appointment.reminder_status !== "not_ready" && (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                            Reminder {humanizeStatus(appointment.reminder_status)}
+                          </span>
+                        )}
+                        {appointment.follow_up_open && (
+                          <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                            Follow-up open
+                          </span>
+                        )}
+                        {appointment.deposit_status !== "not_required" && (
+                          <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${depositStatusClass(appointment.deposit_status)}`}>
+                            {depositStatusLabel(appointment.deposit_status)}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  </button>
-                );
-              })}
+                    <div className="shrink-0 sm:text-right">
+                      <p className="text-sm font-medium text-slate-900">
+                        {appointment.appointment_starts_at
+                          ? formatDateTime(appointment.appointment_starts_at)
+                          : appointment.preferred_datetime_text || "Time not set"}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+              </div>
             </div>
           </div>
 
-          {/* Right rail — detail */}
           {selectedAppointment && selectedDraft && (
-            <div className="space-y-4">
-              {/* Patient info */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="workspace-side-rail">
+              <div className="app-card p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                      <h2 className="text-lg font-bold text-slate-900">{selectedAppointment.patient_name}</h2>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <h2 className="text-xl font-bold text-slate-900">
+                        {selectedAppointment.patient_name}
+                      </h2>
                       <ChannelBadge channel={selectedAppointment.source} withIcon />
                       <LeadStatusBadge status={selectedAppointment.lead_status} />
                     </div>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-500">
                       {selectedAppointment.appointment_starts_at
                         ? formatDateTime(selectedAppointment.appointment_starts_at)
-                        : selectedAppointment.preferred_datetime_text || "Scheduling details still pending."}
+                        : selectedAppointment.preferred_datetime_text || "Scheduling details still need to be confirmed."}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {selectedAppointment.thread_id && (
                       <Link
                         href={`/dashboard/inbox/${selectedAppointment.thread_id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
+                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors"
                       >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>Thread</span>
+                        <MessageSquare className="w-4 h-4" />
+                        Open thread
                       </Link>
                     )}
                     {selectedAppointment.customer_key ? (
                       <Link
                         href={`/dashboard/customers/${selectedAppointment.customer_key}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
-                        <UserRound className="w-3.5 h-3.5" />
-                        <span>Customer</span>
+                        <UserRound className="w-4 h-4" />
+                        Open customer
                       </Link>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-1.5 text-xs text-slate-400">
-                        <UserRound className="w-3.5 h-3.5" />
-                        <span>No customer profile</span>
-                      </span>
+                      <div className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-400 border border-slate-200 rounded-lg">
+                        <UserRound className="w-4 h-4" />
+                        Customer profile unavailable
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400">Phone</p>
-                      <p className="text-xs font-semibold text-slate-900">{selectedAppointment.patient_phone || "N/A"}</p>
+                      <p className="text-xs text-slate-500">Phone</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {selectedAppointment.patient_phone || "Not provided"}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <UserRound className="w-3.5 h-3.5 text-slate-400" />
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <UserRound className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400">Email</p>
-                      <p className="text-xs font-semibold text-slate-900">{selectedAppointment.patient_email || "N/A"}</p>
+                      <p className="text-xs text-slate-500">Email</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {selectedAppointment.patient_email || "Not provided"}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Clock3 className="w-3.5 h-3.5 text-slate-400" />
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <Clock3 className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400">Reminder</p>
-                      <p className="text-xs font-semibold text-slate-900">{humanizeStatus(selectedAppointment.reminder_status)}</p>
+                      <p className="text-xs text-slate-500">Reminder status</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {humanizeStatus(selectedAppointment.reminder_status)}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                      <Wallet className="w-3.5 h-3.5 text-slate-400" />
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <Wallet className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400">Deposit</p>
-                      <p className="text-xs font-semibold text-slate-900">{depositStatusLabel(selectedAppointment.deposit_status)}</p>
+                      <p className="text-xs text-slate-500">Deposit status</p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {depositStatusLabel(selectedAppointment.deposit_status)}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Reminder readiness */}
-                <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-                  <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(selectedAppointment.appointment_status)}`}>
+                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${appointmentStatusClass(selectedAppointment.appointment_status)}`}>
                       {appointmentStatusLabel(selectedAppointment.appointment_status)}
                     </span>
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                      selectedAppointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-                    }`}>
-                      {selectedAppointment.reminder_ready ? "Reminder ready" : "Not ready"}
-                    </span>
+                    {selectedAppointment.reminder_ready ? (
+                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                        Reminder ready
+                      </span>
+                    ) : (
+                      <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">
+                        Reminder not ready
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[11px] leading-relaxed text-slate-500">
+                  <p className="text-sm text-slate-600">
                     {selectedAppointment.reminder_ready
                       ? selectedAppointment.reminder_scheduled_for
-                        ? `Scheduled ${formatDateTime(selectedAppointment.reminder_scheduled_for)}.`
-                        : "Reminder prep complete."
-                      : selectedAppointment.reminder_blocked_reason || "Not active yet."}
+                        ? `Reminder is scheduled for ${formatDateTime(selectedAppointment.reminder_scheduled_for)}.`
+                        : "Reminder prep is complete for this appointment."
+                      : selectedAppointment.reminder_blocked_reason || "Reminder prep is not active for this appointment yet."}
                   </p>
                 </div>
               </div>
 
-              {/* Deposit */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Booking deposit</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Request a Stripe deposit and track delivery.</p>
+              <div className="app-card p-6">
+                <h3 className="text-sm font-semibold text-slate-900">Booking deposit</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Request a real Stripe deposit for this booked appointment and track whether the link reached the patient.
+                </p>
 
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${depositStatusClass(selectedAppointment.deposit_status)}`}>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${depositStatusClass(selectedAppointment.deposit_status)}`}>
                     {depositStatusLabel(selectedAppointment.deposit_status)}
                   </span>
                   {selectedAppointment.deposit_amount_cents ? (
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                    <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">
                       {formatMoney(selectedAppointment.deposit_amount_cents)}
                     </span>
                   ) : null}
                   {selectedAppointment.deposit_request_delivery_status ? (
-                    <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                    <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
                       SMS {humanizeStatus(selectedAppointment.deposit_request_delivery_status)}
                     </span>
                   ) : null}
                 </div>
 
-                <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[10rem_1fr]">
+                <div className="grid grid-cols-1 lg:grid-cols-[12rem_1fr] gap-4 mt-4">
                   <div>
-                    <label htmlFor="deposit-amount" className="mb-1 block text-[10px] font-semibold text-slate-400">Amount (cents)</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                      Deposit amount
+                    </label>
                     <input
-                      id="deposit-amount"
                       type="number"
                       min={0}
                       step={100}
                       value={selectedDraft.depositAmountCents}
                       onChange={(event) => updateDraft(selectedAppointment.lead_id, { depositAmountCents: event.target.value })}
-                      placeholder="e.g. 5000"
-                      className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
-                    <p className="mt-1 text-[10px] text-slate-400">5000 = {formatMoney(5000)}</p>
+                    <p className="text-xs text-slate-400 mt-2">
+                      Enter cents. Example: 5000 for {formatMoney(5000)}.
+                    </p>
                   </div>
-                  <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">State</p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Deposit state
+                    </p>
+                    <p className="text-sm text-slate-700 mt-2 leading-relaxed">
                       {selectedAppointment.deposit_status === "paid"
                         ? selectedAppointment.deposit_paid_at
-                          ? `Paid ${formatDateTime(selectedAppointment.deposit_paid_at)}.`
-                          : "Payment confirmed."
+                          ? `Stripe has confirmed payment. Paid ${formatDateTime(selectedAppointment.deposit_paid_at)}.`
+                          : "Stripe has confirmed payment for this appointment deposit."
                         : selectedAppointment.deposit_request_delivery_reason
                           ? selectedAppointment.deposit_request_delivery_reason
                           : selectedAppointment.deposit_status === "requested"
-                            ? "Link created. Payment pending."
-                            : "No deposit requested."}
+                            ? "Deposit link created. Payment remains pending until Stripe confirms it."
+                            : "No deposit request has been sent for this appointment yet."}
                     </p>
                     {selectedAppointment.deposit_requested_at && selectedAppointment.deposit_status !== "paid" && (
-                      <p className="mt-1 text-[10px] text-slate-400">Requested {formatDateTime(selectedAppointment.deposit_requested_at)}</p>
+                      <p className="text-xs text-slate-500 mt-2">
+                        Requested {formatDateTime(selectedAppointment.deposit_requested_at)}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={() => requestDeposit(true)}
                     disabled={
@@ -676,14 +699,14 @@ export default function AppointmentsPage() {
                       selectedAppointment.appointment_status !== "confirmed" ||
                       selectedAppointment.deposit_status === "paid"
                     }
-                    className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
                   >
                     {depositActionLeadId === selectedAppointment.lead_id
                       ? "Working..."
                       : selectedAppointment.deposit_status === "requested" ||
                           selectedAppointment.deposit_status === "failed" ||
                           selectedAppointment.deposit_status === "expired"
-                        ? "Resend"
+                        ? "Resend deposit request"
                         : "Request deposit"}
                   </button>
                   <button
@@ -692,65 +715,67 @@ export default function AppointmentsPage() {
                       depositActionLeadId === selectedAppointment.lead_id ||
                       selectedAppointment.appointment_status !== "confirmed"
                     }
-                    className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
-                    Link only
+                    Create shareable link
                   </button>
                   <button
                     onClick={clearDepositRequirement}
                     disabled={depositActionLeadId === selectedAppointment.lead_id || selectedAppointment.deposit_status === "not_required"}
-                    className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors disabled:opacity-50"
                   >
-                    Not required
+                    Mark deposit not required
                   </button>
                 </div>
 
-                {depositMessage && <p className="mt-2 text-[11px] text-slate-500">{depositMessage}</p>}
+                {depositMessage && (
+                  <p className="text-sm text-slate-600 mt-4">{depositMessage}</p>
+                )}
 
                 {(depositLink || selectedAppointment.deposit_status === "requested") && (
-                  <div className="mt-3">
-                    <label htmlFor="deposit-link" className="mb-1 block text-[10px] font-semibold text-slate-400">Deposit link</label>
-                    <div className="flex gap-1.5">
+                  <div className="mt-4">
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                      Latest deposit link
+                    </label>
+                    <div className="flex flex-wrap gap-2">
                       <input
-                        id="deposit-link"
                         type="text"
                         value={depositLink}
                         readOnly
-                        placeholder="Create or resend to generate a link"
-                        className="h-9 min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-600"
+                        placeholder="Create or resend a deposit request to generate a fresh link."
+                        className="flex-1 min-w-0 sm:min-w-[16rem] px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-slate-50 text-slate-600"
                       />
                       <button
                         onClick={copyDepositLink}
                         disabled={!depositLink}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
                       >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy</span>
+                        <Copy className="w-4 h-4" />
+                        Copy
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Edit booking */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Edit booking</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Time, reason, and internal note.</p>
+              <div className="app-card p-6">
+                <h3 className="text-sm font-semibold text-slate-900">Edit booking</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Update the scheduled time, visit reason, and internal note without leaving the appointments workspace.
+                </p>
 
-                <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                   <input
                     type="date"
                     value={selectedDraft.date}
                     onChange={(event) => updateDraft(selectedAppointment.lead_id, { date: event.target.value })}
-                    title="Appointment date"
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
                   <input
                     type="time"
                     value={selectedDraft.time}
                     onChange={(event) => updateDraft(selectedAppointment.lead_id, { time: event.target.value })}
-                    title="Appointment time"
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
                 </div>
 
@@ -759,95 +784,100 @@ export default function AppointmentsPage() {
                   value={selectedDraft.reason}
                   onChange={(event) => updateDraft(selectedAppointment.lead_id, { reason: event.target.value })}
                   placeholder="Reason for visit"
-                  className="mt-2 h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
 
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={selectedDraft.note}
                   onChange={(event) => updateDraft(selectedAppointment.lead_id, { note: event.target.value })}
                   placeholder="Internal booking note"
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
                 />
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={saveDetails}
                     disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
                     {savingLeadId === selectedAppointment.lead_id ? "Saving..." : "Save details"}
                   </button>
                   <button
                     onClick={rescheduleAppointment}
                     disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
                   >
                     {savingLeadId === selectedAppointment.lead_id ? "Saving..." : "Reschedule"}
                   </button>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold text-slate-900">Actions</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Lifecycle changes — no external sync implied.</p>
+              <div className="bg-white border border-slate-200 rounded-2xl p-6">
+                <h3 className="text-sm font-semibold text-slate-900">Appointment actions</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Update the lifecycle directly here without implying any external calendar sync.
+                </p>
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={cancelAppointment}
                     disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors disabled:opacity-50"
                   >
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Cancel</span>
+                    <XCircle className="w-4 h-4" />
+                    Cancel
                   </button>
                   <button
                     onClick={markNoShow}
                     disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 px-2.5 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors disabled:opacity-50"
                   >
-                    <Clock3 className="w-3.5 h-3.5" />
-                    <span>No-show</span>
+                    <Clock3 className="w-4 h-4" />
+                    Mark no-show
                   </button>
                   <button
                     onClick={reopenAppointment}
                     disabled={savingLeadId === selectedAppointment.lead_id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reopen</span>
+                    <RotateCcw className="w-4 h-4" />
+                    Reopen request
                   </button>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                   <Link
                     href={`/dashboard/leads/${selectedAppointment.lead_id}`}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Request detail</span>
+                    <ExternalLink className="w-4 h-4" />
+                    Open request detail
                   </Link>
                   {selectedAppointment.thread_id ? (
                     <Link
                       href={`/dashboard/inbox/${selectedAppointment.thread_id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-2 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-50"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors"
                     >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Inbox thread</span>
+                      <MessageSquare className="w-4 h-4" />
+                      Continue in inbox
                     </Link>
                   ) : (
-                    <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-100 px-2.5 py-2 text-xs text-slate-400">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>No thread</span>
-                    </span>
+                    <div className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-400 border border-slate-200 rounded-lg">
+                      <MessageSquare className="w-4 h-4" />
+                      No linked thread yet
+                    </div>
                   )}
                 </div>
 
                 {selectedAppointment.notes && (
-                  <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Notes</p>
-                    <p className="mt-1 whitespace-pre-wrap text-[11px] leading-relaxed text-amber-800">{selectedAppointment.notes}</p>
+                  <div className="mt-5 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                      Internal notes
+                    </p>
+                    <p className="text-sm text-amber-800 mt-1 whitespace-pre-wrap">
+                      {selectedAppointment.notes}
+                    </p>
                   </div>
                 )}
               </div>

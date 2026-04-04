@@ -111,54 +111,35 @@ export default function InboxPage() {
         eyebrow={
           <>
             <Inbox className="h-3.5 w-3.5" />
-            Conversations workspace
+            Conversations
           </>
         }
-        title="Work every patient conversation from one premium inbox."
-        description="Review threads, spot follow-up risk, and open the right conversation without losing source, status, or operator context."
+        title="Premium inbox"
+        description="Review threads, spot follow-up risk, and open the right conversation."
       />
 
-      <div className="workspace-column-layout">
-        <aside className="workspace-side-rail">
-          <div className="app-card p-5">
-            <p className="workspace-rail-title">Conversation mix</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[260px_1fr_280px]">
+        {/* Left rail — filters */}
+        <aside className="hidden space-y-4 xl:block">
+          {/* Metrics */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Conversation mix</p>
+            <div className="mt-3 space-y-2">
               {[
-                {
-                  label: "All conversations",
-                  value: counts.all,
-                  tone: "slate" as const,
-                },
-                {
-                  label: "Open now",
-                  value: counts.open,
-                  tone: "blue" as const,
-                },
-                {
-                  label: "Needs follow-up",
-                  value: counts.needs_follow_up,
-                  tone: "amber" as const,
-                },
-                {
-                  label: "Booked or handled",
-                  value: counts.booked + counts.handled,
-                  tone: "emerald" as const,
-                },
+                { label: "All", value: counts.all, tone: "slate" as const },
+                { label: "Open", value: counts.open, tone: "blue" as const },
+                { label: "Follow-up", value: counts.needs_follow_up, tone: "amber" as const },
+                { label: "Resolved", value: counts.booked + counts.handled, tone: "emerald" as const },
               ].map((card) => (
-                <MetricCard
-                  key={card.label}
-                  label={card.label}
-                  value={card.value}
-                  icon={MessageSquareMore}
-                  tone={card.tone}
-                />
+                <MetricCard key={card.label} label={card.label} value={card.value} icon={MessageSquareMore} tone={card.tone} />
               ))}
             </div>
           </div>
 
-          <div className="app-card p-5">
-            <p className="workspace-rail-title">Status filters</p>
-            <div className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+          {/* Status filters */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</p>
+            <div className="mt-3 space-y-1.5">
               {STATUS_FILTERS.map((filter) => {
                 const count = counts[filter.value];
                 const active = statusFilter === filter.value;
@@ -166,37 +147,33 @@ export default function InboxPage() {
                   <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value)}
-                    className={`flex items-center justify-between rounded-[1.15rem] border px-3.5 py-3 text-sm font-semibold transition-colors xl:w-full ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                       active
-                        ? "border-violet-200 bg-violet-50 text-violet-700"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "bg-violet-50 text-violet-700"
+                        : "text-slate-600 hover:bg-slate-50"
                     }`}
                   >
                     <span>{filter.label}</span>
-                    <span className={`text-[11px] ${active ? "text-violet-600" : "text-slate-400"}`}>
-                      {count}
-                    </span>
+                    <span className={`text-[10px] ${active ? "text-violet-500" : "text-slate-300"}`}>{count}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="app-card p-5">
-            <p className="workspace-rail-title">Channel filters</p>
-            <div className="mt-4 flex flex-wrap gap-2">
+          {/* Channel filters */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Channels</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setChannelFilter("all")}
-                className={`rounded-2xl px-3 py-2 text-sm font-semibold transition-colors ${
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                   channelFilter === "all"
                     ? "bg-slate-900 text-white"
                     : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                 }`}
               >
-                All
-                <span className={`ml-2 text-xs ${channelFilter === "all" ? "text-white/80" : "text-slate-400"}`}>
-                  {channelCounts.all}
-                </span>
+                All <span className="ml-1 text-[10px] opacity-70">{channelCounts.all}</span>
               </button>
               {channelOptions.map((channel) => {
                 const active = channelFilter === channel;
@@ -205,16 +182,12 @@ export default function InboxPage() {
                   <button
                     key={channel}
                     onClick={() => setChannelFilter(channel)}
-                    className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition-colors ${
-                      active
-                        ? config.className
-                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                      active ? config.className : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
                     {config.label}
-                    <span className={`ml-2 text-xs ${active ? "opacity-80" : "text-slate-400"}`}>
-                      {channelCounts[channel] ?? 0}
-                    </span>
+                    <span className="ml-1 text-[10px] opacity-70">{channelCounts[channel] ?? 0}</span>
                   </button>
                 );
               })}
@@ -222,92 +195,93 @@ export default function InboxPage() {
           </div>
         </aside>
 
+        {/* Center — thread list */}
         <div className="space-y-4">
-          <div className="app-card p-5">
-            <div className="workspace-toolbar">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by patient, phone, email, or conversation text..."
-                  className="app-input pl-9"
-                />
-              </div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                <span>{filtered.length}</span>
-                <span>visible threads</span>
-              </div>
-            </div>
+          {/* Search bar */}
+          <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-4 py-2.5 shadow-sm">
+            <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by patient, phone, email, or text..."
+              className="h-6 flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+            <span className="shrink-0 text-[10px] font-bold text-slate-300">{filtered.length}</span>
           </div>
 
-          <div>
+          {/* Mobile filters */}
+          <div className="flex flex-wrap gap-2 xl:hidden">
+            {STATUS_FILTERS.map((filter) => {
+              const active = statusFilter === filter.value;
+              return (
+                <button
+                  key={filter.value}
+                  onClick={() => setStatusFilter(filter.value)}
+                  className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                    active ? "bg-violet-50 text-violet-700" : "text-slate-500 hover:bg-slate-50"
+                  }`}
+                >
+                  {filter.label} <span className="text-[10px] opacity-60">{counts[filter.value]}</span>
+                </button>
+              );
+            })}
+          </div>
+
           {filtered.length === 0 ? (
-            <div className="app-card">
+            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
-                icon={<Inbox className="w-7 h-7 text-slate-400" />}
+                icon={<Inbox className="w-5 h-5 text-slate-400" />}
                 title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
                 description={
                   threads.length === 0
-                    ? "Once patient threads start coming in, the inbox will show web chat today and other channels as they are connected."
+                    ? "Threads show up once patients start chatting via web chat or connected channels."
                     : channelFilter === "all"
-                      ? "Try adjusting the search or status filter to see more conversations."
-                      : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match the current filters.`
+                      ? "Try adjusting the search or status filter."
+                      : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match.`
                 }
               />
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filtered.map((thread) => (
                 <button
                   key={thread.id}
                   onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                  className="app-list-row w-full px-5 py-4 text-left"
+                  className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3.5 text-left shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-900">
-                          {thread.customer_name}
-                        </p>
+                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900">{thread.customer_name}</p>
                         <ChannelBadge channel={thread.channel} withIcon />
                         <FrontdeskStatusBadge status={thread.derived_status} />
                         {thread.unlinked && (
-                          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border bg-rose-50 text-rose-700 border-rose-200">
+                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-600">
                             Unlinked
                           </span>
                         )}
                       </div>
-
-                      <p className="text-sm leading-relaxed text-slate-700">
-                        {thread.last_message_preview}
-                      </p>
-
-                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <p className="text-sm leading-relaxed text-slate-600">{thread.last_message_preview}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2.5 text-[11px] text-slate-400">
                         {(thread.customer_phone || thread.customer_email) && (
                           <span>{thread.customer_phone || thread.customer_email}</span>
                         )}
                         {thread.lead_id && (
                           <span className="inline-flex items-center gap-1">
-                            <UserRound className="w-3.5 h-3.5" />
-                            Linked request
+                            <UserRound className="w-3 h-3" />
+                            <span>Linked</span>
                           </span>
                         )}
                         {thread.last_message_role && (
                           <span className="capitalize">{thread.last_message_role} replied last</span>
                         )}
-                        {thread.thread_type === "event" && (
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                            Recovery thread
-                          </span>
-                        )}
+                        {thread.thread_type === "event" && <span>Recovery thread</span>}
                       </div>
                     </div>
-
-                    <div className="shrink-0 flex items-center gap-2 text-sm text-slate-400">
+                    <div className="flex shrink-0 items-center gap-2 text-[11px] text-slate-300">
                       <span>{thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
                 </button>
@@ -315,52 +289,56 @@ export default function InboxPage() {
             </div>
           )}
         </div>
-        </div>
 
-        <aside className="workspace-side-rail">
-          <div className="app-card p-5">
+        {/* Right rail — context */}
+        <aside className="hidden space-y-4 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-violet-50 text-violet-700">
-                <Bot className="h-5 w-5" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+                <Bot className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Inbox operating model</p>
-                <p className="text-xs text-slate-500">Review, take over, and move patients to the right next action.</p>
+                <p className="text-sm font-bold text-slate-900">Operating model</p>
+                <p className="text-[11px] text-slate-400">Review, take over, move patients forward</p>
               </div>
             </div>
-            <div className="mt-4 space-y-3">
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Review needed</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{counts.needs_follow_up}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Threads waiting for follow-up, approval, or staff review before they can move forward.</p>
+            <div className="mt-4 space-y-2.5">
+              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review needed</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">{counts.needs_follow_up}</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                  Threads waiting for follow-up or staff review.
+                </p>
               </div>
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booked threads</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{counts.booked}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Conversations already converted into booked outcomes or active appointment work.</p>
+              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Booked</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">{counts.booked}</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                  Converted to booked outcomes.
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="app-card p-5">
-            <p className="text-sm font-semibold text-slate-900">Focus areas</p>
-            <div className="mt-4 space-y-3">
-              <div className="app-card-muted flex items-start gap-3 px-4 py-4">
-                <div className="mt-0.5 rounded-[0.9rem] bg-amber-50 p-2 text-amber-600">
-                  <TriangleAlert className="h-4 w-4" />
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-sm font-bold text-slate-900">Focus areas</p>
+            <div className="mt-3 space-y-2.5">
+              <div className="flex items-start gap-2.5 rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                  <TriangleAlert className="h-3.5 w-3.5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Follow-up pressure</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">Stay on top of delayed replies, recovery threads, and anything still unlinked to a request.</p>
+                  <p className="text-xs font-semibold text-slate-900">Follow-up pressure</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">Delayed replies, recovery threads, unlinked items.</p>
                 </div>
               </div>
-              <div className="app-card-muted flex items-start gap-3 px-4 py-4">
-                <div className="mt-0.5 rounded-[0.9rem] bg-teal-50 p-2 text-teal-600">
-                  <CalendarDays className="h-4 w-4" />
+              <div className="flex items-start gap-2.5 rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal-50">
+                  <CalendarDays className="h-3.5 w-3.5 text-teal-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Booking handoff</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">Open a thread to convert, contact, book, or leave an internal note without leaving the workspace.</p>
+                  <p className="text-xs font-semibold text-slate-900">Booking handoff</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">Convert, contact, book, or leave notes in-thread.</p>
                 </div>
               </div>
             </div>

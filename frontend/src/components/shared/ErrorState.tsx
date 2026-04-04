@@ -3,9 +3,9 @@
 import { AlertTriangle } from "lucide-react";
 
 interface ErrorStateProps {
-  title?: string;
-  message?: string;
-  onRetry?: () => void;
+  readonly title?: string;
+  readonly message?: string;
+  readonly onRetry?: () => void;
 }
 
 export function ErrorState({
@@ -14,20 +14,18 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-18 text-center">
-      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-[1.35rem] border border-rose-100 bg-white shadow-sm shadow-rose-500/10">
-        <AlertTriangle className="h-7 w-7 text-rose-500" />
+    <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
+        <AlertTriangle className="h-5 w-5 text-rose-500" />
       </div>
-      <h3 className="mb-2 text-lg font-semibold tracking-tight text-slate-900">{title}</h3>
-      <p className="mb-5 max-w-md text-sm leading-6 text-slate-500">
-        {message}
-      </p>
+      <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-slate-400">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="rounded-2xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
+          className="mt-4 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
         >
-          Try Again
+          Try again
         </button>
       )}
     </div>

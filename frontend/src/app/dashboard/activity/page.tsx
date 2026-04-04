@@ -65,91 +65,69 @@ export default function ActivityPage() {
 
   return (
     <div className="space-y-6">
-      <div className="workspace-stage">
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Feed summary</p>
-            <div className="mt-4 space-y-3">
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Events loaded</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{events.length}</p>
-              </div>
-              <div className="app-card-muted px-4 py-4 text-sm leading-6 text-slate-600">
-                Use the feed to trace what changed without jumping between inbox, leads, and appointments first.
-              </div>
-            </div>
-          </div>
-        </div>
+      <PageHeader
+        eyebrow={
+          <>
+            <Activity className="h-3.5 w-3.5" />
+            Activity feed
+          </>
+        }
+        title="What changed today"
+        description="New requests, status changes, and conversation events in one feed."
+        actions={
+          <button
+            onClick={() => loadActivity(true)}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+          >
+            {refreshing ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5" />
+            )}
+            Refresh
+          </button>
+        }
+      />
 
-        <div className="space-y-5">
-          <div className="workspace-hero-panel p-5 sm:p-6">
-            <div className="workspace-toolbar">
-              <PageHeader
-                eyebrow={
-                  <>
-                    <Activity className="h-3.5 w-3.5" />
-                    Activity feed
-                  </>
-                }
-                title="A cleaner view of what changed today."
-                description="Follow new requests, status changes, and conversation events without digging through disconnected screens."
-              />
-              <button
-                onClick={() => loadActivity(true)}
-                disabled={refreshing}
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-              >
-                {refreshing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" />
-                )}
-                Refresh
-              </button>
-            </div>
-          </div>
-
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
+        <div>
           {events.length === 0 ? (
-            <EmptyState
-              icon={<Activity className="w-7 h-7 text-slate-400" />}
-              title="No activity yet"
-              description="This feed shows real-time events — new patient requests, status changes, and conversations. Activity will appear here once your assistant starts capturing leads."
-            />
+            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+              <EmptyState
+                icon={<Activity className="w-5 h-5 text-slate-400" />}
+                title="No activity yet"
+                description="Events will appear here once your assistant starts capturing leads."
+              />
+            </div>
           ) : (
-            <div className="app-card divide-y divide-slate-100">
+            <div className="divide-y divide-slate-50 rounded-2xl border border-slate-100 bg-white shadow-sm">
               {events.map((event, i) => {
                 const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
                 const Icon = config.icon;
-                const isLead =
-                  event.type === "lead_created" ||
-                  event.type === "lead_status_changed";
-
+                const isLead = event.type === "lead_created" || event.type === "lead_status_changed";
                 return (
                   <div
                     key={`${event.type}-${event.resource_id}-${i}`}
-                    className="flex items-start gap-3 px-5 py-4"
+                    className="flex items-center gap-3 px-4 py-3.5"
                   >
-                    <div
-                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}
-                    >
-                      <Icon className={`w-4 h-4 ${config.color}`} />
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
+                      <Icon className={`w-3.5 h-3.5 ${config.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       {isLead ? (
                         <Link
                           href={`/dashboard/leads/${event.resource_id}`}
-                          className="text-sm font-medium text-slate-900 hover:text-teal-700 transition-colors"
+                          className="text-sm font-medium text-slate-900 hover:text-teal-700"
                         >
                           {event.title}
                         </Link>
                       ) : (
                         <p className="text-sm font-medium text-slate-900">{event.title}</p>
                       )}
-                      <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">{event.detail}</p>
                     </div>
-                    <span className="shrink-0 whitespace-nowrap text-xs text-slate-400">
-                      {timeAgo(event.timestamp)}
-                    </span>
+                    <span className="shrink-0 text-[11px] text-slate-300">{timeAgo(event.timestamp)}</span>
                   </div>
                 );
               })}
@@ -157,13 +135,23 @@ export default function ActivityPage() {
           )}
         </div>
 
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Best use</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Use the feed when you need the cross-workspace story, not just one screen’s detail.</p>
-              <p>It is especially useful for seeing new capture, status changes, and operator actions across the day.</p>
+        <div className="hidden space-y-4 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Feed summary</p>
+            <div className="mt-3 rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+              <p className="text-[11px] text-slate-400">Events loaded</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">{events.length}</p>
             </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+              Trace what changed without jumping between inbox, leads, and appointments.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Best use</p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              Use the feed for the cross-workspace story. Especially useful for new capture, status changes, and operator actions.
+            </p>
           </div>
         </div>
       </div>

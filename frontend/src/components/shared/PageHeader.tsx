@@ -16,19 +16,23 @@ export function PageHeader({
   actions,
 }: Readonly<PageHeaderProps>) {
   return (
-    <div className="app-page-header lg:flex-row lg:items-end lg:justify-between">
+    <div className="flex flex-col gap-1 pb-6 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
-        {eyebrow ? <div className="app-page-kicker mb-4">{eyebrow}</div> : null}
-        <h1 className="max-w-4xl text-[2.1rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.6rem]">
+        {eyebrow ? (
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            {eyebrow}
+          </div>
+        ) : null}
+        <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-[1rem]">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
             {description}
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-3 lg:justify-end">{actions}</div> : null}
+      {actions ? <div className="mt-4 flex flex-wrap items-center gap-3 lg:mt-0">{actions}</div> : null}
     </div>
   );
 }

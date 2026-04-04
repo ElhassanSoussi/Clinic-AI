@@ -25,9 +25,9 @@ function settingsHref(section?: string): string {
 }
 
 function knowledgeStatusClass(status: string): string {
-  if (status === "strong") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "partial") return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-rose-50 text-rose-700 border-rose-200";
+  if (status === "strong") return "bg-emerald-50 text-emerald-700";
+  if (status === "partial") return "bg-amber-50 text-amber-700";
+  return "bg-rose-50 text-rose-700";
 }
 
 function generatePreviewSessionId(): string {
@@ -229,359 +229,303 @@ export default function TrainingPage() {
         eyebrow={
           <>
             <Sparkles className="h-3.5 w-3.5" />
-            AI training workspace
+            AI training
           </>
         }
-        title="Keep the assistant accurate, grounded, and clinic-specific."
-        description="Review readiness, add knowledge notes, and test the live assistant against the clinic information you actually trust."
+        title="Knowledge & training"
+        description="Review readiness, add knowledge notes, and test the live assistant."
       />
 
       {error && (
-        <div className="mb-6 px-4 py-3 rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700">
-          {error}
-        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       )}
 
-      <div className="workspace-stage">
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Training state</p>
-            <div className="mt-4 space-y-3">
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Readiness score</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.knowledge_score}%</p>
-              </div>
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Knowledge gaps</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.knowledge_gaps.length}</p>
-              </div>
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Custom notes</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.custom_sources.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Operator trust</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Use this workspace to keep the assistant grounded in what your clinic actually wants to say.</p>
-              <p>When something is unclear, the goal is visibility and correction, not confident guesswork.</p>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
         <div className="space-y-5">
-          <div className="workspace-hero-panel p-5 sm:p-6">
-            <div className="workspace-toolbar">
+          {/* Knowledge readiness */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="workspace-section-label">AI workspace</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                  Train the assistant on what your clinic actually wants to say.
-                </h2>
-              </div>
-              <div className="app-pill border-violet-200 bg-violet-50 text-violet-700">
-                {training.assistant_name}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-teal-600" />
-                  <span className="text-sm font-semibold text-slate-900">
-                    Knowledge readiness
-                  </span>
+                <div className="mb-1.5 flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                  <span className="text-xs font-semibold text-slate-900">Knowledge readiness</span>
                 </div>
-                <h2 className="text-4xl font-bold text-slate-900">
-                  {training.knowledge_score}%
-                </h2>
-                <p className="text-sm text-slate-500 mt-2">
+                <p className="text-3xl font-bold text-slate-900">{training.knowledge_score}%</p>
+                <p className="mt-1 text-[11px] text-slate-400">
                   {training.assistant_name} is trained on your current clinic data and custom notes.
                 </p>
               </div>
-              <span className={`inline-flex px-3 py-1.5 rounded-full border text-sm font-medium ${knowledgeStatusClass(training.knowledge_status)}`}>
+              <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
                 {training.knowledge_status === "strong"
-                  ? "Strong setup"
+                  ? "Strong"
                   : training.knowledge_status === "partial"
-                    ? "Partially configured"
-                    : "Needs more knowledge"}
+                    ? "Partial"
+                    : "Needs work"}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
-                  className={`rounded-xl border p-4 ${
-                    item.configured
-                      ? "border-emerald-200 bg-emerald-50/60"
-                      : "border-slate-200 bg-slate-50"
+                  className={`rounded-xl border p-3 ${
+                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-100 bg-slate-50/50"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-slate-900">
-                    {item.label}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{item.detail}</p>
+                  <p className="text-xs font-semibold text-slate-900">{item.label}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">{item.detail}</p>
                 </div>
               ))}
             </div>
 
             {training.knowledge_gaps.length > 0 && (
-              <div className="mt-6 p-4 rounded-xl border border-amber-200 bg-amber-50">
-                <p className="text-sm font-semibold text-amber-800">Knowledge gaps</p>
-                <div className="flex flex-wrap gap-2 mt-3">
+              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
+                <p className="text-xs font-semibold text-amber-800">Gaps</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   {training.knowledge_gaps.map((gap) => (
-                    <span
-                      key={gap}
-                      className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-amber-200 text-amber-700"
-                    >
-                      {gap}
-                    </span>
+                    <span key={gap} className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-700">{gap}</span>
                   ))}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="w-4 h-4 text-teal-600" />
-              <h2 className="text-sm font-semibold text-slate-900">
-                Current knowledge sources
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {structuredKnowledge.map((item) => (
-                <div key={item.label} className="rounded-xl border border-slate-200 p-4">
-                  <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">{item.detail}</p>
+          {/* Two-column: sources + preview */}
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+            {/* Knowledge sources */}
+            <div className="space-y-5">
+              {/* Structured knowledge */}
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex items-center gap-2">
+                  <Bot className="w-3.5 h-3.5 text-teal-600" />
+                  <p className="text-xs font-semibold text-slate-900">Current sources</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-3 mb-6">
-              <Link
-                href={settingsHref("services")}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-              >
-                Edit services
-              </Link>
-              <Link
-                href={settingsHref("faq")}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-              >
-                Edit FAQ
-              </Link>
-              <Link
-                href={settingsHref("assistant-messages")}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-              >
-                Edit assistant tone
-              </Link>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <h3 className="text-sm font-semibold text-slate-900">
-                  Custom knowledge notes
-                </h3>
-              </div>
-
-              <div className="space-y-3 mb-5">
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={(event) => setNewTitle(event.target.value)}
-                  placeholder="Title, for example Insurance exceptions"
-                  className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
-                />
-                <textarea
-                  value={newContent}
-                  onChange={(event) => setNewContent(event.target.value)}
-                  rows={4}
-                  placeholder="Add details your assistant should know, such as pricing clarifications, intake instructions, or scheduling rules."
-                  className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400 resize-none"
-                />
-                <button
-                  onClick={createSource}
-                  disabled={saving || !newTitle.trim() || !newContent.trim()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-                >
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                  Save note
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {training.custom_sources.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 text-center">
-                    No custom notes yet. Add details here when the built-in clinic settings are not enough.
-                  </div>
-                ) : (
-                  training.custom_sources.map((source) => (
-                    <div
-                      key={source.id}
-                      className="rounded-xl border border-slate-200 px-4 py-4"
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  {structuredKnowledge.map((item) => (
+                    <div key={item.label} className="rounded-xl border border-slate-100 p-3">
+                      <p className="text-xs font-semibold text-slate-900">{item.label}</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { label: "Services", section: "services" },
+                    { label: "FAQ", section: "faq" },
+                    { label: "Tone", section: "assistant-messages" },
+                  ].map((link) => (
+                    <Link
+                      key={link.section}
+                      href={settingsHref(link.section)}
+                      className="rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-1.5 text-[10px] font-semibold text-teal-700 transition-colors hover:bg-teal-100"
                     >
-                      {editingSourceId === source.id ? (
-                        <div className="space-y-3">
-                          <input
-                            type="text"
-                            value={editingTitle}
-                            onChange={(event) => setEditingTitle(event.target.value)}
-                            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-                          />
-                          <textarea
-                            value={editingContent}
-                            onChange={(event) => setEditingContent(event.target.value)}
-                            rows={4}
-                            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
-                          />
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              onClick={saveEditedSource}
-                              disabled={saving || !editingTitle.trim() || !editingContent.trim()}
-                              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-                            >
-                              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                              Save changes
-                            </button>
-                            <button
-                              onClick={cancelEditingSource}
-                              className="px-4 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            >
-                              Cancel
-                            </button>
+                      Edit {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom notes */}
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-slate-500" />
+                  <p className="text-xs font-semibold text-slate-900">Custom notes</p>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newTitle}
+                    onChange={(event) => setNewTitle(event.target.value)}
+                    placeholder="Title, e.g. Insurance exceptions"
+                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  />
+                  <textarea
+                    value={newContent}
+                    onChange={(event) => setNewContent(event.target.value)}
+                    rows={3}
+                    placeholder="Details your assistant should know..."
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  />
+                  <button
+                    onClick={createSource}
+                    disabled={saving || !newTitle.trim() || !newContent.trim()}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                    <span>Save note</span>
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  {training.custom_sources.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-slate-200 px-4 py-5 text-center text-[11px] text-slate-400">
+                      No custom notes yet. Add details when settings are not enough.
+                    </div>
+                  ) : (
+                    training.custom_sources.map((source) => (
+                      <div key={source.id} className="rounded-xl border border-slate-100 p-3">
+                        {editingSourceId === source.id ? (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={editingTitle}
+                              onChange={(event) => setEditingTitle(event.target.value)}
+                              placeholder="Note title"
+                              className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                            />
+                            <textarea
+                              value={editingContent}
+                              onChange={(event) => setEditingContent(event.target.value)}
+                              rows={3}
+                              placeholder="Note content"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={saveEditedSource}
+                                disabled={saving || !editingTitle.trim() || !editingContent.trim()}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                              >
+                                {saving && <Loader2 className="w-3 h-3 animate-spin" />}
+                                <span>Save</span>
+                              </button>
+                              <button
+                                onClick={cancelEditingSource}
+                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">
-                              {source.title}
-                            </p>
-                            <p className="text-sm text-slate-600 mt-2 whitespace-pre-wrap">
-                              {source.content}
-                            </p>
+                        ) : (
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-slate-900">{source.title}</p>
+                              <p className="mt-1 whitespace-pre-wrap text-[11px] leading-relaxed text-slate-500">{source.content}</p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1.5">
+                              <button
+                                onClick={() => startEditingSource(source)}
+                                className="text-xs font-semibold text-teal-700 hover:text-teal-800"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteSource(source)}
+                                className="text-slate-400 hover:text-rose-600"
+                                aria-label={`Delete ${source.title}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => startEditingSource(source)}
-                              className="text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteSource(source)}
-                              className="text-slate-400 hover:text-rose-600 transition-colors"
-                              aria-label={`Delete ${source.title}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Document uploads */}
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div className="mb-2 flex items-center gap-2">
+                  <Upload className="w-3.5 h-3.5 text-slate-400" />
+                  <p className="text-xs font-semibold text-slate-900">Document uploads</p>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-400">
+                  PDF and text ingestion is not live yet. The training area is ready for it — embeddings and retrieval need a later pass.
+                </p>
+              </div>
+            </div>
+
+            {/* Preview chat */}
+            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm xl:sticky xl:top-20">
+              <div className="mb-3 flex items-center gap-2">
+                <Send className="w-3.5 h-3.5 text-teal-600" />
+                <p className="text-xs font-semibold text-slate-900">Live preview</p>
+              </div>
+
+              {!clinic.is_live && (
+                <div className="mb-3 rounded-xl border border-amber-100 bg-amber-50/50 px-3 py-2 text-[11px] text-amber-700">
+                  Go live before using preview. This test uses the real chat flow.
+                </div>
+              )}
+
+              <div className="h-80 space-y-2 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+                {previewMessages.length === 0 ? (
+                  <p className="text-[11px] leading-relaxed text-slate-400">
+                    Ask a clinic question to test assistant behavior against your configured data.
+                  </p>
+                ) : (
+                  previewMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                          message.role === "user"
+                            ? "rounded-br-sm bg-teal-600 text-white"
+                            : "rounded-bl-sm border border-slate-200 bg-white text-slate-700"
+                        }`}
+                      >
+                        {message.content}
+                      </div>
                     </div>
                   ))
                 )}
               </div>
-            </div>
-          </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Upload className="w-4 h-4 text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-900">
-                Document uploads
-              </h2>
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              PDF and text document ingestion is not live yet in this build. The training area is ready for it, but embeddings and retrieval still need a later implementation pass.
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 h-fit">
-          <div className="flex items-center gap-2 mb-4">
-            <Send className="w-4 h-4 text-teal-600" />
-            <h2 className="text-sm font-semibold text-slate-900">
-              Live assistant preview
-            </h2>
-          </div>
-
-          {!clinic.is_live && (
-            <div className="mb-4 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-700">
-              Go live before using the live assistant preview. This test uses the real clinic chat flow.
-            </div>
-          )}
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 h-120 overflow-y-auto space-y-3">
-            {previewMessages.length === 0 ? (
-              <div className="text-sm text-slate-500 leading-relaxed">
-                Ask a real clinic question here to test the current assistant behavior against your configured services, FAQs, hours, and custom notes.
-              </div>
-            ) : (
-              previewMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              <div className="mt-3 space-y-2">
+                <textarea
+                  value={previewInput}
+                  onChange={(event) => setPreviewInput(event.target.value)}
+                  rows={2}
+                  placeholder="Try: Do you offer same-day appointments?"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                />
+                <button
+                  onClick={sendPreview}
+                  disabled={previewSending || previewDisabled || !previewInput.trim()}
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
                 >
-                  <div
-                    className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      message.role === "user"
-                        ? "bg-teal-600 text-white rounded-br-sm"
-                        : "bg-white text-slate-700 rounded-bl-sm border border-slate-200"
-                    }`}
-                  >
-                    {message.content}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="mt-4 space-y-3">
-            <textarea
-              value={previewInput}
-              onChange={(event) => setPreviewInput(event.target.value)}
-              rows={3}
-              placeholder="Try: Do you offer same-day appointments?"
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400 resize-none"
-            />
-            <button
-              onClick={sendPreview}
-              disabled={previewSending || previewDisabled || !previewInput.trim()}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-            >
-              {previewSending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              Send test prompt
-            </button>
-          </div>
-        </div>
+                  {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  <span>Send test</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Why this matters</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Training quality directly shapes whether the assistant feels grounded and trustworthy to patients.</p>
-              <p>Use preview chat to test the real answers before relying on the live workflow.</p>
+        {/* Right rail */}
+        <div className="hidden space-y-4 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Training state</p>
+            <div className="mt-3 space-y-2">
+              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <p className="text-[11px] text-slate-400">Readiness</p>
+                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.knowledge_score}%</p>
+              </div>
+              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <p className="text-[11px] text-slate-400">Gaps</p>
+                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.knowledge_gaps.length}</p>
+              </div>
+              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
+                <p className="text-[11px] text-slate-400">Custom notes</p>
+                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.custom_sources.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Why this matters</p>
+            <div className="mt-3 space-y-2">
+              <p className="text-[11px] leading-relaxed text-slate-400">
+                Training quality shapes whether patients trust the assistant.
+              </p>
+              <p className="text-[11px] leading-relaxed text-slate-400">
+                Use preview chat to test real answers before relying on the live workflow.
+              </p>
             </div>
           </div>
         </div>

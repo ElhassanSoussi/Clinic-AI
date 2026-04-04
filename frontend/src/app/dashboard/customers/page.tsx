@@ -10,6 +10,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { MetricCard } from "@/components/shared/MetricCard";
 import type { CustomerProfileSummary } from "@/types";
 
 export default function CustomersPage() {
@@ -62,118 +63,83 @@ export default function CustomersPage() {
             Customer workspace
           </>
         }
-        title="See every patient relationship in one place."
-        description="Track conversation history, request counts, booking outcomes, and the latest internal context for each contact."
+        title="Patient relationships"
+        description="Conversation history, request counts, booking outcomes, and internal context for each contact."
       />
 
-      <div className="workspace-stage">
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Customer view</p>
-            <div className="mt-4 space-y-3">
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Profiles tracked</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{customers.length}</p>
-              </div>
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Booked relationships</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{customersWithBookings}</p>
-              </div>
-              <div className="app-card-muted px-4 py-4">
-                <p className="text-xs text-slate-500">Open request pressure</p>
-                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{customersNeedingAttention}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">What this page shows</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Each patient record ties conversations, requests, bookings, and internal notes back to one profile.</p>
-              <p>Use it to spot repeat contacts, booking outcomes, and where staff context still matters.</p>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
         <div className="space-y-5">
-          <div className="workspace-hero-panel p-5 sm:p-6">
-            <div className="workspace-toolbar">
-              <div className="relative max-w-lg flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by patient, phone, or email..."
-                  className="app-input pl-9"
-                />
-              </div>
-              <div className="app-pill border-violet-200 bg-violet-50 text-violet-700">
-                {customers.length} customer profiles tracked
-              </div>
+          {/* Search + summary */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by patient, phone, or email..."
+                className="h-9 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+              />
             </div>
+            <span className="rounded-lg bg-violet-50 px-2.5 py-1 text-[10px] font-bold text-violet-700">
+              {customers.length} profiles
+            </span>
           </div>
 
+          {/* List */}
           {filtered.length === 0 ? (
-            <div className="app-card">
+            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
-                icon={<UserRound className="w-7 h-7 text-slate-400" />}
+                icon={<UserRound className="w-5 h-5 text-slate-400" />}
                 title={customers.length === 0 ? "No customer profiles yet" : "No customers match this search"}
                 description={
                   customers.length === 0
-                    ? "Customer profiles appear automatically once the assistant captures patient details through a request."
+                    ? "Profiles appear automatically once the assistant captures patient details."
                     : "Try a different name, phone number, or email."
                 }
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               {filtered.map((customer) => (
                 <Link
                   key={customer.key}
                   href={`/dashboard/customers/${customer.key}`}
-                  className="app-list-row app-card p-5 transition-all hover:border-teal-200"
+                  className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-teal-200 hover:shadow-md"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="text-base font-semibold text-slate-900">
-                        {customer.name}
-                      </h2>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {customer.phone || customer.email || "No direct contact saved"}
+                      <p className="text-sm font-semibold text-slate-900">{customer.name}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        {customer.phone || customer.email || "No contact saved"}
                       </p>
                     </div>
-                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-300" />
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300" />
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">Conversations</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-900">{customer.conversation_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">Requests</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-900">{customer.lead_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">Booked</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-900">{customer.booked_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">Open</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-900">{customer.open_request_count}</p>
-                    </div>
+                  <div className="mt-3 grid grid-cols-4 gap-2">
+                    {[
+                      { label: "Conversations", val: customer.conversation_count },
+                      { label: "Requests", val: customer.lead_count },
+                      { label: "Booked", val: customer.booked_count },
+                      { label: "Open", val: customer.open_request_count },
+                    ].map((stat) => (
+                      <div key={stat.label}>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400">{stat.label}</p>
+                        <p className="mt-0.5 text-base font-bold text-slate-900">{stat.val}</p>
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-4 text-xs text-slate-500">
+                  <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-slate-400">
                     <span>
-                      Last interaction{" "}
+                      Last{" "}
                       {customer.last_interaction_at
                         ? timeAgo(customer.last_interaction_at)
                         : "not recorded"}
                     </span>
                     {customer.latest_note ? (
-                      <span className="max-w-60 truncate">{customer.latest_note}</span>
+                      <span className="max-w-40 truncate">{customer.latest_note}</span>
                     ) : null}
                   </div>
                 </Link>
@@ -182,13 +148,22 @@ export default function CustomersPage() {
           )}
         </div>
 
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Best use</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>Open a customer profile when you need the relationship view, not just the latest thread.</p>
-              <p>Customer detail links back to inbox context, booking state, and recent notes so staff can work faster.</p>
+        {/* Right rail */}
+        <div className="hidden space-y-4 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Overview</p>
+            <div className="mt-3 space-y-2.5">
+              <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
+              <MetricCard label="With bookings" value={customersWithBookings} icon={ContactRound} tone="emerald" />
+              <MetricCard label="Open requests" value={customersNeedingAttention} icon={ContactRound} tone="amber" />
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Best use</p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+              Open a customer profile for the relationship view — inbox context, booking state, and notes so staff can work faster.
+            </p>
           </div>
         </div>
       </div>
