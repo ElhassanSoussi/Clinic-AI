@@ -183,28 +183,54 @@ export default function OpportunitiesPage() {
         </div>
       )}
 
-      <div className="app-card p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-900">Auto follow-up</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              When enabled, the front desk creates follow-up tasks from stalled conversations and aging new requests using your clinic settings.
-            </p>
+      <div className="workspace-stage">
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Automation</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-sm font-semibold text-slate-900">Auto follow-up</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  When enabled, the front desk creates follow-up tasks from stalled conversations and aging new requests using your clinic settings.
+                </p>
+                <label className="mt-4 inline-flex items-center gap-3 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(clinic?.follow_up_automation_enabled)}
+                    onChange={(event) => toggleAutomation(event.target.checked)}
+                    disabled={savingAutomation}
+                    className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  {savingAutomation ? "Saving..." : "Enable auto follow-up"}
+                </label>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Queued items</p>
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{followUps.length}</p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Needs triage</p>
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{triageItems.length}</p>
+              </div>
+            </div>
           </div>
-          <label className="inline-flex items-center gap-3 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={Boolean(clinic?.follow_up_automation_enabled)}
-              onChange={(event) => toggleAutomation(event.target.checked)}
-              disabled={savingAutomation}
-              className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
-            />
-            {savingAutomation ? "Saving..." : "Enable auto follow-up"}
-          </label>
         </div>
-      </div>
 
-      <div className="workspace-split">
+        <div className="space-y-5">
+          <div className="workspace-hero-panel p-5 sm:p-6">
+            <div className="workspace-toolbar">
+              <div>
+                <p className="workspace-section-label">Opportunity pressure</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  Work the queue before follow-up risk turns into missed revenue.
+                </h2>
+              </div>
+              <div className="app-pill border-violet-200 bg-violet-50 text-violet-700">
+                {followUps.length} queued
+              </div>
+            </div>
+          </div>
+
       <div className="app-card p-5">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
@@ -299,21 +325,6 @@ export default function OpportunitiesPage() {
         )}
       </div>
 
-      <aside className="workspace-side-rail">
-        <div className="app-card p-5">
-          <p className="text-sm font-semibold text-slate-900">What this queue is for</p>
-          <div className="mt-4 space-y-3">
-            <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
-              Keep stalled requests visible before they quietly turn into lost bookings.
-            </div>
-            <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
-              Use queued follow-ups for manual ownership, then turn on automation when the clinic is ready.
-            </div>
-          </div>
-        </div>
-      </aside>
-      </div>
-
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
@@ -391,6 +402,22 @@ export default function OpportunitiesPage() {
             })}
           </div>
         )}
+      </div>
+        </div>
+
+        <aside className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">How to use</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
+                Keep stalled requests visible before they quietly turn into lost bookings.
+              </div>
+              <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
+                Use queued follow-ups for manual ownership, then turn on automation when the clinic is ready.
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

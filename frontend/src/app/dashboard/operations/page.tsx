@@ -473,7 +473,7 @@ export default function OperationsPage() {
         </div>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="workspace-hero-panel p-5 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <PhoneMissed className="w-4 h-4 text-teal-600" />
             <div>
@@ -596,7 +596,7 @@ export default function OperationsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="app-card p-5 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -660,7 +660,7 @@ export default function OperationsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="app-card p-5 mb-6">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="text-sm font-semibold text-slate-900">Reminder delivery</h2>
@@ -744,7 +744,7 @@ export default function OperationsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-6 mb-6">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div className="app-card p-5">
           <div className="flex items-center justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">Recovery queue</h2>
@@ -896,7 +896,7 @@ export default function OperationsPage() {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div className="app-card p-5">
           <h2 className="text-sm font-semibold text-slate-900 mb-1">Log a recovery item</h2>
           <p className="text-xs text-slate-500 mb-4">
             This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
@@ -996,7 +996,7 @@ export default function OperationsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-6">
+      <div className="app-card p-5 mb-6">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h2 className="text-sm font-semibold text-slate-900">SMS review queue</h2>

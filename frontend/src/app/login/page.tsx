@@ -121,59 +121,69 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-12">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(127,86,217,0.12),transparent_45%)]" />
+    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(127,86,217,0.14),transparent_48%)]" />
       <Link
         href="/"
-        className="absolute left-6 top-6 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm backdrop-blur transition-colors hover:text-slate-900"
+        className="absolute left-6 top-6 inline-flex items-center gap-1.5 rounded-full bg-white/82 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm backdrop-blur transition-colors hover:text-slate-900"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
       </Link>
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center justify-center">
-        <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="hidden lg:flex lg:flex-col lg:justify-center">
-            <div className="app-page-kicker mb-6">
-              <Sparkles className="h-3.5 w-3.5" />
-              Premium clinic workspace
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
+        <div className="auth-shell grid w-full max-w-6xl gap-8 p-5 sm:p-6 lg:grid-cols-[0.96fr_1.04fr] lg:p-8">
+          <div className="hidden rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(243,240,255,0.92),rgba(255,255,255,0.92))] p-8 lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <div className="app-page-kicker mb-6">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium clinic workspace
+              </div>
+              <h1 className="max-w-lg text-5xl font-semibold tracking-[-0.05em] text-slate-950">
+                Welcome back to the calmer side of the front desk.
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
+                Review patient conversations, manage booking flow, and keep operator oversight visible without stitching together disconnected tools.
+              </p>
+              <div className="mt-8 grid gap-3">
+                {[
+                  "One inbox for web chat and SMS",
+                  "Manual takeover and human review when needed",
+                  "Appointments, follow-up, and operations in one workspace",
+                ].map((item) => (
+                  <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700">
+                    <ShieldCheck className="h-4 w-4 text-teal-600" />
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="max-w-lg text-5xl font-semibold tracking-tight text-slate-950">
-              Welcome back to the front desk command center.
-            </h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
-              Review patient conversations, manage booking flow, and keep your clinic responsive without losing the operator oversight your team needs.
-            </p>
-            <div className="mt-8 grid gap-3">
-              {[
-                "One inbox for chat and SMS",
-                "Manual takeover and human review when needed",
-                "Appointments, follow-up, and operations in one workspace",
-              ].map((item) => (
-                <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700">
-                  <ShieldCheck className="h-4 w-4 text-teal-600" />
-                  {item}
-                </div>
-              ))}
+
+            <div className="workspace-rail-card p-5">
+              <p className="workspace-section-label">What stays true</p>
+              <div className="mt-4 space-y-3 text-sm text-slate-600">
+                <p>Clinic information stays under your configuration.</p>
+                <p>Human review remains available whenever the assistant should not decide alone.</p>
+                <p>Inbox, appointments, and follow-up stay connected instead of hidden across tabs.</p>
+              </div>
             </div>
           </div>
 
-          <div className="w-full max-w-md justify-self-center lg:max-w-none">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
-              <Bot className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-slate-900">
-              Clinic AI
-            </span>
-          </Link>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Sign in to your clinic dashboard
-          </p>
-        </div>
+          <div className="flex items-center">
+            <div className="mx-auto w-full max-w-xl">
+              <div className="mb-8 text-center">
+                <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+                    <Bot className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-xl font-semibold text-slate-900">Clinic AI</span>
+                </Link>
+                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-slate-900">Sign in to your clinic workspace</h1>
+                <p className="mt-2 text-sm text-slate-500">
+                  Continue into your inbox, appointments, follow-up queue, and training workspace.
+                </p>
+              </div>
 
-        <form onSubmit={handleSubmit} className="app-card app-gradient-border p-8 sm:p-9">
+              <form onSubmit={handleSubmit} className="landing-shell p-8 sm:p-9">
           {supabaseConfigError && (
             <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               {supabaseConfigError}
@@ -259,7 +269,8 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
-        </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>

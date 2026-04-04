@@ -96,7 +96,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -108,13 +108,30 @@ export default function AccountPage() {
         description="Manage your profile information, password, and the operator identity shown across the workspace."
       />
 
-      <div className="space-y-2">
+      <div className="workspace-stage">
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Account overview</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Signed in as</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{user?.email || "Unknown"}</p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Role</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">Owner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
         {/* Profile Section */}
-        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <section className="app-card overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("profile")}
-            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-slate-500" />
@@ -182,11 +199,11 @@ export default function AccountPage() {
         </section>
 
         {/* Password Section */}
-        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <section className="app-card overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("password")}
-            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-slate-500" />
@@ -256,6 +273,17 @@ export default function AccountPage() {
             </div>
           )}
         </section>
+        </div>
+
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Security note</p>
+            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+              <p>Your account controls the operator identity shown across the workspace.</p>
+              <p>Use this page to keep sign-in secure without changing the rest of the clinic configuration.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

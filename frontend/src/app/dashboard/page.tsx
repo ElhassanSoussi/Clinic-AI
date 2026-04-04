@@ -242,43 +242,118 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="workspace-split">
-        <div className="app-card app-gradient-border overflow-hidden p-6 sm:p-7">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="app-page-kicker mb-5">
-                <Sparkles className="h-3.5 w-3.5" />
-                Front-desk command center
+      <div className="workspace-stage">
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Workspace state</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">System</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{systemStatus ?? "Not ready"}</p>
               </div>
-              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">
-                Keep conversations, bookings, and operator workload in one calm operating view.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                Clinic AI shows what was captured, what needs staff judgment, and which appointment or follow-up items still need attention before the day slips away.
-              </p>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Current plan</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">
+                  {billing ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1) : "Unavailable"}
+                </p>
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:w-[19rem]">
-              <div className="app-card-muted p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Live demand</p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                  {analytics.conversations_total}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Active and historical conversations tracked in the workspace.</p>
-              </div>
-              <div className="app-card-muted p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Booked now</p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                  {analytics.booked_requests}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Requests already confirmed into the appointments workflow.</p>
-              </div>
+          </div>
+
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Quick routes</p>
+            <div className="mt-4 space-y-3">
+              {[
+                { href: "/dashboard/inbox", label: "Open inbox", detail: "Review active conversations and staff takeovers." },
+                { href: "/dashboard/appointments", label: "Review appointments", detail: "See booking state, reminders, and deposits." },
+                { href: "/dashboard/opportunities", label: "Work follow-up queue", detail: "Catch stalled requests before they go cold." },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} className="app-card-muted block px-4 py-4 transition-transform hover:-translate-y-0.5">
+                  <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">{item.detail}</p>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
+        <div className="space-y-5">
+          <div className="workspace-hero-panel app-gradient-border p-6 sm:p-7">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+              <div className="max-w-3xl">
+                <div className="app-page-kicker mb-5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Front-desk command center
+                </div>
+                <h2 className="text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.4rem]">
+                  Keep conversations, bookings, and operator workload in one calm operating view.
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                  Clinic AI shows what was captured, what needs human judgment, and which bookings or follow-up items still need attention before the day slips away.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:w-[18.5rem]">
+                <div className="app-card-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Live demand</p>
+                  <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                    {analytics.conversations_total}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Active and historical conversations tracked in the workspace.</p>
+                </div>
+                <div className="app-card-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Booked now</p>
+                  <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                    {analytics.booked_requests}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Requests already confirmed into the appointments workflow.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="workspace-stat-grid">
+            {statCards.map((card) => (
+              <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1fr_1.08fr]">
+            <MetricCard
+              label="Upcoming appointments"
+              value={upcomingAppointments.length}
+              icon={CalendarDays}
+              tone="teal"
+              detail="Confirmed bookings currently scheduled in Clinic AI."
+            />
+            <MetricCard
+              label="Needs booking attention"
+              value={attentionAppointments.length}
+              icon={AlertTriangle}
+              tone="amber"
+              detail="Reschedules, cancellations, reminder prep, and operator follow-up still waiting on staff."
+            />
+            <Link href="/dashboard/appointments" className="workspace-rail-card block p-6 transition-transform hover:-translate-y-0.5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="workspace-section-label">Appointments workspace</p>
+                  <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950">
+                    Manage bookings, reminder readiness, and deposits in one place.
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Keep lifecycle actions, reminder prep, and patient booking state visible without implying an external calendar sync.
+                  </p>
+                </div>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+                  <ArrowRight className="h-4.5 w-4.5" />
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         <div className="workspace-side-rail">
-          <div className="app-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Daily focus</p>
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Daily focus</p>
             <div className="mt-4 space-y-3">
               <div className="app-card-muted px-4 py-4">
                 <p className="text-sm font-semibold text-slate-900">Human review queue</p>
@@ -324,45 +399,6 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : null}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((card) => (
-          <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_1.08fr]">
-        <MetricCard
-          label="Upcoming appointments"
-          value={upcomingAppointments.length}
-          icon={CalendarDays}
-          tone="teal"
-          detail="Confirmed bookings currently scheduled in Clinic AI."
-        />
-        <MetricCard
-          label="Needs booking attention"
-          value={attentionAppointments.length}
-          icon={AlertTriangle}
-          tone="amber"
-          detail="Reschedules, cancellations, reminder prep, and operator follow-up still waiting on staff."
-        />
-        <Link href="/dashboard/appointments" className="app-card app-gradient-border block p-6 transition-transform hover:-translate-y-0.5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-500">Appointments workspace</p>
-              <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950">
-                Manage bookings, reminder readiness, and deposits in one place.
-              </p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                Keep lifecycle actions, reminder prep, and patient booking state visible without implying an external calendar sync.
-              </p>
-            </div>
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
-              <ArrowRight className="h-4.5 w-4.5" />
-            </span>
-          </div>
-        </Link>
-      </div>
 
       <div className="workspace-split">
         <SurfaceCard

@@ -110,53 +110,65 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="app-shell-bg min-h-screen overflow-hidden px-4 py-12">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center justify-center">
-        <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="hidden lg:flex lg:flex-col lg:justify-center">
-            <div className="app-page-kicker mb-6">
-              <Sparkles className="h-3.5 w-3.5" />
-              Set up a clinic workspace
+    <div className="app-shell-bg min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
+        <div className="auth-shell grid w-full max-w-6xl gap-8 p-5 sm:p-6 lg:grid-cols-[0.96fr_1.04fr] lg:p-8">
+          <div className="hidden rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(243,240,255,0.92),rgba(255,255,255,0.92))] p-8 lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <div className="app-page-kicker mb-6">
+                <Sparkles className="h-3.5 w-3.5" />
+                Set up a clinic workspace
+              </div>
+              <h1 className="max-w-lg text-5xl font-semibold tracking-[-0.05em] text-slate-950">
+                Launch a calmer, more reliable front desk in minutes.
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
+                Start with your clinic basics, train the assistant on real information, and keep your team in control from inquiry to booking.
+              </p>
+              <div className="mt-8 grid gap-3">
+                {[
+                  "Guided onboarding and training",
+                  "Inbox, leads, appointments, and operations included",
+                  "Operator review and takeover stay honest by design",
+                ].map((item) => (
+                  <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700">
+                    <ShieldCheck className="h-4 w-4 text-teal-600" />
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="max-w-lg text-5xl font-semibold tracking-tight text-slate-950">
-              Launch a calmer, more reliable front desk in minutes.
-            </h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
-              Start with your clinic basics, train the assistant on real information, and keep your operators in control from inquiry to booking.
-            </p>
-            <div className="mt-8 grid gap-3">
-              {[
-                "Guided onboarding and training",
-                "Inbox, leads, appointments, and operations included",
-                "Operator review and takeover stay honest by design",
-              ].map((item) => (
-                <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700">
-                  <ShieldCheck className="h-4 w-4 text-teal-600" />
-                  {item}
-                </div>
-              ))}
+
+            <div className="workspace-rail-card p-5">
+              <p className="workspace-section-label">You stay in control</p>
+              <div className="mt-4 space-y-3 text-sm text-slate-600">
+                <p>Set the clinic information patients see.</p>
+                <p>Train the assistant on your real services, hours, and notes.</p>
+                <p>Keep operator visibility on inbox, appointments, and follow-up from day one.</p>
+              </div>
             </div>
           </div>
 
-          <div className="w-full max-w-md justify-self-center lg:max-w-none">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
-              <Bot className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-slate-900">
-              Clinic AI
-            </span>
-          </Link>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Create your account
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Set up your clinic in minutes
-          </p>
-        </div>
+          <div className="flex items-center">
+            <div className="mx-auto w-full max-w-xl">
+              <div className="mb-8 text-center">
+                <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+                    <Bot className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-xl font-semibold text-slate-900">
+                    Clinic AI
+                  </span>
+                </Link>
+                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-slate-900">
+                  Create your clinic workspace
+                </h1>
+                <p className="mt-2 text-sm text-slate-500">
+                  Set up your account and move straight into guided onboarding.
+                </p>
+              </div>
 
-        <form onSubmit={handleSubmit} className="app-card app-gradient-border p-8 sm:p-9">
+              <form onSubmit={handleSubmit} className="landing-shell p-8 sm:p-9">
           {supabaseConfigError && (
             <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               {supabaseConfigError}
@@ -279,7 +291,8 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
-        </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>

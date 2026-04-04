@@ -242,7 +242,51 @@ export default function TrainingPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
+      <div className="workspace-stage">
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Training state</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Readiness score</p>
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.knowledge_score}%</p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Knowledge gaps</p>
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.knowledge_gaps.length}</p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs text-slate-500">Custom notes</p>
+                <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{training.custom_sources.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Operator trust</p>
+            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+              <p>Use this workspace to keep the assistant grounded in what your clinic actually wants to say.</p>
+              <p>When something is unclear, the goal is visibility and correction, not confident guesswork.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div className="workspace-hero-panel p-5 sm:p-6">
+            <div className="workspace-toolbar">
+              <div>
+                <p className="workspace-section-label">AI workspace</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  Train the assistant on what your clinic actually wants to say.
+                </h2>
+              </div>
+              <div className="app-pill border-violet-200 bg-violet-50 text-violet-700">
+                {training.assistant_name}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -527,6 +571,18 @@ export default function TrainingPage() {
               )}
               Send test prompt
             </button>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Why this matters</p>
+            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+              <p>Training quality directly shapes whether the assistant feels grounded and trustworthy to patients.</p>
+              <p>Use preview chat to test the real answers before relying on the live workflow.</p>
+            </div>
           </div>
         </div>
       </div>

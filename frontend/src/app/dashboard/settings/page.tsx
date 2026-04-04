@@ -136,11 +136,11 @@ function SettingsSection({
   const status = getSectionStatus(sectionKey, statusState);
 
   return (
-    <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <section className="app-card overflow-hidden">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50/80 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
           <Icon className="w-4 h-4 text-slate-400 shrink-0" />
@@ -1290,7 +1290,7 @@ export default function SettingsPage() {
   const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -1301,37 +1301,37 @@ export default function SettingsPage() {
         title="Keep the workspace accurate, branded, and ready."
         description="Update the clinic information, assistant behavior, spreadsheets, notifications, and embed details that power the rest of Clinic AI."
       />
-
-      <div className="sticky top-3 z-10 rounded-[1.5rem] bg-white/80 pb-4 pt-3 backdrop-blur-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">{completedCount}/10 sections configured</p>
-            <p className="mt-1 text-xs text-slate-500">Save changes when you’re ready to update the live workspace.</p>
+      <div className="workspace-stage">
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card sticky top-6 p-5">
+            <p className="workspace-section-label">Configuration status</p>
+            <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{completedCount}/10</p>
+            <p className="mt-1 text-sm text-slate-500">Sections configured</p>
+            <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-slate-200">
+              <div className="settings-progress h-full rounded-full bg-teal-500 transition-all" />
+            </div>
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              Save changes when you’re ready to update the live workspace, assistant behavior, and operator-facing setup.
+            </p>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              Save settings
+            </button>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 rounded-2xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            Save Settings
-          </button>
         </div>
-      </div>
 
-      <div>
-        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-          <div className="settings-progress h-full bg-teal-500 rounded-full transition-all" />
-        </div>
-      </div>
-
+        <div className="space-y-5">
       {saveMessage && (
         <div
-          className={`mb-4 p-3 text-sm rounded-lg border ${
+          className={`p-3 text-sm rounded-lg border ${
             saveMessage.includes("success") || saveMessage.includes("copied")
               ? "bg-emerald-50 text-emerald-700 border-emerald-100"
               : "bg-red-50 text-red-700 border-red-100"
@@ -1522,6 +1522,18 @@ export default function SettingsPage() {
             />
           </SettingsSection>
         )}
+      </div>
+        </div>
+
+        <div className="workspace-side-rail">
+          <div className="workspace-rail-card p-5">
+            <p className="workspace-section-label">Setup guidance</p>
+            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+              <p>These sections shape what patients see, how the assistant responds, and how your operators manage the workspace.</p>
+              <p>Provider-dependent features stay honest when something is not configured or not live yet.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
