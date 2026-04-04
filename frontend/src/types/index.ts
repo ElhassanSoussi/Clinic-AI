@@ -70,6 +70,23 @@ export interface User {
 }
 
 export type LeadStatus = "new" | "contacted" | "booked" | "closed";
+export type AppointmentStatus =
+  | "request_open"
+  | "confirmed"
+  | "cancel_requested"
+  | "reschedule_requested"
+  | "cancelled"
+  | "completed"
+  | "no_show";
+export type ReminderStatus = "not_ready" | "ready" | "scheduled" | "sent";
+export type DepositStatus =
+  | "not_required"
+  | "required"
+  | "requested"
+  | "paid"
+  | "failed"
+  | "expired"
+  | "waived";
 export type ChannelType =
   | "web_chat"
   | "sms"
@@ -88,15 +105,15 @@ export interface Lead {
   reason_for_visit: string;
   preferred_datetime_text: string;
   status: LeadStatus;
-  appointment_status?: "request_open" | "confirmed" | "cancel_requested" | "reschedule_requested" | "cancelled" | "completed" | "no_show";
+  appointment_status?: AppointmentStatus;
   appointment_starts_at?: string | null;
   appointment_ends_at?: string | null;
-  reminder_status?: "not_ready" | "ready" | "scheduled" | "sent";
+  reminder_status?: ReminderStatus;
   reminder_scheduled_for?: string | null;
   reminder_note?: string;
   deposit_required?: boolean;
   deposit_amount_cents?: number | null;
-  deposit_status?: "not_required" | "required" | "requested" | "paid" | "failed" | "expired" | "waived";
+  deposit_status?: DepositStatus;
   deposit_requested_at?: string | null;
   deposit_paid_at?: string | null;
   source: string;

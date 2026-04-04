@@ -36,6 +36,19 @@ import { getPublicApiUrl } from "@/lib/api-url";
 import { createClient } from "@/utils/supabase/client";
 
 let accessTokenPromise: Promise<string | null> | null = null;
+const DEFAULT_GET_CACHE_TTL_MS = 15000;
+const responseCache = new Map<string, { expiresAt: number; data: unknown }>();
+const inflightGetRequests = new Map<string, Promise<unknown>>();
+
+interface ApiRequestOptions extends RequestInit {
+  skipCache?: boolean;
+  cacheTtlMs?: number;
+}
+
+export function clearApiCache(): void {
+  responseCache.clear();
+  inflightGetRequests.clear();
+}
 
 function isNotFoundError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
@@ -164,9 +177,26 @@ async function getToken(): Promise<string | null> {
 
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
   const apiUrl = getPublicApiUrl();
+  const method = (options.method || "GET").toUpperCase();
+  const cacheKey = `${apiUrl}${path}`;
+  const useCache = method === "GET" && !options.skipCache;
+  const cacheTtlMs = options.cacheTtlMs ?? DEFAULT_GET_CACHE_TTL_MS;
+
+  if (useCache) {
+    const cached = responseCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data as T;
+    }
+
+    const inflight = inflightGetRequests.get(cacheKey);
+    if (inflight) {
+      return inflight as Promise<T>;
+    }
+  }
+
   const token = await getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -176,31 +206,55 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${apiUrl}${path}`, {
-    ...options,
-    headers,
-  });
+  const requestPromise = (async () => {
+    const res = await fetch(`${apiUrl}${path}`, {
+      ...options,
+      headers,
+    });
 
-  if (!res.ok) {
-    if (res.status === 401 && globalThis.window !== undefined) {
-      const pathname = globalThis.location.pathname;
-      const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/auth/");
-      if (!isAuthPage) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("auth_user");
-        try {
-          const supabase = createClient();
-          await supabase.auth.signOut();
-        } catch { /* ignore sign-out errors */ }
-        globalThis.location.href = "/login";
-        throw new Error("Session expired. Please log in again.");
+    if (!res.ok) {
+      if (res.status === 401 && globalThis.window !== undefined) {
+        const pathname = globalThis.location.pathname;
+        const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/auth/");
+        if (!isAuthPage) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("auth_user");
+          clearApiCache();
+          try {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+          } catch { /* ignore sign-out errors */ }
+          globalThis.location.href = "/login";
+          throw new Error("Session expired. Please log in again.");
+        }
       }
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || `Request failed: ${res.status}`);
     }
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Request failed: ${res.status}`);
+
+    const body = await res.json();
+    if (useCache) {
+      responseCache.set(cacheKey, {
+        data: body,
+        expiresAt: Date.now() + cacheTtlMs,
+      });
+    } else if (method !== "GET") {
+      clearApiCache();
+    }
+    return body as T;
+  })();
+
+  if (useCache) {
+    inflightGetRequests.set(cacheKey, requestPromise as Promise<unknown>);
   }
 
-  return res.json();
+  try {
+    return await requestPromise;
+  } finally {
+    if (useCache) {
+      inflightGetRequests.delete(cacheKey);
+    }
+  }
 }
 
 export const api = {

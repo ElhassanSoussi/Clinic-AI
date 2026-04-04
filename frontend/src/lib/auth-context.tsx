@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { AuthResponse } from "@/types";
+import { clearApiCache } from "@/lib/api";
 import { createClient } from "@/utils/supabase/client";
 
 interface AuthContextType {
@@ -66,9 +67,11 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     if (!data.access_token.trim()) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("auth_user");
+      clearApiCache();
       setUser(null);
       return;
     }
+    clearApiCache();
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("auth_user", JSON.stringify(data));
     setUser(data);
@@ -87,6 +90,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const logout = useCallback(async () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("auth_user");
+    clearApiCache();
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
