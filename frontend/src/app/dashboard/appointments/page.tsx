@@ -383,16 +383,13 @@ export default function AppointmentsPage() {
         description="Review appointment timing, reminder readiness, lifecycle status, and deposit handling without leaving the operator workspace."
       />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="app-segmented">
         {APPOINTMENT_VIEWS.map((view) => (
           <button
             key={view.value}
             onClick={() => setActiveView(view.value)}
-            className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
-              activeView === view.value
-                ? "border-teal-600 bg-teal-600 text-white shadow-sm shadow-teal-500/20"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-            }`}
+            className="app-segmented-item"
+            data-active={activeView === view.value}
           >
             {view.label}
           </button>
@@ -406,18 +403,22 @@ export default function AppointmentsPage() {
           description="Booked requests will appear here as soon as the front desk confirms an appointment."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="app-card overflow-hidden">
-            <div className="divide-y divide-slate-100">
+        <div className="workspace-split">
+          <div className="space-y-3">
+            <div className="app-card p-5">
+              <p className="text-sm font-semibold text-slate-900">Appointments board</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Review timing, reminder readiness, deposit state, and the linked patient context from one operational list.
+              </p>
+            </div>
+            <div className="app-card overflow-hidden">
+              <div className="divide-y divide-slate-100/80 p-3">
               {appointments.map((appointment) => (
                 <button
                   key={appointment.lead_id}
                   onClick={() => setSelectedLeadId(appointment.lead_id)}
-                  className={`w-full px-5 py-4 text-left transition-colors ${
-                    selectedLeadId === appointment.lead_id
-                      ? "bg-teal-50/80"
-                      : "hover:bg-slate-50/70"
-                  }`}
+                  className="app-list-row w-full px-5 py-4 text-left"
+                  data-active={selectedLeadId === appointment.lead_id}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="min-w-0">
@@ -465,11 +466,12 @@ export default function AppointmentsPage() {
                   </div>
                 </button>
               ))}
+              </div>
             </div>
           </div>
 
           {selectedAppointment && selectedDraft && (
-            <div className="space-y-6">
+            <div className="workspace-side-rail">
               <div className="app-card p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -588,7 +590,7 @@ export default function AppointmentsPage() {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="app-card p-6">
                 <h3 className="text-sm font-semibold text-slate-900">Booking deposit</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Request a real Stripe deposit for this booked appointment and track whether the link reached the patient.
@@ -718,7 +720,7 @@ export default function AppointmentsPage() {
                 )}
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-6">
+              <div className="app-card p-6">
                 <h3 className="text-sm font-semibold text-slate-900">Edit booking</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Update the scheduled time, visit reason, and internal note without leaving the appointments workspace.

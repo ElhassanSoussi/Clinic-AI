@@ -340,10 +340,10 @@ export default function InboxThreadPage({
   };
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <button
         onClick={() => router.push("/dashboard/inbox")}
-        className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
+        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Inbox
@@ -360,10 +360,10 @@ export default function InboxThreadPage({
         description="Review the full conversation, understand thread state, and move the patient forward without leaving the workspace."
       />
 
-      <div className="flex flex-col gap-6 xl:flex-row">
+      <div className="workspace-split">
         <div className="flex-1 min-w-0">
           <div className="app-card overflow-hidden">
-            <div className="border-b border-slate-100 px-4 py-5 sm:px-6">
+            <div className="border-b border-slate-100 px-5 py-6 sm:px-6">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1 className="text-2xl font-bold text-slate-900">
                   {conversation.customer_name}
@@ -379,7 +379,33 @@ export default function InboxThreadPage({
                 {isEventThread ? "Logged" : "Started"}{" "}
                 {conversation.conversation_started_at ? formatDateTime(conversation.conversation_started_at) : "recently"}
               </p>
-              <div className="flex flex-wrap items-center gap-2 mt-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="app-card-muted px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Thread state</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {isEventThread ? "Operational event thread" : "Live conversation thread"}
+                  </p>
+                </div>
+                <div className="app-card-muted px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Latest source</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900 capitalize">
+                    {conversation.channel}
+                  </p>
+                </div>
+                <div className="app-card-muted px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Lead link</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {lead ? "Request linked" : "Still unlinked"}
+                  </p>
+                </div>
+                <div className="app-card-muted px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Booking state</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {bookingSummary || "Not booked yet"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mt-4">
                 <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
                   lead
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -456,7 +482,7 @@ export default function InboxThreadPage({
               </div>
             </div>
 
-            <div className="space-y-4 px-4 py-5 sm:px-6">
+            <div className="space-y-4 px-5 py-5 sm:px-6">
               {isEventThread ? (
                 <div className="space-y-4">
                   {relatedEvents.length === 0 ? (
@@ -633,7 +659,7 @@ export default function InboxThreadPage({
           </div>
         </div>
 
-        <aside className="w-full shrink-0 space-y-6 xl:w-[22rem]">
+        <aside className="workspace-side-rail">
           <div className="app-card p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
               Customer
@@ -759,7 +785,7 @@ export default function InboxThreadPage({
                     rows={4}
                     value={reviewReplyBody}
                     onChange={(event) => setReviewReplyBody(event.target.value)}
-                    className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                    className="app-input min-h-[7rem] resize-none"
                     placeholder="Review the drafted reply before sending"
                   />
                   <div className="flex flex-wrap gap-2 mt-3">
@@ -797,7 +823,7 @@ export default function InboxThreadPage({
                 rows={4}
                 value={smsBody}
                 onChange={(event) => setSmsBody(event.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                className="app-input min-h-[7rem] resize-none"
                 placeholder="Write your message"
               />
               <button

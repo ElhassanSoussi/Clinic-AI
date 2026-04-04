@@ -3,11 +3,24 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Users, Search, Loader2, MessageSquare, Code2, ExternalLink, AlertTriangle, Zap } from "lucide-react";
+import {
+  Users,
+  Search,
+  Loader2,
+  MessageSquare,
+  Code2,
+  ExternalLink,
+  AlertTriangle,
+  Zap,
+  CalendarDays,
+  ContactRound,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
 import type { Lead, LeadStatus, Clinic } from "@/types";
@@ -187,7 +200,7 @@ function renderLeadsContent({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="app-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -204,7 +217,7 @@ function renderLeadsContent({
               <tr
                 key={lead.id}
                 onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
-                className={`cursor-pointer transition-colors ${lead.status === "new" ? "bg-blue-50/40 hover:bg-blue-50/70 border-l-[3px] border-l-blue-500" : "hover:bg-slate-50 border-l-[3px] border-l-transparent"}`}
+                className={`cursor-pointer transition-colors ${lead.status === "new" ? "bg-violet-50/50 hover:bg-violet-50/70 border-l-[3px] border-l-violet-500" : "hover:bg-slate-50/70 border-l-[3px] border-l-transparent"}`}
               >
                 <td className="px-6 py-4">
                   <p className="text-sm font-medium text-slate-900">{lead.patient_name}</p>
@@ -326,72 +339,112 @@ export default function LeadsPage() {
   const content = renderLeadsContent({ loading, error, filtered, emptyState, loadLeads, router, updatingId, handleInlineStatus });
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">
-          Appointment Requests
-        </h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Manage and track all patient requests
-        </p>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow={
+          <>
+            <Users className="h-3.5 w-3.5" />
+            Requests workspace
+          </>
+        }
+        title="Move captured patient demand into a cleaner booking pipeline."
+        description="See every request, update status in-line, and keep the handoff between conversation, customer, and appointment work visible."
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="All requests" value={counts.all} icon={Users} tone="slate" />
+        <MetricCard label="New" value={counts.new} icon={AlertTriangle} tone="amber" />
+        <MetricCard label="Contacted" value={counts.contacted} icon={ContactRound} tone="blue" />
+        <MetricCard label="Booked" value={counts.booked} icon={CalendarDays} tone="emerald" />
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-        <div className="relative flex-1 w-full sm:max-w-xs">
+      <div className="app-card p-4 sm:p-5">
+        <div className="workspace-toolbar">
+          <div className="relative flex-1 w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, phone, or email..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400"
+            className="app-input pl-9"
           />
         </div>
 
-        <div className="flex gap-1.5 bg-white border border-slate-200 rounded-lg p-1">
-          {STATUS_OPTIONS.map((opt) => {
-            const count =
-              opt.value === ""
-                ? counts.all
-                : counts[opt.value as keyof typeof counts] ?? 0;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setStatusFilter(opt.value)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
-                  statusFilter === opt.value
-                    ? "bg-teal-600 text-white"
-                    : "text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {opt.label}
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                    statusFilter === opt.value
-                      ? "bg-teal-700 text-teal-100"
-                      : "bg-slate-100 text-slate-500"
-                  }`}
+          <div className="app-segmented">
+            {STATUS_OPTIONS.map((opt) => {
+              const count =
+                opt.value === ""
+                  ? counts.all
+                  : counts[opt.value as keyof typeof counts] ?? 0;
+              const active = statusFilter === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setStatusFilter(opt.value)}
+                  className="app-segmented-item"
+                  data-active={active}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  {opt.label}
+                  <span className={`text-[10px] ${active ? "text-white/85" : "text-slate-400"}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Usage warning banner */}
       {usageWarningBanner}
 
-      {/* Table */}
       {updateError && (
         <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center justify-between">
           <span>{updateError}</span>
           <button onClick={() => setUpdateError(null)} className="text-red-400 hover:text-red-600 ml-3">&times;</button>
         </div>
       )}
-      {content}
+
+      <div className="workspace-split">
+        <div>{content}</div>
+
+        <aside className="workspace-side-rail">
+          <div className="app-card p-5">
+            <p className="text-sm font-semibold text-slate-900">Pipeline snapshot</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Open work</p>
+                <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  {counts.new + counts.contacted}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Requests still waiting on booking progress, follow-up, or closure.</p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Closed out</p>
+                <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  {counts.closed}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Completed or closed requests no longer needing front-desk attention.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="app-card p-5">
+            <p className="text-sm font-semibold text-slate-900">How to use this workspace</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-600">
+              <div className="app-card-muted px-4 py-4">
+                New requests land here from chat, SMS, and follow-up capture.
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                Update status in-line when the team contacts the patient or confirms a booking.
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                Open any request to see the full workflow context in inbox, customers, and appointments.
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

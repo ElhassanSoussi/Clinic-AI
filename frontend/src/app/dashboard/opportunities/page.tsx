@@ -165,7 +165,7 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -204,6 +204,7 @@ export default function OpportunitiesPage() {
         </div>
       </div>
 
+      <div className="workspace-split">
       <div className="app-card p-5">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
@@ -296,6 +297,21 @@ export default function OpportunitiesPage() {
             })}
           </div>
         )}
+      </div>
+
+      <aside className="workspace-side-rail">
+        <div className="app-card p-5">
+          <p className="text-sm font-semibold text-slate-900">What this queue is for</p>
+          <div className="mt-4 space-y-3">
+            <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
+              Keep stalled requests visible before they quietly turn into lost bookings.
+            </div>
+            <div className="app-card-muted px-4 py-4 text-sm text-slate-600">
+              Use queued follow-ups for manual ownership, then turn on automation when the clinic is ready.
+            </div>
+          </div>
+        </div>
+      </aside>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-5">

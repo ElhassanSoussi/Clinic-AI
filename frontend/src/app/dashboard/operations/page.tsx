@@ -401,7 +401,7 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>

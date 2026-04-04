@@ -19,16 +19,16 @@ export function PageHeader({
     <div className="app-page-header lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
         {eyebrow ? <div className="app-page-kicker mb-4">{eyebrow}</div> : null}
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.1rem]">
+        <h1 className="max-w-4xl text-[2.1rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.6rem]">
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[0.95rem]">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-[1rem]">
             {description}
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center gap-3 lg:justify-end">{actions}</div> : null}
     </div>
   );
 }

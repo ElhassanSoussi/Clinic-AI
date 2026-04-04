@@ -26,6 +26,7 @@ import {
   Bell,
   ShieldCheck,
   UserCog,
+  Search,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -264,17 +265,17 @@ export default function DashboardLayout({
             key={item.href}
             href={item.href}
             onClick={() => setSidebarOpen(false)}
-            className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[13px] font-semibold transition-all ${
+            className={`group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold transition-all ${
               isActive
-                ? "bg-gradient-to-r from-teal-50 to-violet-50 text-slate-950 shadow-sm ring-1 ring-slate-200/70"
-                : "text-slate-500 hover:bg-white/90 hover:text-slate-900"
+                ? "bg-white text-slate-950 shadow-[0_16px_32px_rgba(91,67,143,0.08)] ring-1 ring-violet-100/90"
+                : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
             }`}
           >
             <span
-              className={`flex h-9 w-9 items-center justify-center rounded-2xl border ${
+              className={`flex h-9 w-9 items-center justify-center rounded-[1rem] border ${
                 isActive
-                  ? "border-teal-100 bg-white text-teal-700"
-                  : "border-transparent bg-slate-100/80 text-slate-500 group-hover:border-slate-200 group-hover:bg-white"
+                  ? "border-violet-100 bg-gradient-to-br from-violet-50 to-teal-50 text-violet-700"
+                  : "border-transparent bg-white/70 text-slate-500 group-hover:border-violet-100 group-hover:bg-white"
               }`}
             >
               <item.icon className="h-4.5 w-4.5" />
@@ -294,9 +295,9 @@ export default function DashboardLayout({
           href={`/chat/${user.clinic_slug}`}
           target="_blank"
           onClick={() => setSidebarOpen(false)}
-          className="group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[13px] font-semibold text-slate-500 transition-all hover:bg-white/90 hover:text-slate-900"
+          className="group flex items-center gap-3 rounded-[1.35rem] px-3.5 py-3 text-[13px] font-semibold text-slate-600 transition-all hover:bg-white/80 hover:text-slate-900"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100/80 text-slate-500 group-hover:bg-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-[1rem] bg-white/70 text-slate-500 group-hover:bg-white">
             <MessageSquareMore className="h-4.5 w-4.5" />
           </span>
           Patient Chat
@@ -308,10 +309,10 @@ export default function DashboardLayout({
 
   return (
     <div className="app-shell-bg flex min-h-screen">
-      <aside className="fixed inset-y-0 left-0 hidden w-[18.5rem] flex-col border-r border-white/60 bg-white/72 backdrop-blur-xl lg:flex">
-        <div className="border-b border-slate-200/70 px-5 py-5">
+      <aside className="workspace-sidebar fixed inset-y-0 left-0 hidden w-[18.75rem] flex-col px-4 py-4 lg:flex">
+        <div className="workspace-sidebar-card px-4 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[1.15rem] bg-gradient-to-br from-teal-600 to-violet-600 shadow-[0_18px_36px_rgba(91,67,143,0.18)]">
               <Bot className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -322,7 +323,7 @@ export default function DashboardLayout({
             </div>
           </div>
           {clinic ? (
-            <div className="mt-5 app-card-muted flex items-center justify-between px-3.5 py-3">
+            <div className="mt-5 rounded-[1.25rem] border border-violet-100/90 bg-white/80 px-3.5 py-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                   Clinic status
@@ -340,7 +341,7 @@ export default function DashboardLayout({
             </div>
           ) : null}
         </div>
-        {sidebarContent}
+        <div className="mt-4 flex min-h-0 flex-1 flex-col">{sidebarContent}</div>
       </aside>
 
       <div
@@ -355,13 +356,13 @@ export default function DashboardLayout({
           aria-label="Close navigation"
         />
         <aside
-          className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-white/70 bg-white/92 shadow-2xl backdrop-blur-xl transition-transform ${
+          className={`workspace-sidebar relative flex h-full w-72 max-w-[85vw] flex-col px-4 py-4 shadow-2xl transition-transform ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="workspace-sidebar-card flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-600 shadow-sm shadow-teal-500/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-gradient-to-br from-teal-600 to-violet-600 shadow-[0_18px_36px_rgba(91,67,143,0.18)]">
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -377,14 +378,14 @@ export default function DashboardLayout({
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
+          <div className="mt-4 flex-1 overflow-y-auto">{sidebarContent}</div>
         </aside>
       </div>
 
-      <div className="flex min-h-screen flex-1 flex-col lg:ml-[18.5rem]">
-        <header className="sticky top-0 z-30 border-b border-white/60 bg-white/65 backdrop-blur-xl">
+      <div className="flex min-h-screen flex-1 flex-col lg:ml-[18.75rem]">
+        <header className="workspace-topbar sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex min-w-0 items-center gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-500 transition-colors hover:bg-white hover:text-slate-900 lg:hidden"
@@ -401,10 +402,21 @@ export default function DashboardLayout({
                 </p>
               </div>
             </div>
+            <div className="hidden xl:flex xl:flex-1 xl:justify-center">
+              <Link href="/dashboard/inbox" className="workspace-search">
+                <Search className="h-4.5 w-4.5 text-violet-500" />
+                <span className="flex-1 text-sm font-medium text-slate-500">
+                  Search inbox, requests, and patients
+                </span>
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+                  Inbox
+                </span>
+              </Link>
+            </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="hidden sm:flex">{systemStatusAction}</div>
               <button
-                className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 lg:inline-flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-500 shadow-sm transition-colors hover:bg-white lg:inline-flex"
                 aria-label="Notifications"
                 type="button"
               >
@@ -413,10 +425,10 @@ export default function DashboardLayout({
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((value) => !value)}
-                className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-2 py-1.5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                className="flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-2 py-1.5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                 aria-haspopup="true"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white select-none">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-600 to-violet-600 text-xs font-bold text-white select-none">
                   {userInitial}
                 </div>
                 <div className="hidden text-left sm:block">
@@ -430,7 +442,7 @@ export default function DashboardLayout({
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-72 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/8 transition-all ${
+                className={`absolute right-0 mt-2 w-72 origin-top-right rounded-[1.5rem] border border-slate-200 bg-white/96 p-2 shadow-2xl shadow-slate-900/8 transition-all ${
                   menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
                 }`}
                 role="menu"
@@ -515,7 +527,7 @@ export default function DashboardLayout({
 
         <main className="flex-1 overflow-y-auto">
           <div className="sm:hidden px-4 pt-4">{systemStatusAction}</div>
-          <div className="px-4 pb-8 pt-5 sm:px-6 lg:px-8">{children}</div>
+          <div className="px-4 pb-10 pt-6 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
 

@@ -64,8 +64,8 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadActivity()} />;
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-6">
+      <div className="workspace-toolbar">
         <PageHeader
           eyebrow={
             <>

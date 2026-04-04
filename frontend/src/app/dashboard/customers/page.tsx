@@ -51,7 +51,7 @@ export default function CustomersPage() {
   if (error) return <ErrorState message={error} onRetry={loadCustomers} />;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -63,7 +63,9 @@ export default function CustomersPage() {
         description="Track conversation history, request counts, booking outcomes, and the latest internal context for each contact."
       />
 
-      <div className="relative max-w-md">
+      <div className="app-card p-4 sm:p-5">
+        <div className="workspace-toolbar">
+          <div className="relative max-w-md flex-1">
         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
@@ -72,6 +74,11 @@ export default function CustomersPage() {
           placeholder="Search by patient, phone, or email..."
           className="app-input pl-9"
         />
+          </div>
+          <div className="app-card-muted px-4 py-3 text-sm text-slate-600">
+            <span className="font-semibold text-slate-900">{customers.length}</span> customer profiles tracked
+          </div>
+        </div>
       </div>
 
       {filtered.length === 0 ? (

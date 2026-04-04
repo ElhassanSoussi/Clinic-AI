@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   MessageSquareMore,
   Settings,
+  Sparkles,
   TrendingUp,
   UserPlus,
   Users,
@@ -241,6 +242,67 @@ export default function DashboardPage() {
         }
       />
 
+      <div className="workspace-split">
+        <div className="app-card app-gradient-border overflow-hidden p-6 sm:p-7">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="app-page-kicker mb-5">
+                <Sparkles className="h-3.5 w-3.5" />
+                Front-desk command center
+              </div>
+              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">
+                Keep conversations, bookings, and operator workload in one calm operating view.
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                Clinic AI shows what was captured, what needs staff judgment, and which appointment or follow-up items still need attention before the day slips away.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:w-[19rem]">
+              <div className="app-card-muted p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Live demand</p>
+                <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  {analytics.conversations_total}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Active and historical conversations tracked in the workspace.</p>
+              </div>
+              <div className="app-card-muted p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Booked now</p>
+                <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  {analytics.booked_requests}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Requests already confirmed into the appointments workflow.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="workspace-side-rail">
+          <div className="app-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Daily focus</p>
+            <div className="mt-4 space-y-3">
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-sm font-semibold text-slate-900">Human review queue</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  {analytics.human_review_required_count} conversations are waiting for a staff decision before the assistant sends anything else.
+                </p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-sm font-semibold text-slate-900">Appointments needing attention</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  {attentionAppointments.length} bookings are blocked by reminder prep, reschedule needs, cancellation risk, or deposit follow-through.
+                </p>
+              </div>
+              <div className="app-card-muted px-4 py-4">
+                <p className="text-sm font-semibold text-slate-900">Opportunity pressure</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  {analytics.follow_up_needed_count} follow-up items and {analytics.unresolved_count} unresolved requests still need operator visibility.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {showFirstLeadSuccess ? (
         <div className="app-card border-emerald-100 bg-emerald-50/70 p-5">
           <div className="flex items-center gap-3">
@@ -269,7 +331,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_1.08fr]">
         <MetricCard
           label="Upcoming appointments"
           value={upcomingAppointments.length}
@@ -284,7 +346,7 @@ export default function DashboardPage() {
           tone="amber"
           detail="Reschedules, cancellations, reminder prep, and operator follow-up still waiting on staff."
         />
-        <Link href="/dashboard/appointments" className="app-card app-gradient-border block p-5 transition-transform hover:-translate-y-0.5">
+        <Link href="/dashboard/appointments" className="app-card app-gradient-border block p-6 transition-transform hover:-translate-y-0.5">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-slate-500">Appointments workspace</p>
@@ -302,7 +364,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="workspace-split">
         <SurfaceCard
           title="Performance snapshot"
           description="Practical metrics derived from real conversation, booking, and review activity."
@@ -420,7 +482,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+      <div className="workspace-split">
         <SurfaceCard
           title="Opportunities preview"
           description="Follow-up signals and stalled requests that may need attention."
