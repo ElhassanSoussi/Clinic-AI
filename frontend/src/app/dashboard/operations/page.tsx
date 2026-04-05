@@ -421,7 +421,7 @@ export default function OperationsPage() {
 
       {/* System readiness */}
       {systemReadiness && (
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-teal-600" />
             <div>
@@ -475,7 +475,7 @@ export default function OperationsPage() {
       )}
 
       {/* Channel readiness */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <div className="mb-3 flex items-center gap-2">
           <PhoneMissed className="h-4 w-4 text-teal-600" />
           <div>
@@ -545,54 +545,54 @@ export default function OperationsPage() {
 
       {/* Outbound activity metrics */}
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5">
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Outbound SMS</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.outbound_sms_total ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Real delivery attempts logged through the SMS channel.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">AI Replies</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.ai_replies_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Assistant-generated SMS replies successfully sent to patients.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Human Review</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.human_review_required ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">SMS threads waiting for staff review before a reply goes out.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Suggested Sent</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.suggested_replies_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">AI drafts approved or edited by staff and sent by SMS.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Reminders Sent</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.reminders_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Booked-request reminders successfully sent by SMS.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Missed-Call Texts</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.missed_call_texts_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Recovery texts sent after missed calls.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Manual Takeovers</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.manual_takeover_threads ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">SMS threads currently held for staff instead of AI auto-reply.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Failed or Skipped</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">
             {(outboundActivity?.failed_sends ?? 0) + (outboundActivity?.skipped_sends ?? 0)}
           </p>
           <p className="mt-1 text-[10px] text-slate-500">Review why sending was blocked or failed.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">AI Reply Failures</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.ai_reply_failures ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Assistant replies that could not be sent and still need staff review.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Blocked for Review</p>
           <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.blocked_for_review ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Risky or unsupported SMS messages held for staff review.</p>
@@ -600,7 +600,7 @@ export default function OperationsPage() {
       </div>
 
       {/* Reminder settings */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="mb-1.5 flex items-center gap-2">
@@ -667,7 +667,7 @@ export default function OperationsPage() {
       </div>
 
       {/* Reminder delivery */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-semibold text-slate-900">Reminder delivery</h2>
@@ -752,7 +752,7 @@ export default function OperationsPage() {
 
       {/* Recovery queue + Log form */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-[13px] font-semibold text-slate-900">Recovery queue</h2>
@@ -905,7 +905,7 @@ export default function OperationsPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
           <h2 className="text-[13px] font-bold text-slate-900">Log a recovery item</h2>
           <p className="mt-0.5 text-[10px] text-slate-400">
             This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
@@ -1000,7 +1000,7 @@ export default function OperationsPage() {
       </div>
 
       {/* SMS review queue */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-semibold text-slate-900">SMS review queue</h2>
@@ -1071,7 +1071,7 @@ export default function OperationsPage() {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-5">
           {/* Reminder-ready bookings */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Reminder-ready bookings</h2>
@@ -1244,7 +1244,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Waitlist */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Waitlist</h2>
@@ -1362,7 +1362,7 @@ export default function OperationsPage() {
 
         <div className="space-y-5">
           {/* Recent outbound SMS */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Recent outbound SMS</h2>
@@ -1402,7 +1402,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Action required */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-amber-600" />
               <h2 className="text-[13px] font-semibold text-slate-900">Action required</h2>
@@ -1460,7 +1460,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Deposit tracking */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <Wallet className="h-4 w-4 text-violet-600" />
               <h2 className="text-[13px] font-semibold text-slate-900">Deposit tracking</h2>

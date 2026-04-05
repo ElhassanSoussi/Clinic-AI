@@ -300,7 +300,7 @@ export default function CustomerProfilePage({
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-4">
+          <div className="bg-white border border-slate-100 rounded-2xl p-4">
             <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
               Recent requests
             </h2>
@@ -335,7 +335,7 @@ export default function CustomerProfilePage({
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
           <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
             Recent conversation history
           </h2>
@@ -371,7 +371,7 @@ export default function CustomerProfilePage({
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
           {profile.phone && (
             <div className="mb-4 pb-4 border-b border-slate-100">
               <h2 className="text-[13px] font-semibold text-slate-900 mb-2.5">
@@ -432,7 +432,7 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-[13px] text-slate-500">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           )}

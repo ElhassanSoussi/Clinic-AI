@@ -158,13 +158,13 @@ export default function OpportunitiesPage() {
       />
 
       {error && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">{error}</div>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">{error}</div>
       )}
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
         <div className="space-y-5">
           {/* Follow-up queue */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-semibold text-slate-900">Active queue</p>
@@ -246,7 +246,7 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Triage */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-semibold text-slate-900">Needs triage</p>
@@ -318,7 +318,7 @@ export default function OpportunitiesPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Automation</p>
             <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[12px] font-semibold text-slate-900">Auto follow-up</p>
@@ -348,7 +348,7 @@ export default function OpportunitiesPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">How to use</p>
             <div className="mt-2.5 space-y-1.5">
               <p className="text-[10px] leading-relaxed text-slate-400">Keep stalled requests visible before they turn into lost bookings.</p>

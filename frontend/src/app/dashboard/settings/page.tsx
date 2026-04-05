@@ -136,7 +136,7 @@ function SettingsSection({
   const status = getSectionStatus(sectionKey, statusState);
 
   return (
-    <section className="app-card overflow-hidden">
+    <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
@@ -188,7 +188,7 @@ function ClinicInformationSectionContent({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -201,7 +201,7 @@ function ClinicInformationSectionContent({
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
               placeholder="(555) 123-4567"
             />
           </div>
@@ -214,7 +214,7 @@ function ClinicInformationSectionContent({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
               placeholder="contact@clinic.com"
             />
           </div>
@@ -228,7 +228,7 @@ function ClinicInformationSectionContent({
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
             placeholder="123 Main St, Suite 100, City, State, ZIP"
           />
         </div>
@@ -264,7 +264,7 @@ function AssistantMessagesSectionContent({
             value={greeting}
             onChange={(e) => setGreeting(e.target.value)}
             rows={2}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 resize-none"
           />
         </div>
         <div>
@@ -279,7 +279,7 @@ function AssistantMessagesSectionContent({
             value={fallback}
             onChange={(e) => setFallback(e.target.value)}
             rows={2}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 resize-none"
           />
         </div>
       </div>
@@ -331,7 +331,7 @@ function ServicesSectionContent({
               addService();
             }
           }}
-          className="flex-1 px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+          className="flex-1 px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
           placeholder="Add a service (e.g., General Checkup)"
         />
         <button
@@ -368,7 +368,7 @@ function BusinessHoursSectionContent({
               onChange={(e) =>
                 setHours({ ...hours, [day]: e.target.value })
               }
-              className="flex-1 px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="flex-1 px-3.5 py-2 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
               placeholder='e.g., 9:00 AM - 5:00 PM or "Closed"'
             />
           </div>
@@ -432,14 +432,14 @@ function FaqSectionContent({
                   type="text"
                   value={item.question}
                   onChange={(e) => updateFaq(index, "question", e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                   placeholder="Question (e.g., Do you accept insurance?)"
                 />
                 <textarea
                   value={item.answer}
                   onChange={(e) => updateFaq(index, "answer", e.target.value)}
                   rows={2}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 resize-none"
                   placeholder="Answer"
                 />
               </div>
@@ -611,7 +611,7 @@ function GoogleSheetsSectionContent({
           </button>
 
           {showManualSetup ? (
-            <div className="border-t border-slate-200 px-4 py-4 space-y-4 bg-white rounded-b-xl">
+            <div className="border-t border-slate-100 px-4 py-3.5 space-y-4 bg-white rounded-b-xl">
               <p className="text-xs text-slate-500">
                 If you prefer manual setup, share your sheet as <b>Editor</b> with{" "}
                 <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 select-all">
@@ -628,7 +628,7 @@ function GoogleSheetsSectionContent({
                   type="text"
                   value={googleSheetId}
                   onChange={(e) => setGoogleSheetId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                   placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRYFa..."
                 />
               </div>
@@ -641,7 +641,7 @@ function GoogleSheetsSectionContent({
                   type="text"
                   value={googleSheetTab}
                   onChange={(e) => setGoogleSheetTab(e.target.value)}
-                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                   placeholder="Sheet1"
                 />
               </div>
@@ -819,7 +819,7 @@ function SchedulingSectionContent({
                 type="text"
                 value={availabilitySheetTab}
                 onChange={(e) => setAvailabilitySheetTab(e.target.value)}
-                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                 placeholder="e.g., Availability"
               />
               <p className="text-[10px] text-slate-400 mt-1.5">
@@ -874,7 +874,7 @@ function BrandingSectionContent({
             type="text"
             value={assistantName}
             onChange={(e) => setAssistantName(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
             placeholder='e.g., "Sarah from Smile Dental"'
           />
           <p className="mt-1 text-xs text-slate-400">

@@ -249,7 +249,7 @@ export default function TrainingPage() {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
         <div className="space-y-5">
           {/* Knowledge readiness */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex items-center gap-2">
@@ -297,7 +297,7 @@ export default function TrainingPage() {
             {/* Knowledge sources */}
             <div className="space-y-5">
               {/* Structured knowledge */}
-              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
                 <div className="mb-2.5 flex items-center gap-2">
                   <Bot className="w-3.5 h-3.5 text-teal-600" />
                   <p className="text-[12px] font-semibold text-slate-900">Current sources</p>
@@ -328,7 +328,7 @@ export default function TrainingPage() {
               </div>
 
               {/* Custom notes */}
-              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
                 <div className="mb-2.5 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-slate-500" />
                   <p className="text-[12px] font-semibold text-slate-900">Custom notes</p>
@@ -429,7 +429,7 @@ export default function TrainingPage() {
               </div>
 
               {/* Document uploads */}
-              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
                 <div className="mb-2 flex items-center gap-2">
                   <Upload className="w-3.5 h-3.5 text-slate-400" />
                   <p className="text-[12px] font-semibold text-slate-900">Document uploads</p>
@@ -441,7 +441,7 @@ export default function TrainingPage() {
             </div>
 
             {/* Preview chat */}
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm xl:sticky xl:top-20">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm xl:sticky xl:top-20">
               <div className="mb-2.5 flex items-center gap-2">
                 <Send className="w-3.5 h-3.5 text-teal-600" />
                 <p className="text-[12px] font-semibold text-slate-900">Live preview</p>
@@ -501,7 +501,7 @@ export default function TrainingPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Training state</p>
             <div className="mt-2.5 space-y-2">
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
@@ -519,7 +519,7 @@ export default function TrainingPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Why this matters</p>
             <div className="mt-2.5 space-y-1.5">
               <p className="text-[10px] leading-relaxed text-slate-400">

@@ -150,7 +150,7 @@ export default function CustomersPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Overview</p>
             <div className="mt-2.5 space-y-2">
               <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
@@ -159,7 +159,7 @@ export default function CustomersPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Best use</p>
             <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
               Open a customer profile for the relationship view — inbox context, booking state, and notes so staff can work faster.

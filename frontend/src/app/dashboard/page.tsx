@@ -253,7 +253,7 @@ export default function DashboardPage() {
 
       {/* ── First lead success banner ── */}
       {showFirstLeadSuccess && (
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 px-4 py-3.5">
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
@@ -323,7 +323,7 @@ export default function DashboardPage() {
         {/* ── Canvas ── */}
         <div className="space-y-5">
           {/* Hero panel */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-5 py-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-5 py-4.5 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
                 <h2 className="text-base font-bold tracking-tight text-slate-900">
@@ -333,15 +333,15 @@ export default function DashboardPage() {
                   What was captured, what needs human judgment, and which items still need attention.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:w-64">
-                <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3">
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:w-64">
+                <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-2.5">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Live demand</p>
-                  <p className="mt-1.5 text-xl font-bold text-slate-900">{analytics.conversations_total}</p>
+                  <p className="mt-1 text-xl font-bold text-slate-900">{analytics.conversations_total}</p>
                   <p className="mt-0.5 text-[10px] text-slate-400">Active conversations</p>
                 </div>
-                <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3">
+                <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-2.5">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Booked now</p>
-                  <p className="mt-1.5 text-xl font-bold text-slate-900">{analytics.booked_requests}</p>
+                  <p className="mt-1 text-xl font-bold text-slate-900">{analytics.booked_requests}</p>
                   <p className="mt-0.5 text-[10px] text-slate-400">Confirmed requests</p>
                 </div>
               </div>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="mt-3.5 rounded-xl border border-slate-100/60 bg-slate-50/40 px-3.5 py-3">
+            <div className="mt-3 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3.5 py-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Performance note</p>
               <p className="mt-1 text-[13px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">

@@ -136,7 +136,7 @@ export default function ActivityPage() {
         </div>
 
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Feed summary</p>
             <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[10px] text-slate-400">Events loaded</p>
@@ -147,7 +147,7 @@ export default function ActivityPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Best use</p>
             <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
               Use the feed for the cross-workspace story. Especially useful for new capture, status changes, and operator actions.

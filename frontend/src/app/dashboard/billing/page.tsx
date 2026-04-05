@@ -15,6 +15,7 @@ import {
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
 import type { BillingStatus, PlanInfo } from "@/types";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -148,28 +149,32 @@ export default function BillingPage() {
   const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Billing & Plan</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Manage your subscription and view usage
-        </p>
-      </div>
+    <div className="space-y-5 max-w-4xl">
+      <PageHeader
+        eyebrow={
+          <>
+            <CreditCard className="h-3.5 w-3.5" />
+            Billing
+          </>
+        }
+        title="Plan & usage"
+        description="Manage your subscription, track usage, and compare plans."
+      />
 
       {/* Stripe return feedback */}
       {successMsg && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 text-[13px] text-emerald-800">
           <strong>{successMsg}</strong> It may take a moment to reflect.
         </div>
       )}
       {canceledMsg && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+        <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3 text-[13px] text-amber-800">
           {canceledMsg}
         </div>
       )}
 
       {/* Current Plan Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -205,7 +210,7 @@ export default function BillingPage() {
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
             >
               {portalLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -219,7 +224,7 @@ export default function BillingPage() {
       </div>
 
       {/* Usage Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-900 mb-4">Monthly Usage</h3>
         <div className="flex items-end justify-between mb-2">
           <span className="text-sm text-slate-600">
@@ -233,7 +238,8 @@ export default function BillingPage() {
         {billing.monthly_lead_limit !== -1 && (
           <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={`billing-usage-bar h-full rounded-full transition-all ${usageBarColor}`}
+              className={`h-full rounded-full transition-all ${usageBarColor}`}
+              style={{ width: usageWidth }} // NOSONAR — dynamic percentage requires inline style
             />
           </div>
         )}
@@ -244,12 +250,6 @@ export default function BillingPage() {
           <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             <div>
-
-            <style jsx>{`
-              .billing-usage-bar {
-                width: ${usageWidth};
-              }
-            `}</style>
               <p className="font-medium">Lead limit reached</p>
               <p className="text-red-600">
                 New patient conversations will be paused. Upgrade your plan to continue capturing leads.
@@ -260,9 +260,9 @@ export default function BillingPage() {
       </div>
 
       {/* Plans Comparison */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Available Plans</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <h3 className="text-sm font-semibold text-slate-900 mb-3">Available Plans</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {plans.map((plan) => {
             const isCurrent = plan.id === billing.plan;
             const isDowngrade =
@@ -273,10 +273,10 @@ export default function BillingPage() {
             return (
               <div
                 key={plan.id}
-                className={`rounded-xl border p-6 flex flex-col ${
+                className={`rounded-2xl border p-5 flex flex-col ${
                   isCurrent
-                    ? "border-teal-300 bg-teal-50/50 ring-1 ring-teal-200"
-                    : "border-slate-200 bg-white"
+                    ? "border-teal-200 bg-teal-50/40 shadow-sm"
+                    : "border-slate-100 bg-white shadow-sm"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -337,7 +337,7 @@ export default function BillingPage() {
 
       {/* Manage via portal for existing subscribers */}
       {billing.has_stripe_subscription && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-slate-400" />
             <div className="flex-1">
@@ -349,7 +349,7 @@ export default function BillingPage() {
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
             >
               {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
               Open Portal

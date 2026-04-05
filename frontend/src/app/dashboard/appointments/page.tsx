@@ -207,7 +207,7 @@ function AppointmentDetailRail({
   return (
     <div className="space-y-3">
       {/* Patient info */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -305,7 +305,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Deposit */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Booking deposit</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Request a Stripe deposit and track delivery.</p>
 
@@ -387,7 +387,7 @@ function AppointmentDetailRail({
                 value={depositLink}
                 readOnly
                 placeholder="Create or resend to generate a link"
-                className="h-9 min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-600"
+                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-xs text-slate-600"
               />
               <button
                 onClick={onCopyLink}
@@ -403,7 +403,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Edit booking */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Edit booking</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Time, reason, and internal note.</p>
 
@@ -459,7 +459,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Actions */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Actions</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Lifecycle changes — no external sync implied.</p>
 
@@ -779,7 +779,7 @@ export default function AppointmentsPage() {
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[210px_1fr_320px]">
           {/* Left rail — views */}
           <div className="hidden space-y-3 xl:block">
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
               <div className="mt-2.5 space-y-1">
                 {APPOINTMENT_VIEWS.map((view) => {
@@ -802,7 +802,7 @@ export default function AppointmentsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
               <div className="mt-2.5 space-y-2">
                 <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
@@ -838,7 +838,7 @@ export default function AppointmentsPage() {
 
           {/* Center — appointment list */}
           <div className="space-y-3">
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
               <p className="text-[13px] font-semibold text-slate-900">Appointments</p>
               <p className="mt-0.5 text-[10px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
             </div>

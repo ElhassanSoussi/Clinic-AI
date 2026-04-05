@@ -272,37 +272,34 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* ─── LEFT SIDEBAR (desktop) ─── */}
-      <aside className="hidden w-60 flex-col border-r border-slate-100/80 bg-white lg:flex">
+      <aside className="hidden w-[15.5rem] flex-col border-r border-slate-200/60 bg-white lg:flex">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 py-4">
+        <div className="flex items-center gap-2.5 px-5 pt-5 pb-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-teal-600 to-violet-600 shadow-sm">
             <Bot className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <span className="block text-[13px] font-bold text-slate-900">Clinic AI</span>
+            <span className="block text-[13px] font-bold tracking-tight text-slate-900">Clinic AI</span>
             <span className="text-[10px] text-slate-400">Front Desk OS</span>
           </div>
         </div>
 
         {/* Clinic status card */}
         {clinic && (
-          <div className="mx-3 mb-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Clinic</p>
-            <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">{clinic.name}</p>
+          <div className="mx-3 mb-2 rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2.5">
+            <p className="truncate text-[12px] font-semibold text-slate-800">{clinic.name}</p>
             {statusCfg && (
-              <div className="mt-1.5">
-                <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusCfg.bg} ${statusCfg.color}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
-                  {statusCfg.label}
-                </span>
-              </div>
+              <span className={`mt-1 inline-flex items-center gap-1.5 text-[10px] font-medium ${statusCfg.color}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
+                {statusCfg.label}
+              </span>
             )}
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-1">
-          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Workspace</p>
+        <nav className="flex-1 space-y-px overflow-y-auto px-3 py-1">
+          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Workspace</p>
           {sidebarNav.map((item) => {
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -311,24 +308,21 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all ${
+                className={`group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.75 text-[13px] font-medium transition-colors ${
                   isActive
-                    ? "bg-teal-50/60 text-teal-800"
+                    ? "bg-teal-50 text-teal-700 font-semibold"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                 }`}
               >
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-md ${
-                    isActive
-                      ? "bg-teal-600 text-white shadow-sm"
-                      : "text-slate-400 group-hover:text-slate-500"
-                  }`}
-                >
-                  <item.icon className="h-3.5 w-3.5" />
-                </span>
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-teal-600" />
+                )}
+                <item.icon className={`h-4 w-4 shrink-0 ${
+                  isActive ? "text-teal-600" : "text-slate-400 group-hover:text-slate-500"
+                }`} />
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto min-w-5 rounded-md bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                  <span className="ml-auto min-w-5 rounded-full bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
                     {newLeadCount}
                   </span>
                 )}
@@ -338,17 +332,15 @@ export default function DashboardLayout({
         </nav>
 
         {/* Channels section */}
-        <div className="border-t border-slate-100/60 px-3 py-2.5">
+        <div className="border-t border-slate-100 px-3 py-2.5">
           <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
           {user?.clinic_slug && (
             <Link
               href={`/chat/${user.clinic_slug}`}
               target="_blank"
-              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-700"
+              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-1.75 text-[13px] font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 group-hover:text-slate-500">
-                <MessageSquareMore className="h-3.5 w-3.5" />
-              </span>
+              <MessageSquareMore className="h-4 w-4 text-slate-400 group-hover:text-slate-500" />
               Patient Chat
               <ExternalLink className="ml-auto h-3 w-3 text-slate-300" />
             </Link>
@@ -356,15 +348,13 @@ export default function DashboardLayout({
         </div>
 
         {/* Operator control card */}
-        <div className="mx-3 mb-3 rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
+        <div className="mx-3 mb-3 rounded-lg border border-slate-100 bg-slate-50/40 p-3">
           <div className="flex items-start gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-violet-500 shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5" />
-            </div>
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
             <div>
               <p className="text-[11px] font-semibold text-slate-600">Operator control</p>
               <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
-                Review, manual takeover, and visibility stay with your team.
+                Review, takeover, and visibility stay with your team.
               </p>
             </div>
           </div>
@@ -435,7 +425,7 @@ export default function DashboardLayout({
       {/* ─── MAIN AREA ─── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* ─── TOPBAR ─── */}
-        <header className="flex h-13 shrink-0 items-center gap-3 border-b border-slate-100/60 bg-white/90 px-4 backdrop-blur-sm lg:px-5">
+        <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200/60 bg-white/95 px-4 backdrop-blur-sm lg:px-6">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -447,20 +437,20 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-[13px] font-semibold text-slate-700">{activeNavItem?.label ?? "Dashboard"}</p>
+            <p className="text-sm font-semibold text-slate-800">{activeNavItem?.label ?? "Dashboard"}</p>
           </div>
 
           {/* Search bar (centered) */}
           <div className="flex-1 flex justify-center">
             <Link
               href="/dashboard/inbox"
-              className="flex w-full max-w-sm items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-3.5 py-1.5 transition-colors hover:border-slate-200 hover:bg-slate-50"
+              className="flex w-full max-w-md items-center gap-2.5 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2 transition-colors hover:border-slate-300 hover:bg-white"
             >
-              <Search className="h-3.5 w-3.5 text-slate-300" />
-              <span className="text-[12px] text-slate-400">Search conversations, leads...</span>
-              <span className="ml-auto rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-300 ring-1 ring-slate-100">
+              <Search className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[13px] text-slate-400">Search conversations, leads...</span>
+              <kbd className="ml-auto hidden rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 sm:inline-block">
                 /
-              </span>
+              </kbd>
             </Link>
           </div>
 
@@ -577,7 +567,7 @@ export default function DashboardLayout({
 
         {/* ─── MAIN CANVAS ─── */}
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

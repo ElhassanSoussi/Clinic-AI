@@ -198,8 +198,8 @@ export default function InboxPage() {
         {/* Center — thread list */}
         <div className="space-y-3">
           {/* Search bar */}
-          <div className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-white px-3.5 py-2 shadow-sm">
-            <Search className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+          <div className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 bg-white px-3.5 py-2 shadow-sm">
+            <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
             <input
               type="text"
               value={search}
@@ -250,7 +250,7 @@ export default function InboxPage() {
                   <button
                   key={thread.id}
                   onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                  className="app-row-hover w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-left shadow-sm transition-all hover:border-slate-200"
+                  className="app-row-hover w-full rounded-lg border border-slate-100 bg-white px-4 py-3 text-left shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
                 >
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                     <div className="min-w-0 flex-1">
@@ -294,10 +294,10 @@ export default function InboxPage() {
 
         {/* Right rail — context */}
         <aside className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-50 text-violet-700">
-                <Bot className="h-3.5 w-3.5" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-violet-700">
+                <Bot className="h-3 w-3" />
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-slate-900">Operating model</p>
@@ -322,7 +322,7 @@ export default function InboxPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
             <p className="text-[13px] font-semibold text-slate-900">Focus areas</p>
             <div className="mt-2.5 space-y-2">
               <div className="flex items-start gap-2 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
