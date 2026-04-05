@@ -521,14 +521,14 @@ a {
 }
 
 .app-btn-primary {
-  background-color: #0d9488;
+  background-color: #0f766e;
   color: white;
   padding: 0.5rem 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .app-btn-primary:hover {
-  background-color: #0f766e;
+  background-color: #115e59;
 }
 
 .app-btn-secondary {

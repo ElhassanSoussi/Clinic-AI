@@ -64,6 +64,40 @@ function depositBadgeLabel(status: string): string {
   return "No deposit";
 }
 
+function smsStatusClass(profile: CustomerProfileDetail): string {
+  if (profile.latest_sms_pending_review) return "bg-blue-50 text-blue-700 border-blue-200";
+  if (profile.latest_sms_manual_takeover) return "bg-amber-50 text-amber-700 border-amber-200";
+  if (profile.latest_sms_ai_auto_reply_enabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  return "bg-slate-100 text-slate-700 border-slate-200";
+}
+
+function smsStatusLabel(profile: CustomerProfileDetail): string {
+  if (profile.latest_sms_pending_review) return "Pending human review";
+  if (profile.latest_sms_manual_takeover) return "Staff handling SMS";
+  if (profile.latest_sms_ai_auto_reply_enabled) return "AI handling SMS";
+  return "SMS auto-reply off";
+}
+
+function smsStatusDescription(profile: CustomerProfileDetail): string {
+  if (profile.latest_sms_pending_review) return "The latest SMS needs staff review before Clinic AI sends anything.";
+  if (profile.latest_sms_manual_takeover) return "Staff is currently handling this thread.";
+  if (profile.latest_sms_ai_auto_reply_enabled) return "Clinic AI can still reply automatically on this thread.";
+  return "SMS auto-reply is currently unavailable on this thread.";
+}
+
+function TimelineItemBadge({ item }: Readonly<{ item: CustomerProfileDetail["timeline"][number] }>) {
+  if (item.item_type === "communication_event" && item.status) {
+    return <CommunicationEventStatusBadge status={item.status as CommunicationEvent["status"]} />;
+  }
+  if (item.item_type === "conversation" && item.status) {
+    return <FrontdeskStatusBadge status={item.status as "open" | "needs_follow_up" | "booked" | "handled"} />;
+  }
+  if (item.item_type === "request" && item.status) {
+    return <LeadStatusBadge status={item.status as "new" | "contacted" | "booked" | "closed"} />;
+  }
+  return null;
+}
+
 export default function CustomerProfilePage({
   params,
 }: Readonly<{
@@ -129,7 +163,7 @@ export default function CustomerProfilePage({
         onClick={() => router.push("/dashboard/customers")}
         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
       >
-        <ArrowLeft className="w-3.5 h-3.5-3.5" />
+        <ArrowLeft className="w-3.5 h-3.5" />
         Back to Customers
       </button>
 
@@ -150,7 +184,7 @@ export default function CustomerProfilePage({
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
               <div>
                 <h1 className="text-xl font-bold text-slate-900">{profile.name}</h1>
-                <p className="text-[13px] text-slate-500 mt-0.5mt-0.5">
+                <p className="text-[13px] text-slate-500 mt-0.5">
                   Last interaction{" "}
                   {profile.last_interaction_at
                     ? timeAgo(profile.last_interaction_at)
@@ -172,12 +206,12 @@ export default function CustomerProfilePage({
                 </div>
                 <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/40 border border-slate-100/60">
                   <p className="text-[10px] uppercase tracking-widest text-slate-300">Last outcome</p>
-                  <p className="text-lg font-bold text-slate-900 mt-0.5.5">{lastOutcomeLabel(profile.last_outcome)}</p>
+                  <p className="text-lg font-bold text-slate-900 mt-0.5">{lastOutcomeLabel(profile.last_outcome)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 mt-4-4">
+            <div className="flex flex-wrap items-center gap-1.5 mt-4">
               <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${lastOutcomeClass(profile.last_outcome)}`}>
                 {lastOutcomeLabel(profile.last_outcome)}
               </span>
@@ -187,22 +221,8 @@ export default function CustomerProfilePage({
                 </span>
               )}
               {profile.latest_sms_thread_id && (
-                <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
-                  profile.latest_sms_pending_review
-                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                    : profile.latest_sms_manual_takeover
-                    ? "bg-amber-50 text-amber-700 border-amber-200"
-                    : profile.latest_sms_ai_auto_reply_enabled
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-slate-100 text-slate-700 border-slate-200"
-                }`}>
-                  {profile.latest_sms_pending_review
-                    ? "Pending human review"
-                    : profile.latest_sms_manual_takeover
-                    ? "Staff handling SMS"
-                    : profile.latest_sms_ai_auto_reply_enabled
-                      ? "AI handling SMS"
-                      : "SMS auto-reply off"}
+                <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${smsStatusClass(profile)}`}>
+                  {smsStatusLabel(profile)}
                 </span>
               )}
             </div>
@@ -214,7 +234,7 @@ export default function CustomerProfilePage({
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400">Primary identity</p>
-                  <p className="text-[13px]3px] font-medium text-slate-900">{profile.name}</p>
+                  <p className="text-[13px] font-medium text-slate-900">{profile.name}</p>
                 </div>
               </div>
 
@@ -225,7 +245,7 @@ export default function CustomerProfilePage({
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400">Phone</p>
-                    <p className="text-[13px]3px] font-medium text-slate-900">{profile.phone}</p>
+                    <p className="text-[13px] font-medium text-slate-900">{profile.phone}</p>
                   </div>
                 </div>
               )}
@@ -237,7 +257,7 @@ export default function CustomerProfilePage({
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400">Email</p>
-                    <p className="text-[13px]3px] font-medium text-slate-900">{profile.email}</p>
+                    <p className="text-[13px] font-medium text-slate-900">{profile.email}</p>
                   </div>
                 </div>
               )}
@@ -248,7 +268,7 @@ export default function CustomerProfilePage({
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700">
                   Recent note
                 </p>
-                <p className="text-[13px] text-amber-800 mt-0.5mt-0.5">{profile.latest_note}</p>
+                <p className="text-[13px] text-amber-800 mt-0.5">{profile.latest_note}</p>
               </div>
             )}
 
@@ -272,13 +292,7 @@ export default function CustomerProfilePage({
                       Open SMS thread
                     </Link>
                     <span className="text-xs text-blue-700/80">
-                      {profile.latest_sms_pending_review
-                        ? "The latest SMS needs staff review before Clinic AI sends anything."
-                        : profile.latest_sms_manual_takeover
-                        ? "Staff is currently handling this thread."
-                        : profile.latest_sms_ai_auto_reply_enabled
-                          ? "Clinic AI can still reply automatically on this thread."
-                          : "SMS auto-reply is currently unavailable on this thread."}
+                      {smsStatusDescription(profile)}
                     </span>
                   </div>
                 )}
@@ -302,7 +316,7 @@ export default function CustomerProfilePage({
                       <p className="text-[13px] font-medium text-slate-900 truncate">
                         {lead.reason_for_visit || "Appointment request"}
                       </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5mt-0.5">
+                      <p className="text-[10px] text-slate-400 mt-0.5">
                         {lead.preferred_datetime_text || "Preferred time not captured"}
                       </p>
                     </div>
@@ -332,7 +346,7 @@ export default function CustomerProfilePage({
                 href={`/dashboard/inbox/${conversation.id}`}
                 className="block rounded-lg border border-slate-100/60 px-3.5 py-2.5 hover:border-teal-200 hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center justify-between gap-3 mb-1.5.5">
+                <div className="flex items-center justify-between gap-3 mb-1.5">
                   <div className="flex items-center gap-2">
                     <ChannelBadge channel={conversation.channel} withIcon />
                     <FrontdeskStatusBadge status={conversation.derived_status} />
@@ -343,7 +357,7 @@ export default function CustomerProfilePage({
                       : "Recently"}
                   </span>
                 </div>
-                <p className="text-[13px]3px] text-slate-700 leading-relaxed">
+                <p className="text-[13px] text-slate-700 leading-relaxed">
                   {conversation.last_message_preview}
                 </p>
               </Link>
@@ -391,23 +405,17 @@ export default function CustomerProfilePage({
               const href = timelineHref(profile, item);
               const content = (
                 <div className="rounded-lg border border-slate-100/60 px-3.5 py-2.5 hover:border-teal-200 hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center justify-between gap-3 mb-1.5.5">
+                  <div className="flex items-center justify-between gap-3 mb-1.5">
                     <div className="flex flex-wrap items-center gap-2">
                       {item.channel && <ChannelBadge channel={item.channel} withIcon />}
-                      {item.item_type === "communication_event" && item.status ? (
-                        <CommunicationEventStatusBadge status={item.status as CommunicationEvent["status"]} />
-                      ) : item.item_type === "conversation" && item.status ? (
-                        <FrontdeskStatusBadge status={item.status as "open" | "needs_follow_up" | "booked" | "handled"} />
-                      ) : item.item_type === "request" && item.status ? (
-                        <LeadStatusBadge status={item.status as "new" | "contacted" | "booked" | "closed"} />
-                      ) : null}
+                      <TimelineItemBadge item={item} />
                     </div>
                     <span className="text-[10px] text-slate-400">
                       {item.occurred_at ? timeAgo(item.occurred_at) : "Recently"}
                     </span>
                   </div>
                   <p className="text-[13px] font-medium text-slate-900">{item.title}</p>
-                  <p className="text-[13px] text-slate-600 mt-0.5mt-0.5 leading-relaxed">{item.detail}</p>
+                  <p className="text-[13px] text-slate-600 mt-0.5 leading-relaxed">{item.detail}</p>
                 </div>
               );
 
@@ -424,12 +432,12 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-[13px]3px] text-slate-500">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-[13px] text-slate-500">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-40 mt-4">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-4">
             <Clock3 className="w-3.5 h-3.5" />
             SMS sends, reminders, and recovery activity all land in this same timeline. Future channels will stack onto the same history once they are connected.
           </div>

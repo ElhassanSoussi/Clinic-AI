@@ -30,6 +30,12 @@ function knowledgeStatusClass(status: string): string {
   return "bg-rose-50 text-rose-700";
 }
 
+function knowledgeStatusLabel(status: string): string {
+  if (status === "strong") return "Strong";
+  if (status === "partial") return "Partial";
+  return "Needs work";
+}
+
 function generatePreviewSessionId(): string {
   return `training_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -256,11 +262,7 @@ export default function TrainingPage() {
                 </p>
               </div>
               <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
-                {training.knowledge_status === "strong"
-                  ? "Strong"
-                  : training.knowledge_status === "partial"
-                    ? "Partial"
-                    : "Needs work"}
+                {knowledgeStatusLabel(training.knowledge_status)}
               </span>
             </div>
 
