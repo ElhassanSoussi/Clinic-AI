@@ -1,11 +1,15 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, EmailStr
 
+from app.config import get_settings
 from app.dependencies import get_supabase
+from app.rate_limit import create_rate_limit_dependency
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
+settings = get_settings()
 router = APIRouter(tags=["contact"])
+contact_rate_limit = create_rate_limit_dependency("contact", settings.rate_limit_contact_per_minute)
 
 
 class ContactCreate(BaseModel):
@@ -16,7 +20,7 @@ class ContactCreate(BaseModel):
     message: str = Field(default="", max_length=2000)
 
 
-@router.post("/contact", status_code=201)
+@router.post("/contact", status_code=201, dependencies=[Depends(contact_rate_limit)])
 async def submit_contact(body: ContactCreate):
     try:
         db = get_supabase()

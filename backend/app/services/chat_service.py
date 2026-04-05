@@ -972,8 +972,6 @@ def save_confirmed_lead(context: ChatContext) -> ChatTransition:
     lead = create_lead(context.clinic_id, intake_data)
     lead_id = lead["id"]
 
-    reserve_selected_slot(context, lead_id)
-
     context.db.table("conversations").update({"lead_id": lead_id}).eq("id", context.conversation_id).execute()
     logger.info(f"Lead created from chat: {lead_id} (session {context.session_id[:8]})")
     return ChatTransition(

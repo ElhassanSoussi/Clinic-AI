@@ -45,6 +45,68 @@ interface ApiRequestOptions extends RequestInit {
   cacheTtlMs?: number;
 }
 
+function normalizeOperationsOverviewResponse(data: unknown): OperationsOverview {
+  const source = (data && typeof data === "object" ? data : {}) as Partial<OperationsOverview>;
+  return {
+    reminder_enabled: Boolean(source.reminder_enabled),
+    reminder_lead_hours:
+      typeof source.reminder_lead_hours === "number" ? source.reminder_lead_hours : 24,
+    follow_up_automation_enabled: Boolean(source.follow_up_automation_enabled),
+    follow_up_delay_minutes:
+      typeof source.follow_up_delay_minutes === "number" ? source.follow_up_delay_minutes : 45,
+    reminder_candidates: Array.isArray(source.reminder_candidates) ? source.reminder_candidates : [],
+    action_required_requests: Array.isArray(source.action_required_requests)
+      ? source.action_required_requests
+      : [],
+    waitlist_entries: Array.isArray(source.waitlist_entries) ? source.waitlist_entries : [],
+    deposit_summary:
+      source.deposit_summary && typeof source.deposit_summary === "object"
+        ? source.deposit_summary
+        : {
+            required_count: 0,
+            requested_count: 0,
+            paid_count: 0,
+            waiting_count: 0,
+            configured_count: 0,
+            note: "",
+          },
+    channel_readiness: Array.isArray(source.channel_readiness) ? source.channel_readiness : [],
+    system_readiness:
+      source.system_readiness && typeof source.system_readiness === "object"
+        ? source.system_readiness
+        : {
+            overall_status: "attention",
+            configured_count: 0,
+            partial_count: 0,
+            missing_count: 0,
+            blocked_count: 0,
+            items: [],
+          },
+    communication_queue: Array.isArray(source.communication_queue) ? source.communication_queue : [],
+    review_queue: Array.isArray(source.review_queue) ? source.review_queue : [],
+    due_reminders: Array.isArray(source.due_reminders) ? source.due_reminders : [],
+    recent_outbound_messages: Array.isArray(source.recent_outbound_messages)
+      ? source.recent_outbound_messages
+      : [],
+    outbound_activity:
+      source.outbound_activity && typeof source.outbound_activity === "object"
+        ? source.outbound_activity
+        : {
+            outbound_sms_total: 0,
+            reminders_sent: 0,
+            missed_call_texts_sent: 0,
+            ai_replies_sent: 0,
+            ai_reply_failures: 0,
+            failed_sends: 0,
+            skipped_sends: 0,
+            human_review_required: 0,
+            suggested_replies_sent: 0,
+            blocked_for_review: 0,
+            manual_takeover_threads: 0,
+          },
+  };
+}
+
 export function clearApiCache(): void {
   responseCache.clear();
   inflightGetRequests.clear();
@@ -635,7 +697,7 @@ export const api = {
     },
 
     getOperations(): Promise<OperationsOverview> {
-      return request("/frontdesk/operations");
+      return request("/frontdesk/operations").then(normalizeOperationsOverviewResponse);
     },
 
     getReminderPreview(): Promise<ReminderPreview[]> {

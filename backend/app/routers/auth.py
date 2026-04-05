@@ -4,12 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated, cast
 from pydantic import BaseModel
 
+from app.config import get_settings
 from app.dependencies import get_current_user, get_supabase
+from app.rate_limit import create_rate_limit_dependency
 from app.schemas.auth import RegisterRequest, LoginRequest, AuthResponse, UpdateProfileRequest, ChangePasswordRequest
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
+settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["auth"])
+auth_rate_limit = create_rate_limit_dependency("auth", settings.rate_limit_auth_per_minute)
 
 USER_WITH_CLINIC_SELECT = "*, clinics(*)"
 
@@ -105,7 +109,7 @@ def _normalized_auth_error(exc: Exception, *, action: str) -> tuple[int, str]:
     )
 
 
-@router.post("/register", response_model=AuthResponse)
+@router.post("/register", response_model=AuthResponse, dependencies=[Depends(auth_rate_limit)])
 async def register(req: RegisterRequest):
     db = get_supabase()
     try:
@@ -187,7 +191,7 @@ async def register(req: RegisterRequest):
     )
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post("/login", response_model=AuthResponse, dependencies=[Depends(auth_rate_limit)])
 async def login(req: LoginRequest):
     db = get_supabase()
     try:

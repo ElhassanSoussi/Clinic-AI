@@ -3231,6 +3231,7 @@ def send_outbound_sms(
     automation_channel: str = "sms",
     sender_kind: str = "staff",
     persist_thread_message: bool = True,
+    enqueue_retry_on_failure: bool = True,
 ) -> dict[str, Any]:
     if event_type not in COMMUNICATION_EVENT_TYPES:
         raise ValueError("Invalid communication event type.")
@@ -3310,6 +3311,32 @@ def send_outbound_sms(
     )
     if not updated:
         raise RuntimeError("Communication event could not be updated after sending.")
+    logger.info(
+        "sms_send_result clinic_id=%s event_id=%s status=%s lead_id=%s conversation_id=%s",
+        clinic_id,
+        updated.get("id"),
+        updated.get("status"),
+        context.get("lead_id") or "",
+        context.get("conversation_id") or "",
+    )
+    if enqueue_retry_on_failure and _safe_text(updated.get("status")) == "failed":
+        try:
+            from app.services.background_jobs import enqueue_background_job
+
+            enqueue_background_job(
+                clinic_id,
+                "retry_communication_event",
+                {"event_id": updated["id"]},
+                available_at=datetime.now(timezone.utc) + timedelta(minutes=10),
+                max_attempts=3,
+            )
+        except Exception as exc:
+            logger.error(
+                "retry_job_enqueue_failed clinic_id=%s event_id=%s error=%s",
+                clinic_id,
+                updated.get("id"),
+                exc,
+            )
     source_event = None
     source_event_id = _safe_text(source_event_id)
     if source_event_id:
@@ -3481,6 +3508,56 @@ def send_reminder_for_lead(clinic_id: str, lead_id: str) -> Optional[dict[str, A
     reason = _safe_text(event.get("failure_reason")) or _safe_text(event.get("skipped_reason")) or "SMS reminder sent."
     _mark_reminder_delivery(lead_id, _safe_text(event.get("status")) or "sent", reason)
     return event
+
+
+def retry_communication_event(clinic_id: str, event_id: str) -> Optional[dict[str, Any]]:
+    event = _maybe_single_data(
+        get_supabase()
+        .table("communication_events")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("id", event_id)
+    )
+    if not event:
+        return None
+    event = _normalize_communication_event_row(event)
+    if _safe_text(event.get("direction")) != "outbound":
+        raise ValueError("Only outbound communication events can be retried.")
+    if _normalize_channel(event.get("channel"), "") != "sms":
+        raise ValueError("Only failed outbound SMS events can be retried.")
+    if _safe_text(event.get("status")) != "failed":
+        raise ValueError("Only failed outbound SMS events can be retried.")
+
+    payload = _to_json_dict(event.get("payload"))
+    retried_event = send_outbound_sms(
+        clinic_id,
+        customer_name=_safe_text(event.get("customer_name")),
+        customer_phone=_safe_text(event.get("customer_phone")),
+        customer_email=_safe_text(event.get("customer_email")),
+        body=_safe_text(event.get("content")),
+        summary=_safe_text(event.get("summary")) or "Retried SMS send",
+        lead_id=event.get("lead_id"),
+        conversation_id=event.get("conversation_id"),
+        follow_up_task_id=event.get("follow_up_task_id"),
+        source_event_id=_safe_text(payload.get("source_event_id")) or event["id"],
+        event_type=_safe_text(event.get("event_type")) or "message",
+        sender_kind=_safe_text(payload.get("sender_kind")) or "system",
+        persist_thread_message=_safe_text(event.get("event_type")) != "deposit_request",
+        enqueue_retry_on_failure=False,
+    )
+    _update_communication_event_record(
+        clinic_id,
+        event["id"],
+        {
+            "payload": {
+                **payload,
+                "retry_attempted_at": _current_timestamp().isoformat(),
+                "retry_event_id": _safe_text(retried_event.get("id")),
+                "retry_status": _safe_text(retried_event.get("status")) or "failed",
+            }
+        },
+    )
+    return retried_event
 
 
 def send_due_reminders(clinic_id: str) -> dict[str, Any]:

@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     app_name: str = "Clinic AI Front Desk"
     environment: Literal["development", "production"]
+    scheduler_enabled: bool = True
+    rate_limit_auth_per_minute: int = 10
+    rate_limit_chat_per_minute: int = 20
+    rate_limit_contact_per_minute: int = 10
+    rate_limit_sms_webhook_per_minute: int = 30
 
     # Optional integrations
     google_credentials_b64: str = ""

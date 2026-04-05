@@ -1,14 +1,18 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.config import get_settings
+from app.rate_limit import create_rate_limit_dependency
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_service import process_chat
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
+settings = get_settings()
 router = APIRouter(prefix="/chat", tags=["chat"])
+chat_rate_limit = create_rate_limit_dependency("chat", settings.rate_limit_chat_per_minute)
 
 
-@router.post("", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse, dependencies=[Depends(chat_rate_limit)])
 async def chat(req: ChatRequest):
     if not req.message.strip():
         raise HTTPException(
