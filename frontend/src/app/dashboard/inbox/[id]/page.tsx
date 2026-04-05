@@ -183,7 +183,7 @@ interface EventTimelineProps {
 function EventTimeline({ relatedEvents, communicationEvent }: EventTimelineProps) {
   if (relatedEvents.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
         <div className="flex items-center gap-2 mb-3">
           <Clock3 className="w-4 h-4 text-slate-400" />
           <p className="text-sm font-semibold text-slate-900">
@@ -207,7 +207,7 @@ function EventTimeline({ relatedEvents, communicationEvent }: EventTimelineProps
     const isInbound = event.direction === "inbound";
     if (!isSmsMessage) {
       return (
-        <div key={event.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+        <div key={event.id} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <ChannelBadge channel={event.channel} withIcon />
             <CommunicationEventStatusBadge status={event.status} />
@@ -232,7 +232,7 @@ function EventTimeline({ relatedEvents, communicationEvent }: EventTimelineProps
         className={`flex ${isInbound ? "justify-end" : "justify-start"}`}
       >
         <div
-          className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
             isInbound
               ? "bg-teal-600 text-white rounded-br-sm"
               : "bg-slate-100 text-slate-700 rounded-bl-sm"
@@ -342,7 +342,7 @@ function MessageList({ messages }: Readonly<{ messages: ConversationDetail["mess
           className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
-            className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
               message.role === "user"
                 ? "bg-teal-600 text-white rounded-br-sm"
                 : "bg-slate-100 text-slate-700 rounded-bl-sm"
@@ -909,7 +909,7 @@ function FrontDeskActionsSection({
         </div>
       )}
       {lead && (
-        <div className="space-y-5 mb-5">
+        <div className="space-y-4 mb-5">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => onUpdateThreadStatus("contacted")}
@@ -1317,7 +1317,7 @@ export default function InboxThreadPage({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>

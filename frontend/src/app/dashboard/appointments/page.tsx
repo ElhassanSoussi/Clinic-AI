@@ -207,7 +207,7 @@ function AppointmentDetailRail({
   return (
     <div className="space-y-3">
       {/* Patient info */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -305,7 +305,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Deposit */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Booking deposit</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Request a Stripe deposit and track delivery.</p>
 
@@ -403,7 +403,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Edit booking */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Edit booking</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Time, reason, and internal note.</p>
 
@@ -459,7 +459,7 @@ function AppointmentDetailRail({
       </div>
 
       {/* Actions */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <p className="text-[12px] font-semibold text-slate-900">Actions</p>
         <p className="mt-0.5 text-[10px] text-slate-400">Lifecycle changes — no external sync implied.</p>
 
@@ -757,7 +757,7 @@ export default function AppointmentsPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -776,11 +776,11 @@ export default function AppointmentsPage() {
           description="Appointments will appear here once staff confirms a booking from the pipeline."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[210px_1fr_320px]">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">
           {/* Left rail — views */}
-          <div className="hidden space-y-3 xl:block">
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
+          <div className="hidden space-y-2.5 xl:block">
+            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
               <div className="mt-2.5 space-y-1">
                 {APPOINTMENT_VIEWS.map((view) => {
                   const active = activeView === view.value;
@@ -802,16 +802,16 @@ export default function AppointmentsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
-              <div className="mt-2.5 space-y-2">
-                <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                  <p className="text-[10px] text-slate-400">Visible</p>
-                  <p className="mt-0.5 text-xl font-bold text-slate-900">{appointments.length}</p>
+            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
+              <div className="mt-2 space-y-1.5">
+                <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                  <p className="text-[9px] text-slate-400">Visible</p>
+                  <p className="mt-0.5 text-lg font-bold text-slate-900">{appointments.length}</p>
                 </div>
-                <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                  <p className="text-[10px] text-slate-400">View</p>
-                  <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+                <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                  <p className="text-[9px] text-slate-400">View</p>
+                  <p className="mt-0.5 text-[12px] font-semibold text-slate-900">
                     {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
                   </p>
                 </div>
@@ -838,9 +838,9 @@ export default function AppointmentsPage() {
 
           {/* Center — appointment list */}
           <div className="space-y-3">
-            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-              <p className="text-[13px] font-semibold text-slate-900">Appointments</p>
-              <p className="mt-0.5 text-[10px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
+            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+              <p className="text-[12px] font-semibold text-slate-900">Appointments</p>
+              <p className="mt-0.5 text-[9px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
             </div>
             <div className="space-y-2">
               {appointments.map((appointment) => {
@@ -849,7 +849,7 @@ export default function AppointmentsPage() {
                   <button
                     key={appointment.lead_id}
                     onClick={() => setSelectedLeadId(appointment.lead_id)}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${
                       active
                         ? "border-teal-200 bg-teal-50/30 shadow-sm"
                         : "border-slate-100 bg-white hover:border-slate-200"

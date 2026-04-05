@@ -64,7 +64,7 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadActivity()} />;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -90,10 +90,10 @@ export default function ActivityPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_240px]">
         <div>
           {events.length === 0 ? (
-            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
                 icon={<Activity className="w-5 h-5 text-slate-400" />}
                 title="No activity yet"
@@ -101,7 +101,7 @@ export default function ActivityPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-slate-50 rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className="divide-y divide-slate-50 rounded-xl border border-slate-100 bg-white shadow-sm">
               {events.map((event, i) => {
                 const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
                 const Icon = config.icon;
@@ -109,7 +109,7 @@ export default function ActivityPage() {
                 return (
                   <div
                     key={`${event.type}-${event.resource_id}-${i}`}
-                    className="flex items-center gap-2.5 px-4 py-3"
+                    className="flex items-center gap-2 px-3.5 py-2.5"
                   >
                     <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${config.bg}`}>
                       <Icon className={`w-3.5 h-3.5 ${config.color}`} />
@@ -136,13 +136,13 @@ export default function ActivityPage() {
         </div>
 
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Feed summary</p>
-            <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-              <p className="text-[10px] text-slate-400">Events loaded</p>
-              <p className="mt-0.5 text-xl font-bold text-slate-900">{events.length}</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Feed summary</p>
+            <div className="mt-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <p className="text-[9px] text-slate-400">Events loaded</p>
+              <p className="mt-0.5 text-lg font-bold text-slate-900">{events.length}</p>
             </div>
-            <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
+            <p className="mt-2 text-[9px] leading-relaxed text-slate-400">
               Trace what changed without jumping between inbox, leads, and appointments.
             </p>
           </div>

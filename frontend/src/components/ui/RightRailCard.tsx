@@ -10,9 +10,9 @@ interface RightRailCardProps {
 
 export function RightRailCard({ title, children, className = "" }: RightRailCardProps) {
   return (
-    <div className={`rounded-2xl border border-slate-100 bg-white/90 p-5 shadow-sm ${className}`.trim()}>
+    <div className={`rounded-xl border border-slate-100 bg-white/90 px-4 py-3.5 shadow-sm ${className}`.trim()}>
       {title && (
-        <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">{title}</h4>
+        <h4 className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-300">{title}</h4>
       )}
       {children}
     </div>

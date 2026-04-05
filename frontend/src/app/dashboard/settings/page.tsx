@@ -136,7 +136,7 @@ function SettingsSection({
   const status = getSectionStatus(sectionKey, statusState);
 
   return (
-    <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+    <section className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
@@ -610,7 +610,7 @@ function GoogleSheetsSectionContent({
           </button>
 
           {showManualSetup ? (
-            <div className="border-t border-slate-100 px-4 py-3.5 space-y-4 bg-white rounded-b-xl">
+            <div className="border-t border-slate-100 px-3.5 py-3 space-y-4 bg-white rounded-b-xl">
               <p className="text-xs text-slate-500">
                 If you prefer manual setup, share your sheet as <b>Editor</b> with{" "}
                 <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 select-all">
@@ -1315,7 +1315,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1327,7 +1327,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
       {saveMessage && (
         <div
           className={`p-3 text-sm rounded-lg border ${

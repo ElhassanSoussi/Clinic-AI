@@ -55,7 +55,7 @@ export default function CustomersPage() {
   const customersNeedingAttention = customers.filter((customer) => customer.open_request_count > 0).length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -67,8 +67,8 @@ export default function CustomersPage() {
         description="Contact details, conversation history, and booking outcomes for every patient."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
+        <div className="space-y-4">
           {/* Search + summary */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md flex-1">
@@ -88,7 +88,7 @@ export default function CustomersPage() {
 
           {/* List */}
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
                 icon={<UserRound className="w-5 h-5 text-slate-400" />}
                 title={customers.length === 0 ? "No patients yet" : "No patients match these filters"}
@@ -100,12 +100,12 @@ export default function CustomersPage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               {filtered.map((customer) => (
                 <Link
                   key={customer.key}
                   href={`/dashboard/customers/${customer.key}`}
-                  className="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm transition-all hover:border-teal-200"
+                  className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm transition-all hover:border-teal-200"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -117,7 +117,7 @@ export default function CustomersPage() {
                     <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300" />
                   </div>
 
-                  <div className="mt-2.5 grid grid-cols-4 gap-2">
+                  <div className="mt-2 grid grid-cols-4 gap-1.5">
                     {[
                       { label: "Conversations", val: customer.conversation_count },
                       { label: "Requests", val: customer.lead_count },
@@ -125,8 +125,8 @@ export default function CustomersPage() {
                       { label: "Open", val: customer.open_request_count },
                     ].map((stat) => (
                       <div key={stat.label}>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-300">{stat.label}</p>
-                        <p className="mt-0.5 text-sm font-bold text-slate-900">{stat.val}</p>
+                        <p className="text-[9px] uppercase tracking-widest text-slate-300">{stat.label}</p>
+                        <p className="mt-0.5 text-[13px] font-bold text-slate-900">{stat.val}</p>
                       </div>
                     ))}
                   </div>
@@ -150,8 +150,8 @@ export default function CustomersPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Overview</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Overview</p>
             <div className="mt-2.5 space-y-2">
               <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
               <MetricCard label="With bookings" value={customersWithBookings} icon={ContactRound} tone="emerald" />

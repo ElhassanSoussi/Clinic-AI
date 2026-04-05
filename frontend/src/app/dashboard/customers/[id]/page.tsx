@@ -158,7 +158,7 @@ export default function CustomerProfilePage({
   );
 
   return (
-    <div className="max-w-6xl space-y-5">
+    <div className="max-w-6xl space-y-4">
       <button
         onClick={() => router.push("/dashboard/customers")}
         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
@@ -178,8 +178,8 @@ export default function CustomerProfilePage({
         description="See the latest thread state, booking outcome, SMS handling context, and internal timeline for this contact."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-4">
           <div className="app-card p-4">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
               <div>
@@ -300,7 +300,7 @@ export default function CustomerProfilePage({
             )}
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-4">
+          <div className="bg-white border border-slate-100 rounded-xl p-4">
             <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
               Recent requests
             </h2>
@@ -335,7 +335,7 @@ export default function CustomerProfilePage({
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
           <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
             Recent conversation history
           </h2>
@@ -371,7 +371,7 @@ export default function CustomerProfilePage({
           )}
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
           {profile.phone && (
             <div className="mb-4 pb-4 border-b border-slate-100">
               <h2 className="text-[13px] font-semibold text-slate-900 mb-2.5">
@@ -432,7 +432,7 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           )}

@@ -149,7 +149,7 @@ export default function BillingPage() {
   const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
-    <div className="space-y-5 max-w-4xl">
+    <div className="space-y-4 max-w-4xl">
       <PageHeader
         eyebrow={
           <>
@@ -174,7 +174,7 @@ export default function BillingPage() {
       )}
 
       {/* Current Plan Card */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -224,7 +224,7 @@ export default function BillingPage() {
       </div>
 
       {/* Usage Card */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-900 mb-4">Usage this month</h3>
         <div className="flex items-end justify-between mb-2">
           <span className="text-sm text-slate-600">
@@ -273,7 +273,7 @@ export default function BillingPage() {
             return (
               <div
                 key={plan.id}
-                className={`rounded-2xl border p-5 flex flex-col ${
+                className={`rounded-xl border p-5 flex flex-col ${
                   isCurrent
                     ? "border-teal-200 bg-teal-50/40 shadow-sm"
                     : "border-slate-100 bg-white shadow-sm"
@@ -337,7 +337,7 @@ export default function BillingPage() {
 
       {/* Manage via portal for existing subscribers */}
       {billing.has_stripe_subscription && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-slate-400" />
             <div className="flex-1">

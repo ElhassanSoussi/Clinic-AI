@@ -228,7 +228,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -319,44 +319,44 @@ export default function DashboardPage() {
       )}
 
       {/* ── Main layout: canvas + right rail ── */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Hero panel */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-5 py-4.5 shadow-sm">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="rounded-xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
-                <h2 className="text-base font-bold tracking-tight text-slate-900">
+                <h2 className="text-[14px] font-bold tracking-tight text-slate-900">
                   What happened, what needs attention, and where things stand.
                 </h2>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">
+                <p className="mt-1 text-[12px] leading-relaxed text-slate-500">
                   Live counts from conversations, bookings, and staff actions across the workspace.
                 </p>
               </div>
-              <div className="grid gap-2.5 sm:grid-cols-2 lg:w-64">
-                <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Live demand</p>
-                  <p className="mt-1 text-xl font-bold text-slate-900">{analytics.conversations_total}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">Active conversations</p>
+              <div className="grid gap-2 sm:grid-cols-2 lg:w-56">
+                <div className="rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2">
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Live demand</p>
+                  <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.conversations_total}</p>
+                  <p className="mt-0.5 text-[9px] text-slate-400">Active conversations</p>
                 </div>
-                <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Booked now</p>
-                  <p className="mt-1 text-xl font-bold text-slate-900">{analytics.booked_requests}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">Confirmed requests</p>
+                <div className="rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2">
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Booked now</p>
+                  <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.booked_requests}</p>
+                  <p className="mt-0.5 text-[9px] text-slate-400">Confirmed requests</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {statCards.map((card) => (
               <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
             ))}
           </div>
 
           {/* Appointment row */}
-          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <MetricCard
               label="Upcoming appointments"
               value={upcomingAppointments.length}
@@ -373,13 +373,13 @@ export default function DashboardPage() {
             />
             <Link
               href="/dashboard/appointments"
-              className="flex items-start justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
+              className="flex items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
             >
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Appointments</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">Manage bookings, reminders, and deposits</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Appointments</p>
+                <p className="mt-1.5 text-[13px] font-semibold text-slate-900">Manage bookings, reminders, and deposits</p>
               </div>
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-50 text-violet-600">
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -399,16 +399,16 @@ export default function DashboardPage() {
               </Link>
             }
           >
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {performanceCards.map((card) => (
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
             </div>
 
-            <div className="mt-3 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3.5 py-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Performance note</p>
-              <p className="mt-1 text-[13px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
+            <div className="mt-2.5 rounded-md border border-slate-100/60 bg-slate-50/40 px-3 py-2">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Performance note</p>
+              <p className="mt-0.5 text-[12px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-[9px] text-slate-400">
                 <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
                 <span>Blocked for review: {analytics.blocked_for_review_count}</span>
                 <span>AI resolution: {analytics.ai_resolution_estimate}%</span>
@@ -457,7 +457,7 @@ export default function DashboardPage() {
           </SurfaceCard>
 
           {/* Two-column: Opportunities + Activity */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <SurfaceCard
               title="Opportunities"
             description="Stalled requests and follow-up items that may need action."
@@ -588,7 +588,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Right rail ── */}
-        <div className="hidden space-y-3.5 xl:block">
+        <div className="hidden space-y-3 xl:block">
           <RightRailCard title="Workspace state">
             <div className="space-y-2">
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">

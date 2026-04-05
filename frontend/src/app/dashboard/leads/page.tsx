@@ -72,7 +72,7 @@ function buildUsageWarningBanner(clinic: Clinic | null): React.ReactNode {
 
   const atLimit = used >= limit;
   return (
-    <div className={`mb-4 flex items-center gap-3 rounded-2xl border p-3 ${atLimit ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
+    <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3 ${atLimit ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
       <AlertTriangle className={`w-4 h-4 shrink-0 ${atLimit ? "text-red-500" : "text-amber-500"}`} />
       <p className={`flex-1 text-sm ${atLimit ? "text-red-700" : "text-amber-700"}`}>
         {atLimit ? "Monthly lead limit reached — new conversations are paused." : `${limit - used} of ${limit} leads remaining this month.`}
@@ -190,7 +190,7 @@ function renderLeadsContent({
 
   if (filtered.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
         <EmptyState
           icon={<Users className="w-5 h-5 text-slate-400" />}
           title={emptyState.title}
@@ -204,7 +204,7 @@ function renderLeadsContent({
   return (
     <div className="space-y-2">
       {filtered.map((lead) => (
-        <div key={lead.id} className="relative rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-slate-200">
+        <div key={lead.id} className="relative rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:border-slate-200">
           <button
             onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
             className="w-full px-4 py-3 text-left"
@@ -339,7 +339,7 @@ export default function LeadsPage() {
   const content = renderLeadsContent({ loading, error, filtered, emptyState, loadLeads, router, updatingId, handleInlineStatus });
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -354,17 +354,17 @@ export default function LeadsPage() {
       {usageWarningBanner}
 
       {updateError && (
-        <div className="flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] text-red-700">
+        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] text-red-700">
           <span>{updateError}</span>
           <button onClick={() => setUpdateError(null)} className="ml-3 text-red-400 hover:text-red-600">&times;</button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[230px_1fr_260px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_240px]">
         {/* Left rail — filters */}
         <aside className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Request mix</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Request mix</p>
             <div className="mt-2.5 space-y-1.5">
               <MetricCard label="All requests" value={counts.all} icon={Users} tone="slate" />
               <MetricCard label="New" value={counts.new} icon={AlertTriangle} tone="amber" />
@@ -373,8 +373,8 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
             <div className="mt-2.5 space-y-1">
               {STATUS_OPTIONS.map((opt) => {
                 const count = opt.value === "" ? counts.all : counts[opt.value as keyof typeof counts] ?? 0;
@@ -434,18 +434,18 @@ export default function LeadsPage() {
 
         {/* Right rail — context */}
         <aside className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Pipeline snapshot</p>
-            <div className="mt-2.5 space-y-2">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Open work</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.new + counts.contacted}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Waiting on booking, follow-up, or closure.</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Pipeline snapshot</p>
+            <div className="mt-2 space-y-1.5">
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Open work</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.new + counts.contacted}</p>
+                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Waiting on booking, follow-up, or closure.</p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Closed</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.closed}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">No longer needing front-desk attention.</p>
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Closed</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.closed}</p>
+                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">No longer needing front-desk attention.</p>
               </div>
             </div>
           </div>

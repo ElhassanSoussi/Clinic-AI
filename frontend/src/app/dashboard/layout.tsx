@@ -272,24 +272,24 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* ─── LEFT SIDEBAR (desktop) ─── */}
-      <aside className="hidden w-[15.5rem] flex-col border-r border-slate-200/60 bg-white lg:flex">
+      <aside className="hidden w-56 flex-col border-r border-slate-200/60 bg-white lg:flex">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 pt-5 pb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-teal-600 to-violet-600 shadow-sm">
-            <Bot className="h-3.5 w-3.5 text-white" />
+        <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-linear-to-br from-teal-600 to-violet-600 shadow-sm">
+            <Bot className="h-3 w-3 text-white" />
           </div>
           <div>
-            <span className="block text-[13px] font-bold tracking-tight text-slate-900">Clinic AI</span>
-            <span className="text-[10px] text-slate-400">Front Desk OS</span>
+            <span className="block text-[12px] font-bold tracking-tight text-slate-900">Clinic AI</span>
+            <span className="text-[9px] text-slate-400">Front Desk OS</span>
           </div>
         </div>
 
         {/* Clinic status card */}
         {clinic && (
-          <div className="mx-3 mb-2 rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2.5">
-            <p className="truncate text-[12px] font-semibold text-slate-800">{clinic.name}</p>
+          <div className="mx-3 mb-1.5 rounded-md border border-slate-100 bg-slate-50/50 px-2.5 py-2">
+            <p className="truncate text-[11px] font-semibold text-slate-800">{clinic.name}</p>
             {statusCfg && (
-              <span className={`mt-1 inline-flex items-center gap-1.5 text-[10px] font-medium ${statusCfg.color}`}>
+              <span className={`mt-0.5 inline-flex items-center gap-1.5 text-[9px] font-medium ${statusCfg.color}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                 {statusCfg.label}
               </span>
@@ -298,8 +298,8 @@ export default function DashboardLayout({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-px overflow-y-auto px-3 py-1">
-          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Workspace</p>
+        <nav className="flex-1 space-y-px overflow-y-auto px-2.5 py-1">
+          <p className="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-widest text-slate-300">Workspace</p>
           {sidebarNav.map((item) => {
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -308,7 +308,7 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.75 text-[13px] font-medium transition-colors ${
+                className={`group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] font-medium transition-colors ${
                   isActive
                     ? "bg-teal-50 text-teal-700 font-semibold"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
@@ -317,12 +317,12 @@ export default function DashboardLayout({
                 {isActive && (
                   <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-teal-600" />
                 )}
-                <item.icon className={`h-4 w-4 shrink-0 ${
+                <item.icon className={`h-3.5 w-3.5 shrink-0 ${
                   isActive ? "text-teal-600" : "text-slate-400 group-hover:text-slate-500"
                 }`} />
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto min-w-5 rounded-full bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                  <span className="ml-auto min-w-4 rounded-full bg-blue-500 px-1 py-0.5 text-center text-[9px] font-bold text-white">
                     {newLeadCount}
                   </span>
                 )}
@@ -332,13 +332,13 @@ export default function DashboardLayout({
         </nav>
 
         {/* Channels section */}
-        <div className="border-t border-slate-100 px-3 py-2.5">
-          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
+        <div className="border-t border-slate-100 px-2.5 py-2">
+          <p className="mb-1 px-2 text-[9px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
           {user?.clinic_slug && (
             <Link
               href={`/chat/${user.clinic_slug}`}
               target="_blank"
-              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-1.75 text-[13px] font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+              className="group flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
             >
               <MessageSquareMore className="h-4 w-4 text-slate-400 group-hover:text-slate-500" />
               Patient Chat
@@ -348,12 +348,12 @@ export default function DashboardLayout({
         </div>
 
         {/* Operator control card */}
-        <div className="mx-3 mb-3 rounded-lg border border-slate-100 bg-slate-50/40 p-3">
-          <div className="flex items-start gap-2.5">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
+        <div className="mx-2.5 mb-2.5 rounded-md border border-slate-100 bg-slate-50/40 px-2.5 py-2">
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400" />
             <div>
-              <p className="text-[11px] font-semibold text-slate-600">Operator control</p>
-              <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+              <p className="text-[10px] font-semibold text-slate-600">Operator control</p>
+              <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
                 Review, takeover, and visibility stay with your team.
               </p>
             </div>
@@ -378,12 +378,12 @@ export default function DashboardLayout({
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-teal-600 to-violet-600">
-                <Bot className="h-4 w-4 text-white" />
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-linear-to-br from-teal-600 to-violet-600">
+                <Bot className="h-3 w-3 text-white" />
               </div>
-              <span className="text-sm font-bold text-slate-900">Clinic AI</span>
+              <span className="text-[12px] font-bold text-slate-900">Clinic AI</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -402,16 +402,16 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all ${
+                  className={`group flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-all ${
                     isActive
                       ? "bg-slate-50 text-slate-900"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                   }`}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-3.5 w-3.5" />
                   {item.label}
                   {item.label === "Leads" && newLeadCount > 0 && (
-                    <span className="ml-auto min-w-5 rounded-md bg-blue-500 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                    <span className="ml-auto min-w-4 rounded-full bg-blue-500 px-1 py-0.5 text-center text-[9px] font-bold text-white">
                       {newLeadCount}
                     </span>
                   )}
@@ -425,7 +425,7 @@ export default function DashboardLayout({
       {/* ─── MAIN AREA ─── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* ─── TOPBAR ─── */}
-        <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200/60 bg-white/95 px-4 backdrop-blur-sm lg:px-6">
+        <header className="flex h-12 shrink-0 items-center gap-3 border-b border-slate-200/60 bg-white/95 px-4 backdrop-blur-sm lg:px-5">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -564,7 +564,7 @@ export default function DashboardLayout({
 
         {/* ─── MAIN CANVAS ─── */}
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-5 lg:px-6">
             {children}
           </div>
         </main>
