@@ -52,12 +52,17 @@ export function isSafeExternalUrl(url: string): boolean {
   }
 }
 
-/** Returns true when `path` is a safe relative path (starts with / but not //). */
+/** Returns true when `path` is a safe relative path (starts with / but not //, no traversal). */
 export function isSafeRelativePath(path: string): boolean {
-  return path.startsWith("/") && !path.startsWith("//") && !path.includes(":");
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes(":")) {
+    return false;
+  }
+  // Reject path traversal attempts (.. segments or encoded variants)
+  const decoded = decodeURIComponent(path);
+  return !decoded.split("/").some((seg) => seg === ".." || seg === ".");
 }
 
 /** Basic email format check for client-side validation. */
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 }

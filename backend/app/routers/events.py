@@ -21,6 +21,11 @@ class EventCreate(BaseModel):
     def cap_metadata(cls, v: dict) -> dict:
         if len(v) > MAX_METADATA_KEYS:
             raise ValueError(f"metadata must have at most {MAX_METADATA_KEYS} keys")
+        for key, val in v.items():
+            if len(str(key)) > 50:
+                raise ValueError("metadata key must be at most 50 characters")
+            if len(str(val)) > 200:
+                raise ValueError("metadata value must be at most 200 characters")
         return v
 
 
