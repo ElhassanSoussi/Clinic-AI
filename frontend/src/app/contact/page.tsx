@@ -4,6 +4,7 @@ import { useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { Bot, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 import { getPublicApiUrl } from "@/lib/api-url";
+import { isValidEmail } from "@/lib/utils";
 
 type ContactFormSubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -27,6 +28,11 @@ export default function ContactPage() {
 
     if (!form.name.trim() || !form.email.trim()) {
       setError("Name and email are required.");
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      setError("Please enter a valid email address.");
       return;
     }
 

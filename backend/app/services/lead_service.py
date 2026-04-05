@@ -1,3 +1,5 @@
+from typing import Optional
+
 from app.dependencies import get_supabase
 from app.utils.logger import get_logger
 import threading
@@ -38,6 +40,7 @@ def create_lead(clinic_id: str, data: dict) -> dict:
     try:
         db.rpc("increment_monthly_leads", {"clinic_id_input": clinic_id}).execute()
     except Exception as e:
+        logger.warning(f"RPC increment_monthly_leads unavailable for clinic {clinic_id}, using fallback: {e}")
         # Fallback: non-atomic increment if RPC doesn't exist yet
         try:
             clinic_row = db.table("clinics").select("monthly_leads_used").eq("id", clinic_id).single().execute()
@@ -70,7 +73,7 @@ def create_lead(clinic_id: str, data: dict) -> dict:
     return result.data[0]
 
 
-def get_leads(clinic_id: str, status_filter: str = None) -> list:
+def get_leads(clinic_id: str, status_filter: Optional[str] = None) -> list[dict]:
     db = get_supabase()
     query = db.table("leads").select("*").eq("clinic_id", clinic_id).order("created_at", desc=True)
     if status_filter:

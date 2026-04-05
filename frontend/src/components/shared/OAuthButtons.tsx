@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { normalizeAuthError } from "@/lib/auth-errors";
 import { createClient } from "@/utils/supabase/client";
 import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/oauth-providers";
+import { isSafeExternalUrl, isSafeRelativePath } from "@/lib/utils";
 
 function GoogleIcon() {
   return (
@@ -77,8 +78,9 @@ export default function OAuthButtons({
     setProviderError("");
     try {
       const supabase = createClient();
-      const redirectTo = nextPath
-        ? `${globalThis.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+      const safeNext = nextPath && isSafeRelativePath(nextPath) ? nextPath : undefined;
+      const redirectTo = safeNext
+        ? `${globalThis.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`
         : `${globalThis.location.origin}/auth/callback`;
 
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -94,9 +96,13 @@ export default function OAuthButtons({
         throw new Error(formatProviderError(provider, error.message));
       }
 
-      if (data?.url && globalThis.window !== undefined) {
+      if (data?.url && globalThis.window !== undefined && isSafeExternalUrl(data.url)) {
         globalThis.location.assign(data.url);
         return;
+      }
+
+      if (data?.url) {
+        throw new Error(`${provider.label} returned an invalid redirect URL.`);
       }
 
       throw new Error(`${provider.label} did not return a sign-in redirect URL.`);

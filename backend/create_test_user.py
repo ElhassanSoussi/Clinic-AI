@@ -1,4 +1,6 @@
 import asyncio
+import os
+import secrets
 import sys
 from app.config import get_settings
 from app.dependencies import get_supabase
@@ -22,8 +24,8 @@ async def create_bypassed_user():
         
         # 2. Tell Supabase Auth to forcefully create an account 
         # (Using the service role key bypasses rate limits)
-        email = "admin@clinicai.com"
-        password = "password123"
+        email = os.environ.get("TEST_USER_EMAIL", "admin@clinicai.com")
+        password = os.environ.get("TEST_USER_PASSWORD") or secrets.token_urlsafe(16)
         print(f"Creating user account for {email}...")
         
         auth_res = supabase.auth.admin.create_user({
