@@ -64,7 +64,7 @@ export default function CustomersPage() {
           </>
         }
         title="Patient directory"
-        description="Contact details, conversation history, and booking outcomes for every patient."
+        description="Contact details, conversation history, and booking outcomes for every patient who interacted with the assistant."
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
@@ -94,8 +94,8 @@ export default function CustomersPage() {
                 title={customers.length === 0 ? "No patients yet" : "No patients match these filters"}
                 description={
                   customers.length === 0
-                    ? "Patient profiles are created automatically when the assistant captures contact details."
-                    : "Try a different name, phone number, or email."
+                    ? "Patient profiles are created automatically when the assistant captures contact details from a conversation."
+                    : "Try a different name, phone number, or email address."
                 }
               />
             </div>

@@ -255,7 +255,7 @@ function AppointmentDetailRail({
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Phone</p>
-              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_phone || "N/A"}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_phone || "No phone"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -264,7 +264,7 @@ function AppointmentDetailRail({
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Email</p>
-              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_email || "N/A"}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_email || "No email"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -766,14 +766,14 @@ export default function AppointmentsPage() {
           </>
         }
         title="Appointment board"
-        description="Timing, deposits, reminders, and appointment lifecycle in one view."
+        description="Timing, deposits, reminders, and appointment lifecycle in one view. Track every booking from confirmation to completion."
       />
 
       {appointments.length === 0 ? (
         <EmptyState
           icon={<CalendarClock className="w-7 h-7 text-slate-400" />}
           title="No appointments yet"
-          description="Appointments will appear here once staff confirms a booking from the pipeline."
+          description="Appointments will appear here once staff confirms a booking from the pipeline. You can also create one manually from any inbox thread."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">

@@ -115,7 +115,7 @@ function buildEmptyStateConfig(
   if (isLive === false) {
     return {
       title: "System not live yet",
-      description: "Finish setting up your clinic so the assistant can start capturing requests.",
+      description: "Complete your clinic setup so the assistant can start capturing patient requests automatically.",
       action: (
         <button
           onClick={() => router.push(settingsHref())}
@@ -130,7 +130,7 @@ function buildEmptyStateConfig(
   if (clinic?.slug) {
     return {
       title: "No requests yet",
-      description: "The assistant is live. Patient requests will appear here as conversations happen.",
+      description: "The assistant is live and ready. Patient requests will appear here automatically as conversations happen.",
       action: (
         <div className="flex flex-wrap justify-center gap-2">
           <a
@@ -166,7 +166,7 @@ function buildEmptyStateConfig(
 
   return {
     title: "No requests yet",
-    description: "Your system is live. Patient requests will appear here as they come in.",
+    description: "Your assistant is active. Patient requests will appear here as conversations come in.",
   };
 }
 
@@ -223,11 +223,11 @@ function renderLeadsContent({
                   ) : null}
                 </div>
                 <p className="text-[13px] leading-relaxed text-slate-500">
-                  {lead.reason_for_visit || "No visit reason recorded yet."}
+                  {lead.reason_for_visit || "No visit reason provided yet — patient may not have shared details."}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
-                  <span>{lead.patient_phone || lead.patient_email || "No contact saved"}</span>
-                  <span>{lead.preferred_datetime_text || "Time open"}</span>
+                  <span>{lead.patient_phone || lead.patient_email || "No contact info saved"}</span>
+                  <span>{lead.preferred_datetime_text || "No time preference"}</span>
                   <span>Received {timeAgo(lead.created_at)}</span>
                 </div>
               </div>
@@ -348,7 +348,7 @@ export default function LeadsPage() {
           </>
         }
         title="Booking pipeline"
-        description="Every patient request in one view. Update status, track progress, and keep handoff clear."
+        description="Every patient request captured by the assistant, from first inquiry to booked appointment. Update status, track progress, and act on open items."
       />
 
       {usageWarningBanner}

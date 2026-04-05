@@ -733,11 +733,11 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
     <div className="space-y-3 text-sm text-slate-600">
       <div>
         <p className="text-xs text-slate-500 mb-1">Reason for visit</p>
-        <p>{lead.reason_for_visit || "Not provided"}</p>
+        <p>{lead.reason_for_visit || "Not provided yet — the patient may not have shared this."}</p>
       </div>
       <div>
         <p className="text-xs text-slate-500 mb-1">Preferred time</p>
-        <p>{lead.preferred_datetime_text || "Not provided"}</p>
+        <p>{lead.preferred_datetime_text || "No preference given — staff can suggest a slot."}</p>
       </div>
       {lead.appointment_status && (
         <div>
@@ -756,7 +756,7 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
       )}
       {lead.notes && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Internal notes</p>
+          <p className="text-xs text-slate-500 mb-1">Staff notes</p>
           <p>{lead.notes}</p>
         </div>
       )}
@@ -765,7 +765,7 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
         className="inline-flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
       >
         <MessageSquare className="w-4 h-4" />
-        Open request detail
+        Open full request detail
       </Link>
     </div>
   );
@@ -842,7 +842,7 @@ function FrontDeskActionsSection({
       {lead ? null : (
         <div className="space-y-3 mb-5">
           <p className="text-sm text-slate-600">
-            Link this thread to a request so your team can track booking progress, send reminders, and follow up.
+            Link this thread to a booking request so your team can track status, send reminders, and follow up from one place.
           </p>
               <label className="sr-only" htmlFor="convert-name">
                 Patient name
@@ -1004,7 +1004,7 @@ function FrontDeskActionsSection({
           <div className="rounded-xl border border-slate-200 p-4">
             <p className="text-sm font-semibold text-slate-900">Internal note</p>
             <p className="text-xs text-slate-500 mt-1">
-              Save a staff note to this thread. Notes stay internal and appear in the customer history.
+              Save a staff-only note to this thread. Notes are visible to your team but never shown to patients.
             </p>
             <label className="sr-only" htmlFor="internal-note">
               Add a short internal note
@@ -1042,8 +1042,8 @@ function FrontDeskActionsSection({
       ) : (
         <p className="text-sm text-slate-500 leading-relaxed">
           {isEventThread
-            ? "This recovery thread is not linked to a request yet. You can send SMS manually and link it when the patient is ready."
-            : "This conversation has not created a linked request yet. If the patient stopped before sharing details, it may need manual follow-up."}
+            ? "This recovery thread is not linked to a booking request yet. You can reply by SMS and convert it to a request when the patient is ready."
+            : "This conversation has not created a linked request yet. If the patient stopped before sharing details, consider following up manually."}
         </p>
       )}
     </div>

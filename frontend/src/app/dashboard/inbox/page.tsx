@@ -115,7 +115,7 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="Every patient conversation in one place. Review, respond, or hand off."
+        description="Every patient conversation in one place — web chat, SMS, and staff notes. Review, respond, or hand off."
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_1fr_240px]">

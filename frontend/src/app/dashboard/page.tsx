@@ -159,7 +159,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="No activity yet"
-          description="Your assistant is live. Activity will appear here as patients start conversations."
+          description="Your assistant is live and ready. Activity will appear here as patients start conversations through the chat widget or SMS."
           action={
             clinic.slug ? (
               <a
@@ -181,7 +181,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="Ready to go live"
-          description="Setup is complete. Activate the assistant to start receiving patient conversations."
+          description="Setup is complete. Activate the assistant to start receiving patient conversations through your website."
         />
       );
     }
@@ -189,7 +189,7 @@ export default function DashboardPage() {
       <EmptyState
         icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="Setup not complete"
-          description="Finish configuring your clinic details so the assistant can start responding."
+          description="Complete your clinic details in settings so the assistant knows how to respond accurately."
           action={
           <button
             onClick={() => router.push(settingsHref())}
@@ -426,7 +426,7 @@ export default function DashboardPage() {
               <EmptyState
                 icon={<Clock className="w-5 h-5 text-slate-400" />}
                 title="Not enough data yet"
-                description="Contact-hour patterns will appear once patients begin chatting."
+                description="Contact-hour patterns will appear after patients begin interacting with the assistant."
               />
             ) : (
               <div className="space-y-3">
@@ -475,7 +475,7 @@ export default function DashboardPage() {
                 <EmptyState
                   icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
                 title="No follow-up items"
-                description="Stalled or at-risk requests will surface here automatically."
+                description="Stalled or at-risk booking requests will surface here when they need attention."
                 />
               ) : (
                 <div className="space-y-2">

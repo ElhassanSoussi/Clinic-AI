@@ -158,7 +158,7 @@ export default function BillingPage() {
           </>
         }
         title="Plan & usage"
-        description="Current plan, usage this month, and upgrade options."
+        description="Current plan, monthly usage, and upgrade options. Payments are handled securely through Stripe."
       />
 
       {/* Stripe return feedback */}
