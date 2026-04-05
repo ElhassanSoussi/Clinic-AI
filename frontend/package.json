@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "e2e:routes": "bash ./scripts/e2e_routes.sh",
-    "e2e:auth": "bash ./scripts/e2e_auth_flow.sh"
+    "e2e:auth": "bash ./scripts/e2e_auth_flow.sh",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -19,6 +21,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
