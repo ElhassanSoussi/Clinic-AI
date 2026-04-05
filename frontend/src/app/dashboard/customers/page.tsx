@@ -159,12 +159,6 @@ export default function CustomersPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Best use</p>
-            <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
-              Open a customer profile for the relationship view — inbox context, booking state, and notes so staff can work faster.
-            </p>
-          </div>
         </div>
       </div>
     </div>

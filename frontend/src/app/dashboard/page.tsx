@@ -107,7 +107,7 @@ export default function DashboardPage() {
         attentionAppointmentsData,
       ] = await Promise.all([
         api.clinics.getMyClinic(),
-        api.frontdesk.getAnalytics(),
+        optional(api.frontdesk.getAnalytics(), null),
         optional(api.billing.getStatus(), null),
         optional(api.activity.list(8), []),
         optional(api.frontdesk.listOpportunities(), []),
@@ -141,7 +141,7 @@ export default function DashboardPage() {
 
   if (loading) return <LoadingState message="Loading dashboard..." />;
   if (error) return <ErrorState message={error} onRetry={loadDashboard} />;
-  if (!analytics) {
+  if (!analytics || typeof analytics.conversations_total !== "number") {
     return (
       <ErrorState
         title="Analytics unavailable"
@@ -422,7 +422,7 @@ export default function DashboardPage() {
             description="When patients reach out most, based on incoming messages."
             action={<Clock className="h-3.5 w-3.5 text-slate-400" />}
           >
-            {analytics.busiest_contact_hours.length === 0 ? (
+            {!analytics.busiest_contact_hours || analytics.busiest_contact_hours.length === 0 ? (
               <EmptyState
                 icon={<Clock className="w-5 h-5 text-slate-400" />}
                 title="Not enough data yet"

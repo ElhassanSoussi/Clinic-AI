@@ -450,18 +450,7 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">How to use</p>
-            <div className="mt-2.5 space-y-1.5">
-              {[
-                "New requests land from chat, SMS, and follow-up capture.",
-                "Update status in-line when team contacts patient or confirms booking.",
-                "Open any request for full workflow context.",
-              ].map((text) => (
-                <p key={text} className="text-[10px] leading-relaxed text-slate-400">{text}</p>
-              ))}
-            </div>
-          </div>
+
         </aside>
       </div>
     </div>

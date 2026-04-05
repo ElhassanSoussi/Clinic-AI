@@ -440,17 +440,14 @@ export default function DashboardLayout({
             <p className="text-sm font-semibold text-slate-800">{activeNavItem?.label ?? "Dashboard"}</p>
           </div>
 
-          {/* Search bar (centered) */}
+          {/* Quick nav to inbox */}
           <div className="flex-1 flex justify-center">
             <Link
               href="/dashboard/inbox"
-              className="flex w-full max-w-md items-center gap-2.5 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2 transition-colors hover:border-slate-300 hover:bg-white"
+              className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2 transition-colors hover:border-slate-300 hover:bg-white"
             >
               <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-[13px] text-slate-400">Search conversations, leads...</span>
-              <kbd className="ml-auto hidden rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 sm:inline-block">
-                /
-              </kbd>
+              <span className="text-[13px] text-slate-400">Go to inbox</span>
             </Link>
           </div>
 

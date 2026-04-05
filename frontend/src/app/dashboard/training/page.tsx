@@ -519,17 +519,7 @@ export default function TrainingPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Why this matters</p>
-            <div className="mt-2.5 space-y-1.5">
-              <p className="text-[10px] leading-relaxed text-slate-400">
-                Training quality shapes whether patients trust the assistant.
-              </p>
-              <p className="text-[10px] leading-relaxed text-slate-400">
-                Use preview chat to test real answers before relying on the live workflow.
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
