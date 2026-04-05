@@ -145,7 +145,7 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow={
           <>
@@ -158,19 +158,19 @@ export default function OpportunitiesPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">{error}</div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
         <div className="space-y-5">
           {/* Follow-up queue */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-slate-900">Active queue</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Tasks you can complete now, automate later.</p>
+                <p className="text-[13px] font-semibold text-slate-900">Active queue</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">Tasks you can complete now, automate later.</p>
               </div>
-              <span className="rounded-lg bg-teal-50 px-2.5 py-1 text-[10px] font-bold text-teal-700">{followUps.length} active</span>
+              <span className="rounded-md bg-teal-50/60 px-2 py-0.5 text-[10px] font-semibold text-teal-700">{followUps.length} active</span>
             </div>
 
             {followUps.length === 0 ? (
@@ -180,15 +180,15 @@ export default function OpportunitiesPage() {
                 description="Queue any opportunity below to assign and track."
               />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {followUps.map((task) => {
                   const href = followUpHref(task);
                   const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
                   return (
-                    <div key={task.id} className="rounded-xl border border-slate-100 p-4">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                    <div key={task.id} className="rounded-lg border border-slate-100/60 p-3">
+                      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
-                          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                          <div className="mb-1 flex flex-wrap items-center gap-1.5">
                             <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${priorityClass(task.priority)}`}>
                               {task.priority === "high" ? "High" : "Follow-up"}
                             </span>
@@ -198,11 +198,11 @@ export default function OpportunitiesPage() {
                             {task.auto_generated && (
                               <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">Auto</span>
                             )}
-                            <span className="text-[11px] text-slate-400">{task.customer_name}</span>
+                            <span className="text-[10px] text-slate-400">{task.customer_name}</span>
                           </div>
-                          <p className="text-sm font-semibold text-slate-900">{task.title}</p>
-                          <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{task.detail}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+                          <p className="text-[13px] font-semibold text-slate-900">{task.title}</p>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-slate-500">{task.detail}</p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[10px] text-slate-400">
                             {task.due_at && <span>Due {formatDateTime(task.due_at)}</span>}
                             {task.note && <span>{task.note}</span>}
                           </div>
@@ -246,13 +246,13 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Triage */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-slate-900">Needs triage</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Rules-based risk items from conversations and requests.</p>
+                <p className="text-[13px] font-semibold text-slate-900">Needs triage</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">Rules-based risk items from conversations and requests.</p>
               </div>
-              <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">{triageItems.length} pending</span>
+              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">{triageItems.length} pending</span>
             </div>
 
             {triageItems.length === 0 ? (
@@ -262,28 +262,28 @@ export default function OpportunitiesPage() {
                 description="Everything is handled or already in the follow-up queue."
               />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {triageItems.map((opportunity) => {
                   const href = opportunityHref(opportunity);
                   const busy = savingId === opportunity.id;
                   return (
-                    <div key={opportunity.id} className="rounded-xl border border-slate-100 p-4">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                    <div key={opportunity.id} className="rounded-lg border border-slate-100/60 p-3">
+                      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
-                          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                          <div className="mb-1 flex flex-wrap items-center gap-1.5">
                             <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${priorityClass(opportunity.priority)}`}>
                               {opportunity.priority === "high" ? "High" : "Follow-up"}
                             </span>
-                            <span className="text-[11px] text-slate-400">{opportunity.customer_name}</span>
+                            <span className="text-[10px] text-slate-400">{opportunity.customer_name}</span>
                             {opportunity.occurred_at && (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-slate-300">
+                              <span className="inline-flex items-center gap-1 text-[10px] text-slate-300">
                                 <Clock className="w-3 h-3" />
                                 <span>{timeAgo(opportunity.occurred_at)}</span>
                               </span>
                             )}
                           </div>
-                          <p className="text-sm font-semibold text-slate-900">{opportunity.title}</p>
-                          <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{opportunity.detail}</p>
+                          <p className="text-[13px] font-semibold text-slate-900">{opportunity.title}</p>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-slate-500">{opportunity.detail}</p>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-1.5">
                           {href && (
@@ -317,15 +317,15 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* Right rail */}
-        <div className="hidden space-y-4 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Automation</p>
-            <div className="mt-3 rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-              <p className="text-xs font-semibold text-slate-900">Auto follow-up</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <div className="hidden space-y-3 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Automation</p>
+            <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+              <p className="text-[12px] font-semibold text-slate-900">Auto follow-up</p>
+              <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
                 Creates tasks from stalled conversations and aging requests.
               </p>
-              <label className="mt-3 inline-flex items-center gap-2 text-xs text-slate-700">
+              <label className="mt-2.5 inline-flex items-center gap-2 text-[12px] text-slate-700">
                 <input
                   type="checkbox"
                   checked={Boolean(clinic?.follow_up_automation_enabled)}
@@ -336,23 +336,23 @@ export default function OpportunitiesPage() {
                 {savingAutomation ? "Saving..." : "Enabled"}
               </label>
             </div>
-            <div className="mt-3 space-y-2">
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Queued</p>
-                <p className="mt-0.5 text-2xl font-bold text-slate-900">{followUps.length}</p>
+            <div className="mt-2.5 space-y-2">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Queued</p>
+                <p className="mt-0.5 text-xl font-bold text-slate-900">{followUps.length}</p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Needs triage</p>
-                <p className="mt-0.5 text-2xl font-bold text-slate-900">{triageItems.length}</p>
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Needs triage</p>
+                <p className="mt-0.5 text-xl font-bold text-slate-900">{triageItems.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">How to use</p>
-            <div className="mt-3 space-y-2">
-              <p className="text-[11px] leading-relaxed text-slate-400">Keep stalled requests visible before they turn into lost bookings.</p>
-              <p className="text-[11px] leading-relaxed text-slate-400">Use queued follow-ups for manual ownership, then automate when ready.</p>
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">How to use</p>
+            <div className="mt-2.5 space-y-1.5">
+              <p className="text-[10px] leading-relaxed text-slate-400">Keep stalled requests visible before they turn into lost bookings.</p>
+              <p className="text-[10px] leading-relaxed text-slate-400">Use queued follow-ups for manual ownership, then automate when ready.</p>
             </div>
           </div>
         </div>

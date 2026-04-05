@@ -15,7 +15,6 @@ import {
   LayoutGrid,
   MessageSquareMore,
   Settings,
-  Sparkles,
   TrendingUp,
   UserPlus,
   Users,
@@ -229,7 +228,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow={
           <>
@@ -254,20 +253,20 @@ export default function DashboardPage() {
 
       {/* ── First lead success banner ── */}
       {showFirstLeadSuccess && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 px-4 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-emerald-900">First lead captured</p>
-              <p className="mt-0.5 text-xs text-emerald-700">
+              <p className="text-[13px] font-semibold text-emerald-900">First lead captured</p>
+              <p className="mt-0.5 text-[11px] text-emerald-700/70">
                 Patient requests are now flowing into the workspace automatically.
               </p>
             </div>
             <button
               onClick={() => setShowFirstLeadSuccess(false)}
-              className="text-emerald-400 hover:text-emerald-600"
+              className="text-emerald-300 hover:text-emerald-500"
             >
               &times;
             </button>
@@ -320,48 +319,44 @@ export default function DashboardPage() {
       )}
 
       {/* ── Main layout: canvas + right rail ── */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_300px]">
         {/* ── Canvas ── */}
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Hero panel */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="rounded-2xl border border-slate-100 bg-white px-5 py-5 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  <Sparkles className="h-3 w-3" />
-                  Front-desk command center
-                </div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                <h2 className="text-base font-bold tracking-tight text-slate-900">
                   Conversations, bookings, and operator workload in one view.
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">
                   What was captured, what needs human judgment, and which items still need attention.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:w-72">
-                <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live demand</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">{analytics.conversations_total}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">Active conversations</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:w-64">
+                <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Live demand</p>
+                  <p className="mt-1.5 text-xl font-bold text-slate-900">{analytics.conversations_total}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">Active conversations</p>
                 </div>
-                <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Booked now</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">{analytics.booked_requests}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">Confirmed requests</p>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Booked now</p>
+                  <p className="mt-1.5 text-xl font-bold text-slate-900">{analytics.booked_requests}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">Confirmed requests</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
             {statCards.map((card) => (
               <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
             ))}
           </div>
 
           {/* Appointment row */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
             <MetricCard
               label="Upcoming appointments"
               value={upcomingAppointments.length}
@@ -378,7 +373,7 @@ export default function DashboardPage() {
             />
             <Link
               href="/dashboard/appointments"
-              className="flex items-start justify-between rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+              className="flex items-start justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
             >
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Appointments</p>
@@ -404,16 +399,16 @@ export default function DashboardPage() {
               </Link>
             }
           >
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
               {performanceCards.map((card) => (
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
             </div>
 
-            <div className="mt-4 rounded-xl border border-slate-50 bg-slate-50/50 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Performance note</p>
-              <p className="mt-1.5 text-sm text-slate-600">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+            <div className="mt-3.5 rounded-xl border border-slate-100/60 bg-slate-50/40 px-3.5 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Performance note</p>
+              <p className="mt-1 text-[13px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
                 <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
                 <span>Blocked for review: {analytics.blocked_for_review_count}</span>
                 <span>AI resolution: {analytics.ai_resolution_estimate}%</span>
@@ -462,7 +457,7 @@ export default function DashboardPage() {
           </SurfaceCard>
 
           {/* Two-column: Opportunities + Activity */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <SurfaceCard
               title="Opportunities"
               description="Follow-up signals and stalled requests."
@@ -497,7 +492,7 @@ export default function DashboardPage() {
                       <Link
                         key={opportunity.id}
                         href={href}
-                        className="flex items-center gap-3 rounded-xl border border-slate-50 px-3.5 py-3 transition-all hover:border-slate-100 hover:bg-slate-50/50"
+                        className="flex items-center gap-3 rounded-xl border border-slate-50 px-3 py-2.5 transition-all hover:border-slate-100 hover:bg-slate-50/50"
                       >
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
@@ -509,7 +504,7 @@ export default function DashboardPage() {
                           <AlertTriangle className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-slate-900">{opportunity.title}</p>
+                          <p className="truncate text-[13px] font-medium text-slate-900">{opportunity.title}</p>
                           <p className="mt-0.5 truncate text-[11px] text-slate-400">
                             {opportunity.customer_name} · {opportunity.detail}
                           </p>
@@ -593,16 +588,16 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Right rail ── */}
-        <div className="hidden space-y-4 xl:block">
+        <div className="hidden space-y-3.5 xl:block">
           <RightRailCard title="Workspace state">
-            <div className="space-y-2.5">
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">System</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{systemStatus ?? "Not ready"}</p>
+            <div className="space-y-2">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">System</p>
+                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{systemStatus ?? "Not ready"}</p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Current plan</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Current plan</p>
+                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
                   {billing ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1) : "Unavailable"}
                 </p>
               </div>
@@ -610,7 +605,7 @@ export default function DashboardPage() {
           </RightRailCard>
 
           <RightRailCard title="Quick routes">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {[
                 { href: "/dashboard/inbox", label: "Open inbox", detail: "Review active conversations." },
                 { href: "/dashboard/appointments", label: "Appointments", detail: "Bookings, reminders, deposits." },
@@ -619,32 +614,32 @@ export default function DashboardPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-xl border border-slate-50 px-3.5 py-3 transition-all hover:border-slate-100 hover:bg-slate-50/50"
+                  className="block rounded-lg border border-slate-50 px-3 py-2.5 transition-all hover:border-slate-100 hover:bg-slate-50/50"
                 >
-                  <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">{item.detail}</p>
+                  <p className="text-[13px] font-medium text-slate-900">{item.label}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">{item.detail}</p>
                 </Link>
               ))}
             </div>
           </RightRailCard>
 
           <RightRailCard title="Daily focus">
-            <div className="space-y-2.5">
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-sm font-medium text-slate-900">Human review</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">
+            <div className="space-y-2">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[13px] font-medium text-slate-900">Human review</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">
                   {analytics.human_review_required_count} conversations waiting for a staff decision.
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-sm font-medium text-slate-900">Attention required</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[13px] font-medium text-slate-900">Attention required</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">
                   {attentionAppointments.length} bookings blocked by prep, reschedule, or deposit needs.
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-sm font-medium text-slate-900">Opportunity pressure</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[13px] font-medium text-slate-900">Opportunity pressure</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">
                   {analytics.follow_up_needed_count} follow-ups and {analytics.unresolved_count} unresolved requests.
                 </p>
               </div>

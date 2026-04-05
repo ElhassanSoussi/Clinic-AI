@@ -64,7 +64,7 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadActivity()} />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow={
           <>
@@ -78,7 +78,7 @@ export default function ActivityPage() {
           <button
             onClick={() => loadActivity(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
           >
             {refreshing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -90,7 +90,7 @@ export default function ActivityPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
         <div>
           {events.length === 0 ? (
             <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -109,25 +109,25 @@ export default function ActivityPage() {
                 return (
                   <div
                     key={`${event.type}-${event.resource_id}-${i}`}
-                    className="flex items-center gap-3 px-4 py-3.5"
+                    className="flex items-center gap-2.5 px-4 py-3"
                   >
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${config.bg}`}>
                       <Icon className={`w-3.5 h-3.5 ${config.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       {isLead ? (
                         <Link
                           href={`/dashboard/leads/${event.resource_id}`}
-                          className="text-sm font-medium text-slate-900 hover:text-teal-700"
+                          className="text-[13px] font-medium text-slate-900 hover:text-teal-700"
                         >
                           {event.title}
                         </Link>
                       ) : (
-                        <p className="text-sm font-medium text-slate-900">{event.title}</p>
+                        <p className="text-[13px] font-medium text-slate-900">{event.title}</p>
                       )}
-                      <p className="mt-0.5 text-[11px] text-slate-400">{event.detail}</p>
+                      <p className="mt-0.5 text-[10px] text-slate-400">{event.detail}</p>
                     </div>
-                    <span className="shrink-0 text-[11px] text-slate-300">{timeAgo(event.timestamp)}</span>
+                    <span className="shrink-0 text-[10px] text-slate-300">{timeAgo(event.timestamp)}</span>
                   </div>
                 );
               })}
@@ -135,21 +135,21 @@ export default function ActivityPage() {
           )}
         </div>
 
-        <div className="hidden space-y-4 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Feed summary</p>
-            <div className="mt-3 rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-              <p className="text-[11px] text-slate-400">Events loaded</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{events.length}</p>
+        <div className="hidden space-y-3 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Feed summary</p>
+            <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+              <p className="text-[10px] text-slate-400">Events loaded</p>
+              <p className="mt-0.5 text-xl font-bold text-slate-900">{events.length}</p>
             </div>
-            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
               Trace what changed without jumping between inbox, leads, and appointments.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Best use</p>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Best use</p>
+            <p className="mt-2.5 text-[10px] leading-relaxed text-slate-400">
               Use the feed for the cross-workspace story. Especially useful for new capture, status changes, and operator actions.
             </p>
           </div>

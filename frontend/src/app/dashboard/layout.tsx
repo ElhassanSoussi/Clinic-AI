@@ -272,26 +272,26 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* ─── LEFT SIDEBAR (desktop) ─── */}
-      <aside className="hidden w-64 flex-col border-r border-slate-100 bg-linear-to-b from-slate-25 to-white lg:flex">
+      <aside className="hidden w-60 flex-col border-r border-slate-100/80 bg-white lg:flex">
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-teal-600 to-violet-600 shadow-sm">
-            <Bot className="h-4 w-4 text-white" />
+        <div className="flex items-center gap-2.5 px-5 py-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-teal-600 to-violet-600 shadow-sm">
+            <Bot className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <span className="block text-sm font-bold text-slate-900">Clinic AI</span>
-            <span className="text-[11px] text-slate-400">Front Desk OS</span>
+            <span className="block text-[13px] font-bold text-slate-900">Clinic AI</span>
+            <span className="text-[10px] text-slate-400">Front Desk OS</span>
           </div>
         </div>
 
         {/* Clinic status card */}
         {clinic && (
-          <div className="mx-4 mb-4 rounded-xl border border-slate-100 bg-white p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Clinic</p>
-            <p className="mt-1 truncate text-sm font-semibold text-slate-900">{clinic.name}</p>
+          <div className="mx-3 mb-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Clinic</p>
+            <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">{clinic.name}</p>
             {statusCfg && (
-              <div className="mt-2">
-                <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-semibold ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color}`}>
+              <div className="mt-1.5">
+                <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusCfg.bg} ${statusCfg.color}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                   {statusCfg.label}
                 </span>
@@ -301,8 +301,8 @@ export default function DashboardLayout({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
-          <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-300">Workspace</p>
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-1">
+          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Workspace</p>
           {sidebarNav.map((item) => {
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -311,20 +311,20 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all ${
+                className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all ${
                   isActive
-                    ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-100"
-                    : "text-slate-500 hover:bg-white/60 hover:text-slate-800"
+                    ? "bg-teal-50/60 text-teal-800"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                 }`}
               >
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                  className={`flex h-7 w-7 items-center justify-center rounded-md ${
                     isActive
-                      ? "bg-linear-to-br from-teal-50 to-violet-50 text-teal-700"
-                      : "text-slate-400 group-hover:text-slate-600"
+                      ? "bg-teal-600 text-white shadow-sm"
+                      : "text-slate-400 group-hover:text-slate-500"
                   }`}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-3.5 w-3.5" />
                 </span>
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
@@ -338,16 +338,16 @@ export default function DashboardLayout({
         </nav>
 
         {/* Channels section */}
-        <div className="border-t border-slate-50 px-3 py-3">
-          <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-300">Channels</p>
+        <div className="border-t border-slate-100/60 px-3 py-2.5">
+          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
           {user?.clinic_slug && (
             <Link
               href={`/chat/${user.clinic_slug}`}
               target="_blank"
-              className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-slate-500 transition-all hover:bg-white/60 hover:text-slate-800"
+              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-700"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 group-hover:text-slate-600">
-                <MessageSquareMore className="h-4 w-4" />
+              <span className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 group-hover:text-slate-500">
+                <MessageSquareMore className="h-3.5 w-3.5" />
               </span>
               Patient Chat
               <ExternalLink className="ml-auto h-3 w-3 text-slate-300" />
@@ -356,14 +356,14 @@ export default function DashboardLayout({
         </div>
 
         {/* Operator control card */}
-        <div className="mx-4 mb-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-violet-600">
-              <ShieldCheck className="h-4 w-4" />
+        <div className="mx-3 mb-3 rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-violet-500 shadow-sm">
+              <ShieldCheck className="h-3.5 w-3.5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-700">Operator control</p>
-              <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">
+              <p className="text-[11px] font-semibold text-slate-600">Operator control</p>
+              <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
                 Review, manual takeover, and visibility stay with your team.
               </p>
             </div>
@@ -435,7 +435,7 @@ export default function DashboardLayout({
       {/* ─── MAIN AREA ─── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* ─── TOPBAR ─── */}
-        <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-100 bg-white/80 px-4 backdrop-blur-sm lg:px-6">
+        <header className="flex h-13 shrink-0 items-center gap-3 border-b border-slate-100/60 bg-white/90 px-4 backdrop-blur-sm lg:px-5">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -447,18 +447,18 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-sm font-semibold text-slate-900">{activeNavItem?.label ?? "Dashboard"}</p>
+            <p className="text-[13px] font-semibold text-slate-700">{activeNavItem?.label ?? "Dashboard"}</p>
           </div>
 
           {/* Search bar (centered) */}
           <div className="flex-1 flex justify-center">
             <Link
               href="/dashboard/inbox"
-              className="flex w-full max-w-md items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-2 transition-colors hover:border-slate-200 hover:bg-white"
+              className="flex w-full max-w-sm items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/60 px-3.5 py-1.5 transition-colors hover:border-slate-200 hover:bg-slate-50"
             >
-              <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs text-slate-400">Search conversations, leads, patients...</span>
-              <span className="ml-auto rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 shadow-sm ring-1 ring-slate-100">
+              <Search className="h-3.5 w-3.5 text-slate-300" />
+              <span className="text-[12px] text-slate-400">Search conversations, leads...</span>
+              <span className="ml-auto rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-300 ring-1 ring-slate-100">
                 /
               </span>
             </Link>
@@ -577,7 +577,7 @@ export default function DashboardLayout({
 
         {/* ─── MAIN CANVAS ─── */}
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

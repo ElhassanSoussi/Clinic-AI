@@ -224,7 +224,7 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow={
           <>
@@ -237,21 +237,21 @@ export default function TrainingPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">{error}</div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_280px]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
         <div className="space-y-5">
           {/* Knowledge readiness */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <div className="mb-1.5 flex items-center gap-2">
+                <div className="mb-1 flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                  <span className="text-xs font-semibold text-slate-900">Knowledge readiness</span>
+                  <span className="text-[12px] font-semibold text-slate-900">Knowledge readiness</span>
                 </div>
-                <p className="text-3xl font-bold text-slate-900">{training.knowledge_score}%</p>
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="text-2xl font-bold text-slate-900">{training.knowledge_score}%</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">
                   {training.assistant_name} is trained on your current clinic data and custom notes.
                 </p>
               </div>
@@ -264,23 +264,23 @@ export default function TrainingPage() {
               </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
-                  className={`rounded-xl border p-3 ${
-                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-100 bg-slate-50/50"
+                  className={`rounded-lg border p-2.5 ${
+                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-100/60 bg-slate-50/40"
                   }`}
                 >
-                  <p className="text-xs font-semibold text-slate-900">{item.label}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">{item.detail}</p>
+                  <p className="text-[12px] font-semibold text-slate-900">{item.label}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">{item.detail}</p>
                 </div>
               ))}
             </div>
 
             {training.knowledge_gaps.length > 0 && (
-              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
-                <p className="text-xs font-semibold text-amber-800">Gaps</p>
+              <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50/50 p-2.5">
+                <p className="text-[12px] font-semibold text-amber-800">Gaps</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {training.knowledge_gaps.map((gap) => (
                     <span key={gap} className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-700">{gap}</span>
@@ -295,16 +295,16 @@ export default function TrainingPage() {
             {/* Knowledge sources */}
             <div className="space-y-5">
               {/* Structured knowledge */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex items-center gap-2">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+                <div className="mb-2.5 flex items-center gap-2">
                   <Bot className="w-3.5 h-3.5 text-teal-600" />
-                  <p className="text-xs font-semibold text-slate-900">Current sources</p>
+                  <p className="text-[12px] font-semibold text-slate-900">Current sources</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   {structuredKnowledge.map((item) => (
-                    <div key={item.label} className="rounded-xl border border-slate-100 p-3">
-                      <p className="text-xs font-semibold text-slate-900">{item.label}</p>
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">{item.detail}</p>
+                    <div key={item.label} className="rounded-lg border border-slate-100/60 p-2.5">
+                      <p className="text-[12px] font-semibold text-slate-900">{item.label}</p>
+                      <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{item.detail}</p>
                     </div>
                   ))}
                 </div>
@@ -326,10 +326,10 @@ export default function TrainingPage() {
               </div>
 
               {/* Custom notes */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="mb-3 flex items-center gap-2">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+                <div className="mb-2.5 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-slate-500" />
-                  <p className="text-xs font-semibold text-slate-900">Custom notes</p>
+                  <p className="text-[12px] font-semibold text-slate-900">Custom notes</p>
                 </div>
                 <div className="space-y-2">
                   <input
@@ -337,33 +337,33 @@ export default function TrainingPage() {
                     value={newTitle}
                     onChange={(event) => setNewTitle(event.target.value)}
                     placeholder="Title, e.g. Insurance exceptions"
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
                   />
                   <textarea
                     value={newContent}
                     onChange={(event) => setNewContent(event.target.value)}
                     rows={3}
                     placeholder="Details your assistant should know..."
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
                   />
                   <button
                     onClick={createSource}
                     disabled={saving || !newTitle.trim() || !newContent.trim()}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                     <span>Save note</span>
                   </button>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 space-y-2">
                   {training.custom_sources.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-slate-200 px-4 py-5 text-center text-[11px] text-slate-400">
+                    <div className="rounded-lg border border-dashed border-slate-200 px-4 py-4 text-center text-[10px] text-slate-400">
                       No custom notes yet. Add details when settings are not enough.
                     </div>
                   ) : (
                     training.custom_sources.map((source) => (
-                      <div key={source.id} className="rounded-xl border border-slate-100 p-3">
+                      <div key={source.id} className="rounded-lg border border-slate-100/60 p-2.5">
                         {editingSourceId === source.id ? (
                           <div className="space-y-2">
                             <input
@@ -371,14 +371,14 @@ export default function TrainingPage() {
                               value={editingTitle}
                               onChange={(event) => setEditingTitle(event.target.value)}
                               placeholder="Note title"
-                              className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                              className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
                             />
                             <textarea
                               value={editingContent}
                               onChange={(event) => setEditingContent(event.target.value)}
                               rows={3}
                               placeholder="Note content"
-                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
                             />
                             <div className="flex gap-2">
                               <button
@@ -400,8 +400,8 @@ export default function TrainingPage() {
                         ) : (
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-slate-900">{source.title}</p>
-                              <p className="mt-1 whitespace-pre-wrap text-[11px] leading-relaxed text-slate-500">{source.content}</p>
+                              <p className="text-[12px] font-semibold text-slate-900">{source.title}</p>
+                              <p className="mt-0.5 whitespace-pre-wrap text-[10px] leading-relaxed text-slate-500">{source.content}</p>
                             </div>
                             <div className="flex shrink-0 items-center gap-1.5">
                               <button
@@ -427,33 +427,33 @@ export default function TrainingPage() {
               </div>
 
               {/* Document uploads */}
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2">
                   <Upload className="w-3.5 h-3.5 text-slate-400" />
-                  <p className="text-xs font-semibold text-slate-900">Document uploads</p>
+                  <p className="text-[12px] font-semibold text-slate-900">Document uploads</p>
                 </div>
-                <p className="text-[11px] leading-relaxed text-slate-400">
+                <p className="text-[10px] leading-relaxed text-slate-400">
                   PDF and text ingestion is not live yet. The training area is ready for it — embeddings and retrieval need a later pass.
                 </p>
               </div>
             </div>
 
             {/* Preview chat */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm xl:sticky xl:top-20">
-              <div className="mb-3 flex items-center gap-2">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm xl:sticky xl:top-20">
+              <div className="mb-2.5 flex items-center gap-2">
                 <Send className="w-3.5 h-3.5 text-teal-600" />
-                <p className="text-xs font-semibold text-slate-900">Live preview</p>
+                <p className="text-[12px] font-semibold text-slate-900">Live preview</p>
               </div>
 
               {!clinic.is_live && (
-                <div className="mb-3 rounded-xl border border-amber-100 bg-amber-50/50 px-3 py-2 text-[11px] text-amber-700">
+                <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-[10px] text-amber-700">
                   Go live before using preview. This test uses the real chat flow.
                 </div>
               )}
 
-              <div className="h-80 space-y-2 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+              <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-slate-100/60 bg-slate-50/40 p-2.5">
                 {previewMessages.length === 0 ? (
-                  <p className="text-[11px] leading-relaxed text-slate-400">
+                  <p className="text-[10px] leading-relaxed text-slate-400">
                     Ask a clinic question to test assistant behavior against your configured data.
                   </p>
                 ) : (
@@ -476,18 +476,18 @@ export default function TrainingPage() {
                 )}
               </div>
 
-              <div className="mt-3 space-y-2">
+              <div className="mt-2.5 space-y-2">
                 <textarea
                   value={previewInput}
                   onChange={(event) => setPreviewInput(event.target.value)}
                   rows={2}
                   placeholder="Try: Do you offer same-day appointments?"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
                 />
                 <button
                   onClick={sendPreview}
                   disabled={previewSending || previewDisabled || !previewInput.trim()}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
                 >
                   {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   <span>Send test</span>
@@ -498,32 +498,32 @@ export default function TrainingPage() {
         </div>
 
         {/* Right rail */}
-        <div className="hidden space-y-4 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Training state</p>
-            <div className="mt-3 space-y-2">
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Readiness</p>
-                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.knowledge_score}%</p>
+        <div className="hidden space-y-3 xl:block">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Training state</p>
+            <div className="mt-2.5 space-y-2">
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Readiness</p>
+                <p className="mt-0.5 text-xl font-bold text-slate-900">{training.knowledge_score}%</p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Gaps</p>
-                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.knowledge_gaps.length}</p>
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Gaps</p>
+                <p className="mt-0.5 text-xl font-bold text-slate-900">{training.knowledge_gaps.length}</p>
               </div>
-              <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                <p className="text-[11px] text-slate-400">Custom notes</p>
-                <p className="mt-0.5 text-2xl font-bold text-slate-900">{training.custom_sources.length}</p>
+              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                <p className="text-[10px] text-slate-400">Custom notes</p>
+                <p className="mt-0.5 text-xl font-bold text-slate-900">{training.custom_sources.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Why this matters</p>
-            <div className="mt-3 space-y-2">
-              <p className="text-[11px] leading-relaxed text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Why this matters</p>
+            <div className="mt-2.5 space-y-1.5">
+              <p className="text-[10px] leading-relaxed text-slate-400">
                 Training quality shapes whether patients trust the assistant.
               </p>
-              <p className="text-[11px] leading-relaxed text-slate-400">
+              <p className="text-[10px] leading-relaxed text-slate-400">
                 Use preview chat to test real answers before relying on the live workflow.
               </p>
             </div>

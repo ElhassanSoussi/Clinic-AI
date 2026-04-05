@@ -205,17 +205,17 @@ function AppointmentDetailRail({
   const isDepositLoading = depositActionLeadId === appointment.lead_id;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Patient info */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-              <h2 className="text-lg font-bold text-slate-900">{appointment.patient_name}</h2>
+            <div className="mb-1 flex flex-wrap items-center gap-1.5">
+              <h2 className="text-base font-bold text-slate-900">{appointment.patient_name}</h2>
               <ChannelBadge channel={appointment.source} withIcon />
               <LeadStatusBadge status={appointment.lead_status} />
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-[10px] text-slate-400">
               {appointment.appointment_starts_at
                 ? formatDateTime(appointment.appointment_starts_at)
                 : appointment.preferred_datetime_text || "Scheduling details still pending."}
@@ -248,48 +248,47 @@ function AppointmentDetailRail({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-              <Phone className="w-3.5 h-3.5 text-slate-400" />
+        <div className="mt-3 grid grid-cols-2 gap-2.5">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-50">
+              <Phone className="w-3 h-3 text-slate-400" />
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Phone</p>
-              <p className="text-xs font-semibold text-slate-900">{appointment.patient_phone || "N/A"}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_phone || "N/A"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-              <UserRound className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-50">
+              <UserRound className="w-3 h-3 text-slate-400" />
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Email</p>
-              <p className="text-xs font-semibold text-slate-900">{appointment.patient_email || "N/A"}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{appointment.patient_email || "N/A"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-              <Clock3 className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-50">
+              <Clock3 className="w-3 h-3 text-slate-400" />
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Reminder</p>
-              <p className="text-xs font-semibold text-slate-900">{humanizeStatus(appointment.reminder_status)}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{humanizeStatus(appointment.reminder_status)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-              <Wallet className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-50">
+              <Wallet className="w-3 h-3 text-slate-400" />
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Deposit</p>
-              <p className="text-xs font-semibold text-slate-900">{depositStatusLabel(appointment.deposit_status)}</p>
+              <p className="text-[12px] font-semibold text-slate-900">{depositStatusLabel(appointment.deposit_status)}</p>
             </div>
           </div>
         </div>
 
-        {/* Reminder readiness */}
-        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+        <div className="mt-3 rounded-lg border border-slate-100/60 bg-slate-50/40 p-2.5">
+          <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
               {appointmentStatusLabel(appointment.appointment_status)}
             </span>
@@ -299,16 +298,16 @@ function AppointmentDetailRail({
               {appointment.reminder_ready ? "Reminder ready" : "Not ready"}
             </span>
           </div>
-          <p className="text-[11px] leading-relaxed text-slate-500">
+          <p className="text-[10px] leading-relaxed text-slate-500">
             {reminderCaption(appointment)}
           </p>
         </div>
       </div>
 
       {/* Deposit */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <p className="text-xs font-bold text-slate-900">Booking deposit</p>
-        <p className="mt-0.5 text-[11px] text-slate-400">Request a Stripe deposit and track delivery.</p>
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <p className="text-[12px] font-semibold text-slate-900">Booking deposit</p>
+        <p className="mt-0.5 text-[10px] text-slate-400">Request a Stripe deposit and track delivery.</p>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
@@ -337,13 +336,13 @@ function AppointmentDetailRail({
               value={draft.depositAmountCents}
               onChange={(event) => onUpdateDraft({ depositAmountCents: event.target.value })}
               placeholder="e.g. 5000"
-              className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+              className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] text-slate-900 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
             />
             <p className="mt-1 text-[10px] text-slate-400">5000 = {formatMoney(5000)}</p>
           </div>
-          <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">State</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+          <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">State</p>
+            <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
               {depositStateCaption(appointment)}
             </p>
             {appointment.deposit_requested_at && appointment.deposit_status !== "paid" && (
@@ -404,9 +403,9 @@ function AppointmentDetailRail({
       </div>
 
       {/* Edit booking */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <p className="text-xs font-bold text-slate-900">Edit booking</p>
-        <p className="mt-0.5 text-[11px] text-slate-400">Time, reason, and internal note.</p>
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <p className="text-[12px] font-semibold text-slate-900">Edit booking</p>
+        <p className="mt-0.5 text-[10px] text-slate-400">Time, reason, and internal note.</p>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input
@@ -414,14 +413,14 @@ function AppointmentDetailRail({
             value={draft.date}
             onChange={(event) => onUpdateDraft({ date: event.target.value })}
             title="Appointment date"
-            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+            className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
           />
           <input
             type="time"
             value={draft.time}
             onChange={(event) => onUpdateDraft({ time: event.target.value })}
             title="Appointment time"
-            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+            className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
           />
         </div>
 
@@ -430,7 +429,7 @@ function AppointmentDetailRail({
           value={draft.reason}
           onChange={(event) => onUpdateDraft({ reason: event.target.value })}
           placeholder="Reason for visit"
-          className="mt-2 h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          className="mt-2 h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
         />
 
         <textarea
@@ -438,7 +437,7 @@ function AppointmentDetailRail({
           value={draft.note}
           onChange={(event) => onUpdateDraft({ note: event.target.value })}
           placeholder="Internal booking note"
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[13px] placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
         />
 
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -460,9 +459,9 @@ function AppointmentDetailRail({
       </div>
 
       {/* Actions */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <p className="text-xs font-bold text-slate-900">Actions</p>
-        <p className="mt-0.5 text-[11px] text-slate-400">Lifecycle changes — no external sync implied.</p>
+      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+        <p className="text-[12px] font-semibold text-slate-900">Actions</p>
+        <p className="mt-0.5 text-[10px] text-slate-400">Lifecycle changes — no external sync implied.</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           <button
@@ -758,7 +757,7 @@ export default function AppointmentsPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow={
           <>
@@ -777,42 +776,42 @@ export default function AppointmentsPage() {
           description="Booked requests will appear here as soon as the front desk confirms an appointment."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[220px_1fr_340px]">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[210px_1fr_320px]">
           {/* Left rail — views */}
-          <div className="hidden space-y-4 xl:block">
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Views</p>
-              <div className="mt-3 space-y-1.5">
+          <div className="hidden space-y-3 xl:block">
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
+              <div className="mt-2.5 space-y-1">
                 {APPOINTMENT_VIEWS.map((view) => {
                   const active = activeView === view.value;
                   return (
                     <button
                       key={view.value}
                       onClick={() => setActiveView(view.value)}
-                      className={`flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
                         active
-                          ? "border-violet-200 bg-violet-50 text-violet-700"
-                          : "border-slate-100 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "bg-teal-50/60 text-teal-800"
+                          : "text-slate-500 hover:bg-slate-50"
                       }`}
                     >
                       <span>{view.label}</span>
-                      {active && <span className="text-[10px] text-violet-500">Active</span>}
+                      {active && <span className="text-[10px] text-teal-500">Active</span>}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Board</p>
-              <div className="mt-3 space-y-2">
-                <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                  <p className="text-[11px] text-slate-400">Visible</p>
-                  <p className="mt-0.5 text-2xl font-bold text-slate-900">{appointments.length}</p>
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
+              <div className="mt-2.5 space-y-2">
+                <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                  <p className="text-[10px] text-slate-400">Visible</p>
+                  <p className="mt-0.5 text-xl font-bold text-slate-900">{appointments.length}</p>
                 </div>
-                <div className="rounded-xl border border-slate-50 bg-slate-50/50 px-3.5 py-3">
-                  <p className="text-[11px] text-slate-400">View</p>
-                  <p className="mt-0.5 text-sm font-semibold text-slate-900">
+                <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+                  <p className="text-[10px] text-slate-400">View</p>
+                  <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
                     {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
                   </p>
                 </div>
@@ -826,10 +825,10 @@ export default function AppointmentsPage() {
               <button
                 key={view.value}
                 onClick={() => setActiveView(view.value)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
                   activeView === view.value
-                    ? "border-violet-200 bg-violet-50 text-violet-700"
-                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    ? "bg-teal-50/60 text-teal-800"
+                    : "text-slate-500 hover:bg-slate-50"
                 }`}
               >
                 {view.label}
@@ -839,9 +838,9 @@ export default function AppointmentsPage() {
 
           {/* Center — appointment list */}
           <div className="space-y-3">
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold text-slate-900">Appointments</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
+            <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm">
+              <p className="text-[13px] font-semibold text-slate-900">Appointments</p>
+              <p className="mt-0.5 text-[10px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
             </div>
             <div className="space-y-2">
               {appointments.map((appointment) => {
@@ -850,20 +849,20 @@ export default function AppointmentsPage() {
                   <button
                     key={appointment.lead_id}
                     onClick={() => setSelectedLeadId(appointment.lead_id)}
-                    className={`w-full rounded-xl border p-4 text-left transition-all ${
+                    className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
                       active
                         ? "border-teal-200 bg-teal-50/30 shadow-sm"
-                        : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
+                        : "border-slate-100 bg-white hover:border-slate-200"
                     }`}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
-                        <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                          <p className="truncate text-sm font-semibold text-slate-900">{appointment.patient_name}</p>
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                          <p className="truncate text-[13px] font-semibold text-slate-900">{appointment.patient_name}</p>
                           <ChannelBadge channel={appointment.source} withIcon />
                           <LeadStatusBadge status={appointment.lead_status} />
                         </div>
-                        <p className="truncate text-xs text-slate-500">
+                        <p className="truncate text-[12px] text-slate-500">
                           {appointment.reason_for_visit || "No visit reason recorded"}
                         </p>
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -886,12 +885,12 @@ export default function AppointmentsPage() {
                         </div>
                       </div>
                       <div className="shrink-0 sm:text-right">
-                        <p className="text-xs font-semibold text-slate-900">
+                        <p className="text-[12px] font-semibold text-slate-900">
                           {appointment.appointment_starts_at
                             ? formatDateTime(appointment.appointment_starts_at)
                             : appointment.preferred_datetime_text || "Time not set"}
                         </p>
-                        <p className="mt-0.5 text-[11px] text-slate-400">
+                        <p className="mt-0.5 text-[10px] text-slate-400">
                           Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
                         </p>
                       </div>
