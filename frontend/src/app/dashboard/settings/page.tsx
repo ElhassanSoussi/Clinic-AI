@@ -177,7 +177,7 @@ function ClinicInformationSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Your clinic&apos;s contact details shown to patients.</p>
+      <p className="text-xs text-slate-500 mb-4">Contact details shown to patients in the chat widget and assistant responses.</p>
       <div className="space-y-4">
         <div>
           <label htmlFor="clinic-name" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -250,7 +250,7 @@ function AssistantMessagesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Customize how your AI assistant greets patients and handles uncertainty.</p>
+      <p className="text-xs text-slate-500 mb-4">Control how the assistant introduces itself and what it says when it cannot answer.</p>
       <div className="space-y-4">
         <div>
           <label htmlFor="greeting" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -272,7 +272,7 @@ function AssistantMessagesSectionContent({
             Fallback Message
           </label>
           <p className="text-xs text-slate-500 mb-1.5">
-            Used when the AI is unsure how to respond.
+            Shown when the assistant cannot find a relevant answer. Patients see this instead of a guess.
           </p>
           <textarea
             id="fallback"
@@ -302,7 +302,7 @@ function ServicesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">List the services your clinic offers so the AI can inform patients.</p>
+      <p className="text-xs text-slate-500 mb-4">The assistant uses this list to answer questions about what your clinic offers.</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {services.map((service, index) => (
           <span
@@ -355,7 +355,7 @@ function BusinessHoursSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Set your clinic&apos;s hours so patients know when you&apos;re available.</p>
+      <p className="text-xs text-slate-500 mb-4">Patients will see these hours when they ask about availability.</p>
       <div className="space-y-3">
         {DAYS.map((day) => (
           <div key={day} className="flex items-center gap-3">
@@ -391,10 +391,9 @@ function FaqSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Add questions and answers the AI assistant can use to help patients.</p>
       <div className="flex items-center justify-between mb-4">
         <p className="text-xs text-slate-500">
-          Add questions and answers that the AI assistant can use to help patients.
+          Common questions the assistant can answer directly instead of holding for staff.
         </p>
         <button
           onClick={addFaq}
@@ -406,7 +405,7 @@ function FaqSectionContent({
       </div>
       {faq.length === 0 ? (
         <p className="text-sm text-slate-400 text-center py-6">
-          No FAQs added yet. Click &quot;Add FAQ&quot; to get started.
+          No FAQs added yet. Add common questions so the assistant can answer them directly.
         </p>
       ) : (
         <div className="space-y-4">
@@ -656,7 +655,7 @@ function GoogleSheetsSectionContent({
                   ) : (
                     <Sheet className="w-4 h-4" />
                   )}
-                  Test Connection
+                  Test connection
                 </button>
               )}
               {sheetsValidation && (
@@ -724,7 +723,7 @@ function EmailNotificationsSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Receive immediate email alerts whenever a new patient lead is captured.</p>
+      <p className="text-xs text-slate-500 mb-4">Get an email alert each time the assistant captures a new patient request.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -765,7 +764,7 @@ function EmailNotificationsSectionContent({
                 ) : (
                   <Send className="w-4 h-4" />
                 )}
-                Send Test Email
+                Send test email
               </button>
               {testEmailResult && (
                 <p className={`mt-2 text-sm ${testEmailResult.success ? "text-emerald-600" : "text-red-600"}`}>
@@ -793,7 +792,7 @@ function SchedulingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Connect a Google Sheet tab to offer real-time appointment slots in chat.</p>
+      <p className="text-xs text-slate-500 mb-4">Let patients pick available appointment slots directly in the chat.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -827,7 +826,7 @@ function SchedulingSectionContent({
               </p>
             </div>
             <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
-              <h4 className="text-[10px] font-bold text-teal-800 uppercase tracking-wider mb-2">Required Sheet Format</h4>
+              <h4 className="text-[10px] font-bold text-teal-800 uppercase tracking-wider mb-2">Required sheet format</h4>
               <p className="text-xs text-teal-700 leading-relaxed font-medium">
                 Your tab must have these headers in the first row:
               </p>
@@ -863,7 +862,7 @@ function BrandingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Customize the chat widget appearance on your website.</p>
+      <p className="text-xs text-slate-500 mb-4">Control how the chat widget looks on your website.</p>
       <div className="space-y-4 max-w-lg">
         <div>
           <label htmlFor="assistant-name" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -920,7 +919,7 @@ function EmbedSectionContent({
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
       <p className="text-xs text-slate-500 mb-4">
-        Add the AI assistant widget to your website with a single line of code.
+        Paste this snippet into your website HTML to add the assistant chat widget.
       </p>
       <div className="relative group">
         <pre className="bg-slate-50 p-4 rounded-lg text-xs text-slate-700 overflow-x-auto border border-slate-200 whitespace-pre-wrap">
@@ -1298,8 +1297,8 @@ export default function SettingsPage() {
             Clinic setup and configuration
           </>
         }
-        title="Keep the workspace accurate, branded, and ready."
-        description="Update the clinic information, assistant behavior, spreadsheets, notifications, and embed details that power the rest of Clinic AI."
+        title="Clinic settings"
+        description="Clinic details, assistant behavior, spreadsheet connections, notifications, and embed configuration."
       />
       <div className="workspace-stage">
         <div className="workspace-side-rail">
@@ -1529,8 +1528,8 @@ export default function SettingsPage() {
           <div className="workspace-rail-card p-5">
             <p className="workspace-section-label">Setup guidance</p>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <p>These sections shape what patients see, how the assistant responds, and how your operators manage the workspace.</p>
-              <p>Provider-dependent features stay honest when something is not configured or not live yet.</p>
+              <p>These sections determine what patients see, how the assistant responds, and what your team manages in the workspace.</p>
+              <p>Features that depend on unconfigured sections will clearly indicate what is missing.</p>
             </div>
           </div>
         </div>

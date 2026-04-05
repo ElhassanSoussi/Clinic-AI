@@ -409,8 +409,8 @@ export default function OperationsPage() {
             Operations board
           </>
         }
-        title="Run the clinic with cleaner operational visibility."
-        description="Reminders, recovery queues, readiness states, waitlist items, and action-required bookings stay visible here so staff can see what is blocked and what is moving."
+        title="Operational visibility"
+        description="Reminders, recovery queues, SMS review, waitlist items, and action-required bookings. See what is blocked and what is moving."
       />
 
       {error && (
@@ -726,7 +726,7 @@ export default function OperationsPage() {
           <EmptyState
             icon={<BellRing className="h-7 w-7 text-slate-400" />}
             title="No upcoming reminders"
-            description="Confirm appointment timing on booked requests and enable reminder prep to build the next reminder schedule."
+            description="Reminders will appear here once booked appointments have confirmed timing and reminder prep is enabled."
           />
         ) : (
           <div className="space-y-2.5">
@@ -768,8 +768,8 @@ export default function OperationsPage() {
           {communicationQueue.length === 0 ? (
             <EmptyState
               icon={<PhoneMissed className="h-7 w-7 text-slate-400" />}
-              title="No recovery items right now"
-              description="Missed calls and callback requests will appear here once they are logged."
+              title="No recovery items"
+              description="Missed calls and callback requests will appear here as they are logged."
             />
           ) : (
             <div className="space-y-3">
@@ -1016,8 +1016,8 @@ export default function OperationsPage() {
         {reviewQueue.length === 0 ? (
           <EmptyState
             icon={<BellRing className="h-6 w-6 text-slate-400" />}
-            title="No SMS reviews waiting"
-            description="When Clinic AI drafts a reply for staff review, the thread will appear here."
+            title="No SMS reviews pending"
+            description="When the assistant drafts a reply that needs staff approval, the thread will appear here."
           />
         ) : (
           <div className="space-y-2.5">
@@ -1088,7 +1088,7 @@ export default function OperationsPage() {
               <EmptyState
                 icon={<CalendarClock className="h-7 w-7 text-slate-400" />}
                 title="No booked requests yet"
-                description="Once requests are booked, you can prepare reminder timing and booking operations here."
+                description="Booked appointments will appear here so you can manage reminders, timing, and deposit tracking."
               />
             ) : (
               <div className="space-y-3">
@@ -1319,7 +1319,7 @@ export default function OperationsPage() {
             <div className="mt-4 space-y-2.5">
               {waitlistEntries.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-300 px-4 py-5 text-center text-[12px] text-slate-500">
-                  No waitlist entries yet.
+                  No waitlist entries yet. Use the form above to add patients waiting for an opening.
                 </div>
               ) : (
                 waitlistEntries.map((entry) => (

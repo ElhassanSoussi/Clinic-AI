@@ -69,11 +69,11 @@ export default function ActivityPage() {
         eyebrow={
           <>
             <Activity className="h-3.5 w-3.5" />
-            Activity feed
+            Activity
           </>
         }
-        title="What changed today"
-        description="New requests, status changes, and conversation events in one feed."
+        title="Activity feed"
+        description="New requests, status changes, and conversations in chronological order."
         actions={
           <button
             onClick={() => loadActivity(true)}
@@ -97,7 +97,7 @@ export default function ActivityPage() {
               <EmptyState
                 icon={<Activity className="w-5 h-5 text-slate-400" />}
                 title="No activity yet"
-                description="Events will appear here once your assistant starts capturing leads."
+                description="Events will appear here once patients begin interacting with the assistant."
               />
             </div>
           ) : (

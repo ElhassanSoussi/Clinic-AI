@@ -104,8 +104,8 @@ export default function AccountPage() {
             Account and security
           </>
         }
-        title="Keep your account details and sign-in secure."
-        description="Manage your profile information, password, and the operator identity shown across the workspace."
+        title="Account & security"
+        description="Profile information, password, and the operator identity displayed across the workspace."
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[240px_1fr_240px]">
@@ -149,7 +149,7 @@ export default function AccountPage() {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="full-name" className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Full Name
+                    Full name
                   </label>
                   <input
                     id="full-name"
@@ -191,7 +191,7 @@ export default function AccountPage() {
                     {savingProfile ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Save Profile"
+                      "Save profile"
                     )}
                   </button>
                 </div>
@@ -209,7 +209,7 @@ export default function AccountPage() {
           >
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-900">Change Password</h2>
+              <h2 className="text-sm font-semibold text-slate-900">Change password</h2>
             </div>
             <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openSections.has("password") ? "rotate-180" : ""}`} />
           </button>
@@ -221,7 +221,7 @@ export default function AccountPage() {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="current-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Current Password
+                    Current password
                   </label>
                   <input
                     id="current-password"
@@ -234,7 +234,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <label htmlFor="new-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    New Password
+                    New password
                   </label>
                   <input
                     id="new-password"
@@ -247,7 +247,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <label htmlFor="confirm-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                    Confirm New Password
+                    Confirm new password
                   </label>
                   <input
                     id="confirm-password"
@@ -267,7 +267,7 @@ export default function AccountPage() {
                     {savingPassword ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Change Password"
+                      "Change password"
                     )}
                   </button>
                 </div>

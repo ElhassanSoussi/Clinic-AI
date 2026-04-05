@@ -239,7 +239,7 @@ export default function TrainingPage() {
           </>
         }
         title="Knowledge & training"
-        description="Review readiness, add knowledge notes, and test the live assistant."
+        description="Configure what the assistant knows, review readiness, and test responses."
       />
 
       {error && (
@@ -361,7 +361,7 @@ export default function TrainingPage() {
                 <div className="mt-3 space-y-2">
                   {training.custom_sources.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-slate-200 px-4 py-4 text-center text-[10px] text-slate-400">
-                      No custom notes yet. Add details when settings are not enough.
+                      No custom notes yet. Use the form above to add clinic-specific details the assistant should know.
                     </div>
                   ) : (
                     training.custom_sources.map((source) => (

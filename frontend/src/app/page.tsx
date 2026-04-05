@@ -43,14 +43,14 @@ const plans: LandingPlan[] = [
     name: "Starter Trial",
     price: "$0",
     period: "for 14 days",
-    description: "A quick way to stand up Clinic AI with your real clinic information and see the workflow live.",
+    description: "Try the full workspace free for 14 days. See how the assistant handles real patient questions with your clinic data.",
     features: [
       "AI chat assistant and live web chat",
       "Inbox, leads, customers, and dashboard",
       "25 captured requests included",
       "Guided onboarding and training workspace",
     ],
-    cta: "Start Free",
+    cta: "Start free",
     highlighted: false,
   },
   {
@@ -58,7 +58,7 @@ const plans: LandingPlan[] = [
     name: "Professional",
     price: "$49",
     period: "/month",
-    description: "For clinics that need one calm operating system for inquiries, booking flow, SMS review, and operator visibility.",
+    description: "The complete operating system for clinics handling inquiries, bookings, SMS, and operator review daily.",
     features: [
       "Everything in Starter Trial",
       "200 requests per month",
@@ -75,7 +75,7 @@ const plans: LandingPlan[] = [
     name: "Premium",
     price: "$99",
     period: "/month",
-    description: "For higher-volume clinics that want advanced booking operations, deposits, and stronger team visibility without capacity limits.",
+    description: "For higher-volume clinics that need unlimited capacity, deposit tracking, and full team visibility.",
     features: [
       "Everything in Professional",
       "Unlimited captured requests",
@@ -91,46 +91,46 @@ const plans: LandingPlan[] = [
 const valuePoints = [
   {
     icon: MessageSquareMore,
-    title: "Answers questions instantly",
-    description: "Give patients real answers based on your clinic information instead of sending every question to voicemail or a form.",
+    title: "Answers patients using your real clinic info",
+    description: "Patients get accurate responses based on the services, hours, and FAQs you configure — not generic scripts or guesswork.",
   },
   {
     icon: Inbox,
-    title: "Runs one operational inbox",
-    description: "Web chat, SMS review, manual takeover, and booking flow stay in one place for the front desk.",
+    title: "Keeps everything in one inbox",
+    description: "Web chat, SMS threads, manual takeover notes, and booking actions live in one place — nothing gets lost between tools.",
   },
   {
     icon: Workflow,
-    title: "Makes follow-up visible",
-    description: "Stalled requests, reminder pressure, missed-call recovery, and booking issues stay visible before they turn into lost patients.",
+    title: "Surfaces follow-up before it slips",
+    description: "Stalled requests, missed-call recovery, and booking gaps stay visible in the workspace so your team can act before patients move on.",
   },
   {
     icon: CalendarDays,
-    title: "Moves requests into bookings",
-    description: "Appointments, reminder readiness, and deposit state stay connected to the original inquiry and staff context.",
+    title: "Connects requests to booked appointments",
+    description: "Appointment timing, reminder readiness, and deposit status stay linked to the original conversation and staff notes.",
   },
 ];
 
 const trustCards = [
   {
     icon: ShieldCheck,
-    title: "Clinic-controlled knowledge",
-    description: "The assistant is grounded in the services, FAQs, hours, and notes your clinic chooses to publish.",
+    title: "Your clinic controls the information",
+    description: "The assistant only uses the services, FAQs, hours, and notes you configure. Nothing is assumed or borrowed from elsewhere.",
   },
   {
     icon: ContactRound,
-    title: "Human review when needed",
-    description: "Your staff can review, edit, or take over a conversation when a patient case needs judgment instead of automation.",
+    title: "Manual takeover at any point",
+    description: "Staff can review, edit, or take over any conversation. Lower-confidence threads are flagged automatically for human judgment.",
   },
   {
     icon: BrainCircuit,
-    title: "No made-up certainty",
-    description: "When the assistant is unsure, Clinic AI can hold the reply for a person instead of pretending confidence.",
+    title: "Honest when uncertain",
+    description: "When the assistant lacks confidence, it holds the reply for staff instead of guessing. Patients get real answers or real people.",
   },
   {
     icon: LayoutGrid,
-    title: "Clear workflow visibility",
-    description: "Every conversation, request, appointment, and follow-up item stays visible in the workspace so the front desk can see what happened.",
+    title: "Full operational visibility",
+    description: "Every conversation, request, appointment, and follow-up item is traceable in the workspace. Nothing disappears into a black box.",
   },
 ];
 
@@ -138,45 +138,45 @@ const productModules = [
   {
     icon: Inbox,
     title: "Operator inbox",
-    description: "Review AI-handled conversations, approve drafts, and keep every patient thread visible to staff.",
+    description: "See every patient thread, review AI-handled conversations, approve or edit drafts, and take over when needed.",
   },
   {
     icon: CalendarDays,
     title: "Appointments workspace",
-    description: "Manage booked requests, reminder readiness, reschedules, cancellations, and deposits from one operational board.",
+    description: "Track booked requests, reminder readiness, reschedules, cancellations, and deposit status from one board.",
   },
   {
     icon: BrainCircuit,
     title: "AI training",
-    description: "Update services, FAQs, notes, and clinic context so the assistant stays aligned with real information.",
+    description: "Keep your assistant accurate by updating services, FAQs, internal notes, and clinic context as things change.",
   },
   {
     icon: TriangleAlert,
     title: "Follow-up visibility",
-    description: "See missed opportunities, recovery queues, and blocked patient journeys before they disappear into the day.",
+    description: "Stalled requests, missed callbacks, and blocked patient journeys surface automatically so nothing falls through.",
   },
 ];
 
 const faqs = [
   {
-    question: "Is this hard to set up?",
+    question: "How long does setup take?",
     answer:
-      "No. Most clinics can connect the assistant, enter their clinic information, and start testing the workflow in a short guided setup.",
+      "Most clinics finish setup in under 15 minutes. Enter your clinic details, add services and FAQs, and the assistant is ready to test.",
   },
   {
-    question: "Can my staff still review conversations?",
+    question: "Can staff review and override the assistant?",
     answer:
-      "Yes. Clinic AI is designed around operator oversight, human review, and manual takeover when a patient thread needs staff judgment.",
+      "Yes. Every conversation is visible in the inbox. Staff can review any thread, edit suggested replies, or take over the conversation entirely.",
   },
   {
-    question: "What happens if the assistant is unsure?",
+    question: "What does the assistant do when it does not know the answer?",
     answer:
-      "The product is built to stay honest. If confidence is low or a thread needs review, staff can step in instead of the system pretending certainty.",
+      "It holds the reply for your staff. The system flags uncertain threads for human review instead of generating a confident guess.",
   },
   {
     question: "Do patients know they are talking to an assistant?",
     answer:
-      "The workspace is designed for transparent clinic communication. You control how the assistant is introduced and how manual handoff appears.",
+      "You decide. You control the assistant name, greeting, and how handoff to staff is presented. The workspace supports transparent communication by default.",
   },
 ];
 
@@ -242,7 +242,7 @@ export default function LandingPage() {
               href="/register"
               className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700"
             >
-              Start Free
+              Start free
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -259,19 +259,19 @@ export default function LandingPage() {
                   Designed for modern clinics, private practices, and med spas
                 </div>
                 <h1 className="max-w-3xl text-5xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-[4.35rem]">
-                  The front desk workspace clinics wish they had years ago.
+                  One calm workspace for your entire front desk.
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
                   Clinic AI answers patient questions, captures appointment requests around the clock,
-                  keeps every conversation in one inbox, and gives your team a clear operating view from inquiry
-                  to booked appointment.
+                  and gives your team a single operating view from first inquiry to confirmed booking &mdash;
+                  with human review built in at every stage.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/register"
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/25 transition-colors hover:bg-teal-700"
                   >
-                    Start Free
+                    Start free
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
@@ -279,18 +279,18 @@ export default function LandingPage() {
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
                   >
                     <MessageSquareMore className="h-4 w-4 text-teal-600" />
-                    Try Live Demo
+                    Try live demo
                   </Link>
                 </div>
                 <p className="mt-4 text-sm text-slate-500">
-                  Fast setup, operator review when needed, and a calm workflow that stays honest about what is automated.
+                  Set up in minutes. Your staff stays in control. The assistant only uses information you configure.
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   {[
-                    "24/7 patient capture",
-                    "Human review and takeover",
-                    "One inbox for chat and SMS",
+                    "Responds to patients 24/7",
+                    "Staff can review or take over anytime",
+                    "Chat, SMS, and follow-up in one place",
                   ].map((item) => (
                     <div key={item} className="app-card-muted px-4 py-3 text-sm font-semibold text-slate-700">
                       {item}
@@ -434,11 +434,11 @@ export default function LandingPage() {
                 What you actually get
               </div>
               <h2 className="text-4xl font-semibold tracking-[-0.04em] text-slate-950">
-                More than a booking button. A full front-desk workflow.
+                Not just a chatbot. A complete front-desk workspace.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                Clinic AI is built for real clinic operations: answering patient questions, capturing intent,
-                keeping one inbox, surfacing follow-up risk, and helping staff move requests into confirmed appointments.
+                Built for real clinic operations: answering patient questions, capturing requests,
+                keeping one inbox, surfacing follow-up risk, and moving conversations toward booked appointments.
               </p>
             </div>
 
@@ -570,10 +570,10 @@ export default function LandingPage() {
                 Pricing
               </div>
               <h2 className="text-4xl font-semibold tracking-[-0.04em] text-slate-950">
-                Clear plans for clinics that want a better front-desk workflow.
+                Honest pricing. No per-message fees. No hidden costs.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                Choose the plan that fits your request volume and operator needs. No inflated feature language, just the real workspace.
+                Pick the plan that matches your request volume. Upgrade or cancel anytime.
               </p>
             </div>
 
@@ -655,10 +655,10 @@ export default function LandingPage() {
                 Common questions
               </div>
               <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-                A clearer way to understand how Clinic AI fits your front desk.
+                Straightforward answers about how the product works.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                The goal is not to replace judgment. The goal is to give clinics a cleaner, more reliable operating workflow around patient communication.
+                Clinic AI is not a replacement for clinical judgment. It is a reliable operating layer for patient communication, follow-up, and scheduling.
               </p>
             </div>
             <div className="space-y-4">
@@ -679,10 +679,10 @@ export default function LandingPage() {
                   Start with the real workflow
                 </div>
                 <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-                  Give your clinic a front desk that stays responsive, visible, and easier to manage.
+                  See the difference in your first week.
                 </h2>
                 <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
-                  Start free, train the assistant on real clinic information, and let your team operate from one calmer workspace.
+                  Start free, configure the assistant with your real clinic information, and let your team work from one workspace.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
@@ -690,14 +690,14 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm shadow-teal-500/20 transition-colors hover:bg-teal-700"
                 >
-                  Start Free
+                  Start free
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/chat/demo"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                 >
-                  Try Live Demo
+                  Try live demo
                 </Link>
               </div>
             </div>
@@ -713,7 +713,7 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-950">Clinic AI</p>
-              <p className="text-xs text-slate-500">A clearer front-desk operating system for clinics.</p>
+              <p className="text-xs text-slate-500">Patient communication and clinic operations, handled with care.</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">

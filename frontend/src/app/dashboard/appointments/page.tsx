@@ -766,14 +766,14 @@ export default function AppointmentsPage() {
           </>
         }
         title="Appointment board"
-        description="Review timing, deposits, and lifecycle without leaving the workspace."
+        description="Timing, deposits, reminders, and appointment lifecycle in one view."
       />
 
       {appointments.length === 0 ? (
         <EmptyState
           icon={<CalendarClock className="w-7 h-7 text-slate-400" />}
-          title="No appointments here yet"
-          description="Booked requests will appear here as soon as the front desk confirms an appointment."
+          title="No appointments yet"
+          description="Appointments will appear here once staff confirms a booking from the pipeline."
         />
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[210px_1fr_320px]">

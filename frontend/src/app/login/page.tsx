@@ -139,16 +139,16 @@ export default function LoginPage() {
                 Premium clinic workspace
               </div>
               <h1 className="max-w-lg text-5xl font-semibold tracking-[-0.05em] text-slate-950">
-                Welcome back to the calmer side of the front desk.
+                Welcome back. Your front desk is waiting.
               </h1>
               <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
-                Review patient conversations, manage booking flow, and keep operator oversight visible without stitching together disconnected tools.
+                Pick up where you left off — conversations, bookings, and follow-up items are all in one place.
               </p>
               <div className="mt-8 grid gap-3">
                 {[
-                  "One inbox for web chat and SMS",
-                  "Manual takeover and human review when needed",
-                  "Appointments, follow-up, and operations in one workspace",
+                  "Web chat and SMS in one inbox",
+                  "Staff can review or take over any thread",
+                  "Appointments, follow-up, and operations together",
                 ].map((item) => (
                   <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700">
                     <ShieldCheck className="h-4 w-4 text-teal-600" />
@@ -161,9 +161,9 @@ export default function LoginPage() {
             <div className="workspace-rail-card p-5">
               <p className="workspace-section-label">What stays true</p>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
-                <p>Clinic information stays under your configuration.</p>
-                <p>Human review remains available whenever the assistant should not decide alone.</p>
-                <p>Inbox, appointments, and follow-up stay connected instead of hidden across tabs.</p>
+                <p>The assistant only uses information you configure.</p>
+                <p>Staff can review or take over any conversation at any time.</p>
+                <p>Inbox, appointments, and follow-up stay connected in one workspace.</p>
               </div>
             </div>
           </div>

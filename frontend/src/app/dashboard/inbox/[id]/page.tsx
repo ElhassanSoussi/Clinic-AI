@@ -642,7 +642,7 @@ function SmsAutoReplySection({
     <>
       <div className="mb-4 pb-4 border-b border-slate-100">
         <h2 className="text-sm font-semibold text-slate-900 mb-2">
-          AI auto-reply
+          AI auto-reply status
         </h2>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <AiReplyStatusBadge
@@ -684,7 +684,7 @@ function SmsAutoReplySection({
             )}
           </div>
           <p className="text-xs text-slate-500 mb-3">
-            {pendingReviewEvent.auto_reply_reason || "Clinic AI drafted a reply for staff review before sending."}
+            {pendingReviewEvent.auto_reply_reason || "The assistant drafted a reply and is waiting for staff approval before sending."}
           </p>
           <textarea
             rows={4}
@@ -837,12 +837,12 @@ function FrontDeskActionsSection({
   return (
     <div className="app-card p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-slate-900 mb-4">
-        Front desk actions
+        Actions
       </h2>
       {lead ? null : (
         <div className="space-y-3 mb-5">
           <p className="text-sm text-slate-600">
-            Convert this thread into a request so your team can track booking progress and reminders.
+            Link this thread to a request so your team can track booking progress, send reminders, and follow up.
           </p>
               <label className="sr-only" htmlFor="convert-name">
                 Patient name
@@ -1042,7 +1042,7 @@ function FrontDeskActionsSection({
       ) : (
         <p className="text-sm text-slate-500 leading-relaxed">
           {isEventThread
-            ? "This recovery thread is not linked to a request yet. You can still send SMS manually and convert it into a request when the patient is ready."
+            ? "This recovery thread is not linked to a request yet. You can send SMS manually and link it when the patient is ready."
             : "This conversation has not created a linked request yet. If the patient stopped before sharing details, it may need manual follow-up."}
         </p>
       )}
@@ -1322,11 +1322,11 @@ export default function InboxThreadPage({
         eyebrow={
           <>
             <MessageSquare className="h-3.5 w-3.5" />
-            Thread workspace
+            Thread detail
           </>
         }
         title={conversation.customer_name}
-        description="Review the full conversation and move the patient forward."
+        description="Full conversation history and actions for this patient thread."
       />
 
       <div className="workspace-column-layout">

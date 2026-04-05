@@ -29,7 +29,7 @@ const STATUS_FILTERS: {
 }[] = [
   { value: "all", label: "All" },
   { value: "open", label: "Open" },
-  { value: "needs_follow_up", label: "Needs Follow-Up" },
+  { value: "needs_follow_up", label: "Needs follow-up" },
   { value: "booked", label: "Booked" },
   { value: "handled", label: "Handled" },
 ];
@@ -115,7 +115,7 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="Review threads, spot follow-up risk, and open the right conversation."
+        description="Every patient conversation in one place. Review, respond, or hand off."
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[240px_1fr_260px]">
@@ -229,7 +229,7 @@ export default function InboxPage() {
           </div>
 
           {filtered.length === 0 ? (() => {
-            let emptyDescription = "Threads show up once patients start chatting via web chat or connected channels.";
+            let emptyDescription = "Conversations will appear here once patients start chatting via web chat or connected channels.";
             if (threads.length > 0) {
               emptyDescription = channelFilter === "all"
                 ? "Try adjusting the search or status filter."
@@ -301,7 +301,7 @@ export default function InboxPage() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-slate-900">Operating model</p>
-                <p className="text-[10px] text-slate-400">Review, take over, move patients forward</p>
+                <p className="text-[10px] text-slate-400">Review, take over, or move patients forward</p>
               </div>
             </div>
             <div className="mt-3 space-y-2">
@@ -309,14 +309,14 @@ export default function InboxPage() {
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Review needed</p>
                 <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.needs_follow_up}</p>
                 <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
-                  Threads waiting for follow-up or staff review.
+                  Threads waiting for staff review or follow-up.
                 </p>
               </div>
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Booked</p>
                 <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.booked}</p>
                 <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
-                  Converted to booked outcomes.
+                  Conversations that reached a booked outcome.
                 </p>
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function InboxPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-slate-800">Follow-up pressure</p>
-                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Delayed replies, recovery threads, unlinked items.</p>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Delayed replies, recovery threads, and unlinked items.</p>
                 </div>
               </div>
               <div className="flex items-start gap-2 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
@@ -340,7 +340,7 @@ export default function InboxPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-slate-800">Booking handoff</p>
-                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Convert, contact, book, or leave notes in-thread.</p>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Contact, book, or add notes directly from the thread.</p>
                 </div>
               </div>
             </div>

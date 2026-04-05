@@ -40,7 +40,7 @@ const QUICK_ACTIONS: {
 }[] = [
   {
     target: "contacted",
-    label: "Mark Contacted",
+    label: "Mark contacted",
     icon: PhoneCall,
     bg: "bg-amber-50",
     hover: "hover:bg-amber-100",
@@ -48,7 +48,7 @@ const QUICK_ACTIONS: {
   },
   {
     target: "booked",
-    label: "Mark Booked",
+    label: "Mark booked",
     icon: CheckCircle2,
     bg: "bg-emerald-50",
     hover: "hover:bg-emerald-100",
@@ -56,7 +56,7 @@ const QUICK_ACTIONS: {
   },
   {
     target: "closed",
-    label: "Mark Closed",
+    label: "Mark closed",
     icon: XCircle,
     bg: "bg-slate-100",
     hover: "hover:bg-slate-200",
@@ -65,13 +65,13 @@ const QUICK_ACTIONS: {
 ];
 
 function sourceLabel(source: string, slotSource?: string): string {
-  if (slotSource === "availability") return "Availability Slot";
-  if (source === "web_chat") return "AI Chat";
+  if (slotSource === "availability") return "Availability slot";
+  if (source === "web_chat") return "AI chat";
   if (source === "sms") return "SMS";
   if (source === "whatsapp") return "WhatsApp";
-  if (source === "missed_call") return "Missed Call";
-  if (source === "callback_request") return "Callback Request";
-  if (source === "manual") return "Manual Entry";
+  if (source === "missed_call") return "Missed call";
+  if (source === "callback_request") return "Callback request";
+  if (source === "manual") return "Manual entry";
   return source;
 }
 
@@ -166,7 +166,7 @@ export default function LeadDetailPage({
         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Requests
+        Back to requests
       </button>
 
       <div className="flex items-start justify-between mb-6">
@@ -203,7 +203,7 @@ export default function LeadDetailPage({
       {/* Contact Info */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
-          Contact Information
+          Contact information
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
@@ -256,7 +256,7 @@ export default function LeadDetailPage({
       {/* Visit Details */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
-          Visit Details
+          Visit details
         </h2>
         <div className="space-y-4">
           <div>
@@ -286,7 +286,7 @@ export default function LeadDetailPage({
               </div>
               <div>
                 <p className="text-[10px] font-bold text-teal-800 uppercase tracking-wider">
-                  Confirmed Slot
+                  Confirmed slot
                 </p>
                 <p className="text-xs text-teal-700">
                   This appointment is linked to row{" "}
@@ -305,7 +305,7 @@ export default function LeadDetailPage({
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-slate-500" />
-              Chat Conversation
+              Chat conversation
             </h2>
             {conversationId && (
               <span className="text-[11px] text-slate-400">
@@ -337,7 +337,7 @@ export default function LeadDetailPage({
       {/* Status + Notes */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
-          Update Request
+          Update request
         </h2>
 
         <div className="space-y-4">
@@ -401,7 +401,7 @@ export default function LeadDetailPage({
             ) : (
               <Save className="w-4 h-4" />
             )}
-            Save Changes
+            Save changes
           </button>
         </div>
       </div>

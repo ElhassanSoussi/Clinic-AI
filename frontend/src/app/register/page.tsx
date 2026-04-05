@@ -44,13 +44,13 @@ export default function RegisterPage() {
     setQueryReady(true);
   }, []);
 
-  let submitLabel = "Create Account";
+  let submitLabel = "Create account";
   if (loading && selectedPlan) {
     submitLabel = "Preparing checkout...";
   } else if (loading) {
     submitLabel = "Creating account...";
   } else if (selectedPlan) {
-    submitLabel = "Continue to Checkout";
+    submitLabel = "Continue to checkout";
   }
 
   const updateField = (field: string, value: string) => {
@@ -120,16 +120,16 @@ export default function RegisterPage() {
                 Set up a clinic workspace
               </div>
               <h1 className="max-w-lg text-5xl font-semibold tracking-[-0.05em] text-slate-950">
-                Launch a calmer, more reliable front desk in minutes.
+                Set up your clinic workspace in minutes.
               </h1>
               <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">
-                Start with your clinic basics, train the assistant on real information, and keep your team in control from inquiry to booking.
+                Add your clinic details, configure the assistant with real information, and give your team a single workspace from inquiry to booking.
               </p>
               <div className="mt-8 grid gap-3">
                 {[
-                  "Guided onboarding and training",
-                  "Inbox, leads, appointments, and operations included",
-                  "Operator review and takeover stay honest by design",
+                  "Guided setup takes under 15 minutes",
+                  "Inbox, pipeline, appointments, and operations included",
+                  "Staff review and takeover built in from the start",
                 ].map((item) => (
                   <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700">
                     <ShieldCheck className="h-4 w-4 text-teal-600" />
@@ -142,9 +142,9 @@ export default function RegisterPage() {
             <div className="workspace-rail-card p-5">
               <p className="workspace-section-label">You stay in control</p>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
-                <p>Set the clinic information patients see.</p>
-                <p>Train the assistant on your real services, hours, and notes.</p>
-                <p>Keep operator visibility on inbox, appointments, and follow-up from day one.</p>
+                <p>You decide what information the assistant uses.</p>
+                <p>Configure services, hours, and FAQs from real clinic data.</p>
+                <p>Your team sees everything — conversations, bookings, and follow-up — from day one.</p>
               </div>
             </div>
           </div>

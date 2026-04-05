@@ -159,7 +159,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="No activity yet"
-          description="Your assistant is live. Events will appear here as patients interact."
+          description="Your assistant is live. Activity will appear here as patients start conversations."
           action={
             clinic.slug ? (
               <a
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
               >
                 <MessageSquareMore className="h-3.5 w-3.5" />
-                Test your assistant
+                Test assistant
               </a>
             ) : undefined
           }
@@ -181,22 +181,22 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="Ready to go live"
-          description="Setup is complete. Go live to start receiving patient requests."
+          description="Setup is complete. Activate the assistant to start receiving patient conversations."
         />
       );
     }
     return (
       <EmptyState
         icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
-        title="System not live yet"
-        description="Complete your setup to start receiving patient requests."
-        action={
+          title="Setup not complete"
+          description="Finish configuring your clinic details so the assistant can start responding."
+          action={
           <button
             onClick={() => router.push(settingsHref())}
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
           >
             <Settings className="h-3.5 w-3.5" />
-            Complete setup
+            Open settings
           </button>
         }
       />
@@ -233,11 +233,11 @@ export default function DashboardPage() {
         eyebrow={
           <>
             <LayoutGrid className="h-3.5 w-3.5" />
-            Command center
+            Overview
           </>
         }
-        title="Front desk overview"
-        description="Capture volume, patient demand, booking pressure, and operator workload."
+        title="Front desk at a glance"
+        description="Patient volume, booking status, and items that need your attention right now."
         actions={
           billing && billing.plan !== "premium" ? (
             <Link
@@ -327,10 +327,10 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
                 <h2 className="text-base font-bold tracking-tight text-slate-900">
-                  Conversations, bookings, and operator workload in one view.
+                  What happened, what needs attention, and where things stand.
                 </h2>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">
-                  What was captured, what needs human judgment, and which items still need attention.
+                  Live counts from conversations, bookings, and staff actions across the workspace.
                 </p>
               </div>
               <div className="grid gap-2.5 sm:grid-cols-2 lg:w-64">
@@ -388,7 +388,7 @@ export default function DashboardPage() {
           {/* Performance snapshot */}
           <SurfaceCard
             title="Performance snapshot"
-            description="Metrics from real conversation, booking, and review activity."
+            description="Real metrics from conversations, bookings, and review activity."
             action={
               <Link
                 href="/dashboard/inbox"
@@ -419,14 +419,14 @@ export default function DashboardPage() {
           {/* Busiest hours */}
           <SurfaceCard
             title="Busiest contact hours"
-            description="Based on incoming patient messages."
+            description="When patients reach out most, based on incoming messages."
             action={<Clock className="h-3.5 w-3.5 text-slate-400" />}
           >
             {analytics.busiest_contact_hours.length === 0 ? (
               <EmptyState
                 icon={<Clock className="w-5 h-5 text-slate-400" />}
                 title="Not enough data yet"
-                description="Once patients start chatting, you'll see which hours are busiest."
+                description="Contact-hour patterns will appear once patients begin chatting."
               />
             ) : (
               <div className="space-y-3">
@@ -460,7 +460,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <SurfaceCard
               title="Opportunities"
-              description="Follow-up signals and stalled requests."
+            description="Stalled requests and follow-up items that may need action."
               action={
                 <Link
                   href="/dashboard/opportunities"
@@ -474,8 +474,8 @@ export default function DashboardPage() {
               {opportunities.length === 0 ? (
                 <EmptyState
                   icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
-                  title="No follow-up risk"
-                  description="Stalled requests will appear here when detected."
+                title="No follow-up items"
+                description="Stalled or at-risk requests will surface here automatically."
                 />
               ) : (
                 <div className="space-y-2">

@@ -22,7 +22,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   active: { label: "Active", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
   trialing: { label: "Trial", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
   canceled: { label: "Canceled", color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
-  past_due: { label: "Past Due", color: "text-red-700", bg: "bg-red-50 border-red-200" },
+  past_due: { label: "Past due", color: "text-red-700", bg: "bg-red-50 border-red-200" },
   inactive: { label: "Inactive", color: "text-slate-700", bg: "bg-slate-50 border-slate-200" },
 };
 
@@ -158,7 +158,7 @@ export default function BillingPage() {
           </>
         }
         title="Plan & usage"
-        description="Manage your subscription, track usage, and compare plans."
+        description="Current plan, usage this month, and upgrade options."
       />
 
       {/* Stripe return feedback */}
@@ -217,7 +217,7 @@ export default function BillingPage() {
               ) : (
                 <ExternalLink className="w-4 h-4" />
               )}
-              Manage Billing
+              Manage billing
             </button>
           )}
         </div>
@@ -225,10 +225,10 @@ export default function BillingPage() {
 
       {/* Usage Card */}
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-900 mb-4">Monthly Usage</h3>
+        <h3 className="text-sm font-semibold text-slate-900 mb-4">Usage this month</h3>
         <div className="flex items-end justify-between mb-2">
           <span className="text-sm text-slate-600">
-            Leads captured this month
+            Patient requests captured
           </span>
           <span className="text-sm font-medium text-slate-900">
             {billing.monthly_leads_used}
@@ -244,15 +244,15 @@ export default function BillingPage() {
           </div>
         )}
         {billing.monthly_lead_limit === -1 && (
-          <p className="text-xs text-slate-400 mt-1">Unlimited leads on your plan</p>
+          <p className="text-xs text-slate-400 mt-1">Unlimited requests on your current plan</p>
         )}
         {isAtLimit && (
           <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium">Lead limit reached</p>
+              <p className="font-medium">Request limit reached</p>
               <p className="text-red-600">
-                New patient conversations will be paused. Upgrade your plan to continue capturing leads.
+                New patient conversations are paused until the next billing cycle. Upgrade your plan to continue.
               </p>
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function BillingPage() {
 
       {/* Plans Comparison */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-900 mb-3">Available Plans</h3>
+        <h3 className="text-sm font-semibold text-slate-900 mb-3">Compare plans</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {plans.map((plan) => {
             const isCurrent = plan.id === billing.plan;
@@ -302,7 +302,7 @@ export default function BillingPage() {
                   if (isCurrent) {
                     return (
                       <div className="w-full py-2.5 text-center text-sm font-medium text-teal-700 bg-teal-100 rounded-lg">
-                        Current Plan
+                        Current plan
                       </div>
                     );
                   }
@@ -341,9 +341,9 @@ export default function BillingPage() {
           <div className="flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-slate-400" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-slate-900">Payment & Invoices</h3>
+              <h3 className="text-sm font-semibold text-slate-900">Payment & invoices</h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Update payment method, view invoices, or cancel your subscription through the Stripe portal.
+                Update your payment method, download invoices, or manage your subscription through the Stripe portal.
               </p>
             </div>
             <button
@@ -352,7 +352,7 @@ export default function BillingPage() {
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
             >
               {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-              Open Portal
+              Open portal
             </button>
           </div>
         </div>

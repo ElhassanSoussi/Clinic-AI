@@ -115,13 +115,13 @@ function buildEmptyStateConfig(
   if (isLive === false) {
     return {
       title: "System not live yet",
-      description: "Complete your setup to start receiving patient requests automatically.",
+      description: "Finish setting up your clinic so the assistant can start capturing requests.",
       action: (
         <button
           onClick={() => router.push(settingsHref())}
           className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
         >
-          Complete setup
+          Open settings
         </button>
       ),
     };
@@ -130,7 +130,7 @@ function buildEmptyStateConfig(
   if (clinic?.slug) {
     return {
       title: "No requests yet",
-      description: "Your system is live. Patient requests will appear here as they come in.",
+      description: "The assistant is live. Patient requests will appear here as conversations happen.",
       action: (
         <div className="flex flex-wrap justify-center gap-2">
           <a
@@ -348,7 +348,7 @@ export default function LeadsPage() {
           </>
         }
         title="Booking pipeline"
-        description="See every request, update status in-line, and keep the handoff visible."
+        description="Every patient request in one view. Update status, track progress, and keep handoff clear."
       />
 
       {usageWarningBanner}

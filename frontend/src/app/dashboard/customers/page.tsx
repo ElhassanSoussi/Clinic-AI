@@ -63,8 +63,8 @@ export default function CustomersPage() {
             Customer workspace
           </>
         }
-        title="Patient relationships"
-        description="Conversation history, request counts, booking outcomes, and internal context for each contact."
+        title="Patient directory"
+        description="Contact details, conversation history, and booking outcomes for every patient."
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
@@ -91,10 +91,10 @@ export default function CustomersPage() {
             <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
                 icon={<UserRound className="w-5 h-5 text-slate-400" />}
-                title={customers.length === 0 ? "No customer profiles yet" : "No customers match this search"}
+                title={customers.length === 0 ? "No patients yet" : "No patients match these filters"}
                 description={
                   customers.length === 0
-                    ? "Profiles appear automatically once the assistant captures patient details."
+                    ? "Patient profiles are created automatically when the assistant captures contact details."
                     : "Try a different name, phone number, or email."
                 }
               />
