@@ -5,6 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response,
 
 from app.config import get_settings
 from app.dependencies import get_current_user
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 from app.rate_limit import create_rate_limit_dependency
 from app.schemas.frontdesk import (
     AppointmentDepositRequest,
@@ -367,8 +370,14 @@ async def edit_channel_readiness(
 async def operations_overview(current_user: Annotated[dict, Depends(get_current_user)]):
     try:
         return build_operations_overview(current_user["clinic_id"])
-    except RuntimeError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("operations_overview failed clinic_id=%s error=%s", current_user.get("clinic_id"), exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Operations data is temporarily unavailable. Please try again.",
+        ) from exc
 
 
 @router.get("/communications", response_model=list[CommunicationEventResponse])

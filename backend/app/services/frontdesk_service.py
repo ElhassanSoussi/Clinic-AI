@@ -4444,6 +4444,22 @@ def build_sms_review_queue(clinic_id: str) -> list[dict[str, Any]]:
     return queue
 
 
+def _empty_outbound_activity() -> dict[str, Any]:
+    return {
+        "outbound_sms_total": 0,
+        "reminders_sent": 0,
+        "missed_call_texts_sent": 0,
+        "ai_replies_sent": 0,
+        "ai_reply_failures": 0,
+        "failed_sends": 0,
+        "skipped_sends": 0,
+        "human_review_required": 0,
+        "suggested_replies_sent": 0,
+        "blocked_for_review": 0,
+        "manual_takeover_threads": 0,
+    }
+
+
 def _build_outbound_activity(clinic_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     events = [
         event
@@ -4529,17 +4545,23 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
     clinic = _load_frontdesk_settings(clinic_id)
     reminder_enabled = clinic["reminder_enabled"]
     reminder_lead_hours = clinic["reminder_lead_hours"]
-    leads = (
-        db.table("leads")
-        .select("*")
-        .eq("clinic_id", clinic_id)
-        .order("updated_at", desc=True)
-        .execute()
-        .data
-        or []
-    )
+
     try:
-        waitlist_entries = (
+        leads: list[dict[str, Any]] = (
+            db.table("leads")
+            .select("*")
+            .eq("clinic_id", clinic_id)
+            .order("updated_at", desc=True)
+            .execute()
+            .data
+            or []
+        )
+    except Exception as exc:
+        logger.warning("operations_overview: failed to load leads clinic_id=%s error=%s", clinic_id, exc)
+        leads = []
+
+    try:
+        waitlist_entries: list[dict[str, Any]] = (
             db.table("waitlist_entries")
             .select("*")
             .eq("clinic_id", clinic_id)
@@ -4549,7 +4571,8 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
             or []
         )
     except Exception as exc:
-        raise RuntimeError("Operations data is not available until the latest database migration is applied.") from exc
+        logger.warning("operations_overview: waitlist_entries unavailable clinic_id=%s error=%s", clinic_id, exc)
+        waitlist_entries = []
 
     reminder_candidates: list[dict[str, Any]] = []
     action_required_requests: list[dict[str, Any]] = []
@@ -4579,9 +4602,50 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
         ),
         "note": "Deposit requests use real Stripe checkout links. Payment stays pending until Stripe confirms the appointment deposit.",
     }
-    reminder_preview = build_reminder_previews(clinic_id)
-    due_reminders = [item for item in reminder_preview if item["is_due"]]
-    outbound_activity, recent_outbound_messages = _build_outbound_activity(clinic_id)
+
+    try:
+        reminder_preview = build_reminder_previews(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: reminder_previews failed clinic_id=%s error=%s", clinic_id, exc)
+        reminder_preview = []
+    due_reminders = [item for item in reminder_preview if item.get("is_due")]
+
+    try:
+        outbound_activity, recent_outbound_messages = _build_outbound_activity(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: outbound_activity failed clinic_id=%s error=%s", clinic_id, exc)
+        outbound_activity, recent_outbound_messages = _empty_outbound_activity(), []
+
+    try:
+        channel_readiness = build_channel_readiness(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: channel_readiness failed clinic_id=%s error=%s", clinic_id, exc)
+        channel_readiness = []
+
+    try:
+        system_readiness = build_system_readiness(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: system_readiness failed clinic_id=%s error=%s", clinic_id, exc)
+        system_readiness = {
+            "overall_status": "attention",
+            "configured_count": 0,
+            "partial_count": 0,
+            "missing_count": 0,
+            "blocked_count": 0,
+            "items": [],
+        }
+
+    try:
+        communication_queue = build_communication_queue(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: communication_queue failed clinic_id=%s error=%s", clinic_id, exc)
+        communication_queue = []
+
+    try:
+        review_queue = build_sms_review_queue(clinic_id)
+    except Exception as exc:
+        logger.warning("operations_overview: review_queue failed clinic_id=%s error=%s", clinic_id, exc)
+        review_queue = []
 
     return {
         "reminder_enabled": reminder_enabled,
@@ -4592,10 +4656,10 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
         "action_required_requests": action_required_requests,
         "waitlist_entries": waitlist_entries,
         "deposit_summary": deposit_summary,
-        "channel_readiness": build_channel_readiness(clinic_id),
-        "system_readiness": build_system_readiness(clinic_id),
-        "communication_queue": build_communication_queue(clinic_id),
-        "review_queue": build_sms_review_queue(clinic_id),
+        "channel_readiness": channel_readiness,
+        "system_readiness": system_readiness,
+        "communication_queue": communication_queue,
+        "review_queue": review_queue,
         "due_reminders": due_reminders,
         "recent_outbound_messages": recent_outbound_messages,
         "outbound_activity": outbound_activity,
