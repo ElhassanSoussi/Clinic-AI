@@ -152,10 +152,9 @@ export default function OperationsPage() {
     setLoading(true);
     setError("");
     try {
-      const clinicData = await api.clinics.getMyClinic();
-      const [operationsData, reminderPreviewData] = await Promise.all([
+      const [clinicData, operationsData] = await Promise.all([
+        api.clinics.getMyClinic(),
         api.frontdesk.getOperations(),
-        api.frontdesk.getReminderPreview(),
       ]);
       setClinic(clinicData);
       setOperations(operationsData);
@@ -163,8 +162,13 @@ export default function OperationsPage() {
       setReminderLeadHours(String(operationsData.reminder_lead_hours));
       setFollowUpAutomationEnabled(operationsData.follow_up_automation_enabled);
       setFollowUpDelayMinutes(String(operationsData.follow_up_delay_minutes));
-      setReminderPreview(reminderPreviewData);
       syncLeadDrafts(operationsData);
+
+      try {
+        setReminderPreview(await api.frontdesk.getReminderPreview());
+      } catch {
+        setReminderPreview([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load operations");
     } finally {

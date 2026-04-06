@@ -107,8 +107,56 @@ export async function seedAuth(page: Page) {
       });
     }
 
+    if (url.includes("/frontdesk/operations")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          reminder_enabled: false,
+          reminder_lead_hours: 24,
+          follow_up_automation_enabled: false,
+          follow_up_delay_minutes: 45,
+          reminder_candidates: [],
+          action_required_requests: [],
+          waitlist_entries: [],
+          deposit_summary: {
+            required_count: 0,
+            requested_count: 0,
+            paid_count: 0,
+            waiting_count: 0,
+            configured_count: 0,
+            note: "No deposits tracked yet.",
+          },
+          channel_readiness: [],
+          system_readiness: {
+            configured_count: 0,
+            partial_count: 0,
+            missing_count: 0,
+            blocked_count: 0,
+            items: [],
+          },
+          communication_queue: [],
+          review_queue: [],
+          due_reminders: [],
+          recent_outbound_messages: [],
+          outbound_activity: {
+            outbound_sms_total: 0,
+            ai_replies_sent: 0,
+            human_review_required: 0,
+            suggested_replies_sent: 0,
+            reminders_sent: 0,
+            missed_call_texts_sent: 0,
+            manual_takeover_threads: 0,
+            failed_sends: 0,
+            skipped_sends: 0,
+            ai_reply_failures: 0,
+            blocked_for_review: 0,
+          },
+        }),
+      });
+    }
+
     if (
-      url.includes("/frontdesk/operations") ||
       url.includes("/frontdesk/opportunities") ||
       url.includes("/frontdesk/follow-ups") ||
       url.includes("/frontdesk/appointments") ||
