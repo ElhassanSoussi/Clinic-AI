@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.main import create_app
+from app.main import app
 from app.rate_limit import rate_limiter
 
 
@@ -21,6 +21,5 @@ def clear_rate_limiter() -> None:
 
 @pytest.fixture
 def client() -> TestClient:
-    app = create_app(scheduler_enabled=False)
     with TestClient(app) as test_client:
         yield test_client

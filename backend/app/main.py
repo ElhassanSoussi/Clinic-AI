@@ -15,7 +15,34 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 settings = get_settings()
 
-# Disable interactive API docs in production
+
+# ── Sentry ───────────────────────────────────────────────────────────────────
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        traces_sample_rate=0.2 if settings.is_production else 1.0,
+        send_default_pii=False,
+    )
+    logger.info("sentry_initialized env=%s", settings.environment)
+
+
+# ── Lifespan (scheduler start/stop) ─────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    if settings.scheduler_enabled:
+        try:
+            start_background_scheduler()
+        except Exception as exc:
+            logger.error("scheduler_start_failed error=%s", exc)
+    yield
+    stop_background_scheduler()
+
+
+# ── App construction ─────────────────────────────────────────────────────────
+
 _docs_url = None if settings.is_production else "/api/docs"
 _redoc_url = None if settings.is_production else "/api/redoc"
 
@@ -24,7 +51,11 @@ app = FastAPI(
     version="1.0.0",
     docs_url=_docs_url,
     redoc_url=_redoc_url,
+    lifespan=lifespan,
 )
+
+
+# ── Middleware ────────────────────────────────────────────────────────────────
 
 origins = settings.cors_origin_list
 
@@ -53,79 +84,73 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SecurityHeadersMiddleware)
 
 
+# ── Exception handlers ───────────────────────────────────────────────────────
+
+@app.exception_handler(AppError)
+async def app_error_handler(request: Request, exc: AppError):
+    log_method = getattr(logger, exc.log_level, logger.error)
+    log_method(
+        "app_error method=%s path=%s status=%s detail=%s",
+        request.method,
+        request.url.path,
+        exc.status_code,
+        exc.detail,
+    )
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    log_method = logger.warning if exc.status_code < 500 else logger.error
+    log_method(
+        "http_error method=%s path=%s status=%s detail=%s",
+        request.method,
+        request.url.path,
+        exc.status_code,
+        exc.detail,
+    )
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    logger.exception(
+        "unhandled_error method=%s path=%s error=%s",
+        request.method,
+        request.url.path,
+        exc,
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": "An unexpected error occurred. Please try again."},
     )
 
-    origins = settings.cors_origin_list
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_origin_regex=settings.development_cors_origin_regex,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
 
-    @app.exception_handler(AppError)
-    async def app_error_handler(request: Request, exc: AppError):
-        log_method = getattr(logger, exc.log_level, logger.error)
-        log_method(
-            "app_error method=%s path=%s status=%s detail=%s",
-            request.method,
-            request.url.path,
-            exc.status_code,
-            exc.detail,
-        )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+# ── Routers ──────────────────────────────────────────────────────────────────
 
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):
-        log_method = logger.warning if exc.status_code < 500 else logger.error
-        log_method(
-            "http_error method=%s path=%s status=%s detail=%s",
-            request.method,
-            request.url.path,
-            exc.status_code,
-            exc.detail,
-        )
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
-
-    @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception):
-        logger.exception(
-            "unhandled_error method=%s path=%s error=%s",
-            request.method,
-            request.url.path,
-            exc,
-        )
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "An unexpected error occurred. Please try again."},
-        )
-
-    app.include_router(auth.router, prefix="/api")
-    app.include_router(clinics.router, prefix="/api")
-    app.include_router(leads.router, prefix="/api")
-    app.include_router(conversations.router, prefix="/api")
-    app.include_router(chat.router, prefix="/api")
-    app.include_router(billing.router, prefix="/api")
-    app.include_router(activity.router, prefix="/api")
-    app.include_router(admin.router, prefix="/api")
-    app.include_router(events.router, prefix="/api")
-    app.include_router(contact.router, prefix="/api")
-    app.include_router(frontdesk.router, prefix="/api")
-
-    @app.get("/api/health")
-    async def health_check():
-        return {"status": "ok"}
-
-    logger.info("%s API initialized (env=%s, cors=%s)", settings.app_name, settings.environment, origins)
-    return app
+app.include_router(auth.router, prefix="/api")
+app.include_router(clinics.router, prefix="/api")
+app.include_router(leads.router, prefix="/api")
+app.include_router(conversations.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
+app.include_router(billing.router, prefix="/api")
+app.include_router(activity.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
+app.include_router(events.router, prefix="/api")
+app.include_router(contact.router, prefix="/api")
+app.include_router(frontdesk.router, prefix="/api")
 
 
-app = create_app()
+# ── Health check ─────────────────────────────────────────────────────────────
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok"}
+
+
+logger.info(
+    "%s API initialized (env=%s, cors=%s)",
+    settings.app_name,
+    settings.environment,
+    origins,
+)
