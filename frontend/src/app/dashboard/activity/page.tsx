@@ -4,9 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   Activity,
-  UserPlus,
-  ArrowRightLeft,
-  MessageSquare,
   RefreshCw,
   Loader2,
 } from "lucide-react";
@@ -16,24 +13,8 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { timeAgo } from "@/lib/utils";
+import { EVENT_CONFIG_COMPACT as EVENT_CONFIG } from "@/lib/activity-config";
 import type { ActivityEvent } from "@/types";
-
-const EVENT_CONFIG: Record<
-  ActivityEvent["type"],
-  { icon: typeof UserPlus; color: string; bg: string }
-> = {
-  lead_created: { icon: UserPlus, color: "text-blue-600", bg: "bg-blue-50" },
-  lead_status_changed: {
-    icon: ArrowRightLeft,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-  },
-  conversation_started: {
-    icon: MessageSquare,
-    color: "text-teal-600",
-    bg: "bg-teal-50",
-  },
-};
 
 export default function ActivityPage() {
   const [events, setEvents] = useState<ActivityEvent[]>([]);

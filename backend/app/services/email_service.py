@@ -1,5 +1,7 @@
 import resend
 from html import escape
+
+from app.errors import ExternalServiceAppError
 from app.config import get_settings
 from app.utils.logger import get_logger
 
@@ -71,20 +73,29 @@ def send_test_notification_email(clinic: dict) -> dict:
         return {"success": False, "error": f"Failed to send: {str(e)[:200]}"}
 
 
-def send_new_lead_email(clinic: dict, lead: dict) -> None:
+def send_new_lead_email(clinic: dict, lead: dict, *, raise_on_error: bool = False) -> dict:
     settings = get_settings()
     api_key = settings.resend_api_key
     sender_email = _get_sender_email(settings)
     dashboard_base_url = _get_dashboard_base_url(settings)
     
     if not api_key:
-        logger.warning(f"Skipping email notification for lead {lead.get('id')} because RESEND_API_KEY is not set.")
-        return
+        message = f"Skipping email notification for lead {lead.get('id')} because RESEND_API_KEY is not set."
+        logger.warning(message)
+        if raise_on_error:
+            raise ExternalServiceAppError("Email notifications are not configured on the server.")
+        return {"success": False, "error": message}
     if not sender_email:
-        logger.warning(
-            f"Skipping email notification for lead {lead.get('id')} because RESEND_FROM_EMAIL/RESEND_FROM_DOMAIN is not configured."
+        message = (
+            f"Skipping email notification for lead {lead.get('id')} because "
+            "RESEND_FROM_EMAIL/RESEND_FROM_DOMAIN is not configured."
         )
-        return
+        logger.warning(message)
+        if raise_on_error:
+            raise ExternalServiceAppError(
+                "Email notifications are missing a verified sender identity."
+            )
+        return {"success": False, "error": message}
         
     resend.api_key = api_key
     
@@ -92,8 +103,11 @@ def send_new_lead_email(clinic: dict, lead: dict) -> None:
     target_email = clinic.get("notification_email") or clinic.get("email")
     
     if not target_email:
-        logger.warning(f"Skipping email notification for lead {lead.get('id')} because no target email is configured.")
-        return
+        message = f"Skipping email notification for lead {lead.get('id')} because no target email is configured."
+        logger.warning(message)
+        if raise_on_error:
+            raise ExternalServiceAppError("Clinic notification email is not configured.")
+        return {"success": False, "error": message}
         
     subject = f"New appointment request — {lead.get('patient_name', 'A patient')}"
 
@@ -157,6 +171,22 @@ def send_new_lead_email(clinic: dict, lead: dict) -> None:
             "subject": subject,
             "html": html_content
         })
-        logger.info(f"Successfully sent email notification for lead {lead.get('id')} to {target_email}. Resend ID: {r.get('id')}")
+        logger.info(
+            "lead_email_sent clinic_id=%s lead_id=%s target_email=%s resend_id=%s",
+            clinic.get("id"),
+            lead.get("id"),
+            target_email,
+            r.get("id"),
+        )
+        return {"success": True, "provider_id": r.get("id", ""), "target_email": target_email}
     except Exception as e:
-        logger.error(f"Failed to send Resend email for lead {lead.get('id')} to {target_email}: {e}")
+        logger.error(
+            "lead_email_failed clinic_id=%s lead_id=%s target_email=%s error=%s",
+            clinic.get("id"),
+            lead.get("id"),
+            target_email,
+            e,
+        )
+        if raise_on_error:
+            raise ExternalServiceAppError("Lead notification email could not be sent.") from e
+        return {"success": False, "error": str(e)[:200]}

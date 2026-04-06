@@ -23,10 +23,8 @@ import {
   CalendarDays,
   Menu,
   X,
-  Bell,
   ShieldCheck,
   UserCog,
-  Search,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -308,18 +306,16 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] font-medium transition-colors ${
-                  isActive
+                className={`group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] font-medium transition-colors ${isActive
                     ? "bg-teal-50 text-teal-700 font-semibold"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 {isActive && (
                   <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-teal-600" />
                 )}
-                <item.icon className={`h-3.5 w-3.5 shrink-0 ${
-                  isActive ? "text-teal-600" : "text-slate-400 group-hover:text-slate-500"
-                }`} />
+                <item.icon className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-teal-600" : "text-slate-400 group-hover:text-slate-500"
+                  }`} />
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
                   <span className="ml-auto min-w-4 rounded-full bg-blue-500 px-1 py-0.5 text-center text-[9px] font-bold text-white">
@@ -363,9 +359,8 @@ export default function DashboardLayout({
 
       {/* ─── MOBILE SIDEBAR ─── */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity lg:hidden ${
-          sidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-40 transition-opacity lg:hidden ${sidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          }`}
         {...(sidebarOpen ? {} : { "aria-hidden": true })}
       >
         <button
@@ -374,9 +369,8 @@ export default function DashboardLayout({
           aria-label="Close navigation"
         />
         <aside
-          className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-slate-100 bg-white shadow-xl transition-transform ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-slate-100 bg-white shadow-xl transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
@@ -402,13 +396,15 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-all ${
-                    isActive
-                      ? "bg-slate-50 text-slate-900"
+                  className={`group relative flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-all ${isActive
+                      ? "bg-teal-50 text-teal-700 font-semibold"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                  }`}
+                    }`}
                 >
-                  <item.icon className="h-3.5 w-3.5" />
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-teal-600" />
+                  )}
+                  <item.icon className={`h-3.5 w-3.5 ${isActive ? "text-teal-600" : ""}`} />
                   {item.label}
                   {item.label === "Leads" && newLeadCount > 0 && (
                     <span className="ml-auto min-w-4 rounded-full bg-blue-500 px-1 py-0.5 text-center text-[9px] font-bold text-white">
@@ -446,8 +442,8 @@ export default function DashboardLayout({
               href="/dashboard/inbox"
               className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2 transition-colors hover:border-slate-300 hover:bg-white"
             >
-              <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-[13px] text-slate-400">Go to inbox</span>
+              <Inbox className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[13px] text-slate-400">Open inbox</span>
             </Link>
           </div>
 
@@ -459,14 +455,6 @@ export default function DashboardLayout({
               onGoLive={() => setGoLiveModal(true)}
               openSettingsPage={openSettingsPage}
             />
-
-            <button
-              className="hidden rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 lg:block"
-              aria-label="Notifications"
-              type="button"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
 
             {/* Profile dropdown */}
             <div ref={menuRef} className="relative">
@@ -490,9 +478,8 @@ export default function DashboardLayout({
 
               {/* Profile dropdown menu */}
               <div
-                className={`absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg transition-all ${
-                  menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                className={`absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-slate-100 bg-white p-1.5 shadow-lg transition-all ${menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                  }`}
                 role="menu"
               >
                 <div className="mb-1 rounded-lg bg-slate-50 px-3 py-2.5">
