@@ -24,6 +24,18 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { AppointmentRecord } from "@/types";
+import {
+  toDateInputValue,
+  toTimeInputValue,
+  combineDateTime,
+  formatBookingText as formatPreferredText,
+  appointmentStatusLabel,
+  appointmentStatusClass,
+  depositStatusLabel,
+  depositStatusClass,
+  humanizeSnakeCase as humanizeStatus,
+  formatMoney,
+} from "@/lib/format-helpers";
 
 const APPOINTMENT_VIEWS = [
   { value: "upcoming", label: "Upcoming" },
@@ -41,84 +53,6 @@ type AppointmentDraft = {
   note: string;
   depositAmountCents: string;
 };
-
-function toDateInputValue(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function toTimeInputValue(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-function combineDateTime(dateValue: string, timeValue: string): string | null {
-  if (!dateValue || !timeValue) return null;
-  const combined = new Date(`${dateValue}T${timeValue}`);
-  if (Number.isNaN(combined.getTime())) return null;
-  return combined.toISOString();
-}
-
-function formatPreferredText(dateValue: string, timeValue: string): string {
-  const combined = combineDateTime(dateValue, timeValue);
-  if (!combined) return "";
-  return new Date(combined).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
-function appointmentStatusLabel(status: AppointmentRecord["appointment_status"]): string {
-  if (status === "cancel_requested") return "Cancel requested";
-  if (status === "reschedule_requested") return "Reschedule requested";
-  if (status === "cancelled") return "Cancelled";
-  if (status === "completed") return "Completed";
-  if (status === "no_show") return "No-show";
-  if (status === "confirmed") return "Confirmed";
-  return "Open request";
-}
-
-function humanizeStatus(value: string): string {
-  return value.replaceAll("_", " ");
-}
-
-function appointmentStatusClass(status: AppointmentRecord["appointment_status"]): string {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-700";
-  if (status === "cancel_requested" || status === "reschedule_requested") return "bg-amber-50 text-amber-700";
-  if (status === "cancelled" || status === "no_show") return "bg-rose-50 text-rose-700";
-  if (status === "completed") return "bg-blue-50 text-blue-700";
-  return "bg-slate-100 text-slate-700";
-}
-
-function depositStatusLabel(status: AppointmentRecord["deposit_status"]): string {
-  if (status === "required") return "Deposit required";
-  if (status === "requested") return "Deposit requested";
-  if (status === "paid") return "Deposit paid";
-  if (status === "failed") return "Deposit failed";
-  if (status === "expired") return "Deposit expired";
-  if (status === "waived") return "Deposit waived";
-  return "No deposit";
-}
-
-function depositStatusClass(status: AppointmentRecord["deposit_status"]): string {
-  if (status === "paid") return "bg-emerald-50 text-emerald-700";
-  if (status === "requested" || status === "required") return "bg-amber-50 text-amber-700";
-  if (status === "failed" || status === "expired") return "bg-rose-50 text-rose-700";
-  if (status === "waived") return "bg-blue-50 text-blue-700";
-  return "bg-slate-100 text-slate-700";
-}
-
-function formatMoney(cents?: number | null): string {
-  if (!cents) return "$0";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
-}
 
 function draftFromAppointment(appointment: AppointmentRecord): AppointmentDraft {
   return {
@@ -292,9 +226,8 @@ function AppointmentDetailRail({
             <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
               {appointmentStatusLabel(appointment.appointment_status)}
             </span>
-            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-              appointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-            }`}>
+            <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${appointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+              }`}>
               {appointment.reminder_ready ? "Reminder ready" : "Not ready"}
             </span>
           </div>
@@ -769,79 +702,77 @@ export default function AppointmentsPage() {
         description="Timing, deposits, reminders, and appointment lifecycle in one view. Track every booking from confirmation to completion."
       />
 
-      {appointments.length === 0 ? (
-        <EmptyState
-          icon={<CalendarClock className="w-7 h-7 text-slate-400" />}
-          title="No appointments yet"
-          description="Appointments will appear here once staff confirms a booking from the pipeline. You can also create one manually from any inbox thread."
-        />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">
-          {/* Left rail — views */}
-          <div className="hidden space-y-2.5 xl:block">
-            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
-              <div className="mt-2.5 space-y-1">
-                {APPOINTMENT_VIEWS.map((view) => {
-                  const active = activeView === view.value;
-                  return (
-                    <button
-                      key={view.value}
-                      onClick={() => setActiveView(view.value)}
-                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                        active
-                          ? "bg-teal-50/60 text-teal-800"
-                          : "text-slate-500 hover:bg-slate-50"
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">
+        {/* Left rail — views */}
+        <div className="hidden space-y-2.5 xl:block">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
+            <div className="mt-2.5 space-y-1">
+              {APPOINTMENT_VIEWS.map((view) => {
+                const active = activeView === view.value;
+                return (
+                  <button
+                    key={view.value}
+                    onClick={() => setActiveView(view.value)}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${active
+                        ? "bg-teal-50/60 text-teal-800"
+                        : "text-slate-500 hover:bg-slate-50"
                       }`}
-                    >
-                      <span>{view.label}</span>
-                      {active && <span className="text-[10px] text-teal-500">Active</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
-              <div className="mt-2 space-y-1.5">
-                <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                  <p className="text-[9px] text-slate-400">Visible</p>
-                  <p className="mt-0.5 text-lg font-bold text-slate-900">{appointments.length}</p>
-                </div>
-                <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                  <p className="text-[9px] text-slate-400">View</p>
-                  <p className="mt-0.5 text-[12px] font-semibold text-slate-900">
-                    {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
-                  </p>
-                </div>
-              </div>
+                  >
+                    <span>{view.label}</span>
+                    {active && <span className="text-[10px] text-teal-500">Active</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Mobile view selector */}
-          <div className="flex flex-wrap gap-2 xl:hidden">
-            {APPOINTMENT_VIEWS.map((view) => (
-              <button
-                key={view.value}
-                onClick={() => setActiveView(view.value)}
-                className={`rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                  activeView === view.value
-                    ? "bg-teal-50/60 text-teal-800"
-                    : "text-slate-500 hover:bg-slate-50"
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
+            <div className="mt-2 space-y-1.5">
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">Visible</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{appointments.length}</p>
+              </div>
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">View</p>
+                <p className="mt-0.5 text-[12px] font-semibold text-slate-900">
+                  {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile view selector */}
+        <div className="flex flex-wrap gap-2 xl:hidden">
+          {APPOINTMENT_VIEWS.map((view) => (
+            <button
+              key={view.value}
+              onClick={() => setActiveView(view.value)}
+              className={`rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${activeView === view.value
+                  ? "bg-teal-50/60 text-teal-800"
+                  : "text-slate-500 hover:bg-slate-50"
                 }`}
-              >
-                {view.label}
-              </button>
-            ))}
-          </div>
+            >
+              {view.label}
+            </button>
+          ))}
+        </div>
 
-          {/* Center — appointment list */}
-          <div className="space-y-3">
-            <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-              <p className="text-[12px] font-semibold text-slate-900">Appointments</p>
-              <p className="mt-0.5 text-[9px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
-            </div>
+        {/* Center — appointment list */}
+        <div className="space-y-3">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[12px] font-semibold text-slate-900">Appointments</p>
+            <p className="mt-0.5 text-[9px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
+          </div>
+          {appointments.length === 0 ? (
+            <EmptyState
+              icon={<CalendarClock className="w-7 h-7 text-slate-400" />}
+              title={`No ${activeView === "upcoming" ? "upcoming" : activeView === "attention" ? "attention-needed" : activeView === "past" ? "completed" : "cancelled"} appointments`}
+              description="Try switching to another view, or appointments will appear here once staff confirms a booking from the pipeline."
+            />
+          ) : (
             <div className="space-y-2">
               {appointments.map((appointment) => {
                 const active = selectedLeadId === appointment.lead_id;
@@ -849,11 +780,10 @@ export default function AppointmentsPage() {
                   <button
                     key={appointment.lead_id}
                     onClick={() => setSelectedLeadId(appointment.lead_id)}
-                    className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${
-                      active
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${active
                         ? "border-teal-200 bg-teal-50/30 shadow-sm"
                         : "border-slate-100 bg-white hover:border-slate-200"
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
@@ -899,30 +829,30 @@ export default function AppointmentsPage() {
                 );
               })}
             </div>
-          </div>
-
-          {/* Right rail — detail */}
-          {selectedAppointment && selectedDraft && (
-            <AppointmentDetailRail
-              appointment={selectedAppointment}
-              draft={selectedDraft}
-              onUpdateDraft={(patch) => updateDraft(selectedAppointment.lead_id, patch)}
-              onSaveDetails={saveDetails}
-              onReschedule={rescheduleAppointment}
-              onCancel={cancelAppointment}
-              onMarkNoShow={markNoShow}
-              onReopen={reopenAppointment}
-              onRequestDeposit={requestDeposit}
-              onClearDeposit={clearDepositRequirement}
-              onCopyLink={copyDepositLink}
-              depositLink={depositLink}
-              depositMessage={depositMessage}
-              depositActionLeadId={depositActionLeadId}
-              savingLeadId={savingLeadId}
-            />
           )}
         </div>
-      )}
+
+        {/* Right rail — detail */}
+        {selectedAppointment && selectedDraft && (
+          <AppointmentDetailRail
+            appointment={selectedAppointment}
+            draft={selectedDraft}
+            onUpdateDraft={(patch) => updateDraft(selectedAppointment.lead_id, patch)}
+            onSaveDetails={saveDetails}
+            onReschedule={rescheduleAppointment}
+            onCancel={cancelAppointment}
+            onMarkNoShow={markNoShow}
+            onReopen={reopenAppointment}
+            onRequestDeposit={requestDeposit}
+            onClearDeposit={clearDepositRequirement}
+            onCopyLink={copyDepositLink}
+            depositLink={depositLink}
+            depositMessage={depositMessage}
+            depositActionLeadId={depositActionLeadId}
+            savingLeadId={savingLeadId}
+          />
+        )}
+      </div>
     </div>
   );
 }

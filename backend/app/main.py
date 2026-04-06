@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,6 +13,14 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 settings = get_settings()
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=0.2,
+        environment=settings.environment,
+        send_default_pii=False,
+    )
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):

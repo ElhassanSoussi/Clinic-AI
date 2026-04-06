@@ -91,7 +91,7 @@ export default function CustomersPage() {
             <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
               <EmptyState
                 icon={<UserRound className="w-5 h-5 text-slate-400" />}
-                title={customers.length === 0 ? "No patients yet" : "No patients match these filters"}
+                title={customers.length === 0 ? "No patients yet" : "No patients match your search"}
                 description={
                   customers.length === 0
                     ? "Patient profiles are created automatically when the assistant captures contact details from a conversation."

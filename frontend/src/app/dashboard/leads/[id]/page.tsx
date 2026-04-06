@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Phone,
@@ -11,6 +11,7 @@ import {
   Save,
   Loader2,
   User,
+  Users,
   MessageSquare,
   CheckCircle2,
   PhoneCall,
@@ -20,6 +21,8 @@ import { api } from "@/lib/api";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
 import { formatDateTime } from "@/lib/utils";
 import type { Lead, LeadStatus, ConversationMessage } from "@/types";
 
@@ -38,31 +41,31 @@ const QUICK_ACTIONS: {
   hover: string;
   text: string;
 }[] = [
-  {
-    target: "contacted",
-    label: "Mark contacted",
-    icon: PhoneCall,
-    bg: "bg-amber-50",
-    hover: "hover:bg-amber-100",
-    text: "text-amber-700",
-  },
-  {
-    target: "booked",
-    label: "Mark booked",
-    icon: CheckCircle2,
-    bg: "bg-emerald-50",
-    hover: "hover:bg-emerald-100",
-    text: "text-emerald-700",
-  },
-  {
-    target: "closed",
-    label: "Mark closed",
-    icon: XCircle,
-    bg: "bg-slate-100",
-    hover: "hover:bg-slate-200",
-    text: "text-slate-600",
-  },
-];
+    {
+      target: "contacted",
+      label: "Mark contacted",
+      icon: PhoneCall,
+      bg: "bg-amber-50",
+      hover: "hover:bg-amber-100",
+      text: "text-amber-700",
+    },
+    {
+      target: "booked",
+      label: "Mark booked",
+      icon: CheckCircle2,
+      bg: "bg-emerald-50",
+      hover: "hover:bg-emerald-100",
+      text: "text-emerald-700",
+    },
+    {
+      target: "closed",
+      label: "Mark closed",
+      icon: XCircle,
+      bg: "bg-slate-100",
+      hover: "hover:bg-slate-200",
+      text: "text-slate-600",
+    },
+  ];
 
 function sourceLabel(source: string, slotSource?: string): string {
   if (slotSource === "availability") return "Availability slot";
@@ -81,7 +84,6 @@ export default function LeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -89,7 +91,8 @@ export default function LeadDetailPage({
   const [quickSaving, setQuickSaving] = useState<LeadStatus | null>(null);
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<LeadStatus>("new");
-  const [saveMessage, setSaveMessage] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<ConversationMessage[]>([]);
 
@@ -119,16 +122,14 @@ export default function LeadDetailPage({
 
   const handleSave = async () => {
     setSaving(true);
-    setSaveMessage("");
+    setActionError("");
     try {
       const updated = await api.leads.update(id, { status, notes });
       setLead(updated);
-      setSaveMessage("Changes saved successfully.");
-      setTimeout(() => setSaveMessage(""), 3000);
+      setSuccessMessage("Changes saved successfully.");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setSaveMessage(
-        err instanceof Error ? err.message : "Failed to save changes."
-      );
+      setActionError(err instanceof Error ? err.message : "Failed to save changes.");
     } finally {
       setSaving(false);
     }
@@ -136,16 +137,15 @@ export default function LeadDetailPage({
 
   const handleQuickAction = async (targetStatus: LeadStatus) => {
     setQuickSaving(targetStatus);
+    setActionError("");
     try {
       const updated = await api.leads.update(id, { status: targetStatus });
       setLead(updated);
       setStatus(targetStatus);
-      setSaveMessage(`Status updated to ${targetStatus}.`);
-      setTimeout(() => setSaveMessage(""), 3000);
+      setSuccessMessage(`Status updated to ${targetStatus}.`);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setSaveMessage(
-        err instanceof Error ? err.message : "Failed to update status."
-      );
+      setActionError(err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setQuickSaving(null);
     }
@@ -159,30 +159,30 @@ export default function LeadDetailPage({
     );
 
   return (
-    <div className="max-w-3xl">
-      {/* Header */}
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
+    <div className="max-w-4xl space-y-4">
+      <Link
+        href="/dashboard/leads"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
       >
-        <ArrowLeft className="w-4 h-4" />
-        Back to requests
-      </button>
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Back to Leads
+      </Link>
 
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {lead.patient_name}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Submitted {formatDateTime(lead.created_at)}
-          </p>
-        </div>
-        <LeadStatusBadge status={lead.status as LeadStatus} />
-      </div>
+      <PageHeader
+        eyebrow={
+          <>
+            <Users className="h-3.5 w-3.5" />
+            Request detail
+          </>
+        }
+        title={lead.patient_name}
+        description={`Submitted ${formatDateTime(lead.created_at)}`}
+        actions={<LeadStatusBadge status={lead.status as LeadStatus} />}
+      />
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
+
+      <div className="flex flex-wrap gap-2">
         {QUICK_ACTIONS.filter((a) => a.target !== lead.status).map((action) => (
           <button
             key={action.target}
@@ -200,8 +200,7 @@ export default function LeadDetailPage({
         ))}
       </div>
 
-      {/* Contact Info */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
           Contact information
         </h2>
@@ -253,8 +252,7 @@ export default function LeadDetailPage({
         </div>
       </div>
 
-      {/* Visit Details */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
           Visit details
         </h2>
@@ -299,9 +297,8 @@ export default function LeadDetailPage({
         </div>
       </div>
 
-      {/* Conversation Preview */}
       {chatMessages.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-slate-500" />
@@ -320,11 +317,10 @@ export default function LeadDetailPage({
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${
-                    msg.role === "user"
+                  className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${msg.role === "user"
                       ? "bg-teal-600 text-white rounded-br-sm"
                       : "bg-slate-100 text-slate-700 rounded-bl-sm"
-                  }`}
+                    }`}
                 >
                   {msg.content}
                 </div>
@@ -334,8 +330,7 @@ export default function LeadDetailPage({
         </div>
       )}
 
-      {/* Status + Notes */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900 mb-4">
           Update request
         </h2>
@@ -379,16 +374,8 @@ export default function LeadDetailPage({
             />
           </div>
 
-          {saveMessage && (
-            <p
-              className={`text-sm ${
-                saveMessage.includes("success") || saveMessage.includes("updated")
-                  ? "text-emerald-600"
-                  : "text-red-600"
-              }`}
-            >
-              {saveMessage}
-            </p>
+          {successMessage && (
+            <p className="text-sm text-emerald-600">{successMessage}</p>
           )}
 
           <button

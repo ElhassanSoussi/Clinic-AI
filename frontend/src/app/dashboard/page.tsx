@@ -16,7 +16,6 @@ import {
   MessageSquareMore,
   Settings,
   TrendingUp,
-  UserPlus,
   Users,
   Zap,
 } from "lucide-react";
@@ -31,6 +30,8 @@ import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { RightRailCard } from "@/components/ui";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
+import { EVENT_CONFIG } from "@/lib/activity-config";
+import { formatMoney } from "@/lib/format-helpers";
 import type {
   ActivityEvent,
   AppointmentRecord,
@@ -40,31 +41,9 @@ import type {
   Opportunity,
 } from "@/types";
 
-const EVENT_CONFIG: Record<
-  ActivityEvent["type"],
-  { icon: typeof UserPlus; color: string; bg: string; label: string }
-> = {
-  lead_created: { icon: UserPlus, color: "text-blue-600", bg: "bg-blue-50", label: "New Lead" },
-  lead_status_changed: { icon: ArrowRightLeft, color: "text-amber-600", bg: "bg-amber-50", label: "Updated" },
-  conversation_started: {
-    icon: MessageSquareMore,
-    color: "text-teal-600",
-    bg: "bg-teal-50",
-    label: "Chat",
-  },
-};
-
 function settingsHref(section?: string | null): string {
   if (!section) return "/dashboard/settings";
   return `/dashboard/settings?section=${encodeURIComponent(section)}`;
-}
-
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
 }
 
 export default function DashboardPage() {
