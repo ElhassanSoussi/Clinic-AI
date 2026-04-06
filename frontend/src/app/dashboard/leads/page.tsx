@@ -388,7 +388,7 @@ export default function LeadsPage() {
                     }`}
                   >
                     <span>{opt.label}</span>
-                    <span className={`text-[10px] ${active ? "text-teal-500" : "text-slate-300"}`}>{count}</span>
+                    <span className={`text-[11px] ${active ? "text-teal-500" : "text-slate-400"}`}>{count}</span>
                   </button>
                 );
               })}
@@ -418,7 +418,7 @@ export default function LeadsPage() {
 
           {/* Search */}
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 bg-white px-3.5 py-2 shadow-sm">
-            <Search className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+            <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
             <input
               type="text"
               value={search}

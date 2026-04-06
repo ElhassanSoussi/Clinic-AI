@@ -154,7 +154,7 @@ export default function InboxPage() {
                     }`}
                   >
                     <span>{filter.label}</span>
-                    <span className={`text-[10px] ${active ? "text-teal-500" : "text-slate-300"}`}>{count}</span>
+                    <span className={`text-[11px] ${active ? "text-teal-500" : "text-slate-400"}`}>{count}</span>
                   </button>
                 );
               })}
@@ -301,7 +301,7 @@ export default function InboxPage() {
               </div>
               <div>
                 <p className="text-[12px] font-semibold text-slate-900">Operating model</p>
-                <p className="text-[9px] text-slate-400">Review, take over, or move patients forward</p>
+                <p className="text-[10px] text-slate-500">Review, take over, or move patients forward</p>
               </div>
             </div>
             <div className="mt-2.5 space-y-1.5">

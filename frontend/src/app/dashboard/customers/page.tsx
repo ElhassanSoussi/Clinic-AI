@@ -72,7 +72,7 @@ export default function CustomersPage() {
           {/* Search + summary */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300" />
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={search}
@@ -114,7 +114,7 @@ export default function CustomersPage() {
                         {customer.phone || customer.email || "No contact saved"}
                       </p>
                     </div>
-                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300" />
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                   </div>
 
                   <div className="mt-2 grid grid-cols-4 gap-1.5">

@@ -112,7 +112,7 @@ export default function AccountPage() {
         {/* Left rail */}
         <aside className="hidden xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Account overview</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Account overview</p>
             <div className="mt-3 space-y-2.5">
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] text-slate-400">Signed in as</p>
@@ -280,7 +280,7 @@ export default function AccountPage() {
         {/* Right rail */}
         <aside className="hidden xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Security note</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Security note</p>
             <div className="mt-3 space-y-2 text-[13px] leading-relaxed text-slate-500">
               <p>Your account controls the operator identity shown across the workspace.</p>
               <p>Use this page to keep sign-in secure without changing the rest of the clinic configuration.</p>

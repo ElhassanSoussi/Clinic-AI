@@ -175,20 +175,20 @@ export default function CustomerProfilePage({
                 </p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 text-center">
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/40 border border-slate-100/60">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-300">Conversations</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
+                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Conversations</p>
                   <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.conversation_count}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/40 border border-slate-100/60">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-300">Requests</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
+                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Requests</p>
                   <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.lead_count}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/40 border border-slate-100/60">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-300">Total interactions</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
+                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Total interactions</p>
                   <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.total_interactions}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/40 border border-slate-100/60">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-300">Last outcome</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
+                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Last outcome</p>
                   <p className="text-lg font-bold text-slate-900 mt-0.5">{lastOutcomeLabel(profile.last_outcome)}</p>
                 </div>
               </div>

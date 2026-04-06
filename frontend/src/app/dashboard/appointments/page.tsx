@@ -274,7 +274,7 @@ function AppointmentDetailRail({
             <p className="mt-1 text-[10px] text-slate-400">5000 = {formatMoney(5000)}</p>
           </div>
           <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">State</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">State</p>
             <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
               {depositStateCaption(appointment)}
             </p>
@@ -730,11 +730,11 @@ export default function AppointmentsPage() {
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Board</p>
             <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
                 <p className="text-[10px] text-slate-500">Visible</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{appointments.length}</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
                 <p className="text-[10px] text-slate-500">View</p>
                 <p className="mt-0.5 text-[12px] font-semibold text-slate-900">
                   {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
