@@ -449,7 +449,7 @@ def _parse_json_field(clinic: dict, key: str, default):
     return value
 
 
-def _clinic_context_block(clinic: dict) -> str:
+def _clinic_context_block(clinic: dict, knowledge_context: str = "") -> str:
     services = _parse_json_field(clinic, "services", [])
     services_text = ", ".join(services) if services else "General consultation"
 
@@ -465,6 +465,10 @@ def _clinic_context_block(clinic: dict) -> str:
             faq_lines.append(f"  Q: {q}\n  A: {a}")
     faq_text = ("\nFREQUENTLY ASKED QUESTIONS:\n" + "\n".join(faq_lines)) if faq_lines else ""
 
+    knowledge_block = ""
+    if knowledge_context:
+        knowledge_block = f"\n\n{knowledge_context}\nIMPORTANT: Use the above knowledge to help answer questions, but never invent information that is not present. If the knowledge does not contain a clear answer, say you are not sure and offer to connect the patient with the clinic directly."
+
     return f"""CLINIC INFORMATION:
   Name:     {clinic.get('name', 'the clinic')}
   Phone:    {clinic.get('phone', 'not provided')}
@@ -472,7 +476,7 @@ def _clinic_context_block(clinic: dict) -> str:
   Address:  {clinic.get('address', 'not provided')}
   Services: {services_text}
   Hours:
-{hours_text}{faq_text}"""
+{hours_text}{faq_text}{knowledge_block}"""
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -488,11 +492,11 @@ def _base_rules() -> str:
 - Keep responses warm, calm, professional, and concise."""
 
 
-def build_greeting_prompt(clinic: dict) -> str:
+def build_greeting_prompt(clinic: dict, knowledge_context: str = "") -> str:
     clinic_name = clinic.get("name", DEFAULT_CLINIC_NAME)
     return f"""You are the virtual front desk assistant for {clinic_name}.
 
-{_clinic_context_block(clinic)}
+{_clinic_context_block(clinic, knowledge_context)}
 
 {_base_rules()}
 
@@ -502,17 +506,18 @@ Style: "Hi, welcome to {clinic_name}! I'm the clinic assistant. I can help you b
 Adapt the wording — don't copy it verbatim. Keep it under 3 sentences."""
 
 
-def build_faq_prompt(clinic: dict, user_message: str) -> str:
+def build_faq_prompt(clinic: dict, user_message: str, knowledge_context: str = "") -> str:
     clinic_name = clinic.get("name", DEFAULT_CLINIC_NAME)
     fallback = clinic.get("fallback_message", "That's a great question — I'd recommend calling us directly so we can give you the most accurate answer.")
     return f"""You are the front desk assistant for {clinic_name}.
 
-{_clinic_context_block(clinic)}
+{_clinic_context_block(clinic, knowledge_context)}
 
 {_base_rules()}
 
-TASK: Answer the patient's question using ONLY the clinic information above.
+TASK: Answer the patient's question using ONLY the clinic information and knowledge above.
 - Be friendly, clear, and concise.
+- If the answer is available in the clinic knowledge or documents, use it.
 - If you don't know the answer, say: "{fallback}"
 - After answering, gently offer to help with anything else (such as booking an appointment).
 
@@ -811,6 +816,7 @@ class ChatContext:
     available_slots: list
     slot_options: list[dict]
     source: str = "web_chat"
+    knowledge_context: str = ""
 
 
 @dataclass
@@ -835,7 +841,7 @@ def faq_interrupt_transition(state: str, context: ChatContext) -> Optional[ChatT
         return None
     return ChatTransition(
         next_state=state,
-        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+        system_prompt=build_faq_prompt(context.clinic, context.user_message, context.knowledge_context),
     )
 
 
@@ -994,12 +1000,12 @@ def handle_general_state(context: ChatContext) -> ChatTransition:
     if intent == "faq":
         return ChatTransition(
             next_state="faq",
-            system_prompt=build_faq_prompt(context.clinic, context.user_message),
+            system_prompt=build_faq_prompt(context.clinic, context.user_message, context.knowledge_context),
         )
     if is_simple_greeting(context.user_message):
         return ChatTransition(
             next_state="greeting",
-            system_prompt=build_greeting_prompt(context.clinic),
+            system_prompt=build_greeting_prompt(context.clinic, context.knowledge_context),
             response_override=reply_greeting(context.clinic),
         )
     return ChatTransition(
@@ -1014,7 +1020,7 @@ def handle_general_entry_state(context: ChatContext) -> ChatTransition:
     if transition.next_state == "fallback":
         return ChatTransition(
             next_state="greeting",
-            system_prompt=build_greeting_prompt(context.clinic),
+            system_prompt=build_greeting_prompt(context.clinic, context.knowledge_context),
             response_override=reply_greeting(context.clinic),
         )
     return transition
@@ -1030,7 +1036,7 @@ def handle_faq_state(context: ChatContext) -> ChatTransition:
         )
     return ChatTransition(
         next_state="faq",
-        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+        system_prompt=build_faq_prompt(context.clinic, context.user_message, context.knowledge_context),
     )
 
 
@@ -1192,7 +1198,7 @@ def handle_booking_complete_state(context: ChatContext) -> ChatTransition:
         )
     return ChatTransition(
         next_state="booking_complete",
-        system_prompt=build_faq_prompt(context.clinic, context.user_message),
+        system_prompt=build_faq_prompt(context.clinic, context.user_message, context.knowledge_context),
     )
 
 
@@ -1391,6 +1397,13 @@ async def process_conversation_turn(
     available_slots, slot_options = load_slot_context(clinic)
     messages = build_message_history(db, conversation_id, user_message)
 
+    knowledge_context = ""
+    try:
+        from app.services.knowledge_service import build_knowledge_context
+        knowledge_context = await build_knowledge_context(clinic_id, user_message)
+    except Exception as exc:
+        logger.warning("knowledge_retrieval_failed clinic_id=%s error=%s", clinic_id, exc)
+
     logger.info(
         f"Session {session_id[:8]} | State: {state} | "
         f"Msg: {user_message[:60]!r} | Slots: {len(available_slots)}"
@@ -1414,6 +1427,7 @@ async def process_conversation_turn(
             available_slots=available_slots,
             slot_options=slot_options,
             source=source,
+            knowledge_context=knowledge_context,
         )
         transition = resolve_chat_transition(state, context)
         next_state = transition.next_state

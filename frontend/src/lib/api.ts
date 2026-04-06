@@ -319,6 +319,32 @@ async function request<T>(
   }
 }
 
+async function requestRaw<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const apiUrl = getPublicApiUrl();
+  const token = await getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${apiUrl}${path}`, {
+    ...options,
+    headers: { ...headers, ...(options.headers as Record<string, string>) },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Request failed: ${res.status}`);
+  }
+
+  const body = await res.json();
+  clearApiCache();
+  return body as T;
+}
+
 export const api = {
   auth: {
     register(data: {
@@ -889,6 +915,27 @@ export const api = {
     deleteKnowledgeSource(id: string): Promise<{ success: boolean }> {
       return request(`/frontdesk/training/sources/${id}`, {
         method: "DELETE",
+      });
+    },
+
+    uploadDocument(file: File): Promise<import("@/types").KnowledgeDocument> {
+      const formData = new FormData();
+      formData.append("file", file);
+      return requestRaw("/frontdesk/training/documents", {
+        method: "POST",
+        body: formData,
+      });
+    },
+
+    deleteDocument(id: string): Promise<{ success: boolean }> {
+      return request(`/frontdesk/training/documents/${id}`, {
+        method: "DELETE",
+      });
+    },
+
+    reprocessDocument(id: string): Promise<{ success: boolean; status: string }> {
+      return request(`/frontdesk/training/documents/${id}/reprocess`, {
+        method: "POST",
       });
     },
   },

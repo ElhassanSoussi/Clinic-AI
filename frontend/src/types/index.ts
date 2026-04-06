@@ -539,6 +539,27 @@ export interface TrainingKnowledgeSource {
   updated_at?: string | null;
 }
 
+export interface KnowledgeDocument {
+  id: string;
+  filename: string;
+  file_type: string;
+  file_size_bytes: number;
+  storage_path: string;
+  status: "uploaded" | "processing" | "ready" | "failed";
+  error_message: string;
+  chunk_count: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface DocumentStats {
+  total: number;
+  ready: number;
+  processing: number;
+  failed: number;
+  total_chunks: number;
+}
+
 export interface TrainingReadinessItem {
   key: string;
   label: string;
@@ -554,6 +575,8 @@ export interface TrainingOverview {
   readiness_items: TrainingReadinessItem[];
   knowledge_gaps: string[];
   custom_sources: TrainingKnowledgeSource[];
+  documents: KnowledgeDocument[];
+  document_stats: DocumentStats;
 }
 
 export interface AuthResponse {

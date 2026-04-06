@@ -134,6 +134,8 @@ async function seedAuth(page: Page) {
           readiness_items: [],
           knowledge_gaps: [],
           custom_sources: [],
+          documents: [],
+          document_stats: { total: 0, ready: 0, processing: 0, failed: 0, total_chunks: 0 },
         }),
       });
     }

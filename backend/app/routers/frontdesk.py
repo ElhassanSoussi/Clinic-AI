@@ -1,7 +1,7 @@
 from typing import Annotated
 from urllib.parse import parse_qsl
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, UploadFile, status
 
 from app.config import get_settings
 from app.dependencies import get_current_user
@@ -648,3 +648,119 @@ async def remove_training_source(
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Knowledge source not found.")
     return {"success": True}
+
+
+# ── Document upload & management ──────────────────────────────────────────
+
+@router.get("/training/documents")
+async def list_training_documents(
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.knowledge_service import list_documents
+    return list_documents(current_user["clinic_id"])
+
+
+@router.post("/training/documents")
+async def upload_training_document(
+    file: UploadFile,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.knowledge_service import (
+        create_document_record,
+        ingest_document,
+        upload_to_storage,
+    )
+
+    if not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided.")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext not in ("pdf", "txt"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file type: .{ext}. Upload a PDF or TXT file.",
+        )
+
+    file_bytes = await file.read()
+    max_size = 10 * 1024 * 1024
+    if len(file_bytes) > max_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10 MB.",
+        )
+
+    clinic_id = current_user["clinic_id"]
+    content_type = file.content_type or ("application/pdf" if ext == "pdf" else "text/plain")
+
+    try:
+        storage_path = upload_to_storage(clinic_id, file.filename, file_bytes, content_type)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"File storage failed: {exc}",
+        ) from exc
+
+    doc = create_document_record(
+        clinic_id=clinic_id,
+        filename=file.filename,
+        file_type=ext,
+        file_size_bytes=len(file_bytes),
+        storage_path=storage_path,
+    )
+
+    import asyncio
+    asyncio.create_task(ingest_document(clinic_id, doc["id"], file_bytes, ext))
+
+    return doc
+
+
+@router.delete("/training/documents/{document_id}")
+async def remove_training_document(
+    document_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.knowledge_service import delete_document
+
+    deleted = delete_document(current_user["clinic_id"], document_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+    return {"success": True}
+
+
+@router.post("/training/documents/{document_id}/reprocess")
+async def reprocess_training_document(
+    document_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    from app.services.knowledge_service import (
+        get_document,
+        ingest_document,
+        update_document_status,
+    )
+
+    clinic_id = current_user["clinic_id"]
+    doc = get_document(clinic_id, document_id)
+    if not doc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+    if not doc.get("storage_path"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Document has no stored file to reprocess.")
+
+    db = __import__("app.dependencies", fromlist=["get_supabase"]).get_supabase()
+
+    db.table("document_chunks").delete().eq("document_id", document_id).execute()
+    update_document_status(document_id, "uploaded")
+
+    try:
+        file_bytes = db.storage.from_("knowledge-documents").download(doc["storage_path"])
+    except Exception as exc:
+        update_document_status(document_id, "failed", error_message=f"Could not retrieve file: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Could not retrieve original file from storage.",
+        ) from exc
+
+    import asyncio
+    asyncio.create_task(ingest_document(clinic_id, document_id, file_bytes, doc["file_type"]))
+
+    return {"success": True, "status": "processing"}

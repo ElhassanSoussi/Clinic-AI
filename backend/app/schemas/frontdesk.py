@@ -542,6 +542,27 @@ class TrainingKnowledgeSourceResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+class KnowledgeDocumentResponse(BaseModel):
+    id: str
+    filename: str
+    file_type: str
+    file_size_bytes: int = 0
+    storage_path: str = ""
+    status: str
+    error_message: str = ""
+    chunk_count: int = 0
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class DocumentStatsResponse(BaseModel):
+    total: int = 0
+    ready: int = 0
+    processing: int = 0
+    failed: int = 0
+    total_chunks: int = 0
+
+
 class TrainingReadinessItemResponse(BaseModel):
     key: str
     label: str
@@ -557,6 +578,8 @@ class TrainingOverviewResponse(BaseModel):
     readiness_items: list[TrainingReadinessItemResponse]
     knowledge_gaps: list[str]
     custom_sources: list[TrainingKnowledgeSourceResponse]
+    documents: list[KnowledgeDocumentResponse] = []
+    document_stats: DocumentStatsResponse = DocumentStatsResponse()
 
 
 class KnowledgeSourceCreateRequest(BaseModel):

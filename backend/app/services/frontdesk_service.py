@@ -2606,6 +2606,12 @@ def build_training_overview(clinic_id: str) -> dict[str, Any]:
     except Exception:
         custom_sources = []
 
+    try:
+        from app.services.knowledge_service import get_document_stats
+        doc_stats = get_document_stats(clinic_id)
+    except Exception:
+        doc_stats = {"documents": [], "document_count": 0, "ready_count": 0, "processing_count": 0, "failed_count": 0, "total_chunks": 0}
+
     readiness_items = [
         {
             "key": "services",
@@ -2637,6 +2643,12 @@ def build_training_overview(clinic_id: str) -> dict[str, Any]:
             "configured": len(custom_sources) > 0,
             "detail": f"{len(custom_sources)} custom notes added" if custom_sources else "No custom notes added yet",
         },
+        {
+            "key": "uploaded_documents",
+            "label": "Uploaded documents",
+            "configured": doc_stats["ready_count"] > 0,
+            "detail": f"{doc_stats['ready_count']} document(s) ready, {doc_stats['total_chunks']} searchable chunks" if doc_stats["ready_count"] > 0 else "No documents uploaded yet",
+        },
     ]
 
     configured_count = sum(1 for item in readiness_items if item["configured"])
@@ -2658,6 +2670,14 @@ def build_training_overview(clinic_id: str) -> dict[str, Any]:
         "readiness_items": readiness_items,
         "knowledge_gaps": knowledge_gaps,
         "custom_sources": custom_sources,
+        "documents": doc_stats["documents"],
+        "document_stats": {
+            "total": doc_stats["document_count"],
+            "ready": doc_stats["ready_count"],
+            "processing": doc_stats["processing_count"],
+            "failed": doc_stats["failed_count"],
+            "total_chunks": doc_stats["total_chunks"],
+        },
     }
 
 

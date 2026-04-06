@@ -1,23 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  AlertTriangle,
   Bot,
+  CheckCircle2,
   FileText,
   Loader2,
   Plus,
+  RefreshCw,
   Send,
   Sparkles,
   Trash2,
   Upload,
+  XCircle,
 } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import type { ChatResponse, Clinic, TrainingKnowledgeSource, TrainingOverview } from "@/types";
+import type {
+  ChatResponse,
+  Clinic,
+  KnowledgeDocument,
+  TrainingKnowledgeSource,
+  TrainingOverview,
+} from "@/types";
 
 function settingsHref(section?: string): string {
   if (!section) return "/dashboard/settings";
@@ -40,6 +50,40 @@ function generatePreviewSessionId(): string {
   return `training_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function docStatusIcon(status: KnowledgeDocument["status"]) {
+  switch (status) {
+    case "ready":
+      return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />;
+    case "processing":
+      return <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />;
+    case "failed":
+      return <XCircle className="h-3.5 w-3.5 text-rose-500" />;
+    default:
+      return <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />;
+  }
+}
+
+function docStatusLabel(status: KnowledgeDocument["status"]): string {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "processing":
+      return "Processing...";
+    case "failed":
+      return "Failed";
+    case "uploaded":
+      return "Uploaded";
+    default:
+      return status;
+  }
+}
+
 export default function TrainingPage() {
   const [training, setTraining] = useState<TrainingOverview | null>(null);
   const [clinic, setClinic] = useState<Clinic | null>(null);
@@ -57,6 +101,8 @@ export default function TrainingPage() {
   >([]);
   const [previewSending, setPreviewSending] = useState(false);
   const [previewSessionId] = useState(() => generatePreviewSessionId());
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadTraining = useCallback(async () => {
     setLoading(true);
@@ -78,6 +124,18 @@ export default function TrainingPage() {
   useEffect(() => {
     loadTraining();
   }, [loadTraining]);
+
+  useEffect(() => {
+    if (!training) return;
+    const hasProcessing = training.documents?.some(
+      (d) => d.status === "processing" || d.status === "uploaded"
+    );
+    if (!hasProcessing) return;
+    const interval = setInterval(() => {
+      api.frontdesk.getTraining().then(setTraining).catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [training]);
 
   const createSource = async () => {
     if (!newTitle.trim() || !newContent.trim()) return;
@@ -142,6 +200,40 @@ export default function TrainingPage() {
       setError(err instanceof Error ? err.message : "Failed to update knowledge note");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    try {
+      await api.frontdesk.uploadDocument(file);
+      await loadTraining();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload document");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteDocument = async (doc: KnowledgeDocument) => {
+    try {
+      await api.frontdesk.deleteDocument(doc.id);
+      await loadTraining();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete document");
+    }
+  };
+
+  const handleReprocessDocument = async (doc: KnowledgeDocument) => {
+    try {
+      await api.frontdesk.reprocessDocument(doc.id);
+      await loadTraining();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reprocess document");
     }
   };
 
@@ -229,6 +321,10 @@ export default function TrainingPage() {
     return <ErrorState title="Missing training data" message="Training data could not be loaded." />;
   }
 
+  const documents = training.documents || [];
+  const docStats = training.document_stats || { total: 0, ready: 0, processing: 0, failed: 0, total_chunks: 0 };
+  const hasRealKnowledge = (training.custom_sources?.length ?? 0) > 0 || docStats.ready > 0;
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -239,7 +335,7 @@ export default function TrainingPage() {
           </>
         }
         title="Knowledge & training"
-        description="Configure what the assistant knows, review readiness, and test responses."
+        description="Configure what the assistant knows, upload documents, review readiness, and test responses."
       />
 
       {error && (
@@ -258,7 +354,7 @@ export default function TrainingPage() {
                 </div>
                 <p className="text-xl font-bold text-slate-900">{training.knowledge_score}%</p>
                 <p className="mt-0.5 text-[9px] text-slate-400">
-                  {training.assistant_name} is trained on your current clinic data and custom notes.
+                  {training.assistant_name} uses your clinic config, custom notes, and uploaded documents to answer questions.
                 </p>
               </div>
               <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
@@ -266,7 +362,7 @@ export default function TrainingPage() {
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
@@ -325,6 +421,79 @@ export default function TrainingPage() {
                     </Link>
                   ))}
                 </div>
+              </div>
+
+              {/* Document uploads */}
+              <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+                <div className="mb-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Upload className="w-3.5 h-3.5 text-teal-600" />
+                    <p className="text-[12px] font-semibold text-slate-900">Document uploads</p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.txt"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-2.5 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                    <span>Upload PDF or TXT</span>
+                  </button>
+                </div>
+
+                <p className="mb-2.5 text-[9px] leading-relaxed text-slate-400">
+                  Upload clinic documents (policies, procedures, service guides) to teach the assistant. Files are processed into searchable knowledge chunks.
+                </p>
+
+                {documents.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-slate-200 px-4 py-4 text-center text-[10px] text-slate-400">
+                    No documents uploaded yet. Upload a PDF or TXT file to get started.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100/60 px-2.5 py-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {docStatusIcon(doc.status)}
+                          <div className="min-w-0">
+                            <p className="truncate text-[12px] font-semibold text-slate-900">{doc.filename}</p>
+                            <p className="text-[9px] text-slate-400">
+                              {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
+                              {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
+                            </p>
+                            {doc.status === "failed" && doc.error_message && (
+                              <p className="mt-0.5 text-[9px] text-rose-500">{doc.error_message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          {doc.status === "failed" && (
+                            <button
+                              onClick={() => handleReprocessDocument(doc)}
+                              className="text-amber-600 hover:text-amber-700"
+                              title="Reprocess"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteDocument(doc)}
+                            className="text-slate-400 hover:text-rose-600"
+                            aria-label={`Delete ${doc.filename}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Custom notes */}
@@ -427,17 +596,6 @@ export default function TrainingPage() {
                   )}
                 </div>
               </div>
-
-              {/* Document uploads */}
-              <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-                <div className="mb-1.5 flex items-center gap-2">
-                  <Upload className="w-3.5 h-3.5 text-slate-400" />
-                  <p className="text-[11px] font-semibold text-slate-900">Document uploads</p>
-                </div>
-                <p className="text-[9px] leading-relaxed text-slate-400">
-                  PDF and text ingestion is not live yet. The training area is ready for it — embeddings and retrieval need a later pass.
-                </p>
-              </div>
             </div>
 
             {/* Preview chat */}
@@ -456,7 +614,7 @@ export default function TrainingPage() {
               <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-slate-100/60 bg-slate-50/40 p-2.5">
                 {previewMessages.length === 0 ? (
                   <p className="text-[10px] leading-relaxed text-slate-400">
-                    Ask a clinic question to test assistant behavior against your configured data.
+                    Ask a clinic question to test assistant behavior against your configured data and uploaded documents.
                   </p>
                 ) : (
                   previewMessages.map((message) => (
@@ -516,10 +674,46 @@ export default function TrainingPage() {
                 <p className="text-[9px] text-slate-400">Custom notes</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{training.custom_sources.length}</p>
               </div>
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">Documents</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{docStats.ready}</p>
+                {docStats.processing > 0 && (
+                  <p className="text-[9px] text-amber-600">{docStats.processing} processing</p>
+                )}
+                {docStats.failed > 0 && (
+                  <p className="text-[9px] text-rose-500">{docStats.failed} failed</p>
+                )}
+              </div>
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">Searchable chunks</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{docStats.total_chunks}</p>
+              </div>
             </div>
           </div>
 
+          {hasRealKnowledge && (
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 px-3.5 py-3 shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <p className="text-[10px] font-semibold text-emerald-700">Retrieval active</p>
+              </div>
+              <p className="mt-1 text-[9px] leading-relaxed text-emerald-600">
+                The assistant now uses your custom notes and uploaded documents when answering patient questions.
+              </p>
+            </div>
+          )}
 
+          {!hasRealKnowledge && (
+            <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-3.5 py-3 shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-slate-400" />
+                <p className="text-[10px] font-semibold text-slate-500">Basic mode</p>
+              </div>
+              <p className="mt-1 text-[9px] leading-relaxed text-slate-400">
+                The assistant is answering from clinic config only (services, FAQ, hours). Upload documents or add notes to improve depth.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

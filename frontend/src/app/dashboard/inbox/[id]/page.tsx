@@ -340,8 +340,8 @@ function SmsAutoReplySection({
           onClick={() => onUpdateThreadControl(!conversation.manual_takeover)}
           disabled={savingAction === "takeover" || savingAction === "resume_ai" || (!conversation.ai_auto_reply_ready && !conversation.manual_takeover)}
           className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${conversation.manual_takeover
-              ? "text-emerald-700 border border-emerald-200 hover:bg-emerald-50"
-              : "text-amber-700 border border-amber-200 hover:bg-amber-50"
+            ? "text-emerald-700 border border-emerald-200 hover:bg-emerald-50"
+            : "text-amber-700 border border-amber-200 hover:bg-amber-50"
             }`}
         >
           {takeoverButtonLabel}
