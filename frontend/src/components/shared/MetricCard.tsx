@@ -31,9 +31,9 @@ export function MetricCard({
     <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-400">{label}</p>
+          <p className="text-xs font-medium text-slate-500">{label}</p>
           <p className="mt-1 text-xl font-bold tracking-tight text-slate-900">{value}</p>
-          {detail ? <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{detail}</p> : null}
+          {detail ? <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{detail}</p> : null}
         </div>
         <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${TONE_STYLES[tone]}`}>
           <Icon className="h-3.5 w-3.5" />

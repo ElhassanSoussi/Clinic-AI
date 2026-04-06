@@ -123,7 +123,7 @@ export default function InboxPage() {
         <aside className="hidden space-y-3 xl:block">
           {/* Metrics */}
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Conversation mix</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Conversation mix</p>
             <div className="mt-2.5 space-y-1.5">
               {[
                 { label: "All", value: counts.all, tone: "slate" as const },
@@ -138,7 +138,7 @@ export default function InboxPage() {
 
           {/* Status filters */}
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Status</p>
             <div className="mt-2.5 space-y-1">
               {STATUS_FILTERS.map((filter) => {
                 const count = counts[filter.value];
@@ -163,7 +163,7 @@ export default function InboxPage() {
 
           {/* Channel filters */}
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Channels</p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setChannelFilter("all")}
@@ -207,7 +207,7 @@ export default function InboxPage() {
               placeholder="Search by patient, phone, email, or text..."
               className="h-6 flex-1 bg-transparent text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none"
             />
-            <span className="shrink-0 text-[10px] font-semibold text-slate-300">{filtered.length}</span>
+            <span className="shrink-0 text-[11px] font-semibold text-slate-400">{filtered.length}</span>
           </div>
 
           {/* Mobile filters */}
@@ -265,7 +265,7 @@ export default function InboxPage() {
                         )}
                       </div>
                       <p className="text-[12px] leading-relaxed text-slate-500">{thread.last_message_preview}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
                         {(thread.customer_phone || thread.customer_email) && (
                           <span>{thread.customer_phone || thread.customer_email}</span>
                         )}
@@ -281,7 +281,7 @@ export default function InboxPage() {
                         {thread.thread_type === "event" && <span>Recovery thread</span>}
                       </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2 text-[11px] text-slate-300">
+                    <div className="flex shrink-0 items-center gap-2 text-xs text-slate-400">
                       <span>{thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
@@ -305,17 +305,17 @@ export default function InboxPage() {
               </div>
             </div>
             <div className="mt-2.5 space-y-1.5">
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Review needed</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Review needed</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.needs_follow_up}</p>
-                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
+                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
                   Threads waiting for staff review or follow-up.
                 </p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Booked</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Booked</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.booked}</p>
-                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
+                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
                   Conversations that reached a booked outcome.
                 </p>
               </div>
@@ -325,22 +325,22 @@ export default function InboxPage() {
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <p className="text-[12px] font-semibold text-slate-900">Focus areas</p>
             <div className="mt-2 space-y-1.5">
-              <div className="flex items-start gap-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <div className="flex items-start gap-2 rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-50">
                   <TriangleAlert className="h-2.5 w-2.5 text-amber-600" />
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold text-slate-800">Follow-up pressure</p>
-                  <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Delayed replies, recovery threads, and unlinked items.</p>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">Delayed replies, recovery threads, and unlinked items.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <div className="flex items-start gap-2 rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-teal-50">
                   <CalendarDays className="h-2.5 w-2.5 text-teal-600" />
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold text-slate-800">Booking handoff</p>
-                  <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Contact, book, or add notes directly from the thread.</p>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">Contact, book, or add notes directly from the thread.</p>
                 </div>
               </div>
             </div>

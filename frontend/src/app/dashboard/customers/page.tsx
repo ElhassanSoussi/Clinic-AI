@@ -110,7 +110,7 @@ export default function CustomersPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[13px] font-semibold text-slate-900">{customer.name}</p>
-                      <p className="mt-0.5 text-[10px] text-slate-400">
+                      <p className="mt-0.5 text-[11px] text-slate-500">
                         {customer.phone || customer.email || "No contact saved"}
                       </p>
                     </div>
@@ -125,13 +125,13 @@ export default function CustomersPage() {
                       { label: "Open", val: customer.open_request_count },
                     ].map((stat) => (
                       <div key={stat.label}>
-                        <p className="text-[9px] uppercase tracking-widest text-slate-300">{stat.label}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400">{stat.label}</p>
                         <p className="mt-0.5 text-[13px] font-bold text-slate-900">{stat.val}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-2.5 flex items-center justify-between gap-3 text-[10px] text-slate-400">
+                  <div className="mt-2.5 flex items-center justify-between gap-3 text-[11px] text-slate-500">
                     <span>
                       Last{" "}
                       {customer.last_interaction_at
@@ -151,7 +151,7 @@ export default function CustomersPage() {
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Overview</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Overview</p>
             <div className="mt-2.5 space-y-2">
               <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
               <MetricCard label="With bookings" value={customersWithBookings} icon={ContactRound} tone="emerald" />

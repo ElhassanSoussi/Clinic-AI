@@ -185,7 +185,7 @@ export default function OpportunitiesPage() {
                   const href = followUpHref(task);
                   const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
                   return (
-                    <div key={task.id} className="rounded-lg border border-slate-100/60 p-3">
+                    <div key={task.id} className="rounded-lg border border-slate-200/60 p-3">
                       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -250,7 +250,7 @@ export default function OpportunitiesPage() {
             <div className="mb-2.5 flex items-center justify-between gap-3">
               <div>
                 <p className="text-[12px] font-semibold text-slate-900">Needs triage</p>
-                <p className="mt-0.5 text-[9px] text-slate-400">Rules-based risk items from conversations and requests.</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">Rules-based risk items from conversations and requests.</p>
               </div>
               <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">{triageItems.length} pending</span>
             </div>
@@ -267,7 +267,7 @@ export default function OpportunitiesPage() {
                   const href = opportunityHref(opportunity);
                   const busy = savingId === opportunity.id;
                   return (
-                    <div key={opportunity.id} className="rounded-lg border border-slate-100/60 p-3">
+                    <div key={opportunity.id} className="rounded-lg border border-slate-200/60 p-3">
                       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -276,7 +276,7 @@ export default function OpportunitiesPage() {
                             </span>
                             <span className="text-[10px] text-slate-400">{opportunity.customer_name}</span>
                             {opportunity.occurred_at && (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-slate-300">
+                              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
                                 <Clock className="w-3 h-3" />
                                 <span>{timeAgo(opportunity.occurred_at)}</span>
                               </span>
@@ -319,10 +319,10 @@ export default function OpportunitiesPage() {
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Automation</p>
-            <div className="mt-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Automation</p>
+            <div className="mt-2 rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
               <p className="text-[11px] font-semibold text-slate-900">Auto follow-up</p>
-              <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">
                 Creates tasks from stalled conversations and aging requests.
               </p>
               <label className="mt-2 inline-flex items-center gap-2 text-[11px] text-slate-700">
@@ -337,12 +337,12 @@ export default function OpportunitiesPage() {
               </label>
             </div>
             <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Queued</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Queued</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{followUps.length}</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Needs triage</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Needs triage</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{triageItems.length}</p>
               </div>
             </div>

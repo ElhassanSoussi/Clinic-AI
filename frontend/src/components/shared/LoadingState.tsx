@@ -12,8 +12,8 @@ export function LoadingState({ message = "Loading..." }: LoadingStateProps) {
       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50">
         <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
       </div>
-      <p className="text-[13px] font-medium text-slate-700">{message}</p>
-      <p className="mt-0.5 text-[10px] text-slate-400">Preparing workspace data</p>
+      <p className="text-sm font-medium text-slate-700">{message}</p>
+      <p className="mt-0.5 text-xs text-slate-500">Preparing workspace data</p>
     </div>
   );
 }

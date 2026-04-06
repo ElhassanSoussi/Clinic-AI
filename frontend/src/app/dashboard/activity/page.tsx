@@ -82,7 +82,7 @@ export default function ActivityPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-slate-50 rounded-xl border border-slate-100 bg-white shadow-sm">
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white shadow-sm">
               {events.map((event, i) => {
                 const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
                 const Icon = config.icon;
@@ -106,9 +106,9 @@ export default function ActivityPage() {
                       ) : (
                         <p className="text-[13px] font-medium text-slate-900">{event.title}</p>
                       )}
-                      <p className="mt-0.5 text-[10px] text-slate-400">{event.detail}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500">{event.detail}</p>
                     </div>
-                    <span className="shrink-0 text-[10px] text-slate-300">{timeAgo(event.timestamp)}</span>
+                    <span className="shrink-0 text-[11px] text-slate-400">{timeAgo(event.timestamp)}</span>
                   </div>
                 );
               })}
@@ -118,12 +118,12 @@ export default function ActivityPage() {
 
         <div className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Feed summary</p>
-            <div className="mt-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-              <p className="text-[9px] text-slate-400">Events loaded</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Feed summary</p>
+            <div className="mt-2 rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+              <p className="text-[10px] text-slate-500">Events loaded</p>
               <p className="mt-0.5 text-lg font-bold text-slate-900">{events.length}</p>
             </div>
-            <p className="mt-2 text-[9px] leading-relaxed text-slate-400">
+            <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
               Trace what changed without jumping between inbox, leads, and appointments.
             </p>
           </div>

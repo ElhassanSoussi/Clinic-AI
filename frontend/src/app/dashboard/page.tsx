@@ -239,7 +239,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex-1">
               <p className="text-[13px] font-semibold text-emerald-900">First lead captured</p>
-              <p className="mt-0.5 text-[11px] text-emerald-700/70">
+              <p className="mt-0.5 text-xs text-emerald-700/80">
                 Patient requests are now flowing into the workspace automatically.
               </p>
             </div>
@@ -302,26 +302,26 @@ export default function DashboardPage() {
         {/* ── Canvas ── */}
         <div className="space-y-4">
           {/* Hero panel */}
-          <div className="rounded-xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
-                <h2 className="text-[14px] font-bold tracking-tight text-slate-900">
+                <h2 className="text-[15px] font-bold tracking-tight text-slate-900">
                   What happened, what needs attention, and where things stand.
                 </h2>
-                <p className="mt-1 text-[12px] leading-relaxed text-slate-500">
+                <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
                   Live counts from conversations, bookings, and staff actions across the workspace.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2 lg:w-56">
-                <div className="rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Live demand</p>
+                <div className="rounded-md border border-slate-200/70 bg-slate-50/70 px-3 py-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Live demand</p>
                   <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.conversations_total}</p>
-                  <p className="mt-0.5 text-[9px] text-slate-400">Active conversations</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">Active conversations</p>
                 </div>
-                <div className="rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Booked now</p>
+                <div className="rounded-md border border-slate-200/70 bg-slate-50/70 px-3 py-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Booked now</p>
                   <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.booked_requests}</p>
-                  <p className="mt-0.5 text-[9px] text-slate-400">Confirmed requests</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">Confirmed requests</p>
                 </div>
               </div>
             </div>
@@ -352,10 +352,10 @@ export default function DashboardPage() {
             />
             <Link
               href="/dashboard/appointments"
-              className="flex items-start justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
+              className="flex items-start justify-between rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
             >
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Appointments</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Appointments</p>
                 <p className="mt-1.5 text-[13px] font-semibold text-slate-900">Manage bookings, reminders, and deposits</p>
               </div>
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-50 text-violet-600">
@@ -384,10 +384,10 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="mt-2.5 rounded-md border border-slate-100/60 bg-slate-50/40 px-3 py-2">
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Performance note</p>
-              <p className="mt-0.5 text-[12px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-[9px] text-slate-400">
+            <div className="mt-2.5 rounded-md border border-slate-200/60 bg-slate-50/60 px-3.5 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Performance note</p>
+              <p className="mt-0.5 text-[13px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
                 <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
                 <span>Blocked for review: {analytics.blocked_for_review_count}</span>
                 <span>AI resolution: {analytics.ai_resolution_estimate}%</span>
@@ -428,7 +428,7 @@ export default function DashboardPage() {
                         }}
                       />
                     </div>
-                    <span className="text-[11px] font-medium text-slate-500">{bucket.count}</span>
+                    <span className="text-xs font-medium text-slate-600">{bucket.count}</span>
                   </div>
                 ))}
               </div>
@@ -471,7 +471,7 @@ export default function DashboardPage() {
                       <Link
                         key={opportunity.id}
                         href={href}
-                        className="flex items-center gap-3 rounded-xl border border-slate-50 px-3 py-2.5 transition-all hover:border-slate-100 hover:bg-slate-50/50"
+                        className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 transition-all hover:border-slate-200 hover:bg-slate-50/60"
                       >
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
@@ -484,11 +484,11 @@ export default function DashboardPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[13px] font-medium text-slate-900">{opportunity.title}</p>
-                          <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                          <p className="mt-0.5 truncate text-xs text-slate-500">
                             {opportunity.customer_name} · {opportunity.detail}
                           </p>
                         </div>
-                        <span className="shrink-0 text-[11px] text-slate-300">
+                        <span className="shrink-0 text-xs text-slate-400">
                           {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
                         </span>
                       </Link>
@@ -523,7 +523,7 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={`${event.type}-${event.resource_id}-${index}`}
-                        className="flex items-center gap-3 rounded-xl border border-slate-50 px-3.5 py-3"
+                        className="flex items-center gap-3 rounded-xl border border-slate-100 px-3.5 py-3"
                       >
                         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
                           <Icon className={`h-3.5 w-3.5 ${config.color}`} />
@@ -539,13 +539,13 @@ export default function DashboardPage() {
                           ) : (
                             <p className="truncate text-sm font-medium text-slate-900">{event.title}</p>
                           )}
-                          <p className="mt-0.5 truncate text-[11px] text-slate-400">{event.detail}</p>
+                          <p className="mt-0.5 truncate text-xs text-slate-500">{event.detail}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
-                          <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${config.bg} ${config.color}`}>
+                          <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${config.bg} ${config.color}`}>
                             {config.label}
                           </span>
-                          <span className="text-[10px] text-slate-300">{timeAgo(event.timestamp)}</span>
+                          <span className="text-[11px] text-slate-400">{timeAgo(event.timestamp)}</span>
                         </div>
                       </div>
                     );
@@ -570,12 +570,12 @@ export default function DashboardPage() {
         <div className="hidden space-y-3 xl:block">
           <RightRailCard title="Workspace state">
             <div className="space-y-2">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">System</p>
+              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
+                <p className="text-[11px] text-slate-500">System</p>
                 <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{systemStatus ?? "Not ready"}</p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">Current plan</p>
+              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
+                <p className="text-[11px] text-slate-500">Current plan</p>
                 <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
                   {billing ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1) : "Unavailable"}
                 </p>
@@ -593,10 +593,10 @@ export default function DashboardPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-lg border border-slate-50 px-3 py-2.5 transition-all hover:border-slate-100 hover:bg-slate-50/50"
+                  className="block rounded-lg border border-slate-200/60 px-3 py-2.5 transition-all hover:border-slate-300 hover:bg-slate-50"
                 >
                   <p className="text-[13px] font-medium text-slate-900">{item.label}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">{item.detail}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">{item.detail}</p>
                 </Link>
               ))}
             </div>
@@ -604,21 +604,21 @@ export default function DashboardPage() {
 
           <RightRailCard title="Daily focus">
             <div className="space-y-2">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
                 <p className="text-[13px] font-medium text-slate-900">Human review</p>
-                <p className="mt-0.5 text-[10px] text-slate-400">
+                <p className="mt-0.5 text-[11px] text-slate-500">
                   {analytics.human_review_required_count} conversations waiting for a staff decision.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
                 <p className="text-[13px] font-medium text-slate-900">Attention required</p>
-                <p className="mt-0.5 text-[10px] text-slate-400">
+                <p className="mt-0.5 text-[11px] text-slate-500">
                   {attentionAppointments.length} bookings blocked by prep, reschedule, or deposit needs.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
+              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
                 <p className="text-[13px] font-medium text-slate-900">Opportunity pressure</p>
-                <p className="mt-0.5 text-[10px] text-slate-400">
+                <p className="mt-0.5 text-[11px] text-slate-500">
                   {analytics.follow_up_needed_count} follow-ups and {analytics.unresolved_count} unresolved requests.
                 </p>
               </div>

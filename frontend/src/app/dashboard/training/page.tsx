@@ -353,7 +353,7 @@ export default function TrainingPage() {
                   <span className="text-[11px] font-semibold text-slate-900">Knowledge readiness</span>
                 </div>
                 <p className="text-xl font-bold text-slate-900">{training.knowledge_score}%</p>
-                <p className="mt-0.5 text-[9px] text-slate-400">
+                <p className="mt-0.5 text-[10px] text-slate-500">
                   {training.assistant_name} uses your clinic config, custom notes, and uploaded documents to answer questions.
                 </p>
               </div>
@@ -367,7 +367,7 @@ export default function TrainingPage() {
                 <div
                   key={item.key}
                   className={`rounded-lg border p-2.5 ${
-                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-100/60 bg-slate-50/40"
+                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-200/60 bg-slate-50/60"
                   }`}
                 >
                   <p className="text-[12px] font-semibold text-slate-900">{item.label}</p>
@@ -400,9 +400,9 @@ export default function TrainingPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   {structuredKnowledge.map((item) => (
-                    <div key={item.label} className="rounded-lg border border-slate-100/60 p-2.5">
+                    <div key={item.label} className="rounded-lg border border-slate-200/60 p-2.5">
                       <p className="text-[12px] font-semibold text-slate-900">{item.label}</p>
-                      <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{item.detail}</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{item.detail}</p>
                     </div>
                   ))}
                 </div>
@@ -447,7 +447,7 @@ export default function TrainingPage() {
                   </button>
                 </div>
 
-                <p className="mb-2.5 text-[9px] leading-relaxed text-slate-400">
+                <p className="mb-2.5 text-[10px] leading-relaxed text-slate-500">
                   Upload clinic documents (policies, procedures, service guides) to teach the assistant. Files are processed into searchable knowledge chunks.
                 </p>
 
@@ -458,17 +458,17 @@ export default function TrainingPage() {
                 ) : (
                   <div className="space-y-2">
                     {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100/60 px-2.5 py-2">
+                      <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200/60 px-2.5 py-2">
                         <div className="flex items-center gap-2 min-w-0">
                           {docStatusIcon(doc.status)}
                           <div className="min-w-0">
                             <p className="truncate text-[12px] font-semibold text-slate-900">{doc.filename}</p>
-                            <p className="text-[9px] text-slate-400">
+                            <p className="text-[10px] text-slate-500">
                               {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
                               {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
                             </p>
                             {doc.status === "failed" && doc.error_message && (
-                              <p className="mt-0.5 text-[9px] text-rose-500">{doc.error_message}</p>
+                              <p className="mt-0.5 text-[10px] text-rose-500">{doc.error_message}</p>
                             )}
                           </div>
                         </div>
@@ -534,7 +534,7 @@ export default function TrainingPage() {
                     </div>
                   ) : (
                     training.custom_sources.map((source) => (
-                      <div key={source.id} className="rounded-lg border border-slate-100/60 p-2.5">
+                      <div key={source.id} className="rounded-lg border border-slate-200/60 p-2.5">
                         {editingSourceId === source.id ? (
                           <div className="space-y-2">
                             <input
@@ -611,9 +611,9 @@ export default function TrainingPage() {
                 </div>
               )}
 
-              <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-slate-100/60 bg-slate-50/40 p-2.5">
+              <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-slate-200/60 bg-slate-50/60 p-2.5">
                 {previewMessages.length === 0 ? (
-                  <p className="text-[10px] leading-relaxed text-slate-400">
+                  <p className="text-[11px] leading-relaxed text-slate-500">
                     Ask a clinic question to test assistant behavior against your configured data and uploaded documents.
                   </p>
                 ) : (
@@ -660,32 +660,32 @@ export default function TrainingPage() {
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Training state</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Training state</p>
             <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Readiness</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Readiness</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{training.knowledge_score}%</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Gaps</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Gaps</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{training.knowledge_gaps.length}</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Custom notes</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Custom notes</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{training.custom_sources.length}</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Documents</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Documents</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{docStats.ready}</p>
                 {docStats.processing > 0 && (
-                  <p className="text-[9px] text-amber-600">{docStats.processing} processing</p>
+                  <p className="text-[10px] text-amber-600">{docStats.processing} processing</p>
                 )}
                 {docStats.failed > 0 && (
-                  <p className="text-[9px] text-rose-500">{docStats.failed} failed</p>
+                  <p className="text-[10px] text-rose-500">{docStats.failed} failed</p>
                 )}
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Searchable chunks</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] text-slate-500">Searchable chunks</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{docStats.total_chunks}</p>
               </div>
             </div>
@@ -697,7 +697,7 @@ export default function TrainingPage() {
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 <p className="text-[10px] font-semibold text-emerald-700">Retrieval active</p>
               </div>
-              <p className="mt-1 text-[9px] leading-relaxed text-emerald-600">
+              <p className="mt-1 text-[10px] leading-relaxed text-emerald-600">
                 The assistant now uses your custom notes and uploaded documents when answering patient questions.
               </p>
             </div>
@@ -709,7 +709,7 @@ export default function TrainingPage() {
                 <AlertTriangle className="h-3.5 w-3.5 text-slate-400" />
                 <p className="text-[10px] font-semibold text-slate-500">Basic mode</p>
               </div>
-              <p className="mt-1 text-[9px] leading-relaxed text-slate-400">
+              <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
                 The assistant is answering from clinic config only (services, FAQ, hours). Upload documents or add notes to improve depth.
               </p>
             </div>

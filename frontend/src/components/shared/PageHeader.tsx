@@ -19,7 +19,7 @@ export function PageHeader({
     <div className="flex flex-col gap-1 pb-3 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-md bg-slate-100/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">
             {eyebrow}
           </div>
         ) : null}
@@ -27,7 +27,7 @@ export function PageHeader({
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-slate-500">
+          <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-slate-500">
             {description}
           </p>
         ) : null}

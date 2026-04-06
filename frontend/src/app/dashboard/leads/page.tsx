@@ -364,7 +364,7 @@ export default function LeadsPage() {
         {/* Left rail — filters */}
         <aside className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Request mix</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Request mix</p>
             <div className="mt-2.5 space-y-1.5">
               <MetricCard label="All requests" value={counts.all} icon={Users} tone="slate" />
               <MetricCard label="New" value={counts.new} icon={AlertTriangle} tone="amber" />
@@ -374,7 +374,7 @@ export default function LeadsPage() {
           </div>
 
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Status</p>
             <div className="mt-2.5 space-y-1">
               {STATUS_OPTIONS.map((opt) => {
                 const count = opt.value === "" ? counts.all : counts[opt.value as keyof typeof counts] ?? 0;
@@ -426,7 +426,7 @@ export default function LeadsPage() {
               placeholder="Search by name, phone, email, or visit reason..."
               className="h-6 flex-1 bg-transparent text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none"
             />
-            <span className="shrink-0 text-[10px] font-semibold text-slate-300">{filtered.length}</span>
+            <span className="shrink-0 text-[11px] font-semibold text-slate-400">{filtered.length}</span>
           </div>
 
           {content}
@@ -435,17 +435,17 @@ export default function LeadsPage() {
         {/* Right rail — context */}
         <aside className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Pipeline snapshot</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Pipeline snapshot</p>
             <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Open work</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Open work</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.new + counts.contacted}</p>
-                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Waiting on booking, follow-up, or closure.</p>
+                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">Waiting on booking, follow-up, or closure.</p>
               </div>
-              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Closed</p>
+              <div className="rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Closed</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.closed}</p>
-                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">No longer needing front-desk attention.</p>
+                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">No longer needing front-desk attention.</p>
               </div>
             </div>
           </div>

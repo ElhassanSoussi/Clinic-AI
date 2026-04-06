@@ -706,7 +706,7 @@ export default function AppointmentsPage() {
         {/* Left rail — views */}
         <div className="hidden space-y-2.5 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Views</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Views</p>
             <div className="mt-2.5 space-y-1">
               {APPOINTMENT_VIEWS.map((view) => {
                 const active = activeView === view.value;
@@ -728,14 +728,14 @@ export default function AppointmentsPage() {
           </div>
 
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Board</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Board</p>
             <div className="mt-2 space-y-1.5">
               <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">Visible</p>
+                <p className="text-[10px] text-slate-500">Visible</p>
                 <p className="mt-0.5 text-lg font-bold text-slate-900">{appointments.length}</p>
               </div>
               <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
-                <p className="text-[9px] text-slate-400">View</p>
+                <p className="text-[10px] text-slate-500">View</p>
                 <p className="mt-0.5 text-[12px] font-semibold text-slate-900">
                   {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
                 </p>
@@ -764,7 +764,7 @@ export default function AppointmentsPage() {
         <div className="space-y-3">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <p className="text-[12px] font-semibold text-slate-900">Appointments</p>
-            <p className="mt-0.5 text-[9px] text-slate-400">Timing, reminders, deposit state, and linked patient context.</p>
+            <p className="mt-0.5 text-[10px] text-slate-500">Timing, reminders, deposit state, and linked patient context.</p>
           </div>
           {appointments.length === 0 ? (
             <EmptyState
