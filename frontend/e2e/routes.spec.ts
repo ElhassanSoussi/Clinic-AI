@@ -43,8 +43,7 @@ test.describe("404 handling", () => {
 test.describe("Chat widget page", () => {
   test("renders chat interface for arbitrary slug", async ({ page }) => {
     await page.goto("/chat/demo");
-    await page.waitForTimeout(2000);
-    // Page loads without crashing for the given slug
+    await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
     expect(page.url()).toContain("/chat/demo");
   });
 });

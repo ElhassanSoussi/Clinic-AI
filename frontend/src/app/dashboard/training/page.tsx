@@ -125,17 +125,21 @@ export default function TrainingPage() {
     loadTraining();
   }, [loadTraining]);
 
+  const hasProcessingDocs = training?.documents?.some(
+    (d) => d.status === "processing" || d.status === "uploaded"
+  ) ?? false;
+
   useEffect(() => {
-    if (!training) return;
-    const hasProcessing = training.documents?.some(
-      (d) => d.status === "processing" || d.status === "uploaded"
-    );
-    if (!hasProcessing) return;
+    if (!hasProcessingDocs) return;
+    let cancelled = false;
     const interval = setInterval(() => {
-      api.frontdesk.getTraining().then(setTraining).catch(() => {});
+      if (cancelled) return;
+      api.frontdesk.getTraining().then((data) => {
+        if (!cancelled) setTraining(data);
+      }).catch(() => {});
     }, 5000);
-    return () => clearInterval(interval);
-  }, [training]);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [hasProcessingDocs]);
 
   const createSource = async () => {
     if (!newTitle.trim() || !newContent.trim()) return;
