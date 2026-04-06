@@ -50,3 +50,4 @@ htmlcov/
 
 # ── Nested repo metadata (future root Git repo) ────────
 frontend/.git/
+.vscode/
