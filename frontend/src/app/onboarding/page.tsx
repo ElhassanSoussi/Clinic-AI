@@ -28,6 +28,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
+import { isSafeExternalUrl } from "@/lib/utils";
 
 const STEPS = [
   { id: 1, title: "Clinic Info", icon: Building2 },
@@ -1309,6 +1310,12 @@ export default function OnboardingPage() {
         return;
       }
 
+      if (!isSafeExternalUrl(result.authorization_url)) {
+        setGoogleConnectTone("error");
+        setGoogleConnectMessage("Invalid authorization URL returned by server.");
+        return;
+      }
+
       globalThis.location.assign(result.authorization_url);
     } catch (err) {
       setGoogleConnectTone("error");
@@ -1334,6 +1341,12 @@ export default function OnboardingPage() {
       if (!result.available || !result.authorization_url) {
         setExcelConnectTone("error");
         setExcelConnectMessage(result.detail || "Microsoft Excel quick connect is not available yet.");
+        return;
+      }
+
+      if (!isSafeExternalUrl(result.authorization_url)) {
+        setExcelConnectTone("error");
+        setExcelConnectMessage("Invalid authorization URL returned by server.");
         return;
       }
 

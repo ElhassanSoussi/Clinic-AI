@@ -4,6 +4,7 @@ import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import get_settings
 from app.errors import AppError
@@ -14,36 +15,50 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 settings = get_settings()
 
-if settings.sentry_dsn:
-    sentry_sdk.init(
-        dsn=settings.sentry_dsn,
-        traces_sample_rate=0.2,
-        environment=settings.environment,
-        send_default_pii=False,
-    )
+# Disable interactive API docs in production
+_docs_url = None if settings.is_production else "/api/docs"
+_redoc_url = None if settings.is_production else "/api/redoc"
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    if settings.scheduler_enabled:
-        start_background_scheduler()
-    else:
-        logger.info("background_scheduler_disabled scheduler_enabled=%s", settings.scheduler_enabled)
-    try:
-        yield
-    finally:
-        if settings.scheduler_enabled:
-            stop_background_scheduler()
+app = FastAPI(
+    title=settings.app_name,
+    version="1.0.0",
+    docs_url=_docs_url,
+    redoc_url=_redoc_url,
+)
+
+origins = settings.cors_origin_list
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex=settings.development_cors_origin_regex,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
-def create_app(*, scheduler_enabled: bool | None = None) -> FastAPI:
-    docs_url = None if settings.is_production else "/api/docs"
-    redoc_url = None if settings.is_production else "/api/redoc"
-    app = FastAPI(
-        title=settings.app_name,
-        version="1.0.0",
-        docs_url=docs_url,
-        redoc_url=redoc_url,
-        lifespan=lifespan if scheduler_enabled is not False else None,
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if settings.is_production:
+            response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred. Please try again."},
     )
 
     origins = settings.cors_origin_list

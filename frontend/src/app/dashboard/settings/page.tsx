@@ -39,6 +39,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
+import { isSafeExternalUrl } from "@/lib/utils";
 
 const DAYS = [
   "monday",
@@ -1207,6 +1208,12 @@ export default function SettingsPage() {
         return;
       }
 
+      if (!isSafeExternalUrl(result.authorization_url)) {
+        setGoogleConnectTone("error");
+        setGoogleConnectMessage("Invalid authorization URL returned by server.");
+        return;
+      }
+
       globalThis.location.assign(result.authorization_url);
     } catch (err) {
       setGoogleConnectTone("error");
@@ -1232,6 +1239,12 @@ export default function SettingsPage() {
       if (!result.available || !result.authorization_url) {
         setExcelConnectTone("error");
         setExcelConnectMessage(result.detail || "Microsoft Excel quick connect is not available yet.");
+        return;
+      }
+
+      if (!isSafeExternalUrl(result.authorization_url)) {
+        setExcelConnectTone("error");
+        setExcelConnectMessage("Invalid authorization URL returned by server.");
         return;
       }
 

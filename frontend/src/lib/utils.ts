@@ -27,3 +27,42 @@ export function timeAgo(dateStr: string): string {
     year: "numeric",
   });
 }
+
+/** Returns true when `url` is an absolute HTTP(S) URL pointing at the current origin. */
+export function isSafeRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) return false;
+    if (globalThis.window !== undefined) {
+      return parsed.origin === globalThis.location.origin;
+    }
+    return true; // server-side: accept any http(s)
+  } catch {
+    return false;
+  }
+}
+
+/** Returns true for any absolute HTTPS URL (for third-party redirects like Stripe/OAuth). */
+export function isSafeExternalUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** Returns true when `path` is a safe relative path (starts with / but not //, no traversal). */
+export function isSafeRelativePath(path: string): boolean {
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes(":")) {
+    return false;
+  }
+  // Reject path traversal attempts (.. segments or encoded variants)
+  const decoded = decodeURIComponent(path);
+  return !decoded.split("/").some((seg) => seg === ".." || seg === ".");
+}
+
+/** Basic email format check for client-side validation. */
+export function isValidEmail(email: string): boolean {
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+}

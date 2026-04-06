@@ -13,6 +13,7 @@ import {
   Crown,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { isSafeExternalUrl } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -123,6 +124,9 @@ export default function BillingPage() {
       const result = await api.billing.createPortal({
         return_url: `${globalThis.location.origin}/dashboard/billing`,
       });
+      if (!isSafeExternalUrl(result.portal_url)) {
+        throw new Error("Invalid billing portal URL returned by server.");
+      }
       globalThis.location.href = result.portal_url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open billing portal");
