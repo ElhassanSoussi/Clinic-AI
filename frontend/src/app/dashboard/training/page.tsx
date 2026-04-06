@@ -136,7 +136,7 @@ export default function TrainingPage() {
       if (cancelled) return;
       api.frontdesk.getTraining().then((data) => {
         if (!cancelled) setTraining(data);
-      }).catch(() => {});
+      }).catch(() => { });
     }, 5000);
     return () => { cancelled = true; clearInterval(interval); };
   }, [hasProcessingDocs]);
@@ -370,9 +370,8 @@ export default function TrainingPage() {
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
-                  className={`rounded-lg border p-2.5 ${
-                    item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-200/60 bg-slate-50/60"
-                  }`}
+                  className={`rounded-lg border p-2.5 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-slate-200/60 bg-slate-50/60"
+                    }`}
                 >
                   <p className="text-[12px] font-semibold text-slate-900">{item.label}</p>
                   <p className="mt-0.5 text-[10px] text-slate-400">{item.detail}</p>
@@ -439,6 +438,7 @@ export default function TrainingPage() {
                     type="file"
                     accept=".pdf,.txt"
                     onChange={handleFileUpload}
+                    aria-label="Upload training document"
                     className="hidden"
                   />
                   <button
@@ -627,11 +627,10 @@ export default function TrainingPage() {
                       className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
-                          message.role === "user"
+                        className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
                             ? "rounded-br-sm bg-teal-600 text-white"
                             : "rounded-bl-sm border border-slate-200 bg-white text-slate-700"
-                        }`}
+                          }`}
                       >
                         {message.content}
                       </div>

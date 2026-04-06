@@ -45,6 +45,50 @@ interface ApiRequestOptions extends RequestInit {
   cacheTtlMs?: number;
 }
 
+function normalizeDepositSummary(source: Partial<OperationsOverview>): OperationsOverview["deposit_summary"] {
+  return source.deposit_summary && typeof source.deposit_summary === "object"
+    ? source.deposit_summary
+    : {
+        required_count: 0,
+        requested_count: 0,
+        paid_count: 0,
+        waiting_count: 0,
+        configured_count: 0,
+        note: "",
+      };
+}
+
+function normalizeSystemReadiness(source: Partial<OperationsOverview>): OperationsOverview["system_readiness"] {
+  return source.system_readiness && typeof source.system_readiness === "object"
+    ? source.system_readiness
+    : {
+        overall_status: "attention",
+        configured_count: 0,
+        partial_count: 0,
+        missing_count: 0,
+        blocked_count: 0,
+        items: [],
+      };
+}
+
+function normalizeOutboundActivity(source: Partial<OperationsOverview>): OperationsOverview["outbound_activity"] {
+  return source.outbound_activity && typeof source.outbound_activity === "object"
+    ? source.outbound_activity
+    : {
+        outbound_sms_total: 0,
+        reminders_sent: 0,
+        missed_call_texts_sent: 0,
+        ai_replies_sent: 0,
+        ai_reply_failures: 0,
+        failed_sends: 0,
+        skipped_sends: 0,
+        human_review_required: 0,
+        suggested_replies_sent: 0,
+        blocked_for_review: 0,
+        manual_takeover_threads: 0,
+      };
+}
+
 function normalizeOperationsOverviewResponse(data: unknown): OperationsOverview {
   const source = (data && typeof data === "object" ? data : {}) as Partial<OperationsOverview>;
   return {
@@ -59,51 +103,16 @@ function normalizeOperationsOverviewResponse(data: unknown): OperationsOverview 
       ? source.action_required_requests
       : [],
     waitlist_entries: Array.isArray(source.waitlist_entries) ? source.waitlist_entries : [],
-    deposit_summary:
-      source.deposit_summary && typeof source.deposit_summary === "object"
-        ? source.deposit_summary
-        : {
-            required_count: 0,
-            requested_count: 0,
-            paid_count: 0,
-            waiting_count: 0,
-            configured_count: 0,
-            note: "",
-          },
+    deposit_summary: normalizeDepositSummary(source),
     channel_readiness: Array.isArray(source.channel_readiness) ? source.channel_readiness : [],
-    system_readiness:
-      source.system_readiness && typeof source.system_readiness === "object"
-        ? source.system_readiness
-        : {
-            overall_status: "attention",
-            configured_count: 0,
-            partial_count: 0,
-            missing_count: 0,
-            blocked_count: 0,
-            items: [],
-          },
+    system_readiness: normalizeSystemReadiness(source),
     communication_queue: Array.isArray(source.communication_queue) ? source.communication_queue : [],
     review_queue: Array.isArray(source.review_queue) ? source.review_queue : [],
     due_reminders: Array.isArray(source.due_reminders) ? source.due_reminders : [],
     recent_outbound_messages: Array.isArray(source.recent_outbound_messages)
       ? source.recent_outbound_messages
       : [],
-    outbound_activity:
-      source.outbound_activity && typeof source.outbound_activity === "object"
-        ? source.outbound_activity
-        : {
-            outbound_sms_total: 0,
-            reminders_sent: 0,
-            missed_call_texts_sent: 0,
-            ai_replies_sent: 0,
-            ai_reply_failures: 0,
-            failed_sends: 0,
-            skipped_sends: 0,
-            human_review_required: 0,
-            suggested_replies_sent: 0,
-            blocked_for_review: 0,
-            manual_takeover_threads: 0,
-          },
+    outbound_activity: normalizeOutboundActivity(source),
   };
 }
 
