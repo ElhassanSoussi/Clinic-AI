@@ -237,6 +237,31 @@ async function getToken(): Promise<string | null> {
   }
 }
 
+function looksLikeHtml(text: string): boolean {
+  const t = text.trimStart();
+  return t.startsWith("<!") || /^<html[\s>]/i.test(t);
+}
+
+async function extractErrorDetail(res: Response): Promise<string> {
+  try {
+    const text = await res.text();
+    if (looksLikeHtml(text)) {
+      return res.status >= 500
+        ? "The server is temporarily unavailable. Please try again."
+        : `Request failed: ${res.status}`;
+    }
+    let body: Record<string, unknown> = {};
+    try { body = JSON.parse(text); } catch { /* not JSON */ }
+    const rawDetail = typeof body.detail === "string" ? body.detail : "";
+    if (looksLikeHtml(rawDetail)) {
+      return "The server is temporarily unavailable. Please try again.";
+    }
+    return rawDetail || `Request failed: ${res.status}`;
+  } catch {
+    return `Request failed: ${res.status}`;
+  }
+}
+
 async function request<T>(
   path: string,
   options: ApiRequestOptions = {}
@@ -269,10 +294,15 @@ async function request<T>(
   }
 
   const requestPromise = (async () => {
-    const res = await fetch(`${apiUrl}${path}`, {
-      ...options,
-      headers,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${apiUrl}${path}`, {
+        ...options,
+        headers,
+      });
+    } catch {
+      throw new Error("The server is temporarily unavailable. Please try again.");
+    }
 
     if (!res.ok) {
       if (res.status === 401 && globalThis.window !== undefined) {
@@ -290,8 +320,7 @@ async function request<T>(
           throw new Error("Session expired. Please log in again.");
         }
       }
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.detail || `Request failed: ${res.status}`);
+      throw new Error(await extractErrorDetail(res));
     }
 
     const body = await res.json();
@@ -330,14 +359,18 @@ async function requestRaw<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${apiUrl}${path}`, {
-    ...options,
-    headers: { ...headers, ...(options.headers as Record<string, string>) },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${apiUrl}${path}`, {
+      ...options,
+      headers: { ...headers, ...(options.headers as Record<string, string>) },
+    });
+  } catch {
+    throw new Error("The server is temporarily unavailable. Please try again.");
+  }
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Request failed: ${res.status}`);
+    throw new Error(await extractErrorDetail(res));
   }
 
   const body = await res.json();
