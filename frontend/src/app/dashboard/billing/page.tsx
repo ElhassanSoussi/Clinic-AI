@@ -72,7 +72,7 @@ export default function BillingPage() {
         api.billing.getPlans(),
       ]);
       setBilling(statusData);
-      setPlans(plansData);
+      setPlans(Array.isArray(plansData) ? plansData : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load billing");
     } finally {
@@ -162,7 +162,7 @@ export default function BillingPage() {
           </>
         }
         title="Plan & usage"
-        description="Current plan, usage this month, and upgrade options."
+        description="Current plan, monthly usage, and upgrade options. Payments are handled securely through Stripe."
       />
 
       {/* Stripe return feedback */}
@@ -266,6 +266,11 @@ export default function BillingPage() {
       {/* Plans Comparison */}
       <div>
         <h3 className="text-sm font-semibold text-slate-900 mb-3">Compare plans</h3>
+        {plans.length === 0 ? (
+          <div className="rounded-xl border border-slate-100 bg-white p-5 text-sm text-slate-500 shadow-sm">
+            Plan details are temporarily unavailable. Your current billing status is still accurate above.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {plans.map((plan) => {
             const isCurrent = plan.id === billing.plan;
@@ -334,9 +339,10 @@ export default function BillingPage() {
                   );
                 })()}
               </div>
-            );
+              );
           })}
         </div>
+        )}
       </div>
 
       {/* Manage via portal for existing subscribers */}

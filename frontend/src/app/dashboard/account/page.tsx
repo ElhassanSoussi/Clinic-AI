@@ -105,7 +105,7 @@ export default function AccountPage() {
           </>
         }
         title="Account & security"
-        description="Profile information, password, and the operator identity displayed across the workspace."
+        description="Your login credentials, display name, and workspace identity. Changes here affect how you appear across the product."
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_1fr_240px]">
@@ -171,7 +171,7 @@ export default function AccountPage() {
                     className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
-                    Email cannot be changed. Contact support if needed.
+                    Email is tied to your login. Contact support to change it.
                   </p>
                 </div>
                 <div>

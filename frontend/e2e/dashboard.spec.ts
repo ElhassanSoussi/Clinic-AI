@@ -204,8 +204,15 @@ test.describe("Dashboard structure (seeded auth)", () => {
     ];
 
     for (const route of routes) {
-      const response = await page.goto(route);
-      expect(response?.status()).toBeLessThan(500);
+      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+
+      if (response) {
+        expect(response.status()).toBeLessThan(500);
+      }
+
+      await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(new RegExp(`${route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+      await expect(page.locator("main")).toBeVisible();
     }
   });
 });

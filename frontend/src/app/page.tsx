@@ -43,12 +43,12 @@ const plans: LandingPlan[] = [
     name: "Starter Trial",
     price: "$0",
     period: "for 14 days",
-    description: "Try the full workspace free for 14 days. See how the assistant handles real patient questions with your clinic data.",
+    description: "Set up in under 15 minutes. The assistant uses your real clinic data — no credit card, no commitment.",
     features: [
-      "AI chat assistant and live web chat",
-      "Inbox, leads, customers, and dashboard",
-      "25 captured requests included",
-      "Guided onboarding and training workspace",
+      "AI chat assistant trained on your services and hours",
+      "Inbox, leads, customers, and operational dashboard",
+      "25 captured patient requests included",
+      "Guided onboarding with live assistant preview",
     ],
     cta: "Start free",
     highlighted: false,
@@ -58,13 +58,13 @@ const plans: LandingPlan[] = [
     name: "Professional",
     price: "$49",
     period: "/month",
-    description: "The complete operating system for clinics handling inquiries, bookings, SMS, and operator review daily.",
+    description: "Everything a front desk needs: SMS, human review, appointment tracking, and a single workspace for daily operations.",
     features: [
       "Everything in Starter Trial",
-      "200 requests per month",
-      "SMS inbox and human review controls",
-      "Appointments workspace and reminder readiness",
-      "Google Sheets and Excel quick connect",
+      "200 patient requests per month",
+      "Two-way SMS inbox with human review controls",
+      "Appointments workspace with reminder readiness",
+      "Google Sheets and Excel export for records",
     ],
     cta: "Choose Professional",
     highlighted: true,
@@ -75,13 +75,13 @@ const plans: LandingPlan[] = [
     name: "Premium",
     price: "$99",
     period: "/month",
-    description: "For higher-volume clinics that need unlimited capacity, deposit tracking, and full team visibility.",
+    description: "Unlimited capacity for higher-volume clinics. Deposit tracking, custom branding, and full team visibility included.",
     features: [
       "Everything in Professional",
-      "Unlimited captured requests",
+      "Unlimited patient requests — no caps",
       "Deposit requests and payment tracking",
-      "Priority support",
-      "Advanced branding and operations visibility",
+      "Priority support with faster response times",
+      "Custom branding and advanced operations visibility",
     ],
     cta: "Choose Premium",
     highlighted: false,
@@ -92,22 +92,22 @@ const valuePoints = [
   {
     icon: MessageSquareMore,
     title: "Answers patients using your real clinic info",
-    description: "Patients get accurate responses based on the services, hours, and FAQs you configure — not generic scripts or guesswork.",
+    description: "Responses are grounded in the services, hours, and FAQs you configure. Nothing is assumed, borrowed, or generated from generic templates.",
   },
   {
     icon: Inbox,
-    title: "Keeps everything in one inbox",
-    description: "Web chat, SMS threads, manual takeover notes, and booking actions live in one place — nothing gets lost between tools.",
+    title: "One inbox for web chat, SMS, and staff notes",
+    description: "Every patient thread — web chat, SMS, manual takeover notes, and booking actions — lives in one place. No switching between tools.",
   },
   {
     icon: Workflow,
-    title: "Surfaces follow-up before it slips",
-    description: "Stalled requests, missed-call recovery, and booking gaps stay visible in the workspace so your team can act before patients move on.",
+    title: "Surfaces follow-up risk before it slips",
+    description: "Stalled requests, missed-call recovery, and booking gaps stay visible so your team can act before patients move on to another clinic.",
   },
   {
     icon: CalendarDays,
-    title: "Connects requests to booked appointments",
-    description: "Appointment timing, reminder readiness, and deposit status stay linked to the original conversation and staff notes.",
+    title: "Ties every request to a booked appointment",
+    description: "Appointment timing, reminder readiness, deposit status, and staff notes stay linked to the original conversation throughout.",
   },
 ];
 
@@ -115,22 +115,22 @@ const trustCards = [
   {
     icon: ShieldCheck,
     title: "Your clinic controls the information",
-    description: "The assistant only uses the services, FAQs, hours, and notes you configure. Nothing is assumed or borrowed from elsewhere.",
+    description: "The assistant only uses the services, FAQs, hours, and notes you configure. It never invents details, pulls from other clinics, or assumes anything.",
   },
   {
     icon: ContactRound,
-    title: "Manual takeover at any point",
-    description: "Staff can review, edit, or take over any conversation. Lower-confidence threads are flagged automatically for human judgment.",
+    title: "Staff can take over at any point",
+    description: "Every conversation is visible. Staff can review, edit AI drafts, or take over entirely. Lower-confidence threads are flagged automatically.",
   },
   {
     icon: BrainCircuit,
-    title: "Honest when uncertain",
-    description: "When the assistant lacks confidence, it holds the reply for staff instead of guessing. Patients get real answers or real people.",
+    title: "Holds the reply when uncertain",
+    description: "When the assistant is not confident about an answer, it pauses and flags the thread for human review instead of guessing.",
   },
   {
     icon: LayoutGrid,
-    title: "Full operational visibility",
-    description: "Every conversation, request, appointment, and follow-up item is traceable in the workspace. Nothing disappears into a black box.",
+    title: "Full visibility — nothing is hidden",
+    description: "Every conversation, request, appointment, and follow-up is traceable in the workspace. You always know what the assistant said and why.",
   },
 ];
 
@@ -161,22 +161,32 @@ const faqs = [
   {
     question: "How long does setup take?",
     answer:
-      "Most clinics finish setup in under 15 minutes. Enter your clinic details, add services and FAQs, and the assistant is ready to test.",
+      "Most clinics finish in under 15 minutes. Enter your clinic details, add services and FAQs, and test the assistant with a live preview before going live.",
   },
   {
     question: "Can staff review and override the assistant?",
     answer:
-      "Yes. Every conversation is visible in the inbox. Staff can review any thread, edit suggested replies, or take over the conversation entirely.",
+      "Yes. Every conversation is visible in the inbox. Staff can review any thread, edit suggested replies, take over a conversation, or pause AI replies entirely.",
   },
   {
     question: "What does the assistant do when it does not know the answer?",
     answer:
-      "It holds the reply for your staff. The system flags uncertain threads for human review instead of generating a confident guess.",
+      "It holds the reply and flags the thread for staff review. The system never generates a confident guess when it lacks information.",
   },
   {
     question: "Do patients know they are talking to an assistant?",
     answer:
-      "You decide. You control the assistant name, greeting, and how handoff to staff is presented. The workspace supports transparent communication by default.",
+      "You decide. You control the assistant name, greeting, and how handoff to a real person is presented. Transparent communication is the default.",
+  },
+  {
+    question: "Is my clinic data shared or used to train other models?",
+    answer:
+      "No. Your clinic information is only used to generate responses for your patients. It is never shared with other clinics or used to train shared models.",
+  },
+  {
+    question: "What happens when my trial ends?",
+    answer:
+      "Your workspace and data remain intact. You can upgrade to a paid plan at any time to continue operations, or export your data.",
   },
 ];
 
@@ -283,7 +293,7 @@ export default function LandingPage() {
                   </Link>
                 </div>
                 <p className="mt-4 text-sm text-slate-500">
-                  Set up in minutes. Your staff stays in control. The assistant only uses information you configure.
+                  Set up in minutes. No credit card required. Your staff stays in control at every stage.
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -513,13 +523,13 @@ export default function LandingPage() {
                 Built to feel careful, visible, and clinic-controlled.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                Clinic AI is designed for real clinic work. That means the product stays honest about what the
-                assistant can handle, what staff should review, and how patient communications move across the day.
+                Clinic AI is designed for real clinic work. The product stays honest about what the
+                assistant can handle, keeps staff in control of every decision, and makes every patient interaction traceable.
               </p>
               <div className="mt-6 space-y-3 text-sm leading-6 text-slate-600">
-                <p>Clinic information stays under your clinic’s configuration, not a made-up generic script.</p>
-                <p>Operators can review, step in manually, and keep workflow decisions visible from inquiry to appointment.</p>
-                <p>Communication handling is designed to stay privacy-conscious and operationally transparent.</p>
+                <p>Your clinic information stays under your configuration — the assistant never references generic scripts or outside sources.</p>
+                <p>Operators can review, edit, step in manually, or pause AI replies at any time from the same workspace.</p>
+                <p>Patient communication is logged end-to-end so your team always knows what was said, by whom, and when.</p>
               </div>
             </div>
 
@@ -573,7 +583,7 @@ export default function LandingPage() {
                 Honest pricing. No per-message fees. No hidden costs.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                Pick the plan that matches your request volume. Upgrade or cancel anytime.
+                Pick the plan that matches your patient volume. Start free, upgrade when ready, cancel anytime — no lock-in contracts.
               </p>
             </div>
 
@@ -658,7 +668,8 @@ export default function LandingPage() {
                 Straightforward answers about how the product works.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-600">
-                Clinic AI is not a replacement for clinical judgment. It is a reliable operating layer for patient communication, follow-up, and scheduling.
+                Clinic AI is not a replacement for clinical judgment. It is a reliable operating layer
+                for patient communication, appointment follow-up, and front-desk scheduling.
               </p>
             </div>
             <div className="space-y-4">
@@ -713,7 +724,7 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-950">Clinic AI</p>
-              <p className="text-xs text-slate-500">Patient communication and clinic operations, handled with care.</p>
+              <p className="text-xs text-slate-500">Patient communication and clinic operations, handled with care and full transparency.</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">

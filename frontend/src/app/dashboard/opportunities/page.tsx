@@ -154,7 +154,7 @@ export default function OpportunitiesPage() {
           </>
         }
         title="Follow-up queue"
-        description="Stalled requests and missed-call recovery items that need attention."
+        description="Stalled requests and missed-call recovery threads that need your attention. Triage, queue, and resolve from one place."
       />
 
       {error && (
@@ -177,7 +177,7 @@ export default function OpportunitiesPage() {
               <EmptyState
                 icon={<CheckCircle2 className="w-5 h-5 text-slate-400" />}
                 title="No queued follow-ups"
-                description="Add items from the list below to start tracking them here."
+                description="Move items from the triage list below into the active queue to start tracking them."
               />
             ) : (
               <div className="space-y-2.5">
@@ -259,7 +259,7 @@ export default function OpportunitiesPage() {
               <EmptyState
                 icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
                 title="No unqueued items"
-                description="All follow-up items are either resolved or already in the queue."
+                description="All follow-up items are either resolved or already in the active queue above."
               />
             ) : (
               <div className="space-y-2.5">

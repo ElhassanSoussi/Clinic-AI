@@ -53,7 +53,7 @@ def _provider(clinic: dict) -> str:
     return ""
 
 
-def append_lead_for_clinic(clinic: dict, lead: dict) -> None:
+def append_lead_for_clinic(clinic: dict, lead: dict, *, raise_on_error: bool = False) -> None:
     provider = _provider(clinic)
     try:
         if provider == "excel":
@@ -63,9 +63,17 @@ def append_lead_for_clinic(clinic: dict, lead: dict) -> None:
             append_lead_to_sheet(clinic["google_sheet_id"], clinic.get("google_sheet_tab"), lead)
     except Exception as exc:
         logger.error(f"Spreadsheet lead sync failed: {exc}")
+        if raise_on_error:
+            raise
 
 
-def update_lead_status_for_clinic(clinic: dict, lead_id: str, new_status: str) -> None:
+def update_lead_status_for_clinic(
+    clinic: dict,
+    lead_id: str,
+    new_status: str,
+    *,
+    raise_on_error: bool = False,
+) -> None:
     provider = _provider(clinic)
     try:
         if provider == "excel":
@@ -75,6 +83,8 @@ def update_lead_status_for_clinic(clinic: dict, lead_id: str, new_status: str) -
             update_lead_status_in_sheet(clinic["google_sheet_id"], clinic.get("google_sheet_tab"), lead_id, new_status)
     except Exception as exc:
         logger.error(f"Spreadsheet status sync failed: {exc}")
+        if raise_on_error:
+            raise
 
 
 def get_available_slots_for_clinic(clinic: dict) -> list[dict]:
@@ -89,7 +99,14 @@ def get_available_slots_for_clinic(clinic: dict) -> list[dict]:
     return []
 
 
-def reserve_slot_for_clinic(clinic: dict, row_index: int, patient_name: str, lead_id: str) -> bool:
+def reserve_slot_for_clinic(
+    clinic: dict,
+    row_index: int,
+    patient_name: str,
+    lead_id: str,
+    *,
+    raise_on_error: bool = False,
+) -> bool:
     provider = _provider(clinic)
     try:
         if provider == "excel":
@@ -104,4 +121,6 @@ def reserve_slot_for_clinic(clinic: dict, row_index: int, patient_name: str, lea
             )
     except Exception as exc:
         logger.error(f"Spreadsheet slot reservation failed: {exc}")
+        if raise_on_error:
+            raise
     return False

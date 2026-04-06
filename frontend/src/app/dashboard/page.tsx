@@ -16,7 +16,6 @@ import {
   MessageSquareMore,
   Settings,
   TrendingUp,
-  UserPlus,
   Users,
   Zap,
 } from "lucide-react";
@@ -31,6 +30,8 @@ import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { RightRailCard } from "@/components/ui";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
+import { EVENT_CONFIG } from "@/lib/activity-config";
+import { formatMoney } from "@/lib/format-helpers";
 import type {
   ActivityEvent,
   AppointmentRecord,
@@ -40,31 +41,9 @@ import type {
   Opportunity,
 } from "@/types";
 
-const EVENT_CONFIG: Record<
-  ActivityEvent["type"],
-  { icon: typeof UserPlus; color: string; bg: string; label: string }
-> = {
-  lead_created: { icon: UserPlus, color: "text-blue-600", bg: "bg-blue-50", label: "New Lead" },
-  lead_status_changed: { icon: ArrowRightLeft, color: "text-amber-600", bg: "bg-amber-50", label: "Updated" },
-  conversation_started: {
-    icon: MessageSquareMore,
-    color: "text-teal-600",
-    bg: "bg-teal-50",
-    label: "Chat",
-  },
-};
-
 function settingsHref(section?: string | null): string {
   if (!section) return "/dashboard/settings";
   return `/dashboard/settings?section=${encodeURIComponent(section)}`;
-}
-
-function formatMoney(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
 }
 
 export default function DashboardPage() {
@@ -159,7 +138,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="No activity yet"
-          description="Your assistant is live. Activity will appear here as patients start conversations."
+          description="Your assistant is live and ready. Activity will appear here as patients start conversations through the chat widget or SMS."
           action={
             clinic.slug ? (
               <a
@@ -181,7 +160,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="Ready to go live"
-          description="Setup is complete. Activate the assistant to start receiving patient conversations."
+          description="Setup is complete. Activate the assistant to start receiving patient conversations through your website."
         />
       );
     }
@@ -189,7 +168,7 @@ export default function DashboardPage() {
       <EmptyState
         icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
           title="Setup not complete"
-          description="Finish configuring your clinic details so the assistant can start responding."
+          description="Complete your clinic details in settings so the assistant knows how to respond accurately."
           action={
           <button
             onClick={() => router.push(settingsHref())}
@@ -426,7 +405,7 @@ export default function DashboardPage() {
               <EmptyState
                 icon={<Clock className="w-5 h-5 text-slate-400" />}
                 title="Not enough data yet"
-                description="Contact-hour patterns will appear once patients begin chatting."
+                description="Contact-hour patterns will appear after patients begin interacting with the assistant."
               />
             ) : (
               <div className="space-y-3">
@@ -475,7 +454,7 @@ export default function DashboardPage() {
                 <EmptyState
                   icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
                 title="No follow-up items"
-                description="Stalled or at-risk requests will surface here automatically."
+                description="Stalled or at-risk booking requests will surface here when they need attention."
                 />
               ) : (
                 <div className="space-y-2">

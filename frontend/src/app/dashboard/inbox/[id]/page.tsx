@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Clock3,
   Mail,
   MessageSquare,
   Phone,
@@ -20,18 +19,17 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { CommunicationEvent, ConversationDetail } from "@/types";
-
-function humanizeSnakeCase(value?: string | null): string {
-  if (!value) return "";
-  return value.replaceAll("_", " ");
-}
-
-function smsSenderLabel(senderKind: string, direction: string): string {
-  if (direction === "inbound") return "Patient";
-  if (senderKind === "assistant") return "AI assistant";
-  if (senderKind === "system") return "System";
-  return "Team member";
-}
+import {
+  toDateInputValue,
+  toTimeInputValue,
+  combineDateTime,
+  formatBookingText as formatAppointmentText,
+  humanizeSnakeCase,
+} from "@/lib/format-helpers";
+import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
+import { EventTimeline, DeliveryStateCard } from "@/components/inbox/EventTimeline";
+import { MessageList } from "@/components/inbox/MessageList";
+import { ThreadBadgeStrip } from "@/components/inbox/ThreadBadgeStrip";
 
 function smsEventTitle(senderKind: string, eventType: string): string {
   if (eventType === "reminder") return "Appointment reminder";
@@ -40,36 +38,6 @@ function smsEventTitle(senderKind: string, eventType: string): string {
   if (senderKind === "staff") return "Manual SMS reply";
   if (senderKind === "system") return "System SMS";
   return "SMS activity";
-}
-
-function toDateInputValue(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function toTimeInputValue(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-function combineDateTime(dateValue: string, timeValue: string): string | null {
-  if (!dateValue || !timeValue) return null;
-  const combined = new Date(`${dateValue}T${timeValue}`);
-  if (Number.isNaN(combined.getTime())) return null;
-  return combined.toISOString();
-}
-
-function formatAppointmentText(dateValue: string, timeValue: string): string {
-  const combined = combineDateTime(dateValue, timeValue);
-  if (!combined) return "";
-  return new Date(combined).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 }
 
 function deriveConvertName(detail: ConversationDetail): string {
@@ -100,56 +68,6 @@ function threadFollowUpPriority(
   return "medium";
 }
 
-function appointmentBadgeClass(status: string): string {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "request_open") return "bg-slate-100 text-slate-700 border-slate-200";
-  return "bg-amber-50 text-amber-700 border-amber-200";
-}
-
-function appointmentBadgeLabel(status: string): string {
-  return status === "confirmed" ? "Booked" : humanizeSnakeCase(status);
-}
-
-function depositBadgeClass(status: string): string {
-  if (status === "paid") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "requested" || status === "required") {
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-  if (status === "waived") return "bg-blue-50 text-blue-700 border-blue-200";
-  return "bg-rose-50 text-rose-700 border-rose-200";
-}
-
-function depositBadgeLabel(status: string): string {
-  if (status === "requested") return "Deposit requested";
-  if (status === "required") return "Deposit required";
-  if (status === "paid") return "Deposit paid";
-  if (status === "expired") return "Deposit expired";
-  if (status === "failed") return "Deposit failed";
-  return "Deposit waived";
-}
-
-function smsAiStateClass(
-  hasPendingReview: boolean,
-  manualTakeover: boolean,
-  aiAutoReplyEnabled: boolean
-): string {
-  if (hasPendingReview) return "bg-blue-50 text-blue-700 border-blue-200";
-  if (manualTakeover) return "bg-amber-50 text-amber-700 border-amber-200";
-  if (aiAutoReplyEnabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-}
-
-function smsAiStateLabel(
-  hasPendingReview: boolean,
-  manualTakeover: boolean,
-  aiAutoReplyEnabled: boolean
-): string {
-  if (hasPendingReview) return "Human review needed";
-  if (manualTakeover) return "Staff handling";
-  if (aiAutoReplyEnabled) return "AI active";
-  return "AI off";
-}
-
 function smsAutomationSummary(
   hasPendingReview: boolean,
   manualTakeover: boolean,
@@ -167,246 +85,6 @@ function smsAutomationSummary(
   return "SMS auto-reply is unavailable until clinic SMS automation is ready.";
 }
 
-function eventHeaderTitle(eventType?: string): string {
-  return eventType === "missed_call" ? "Missed-call recovery" : "Callback request";
-}
-
-function deliveryStateCaption(autoReplyStatus?: string): string {
-  return autoReplyStatus === "blocked" ? "AI reply held for staff review" : "Latest delivery result";
-}
-
-interface EventTimelineProps {
-  readonly relatedEvents: CommunicationEvent[];
-  readonly communicationEvent: CommunicationEvent | null;
-}
-
-function EventTimeline({ relatedEvents, communicationEvent }: EventTimelineProps) {
-  if (relatedEvents.length === 0) {
-    return (
-      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Clock3 className="w-4 h-4 text-slate-400" />
-          <p className="text-sm font-semibold text-slate-900">
-            {eventHeaderTitle(communicationEvent?.event_type)}
-          </p>
-        </div>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          {communicationEvent?.summary || "Communication event recorded."}
-        </p>
-        {communicationEvent?.content && (
-          <p className="text-sm text-slate-500 leading-relaxed mt-2">
-            {communicationEvent.content}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  return relatedEvents.map((event) => {
-    const isSmsMessage = event.channel === "sms";
-    const isInbound = event.direction === "inbound";
-    if (!isSmsMessage) {
-      return (
-        <div key={event.id} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <ChannelBadge channel={event.channel} withIcon />
-            <CommunicationEventStatusBadge status={event.status} />
-          </div>
-          <p className="text-sm font-semibold text-slate-900">
-            {event.summary || "Communication event recorded."}
-          </p>
-          {event.content && (
-            <p className="text-sm text-slate-600 leading-relaxed mt-2">
-              {event.content}
-            </p>
-          )}
-          <p className="text-[11px] text-slate-400 mt-2">
-            {event.occurred_at ? formatDateTime(event.occurred_at) : ""}
-          </p>
-        </div>
-      );
-    }
-    return (
-      <div
-        key={event.id}
-        className={`flex ${isInbound ? "justify-end" : "justify-start"}`}
-      >
-        <div
-          className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-            isInbound
-              ? "bg-teal-600 text-white rounded-br-sm"
-              : "bg-slate-100 text-slate-700 rounded-bl-sm"
-          }`}
-        >
-          <p
-            className={`text-[11px] font-semibold uppercase tracking-wide mb-2 ${
-              isInbound ? "text-white/70" : "text-slate-400"
-            }`}
-          >
-            {smsSenderLabel(event.sender_kind, event.direction)}
-          </p>
-          {!isInbound && event.summary && (
-            <p
-              className={`text-[11px] mb-2 ${
-                isInbound ? "text-white/70" : "text-slate-500"
-              }`}
-            >
-              {event.summary}
-            </p>
-          )}
-          <p className="whitespace-pre-wrap">{event.content || event.summary}</p>
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <p
-              className={`text-[11px] ${
-                isInbound ? "text-white/70" : "text-slate-400"
-              }`}
-            >
-              {event.occurred_at ? formatDateTime(event.occurred_at) : ""}
-            </p>
-            {!isInbound && (
-              <CommunicationEventStatusBadge status={event.status} />
-            )}
-          </div>
-          {!isInbound && (event.failure_reason || event.skipped_reason) && (
-            <p className="text-[11px] text-slate-400 mt-2">
-              {event.failure_reason || event.skipped_reason}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  });
-}
-
-function DeliveryStateCard({ communicationEvent }: Readonly<{ communicationEvent: CommunicationEvent | null }>) {
-  return (
-    <div className="app-card-muted border-dashed px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
-        Delivery state
-      </p>
-      <DeliveryStateContent communicationEvent={communicationEvent} />
-    </div>
-  );
-}
-
-function DeliveryStateContent({ communicationEvent }: Readonly<{ communicationEvent: CommunicationEvent | null }>) {
-  if (communicationEvent?.latest_outbound_status) {
-    return (
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <CommunicationEventStatusBadge status={communicationEvent.latest_outbound_status as CommunicationEvent["status"]} />
-          <span className="text-xs text-slate-500">
-            {communicationEvent.latest_outbound_summary || "Latest text-back recorded."}
-          </span>
-        </div>
-        {communicationEvent.latest_outbound_reason && (
-          <p className="text-xs text-slate-500">{communicationEvent.latest_outbound_reason}</p>
-        )}
-        {communicationEvent.latest_inbound_summary && (
-          <p className="text-xs text-slate-500">
-            Latest reply: {communicationEvent.latest_inbound_summary}
-          </p>
-        )}
-      </div>
-    );
-  }
-  if (communicationEvent?.auto_reply_reason) {
-    return (
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <CommunicationEventStatusBadge status={communicationEvent.status} />
-          <span className="text-xs text-slate-500">
-            {deliveryStateCaption(communicationEvent.auto_reply_status)}
-          </span>
-        </div>
-        <p className="text-xs text-slate-500">{communicationEvent.auto_reply_reason}</p>
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <CommunicationEventStatusBadge status={communicationEvent?.status ?? "new"} />
-      <span className="text-xs text-slate-500">
-        Two-way SMS will continue here once a patient replies. Manual send is available below.
-      </span>
-    </div>
-  );
-}
-
-function MessageList({ messages }: Readonly<{ messages: ConversationDetail["messages"] }>) {
-  return (
-    <>
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-              message.role === "user"
-                ? "bg-teal-600 text-white rounded-br-sm"
-                : "bg-slate-100 text-slate-700 rounded-bl-sm"
-            }`}
-          >
-            <p className="whitespace-pre-wrap">{message.content}</p>
-            <p
-              className={`text-[11px] mt-2 ${
-                message.role === "user" ? "text-white/70" : "text-slate-400"
-              }`}
-            >
-              {message.created_at ? formatDateTime(message.created_at) : ""}
-            </p>
-          </div>
-        </div>
-      ))}
-    </>
-  );
-}
-
-function ThreadBadgeStrip({ lead, conversation, isEventThread, pendingReviewEvent }: Readonly<{
-  lead: ConversationDetail["lead"] | null;
-  conversation: ConversationDetail["conversation"];
-  isEventThread: boolean;
-  pendingReviewEvent: CommunicationEvent | null;
-}>) {
-  return (
-    <div className="flex flex-wrap items-center gap-2 mt-4">
-      <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${
-        lead
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-          : "bg-amber-50 text-amber-700 border-amber-200"
-      }`}>
-        {lead ? "Linked request" : "Unlinked thread"}
-      </span>
-      {lead && <LeadStatusBadge status={lead.status} />}
-      {lead?.appointment_status && (
-        <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${appointmentBadgeClass(lead.appointment_status)}`}>
-          {appointmentBadgeLabel(lead.appointment_status)}
-        </span>
-      )}
-      {lead?.reminder_status && lead.reminder_status !== "not_ready" && (
-        <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-          Reminder {humanizeSnakeCase(lead.reminder_status)}
-        </span>
-      )}
-      {lead?.deposit_status && lead.deposit_status !== "not_required" && (
-        <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${depositBadgeClass(lead.deposit_status)}`}>
-          {depositBadgeLabel(lead.deposit_status)}
-        </span>
-      )}
-      {conversation.derived_status === "needs_follow_up" && (
-        <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-          Follow-up needed
-        </span>
-      )}
-      {isEventThread && conversation.channel === "sms" && (
-        <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${smsAiStateClass(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}`}>
-          {smsAiStateLabel(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}
-        </span>
-      )}
-    </div>
-  );
-}
 
 interface RightRailActionsProps {
   readonly detail: ConversationDetail;
@@ -661,11 +339,10 @@ function SmsAutoReplySection({
         <button
           onClick={() => onUpdateThreadControl(!conversation.manual_takeover)}
           disabled={savingAction === "takeover" || savingAction === "resume_ai" || (!conversation.ai_auto_reply_ready && !conversation.manual_takeover)}
-          className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
-            conversation.manual_takeover
+          className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${conversation.manual_takeover
               ? "text-emerald-700 border border-emerald-200 hover:bg-emerald-50"
               : "text-amber-700 border border-amber-200 hover:bg-amber-50"
-          }`}
+            }`}
         >
           {takeoverButtonLabel}
         </button>
@@ -733,11 +410,11 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
     <div className="space-y-3 text-sm text-slate-600">
       <div>
         <p className="text-xs text-slate-500 mb-1">Reason for visit</p>
-        <p>{lead.reason_for_visit || "Not provided"}</p>
+        <p>{lead.reason_for_visit || "Not provided yet — the patient may not have shared this."}</p>
       </div>
       <div>
         <p className="text-xs text-slate-500 mb-1">Preferred time</p>
-        <p>{lead.preferred_datetime_text || "Not provided"}</p>
+        <p>{lead.preferred_datetime_text || "No preference given — staff can suggest a slot."}</p>
       </div>
       {lead.appointment_status && (
         <div>
@@ -756,7 +433,7 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
       )}
       {lead.notes && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Internal notes</p>
+          <p className="text-xs text-slate-500 mb-1">Staff notes</p>
           <p>{lead.notes}</p>
         </div>
       )}
@@ -765,7 +442,7 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
         className="inline-flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
       >
         <MessageSquare className="w-4 h-4" />
-        Open request detail
+        Open full request detail
       </Link>
     </div>
   );
@@ -842,16 +519,16 @@ function FrontDeskActionsSection({
       {lead ? null : (
         <div className="space-y-3 mb-5">
           <p className="text-sm text-slate-600">
-            Link this thread to a request so your team can track booking progress, send reminders, and follow up.
+            Link this thread to a booking request so your team can track status, send reminders, and follow up from one place.
           </p>
-              <label className="sr-only" htmlFor="convert-name">
-                Patient name
-              </label>
-              <input
-                id="convert-name"
-                type="text"
-                value={convertName}
-                onChange={(event) => onConvertNameChange(event.target.value)}
+          <label className="sr-only" htmlFor="convert-name">
+            Patient name
+          </label>
+          <input
+            id="convert-name"
+            type="text"
+            value={convertName}
+            onChange={(event) => onConvertNameChange(event.target.value)}
             placeholder="Patient name"
             className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
           />
@@ -1004,7 +681,7 @@ function FrontDeskActionsSection({
           <div className="rounded-xl border border-slate-200 p-4">
             <p className="text-sm font-semibold text-slate-900">Internal note</p>
             <p className="text-xs text-slate-500 mt-1">
-              Save a staff note to this thread. Notes stay internal and appear in the customer history.
+              Save a staff-only note to this thread. Notes are visible to your team but never shown to patients.
             </p>
             <label className="sr-only" htmlFor="internal-note">
               Add a short internal note
@@ -1042,8 +719,8 @@ function FrontDeskActionsSection({
       ) : (
         <p className="text-sm text-slate-500 leading-relaxed">
           {isEventThread
-            ? "This recovery thread is not linked to a request yet. You can send SMS manually and link it when the patient is ready."
-            : "This conversation has not created a linked request yet. If the patient stopped before sharing details, it may need manual follow-up."}
+            ? "This recovery thread is not linked to a booking request yet. You can reply by SMS and convert it to a request when the patient is ready."
+            : "This conversation has not created a linked request yet. If the patient stopped before sharing details, consider following up manually."}
         </p>
       )}
     </div>
@@ -1059,7 +736,8 @@ export default function InboxThreadPage({
   const router = useRouter();
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [savingAction, setSavingAction] = useState("");
   const [smsBody, setSmsBody] = useState("");
   const [reviewReplyBody, setReviewReplyBody] = useState("");
@@ -1075,12 +753,12 @@ export default function InboxThreadPage({
 
   const loadConversation = useCallback(async () => {
     setLoading(true);
-    setError("");
+    setLoadError("");
     try {
       const data = await api.frontdesk.getConversation(id);
       setDetail(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load conversation");
+      setLoadError(err instanceof Error ? err.message : "Failed to load conversation");
     } finally {
       setLoading(false);
     }
@@ -1094,16 +772,16 @@ export default function InboxThreadPage({
   const relatedEvents = detail?.related_events ?? [];
   const pendingReviewEvent = isEventThread
     ? [...relatedEvents].reverse().find(
-        (event) =>
-          event.channel === "sms" &&
-          event.direction === "inbound" &&
-          event.operator_review_required
-      ) ?? null
+      (event) =>
+        event.channel === "sms" &&
+        event.direction === "inbound" &&
+        event.operator_review_required
+    ) ?? null
     : null;
   const latestSmsInboundEvent = isEventThread
     ? [...relatedEvents].reverse().find(
-        (event) => event.channel === "sms" && event.direction === "inbound"
-      ) ?? null
+      (event) => event.channel === "sms" && event.direction === "inbound"
+    ) ?? null
     : null;
 
   useEffect(() => {
@@ -1125,7 +803,7 @@ export default function InboxThreadPage({
   }, [detail]);
 
   if (loading) return <LoadingState message="Loading conversation..." />;
-  if (error) return <ErrorState message={error} onRetry={loadConversation} />;
+  if (loadError) return <ErrorState message={loadError} onRetry={loadConversation} />;
   if (!detail) {
     return <ErrorState title="Not found" message="This conversation could not be found." />;
   }
@@ -1172,7 +850,7 @@ export default function InboxThreadPage({
       }
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create follow-up");
+      setActionError(err instanceof Error ? err.message : "Failed to create follow-up");
     } finally {
       setSavingAction("");
     }
@@ -1189,7 +867,7 @@ export default function InboxThreadPage({
       });
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to convert conversation to a lead");
+      setActionError(err instanceof Error ? err.message : "Failed to convert conversation to a lead");
     } finally {
       setSavingAction("");
     }
@@ -1215,7 +893,7 @@ export default function InboxThreadPage({
       setSmsBody("");
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send SMS");
+      setActionError(err instanceof Error ? err.message : "Failed to send SMS");
     } finally {
       setSavingAction("");
     }
@@ -1227,7 +905,7 @@ export default function InboxThreadPage({
       await api.frontdesk.updateThreadControl(id, { manual_takeover: manualTakeover });
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update thread control");
+      setActionError(err instanceof Error ? err.message : "Failed to update thread control");
     } finally {
       setSavingAction("");
     }
@@ -1245,7 +923,7 @@ export default function InboxThreadPage({
       );
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send suggested reply");
+      setActionError(err instanceof Error ? err.message : "Failed to send suggested reply");
     } finally {
       setSavingAction("");
     }
@@ -1258,7 +936,7 @@ export default function InboxThreadPage({
       await api.frontdesk.discardSuggestedReply(pendingReviewEvent.id);
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to discard suggested reply");
+      setActionError(err instanceof Error ? err.message : "Failed to discard suggested reply");
     } finally {
       setSavingAction("");
     }
@@ -1271,7 +949,7 @@ export default function InboxThreadPage({
       await api.frontdesk.updateThreadWorkflow(id, { status });
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update thread");
+      setActionError(err instanceof Error ? err.message : "Failed to update thread");
     } finally {
       setSavingAction("");
     }
@@ -1281,7 +959,7 @@ export default function InboxThreadPage({
     if (!lead) return;
     const appointment_starts_at = combineDateTime(bookingDate, bookingTime);
     if (!appointment_starts_at) {
-      setError("Add an appointment date and time before marking this request as booked.");
+      setActionError("Add an appointment date and time before marking this request as booked.");
       return;
     }
     setSavingAction("book_thread");
@@ -1296,7 +974,7 @@ export default function InboxThreadPage({
       setBookingNote("");
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to book request");
+      setActionError(err instanceof Error ? err.message : "Failed to book request");
     } finally {
       setSavingAction("");
     }
@@ -1310,7 +988,7 @@ export default function InboxThreadPage({
       setInternalNote("");
       await loadConversation();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save note");
+      setActionError(err instanceof Error ? err.message : "Failed to save note");
     } finally {
       setSavingAction("");
     }
@@ -1328,6 +1006,8 @@ export default function InboxThreadPage({
         title={conversation.customer_name}
         description="Full conversation history and actions for this patient thread."
       />
+
+      <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
       <div className="workspace-column-layout">
         <aside className="workspace-side-rail">
@@ -1388,24 +1068,6 @@ export default function InboxThreadPage({
                 Open customer profile
               </Link>
             )}
-          </div>
-
-          <div className="app-card p-4">
-            <p className="workspace-rail-title">Thread summary</p>
-            <div className="mt-3 space-y-2">
-              <div className="app-card-muted px-3.5 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">State</p>
-                <p className="mt-1 text-[13px] font-semibold text-slate-900">
-                  {isEventThread ? "Operational event thread" : "Live conversation thread"}
-                </p>
-              </div>
-              <div className="app-card-muted px-3.5 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Lead link</p>
-                <p className="mt-1 text-[13px] font-semibold text-slate-900">
-                  {lead ? "Request linked" : "Still unlinked"}
-                </p>
-              </div>
-            </div>
           </div>
 
           {internalNotes.length > 0 && (

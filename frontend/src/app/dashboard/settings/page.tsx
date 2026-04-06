@@ -178,7 +178,7 @@ function ClinicInformationSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Contact details shown to patients in the chat widget and assistant responses.</p>
+      <p className="text-xs text-slate-500 mb-4">These details are shown to patients in the chat widget and assistant responses. Keep them accurate so the assistant gives correct information.</p>
       <div className="space-y-4">
         <div>
           <label htmlFor="clinic-name" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -251,7 +251,7 @@ function AssistantMessagesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Control how the assistant introduces itself and what it says when it cannot answer.</p>
+      <p className="text-xs text-slate-500 mb-4">Control exactly how the assistant introduces itself and what it says when it cannot answer a question.</p>
       <div className="space-y-4">
         <div>
           <label htmlFor="greeting" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -303,7 +303,7 @@ function ServicesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">The assistant uses this list to answer questions about what your clinic offers.</p>
+      <p className="text-xs text-slate-500 mb-4">The assistant uses this list to answer patient questions about what your clinic offers. Only services listed here will be mentioned.</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {services.map((service, index) => (
           <span
@@ -356,7 +356,7 @@ function BusinessHoursSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Patients will see these hours when they ask about availability.</p>
+      <p className="text-xs text-slate-500 mb-4">The assistant references these hours when patients ask about availability. Keep them current to avoid incorrect information.</p>
       <div className="space-y-3">
         {DAYS.map((day) => (
           <div key={day} className="flex items-center gap-3">
@@ -724,7 +724,7 @@ function EmailNotificationsSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Get an email alert each time the assistant captures a new patient request.</p>
+      <p className="text-xs text-slate-500 mb-4">Receive an email alert each time the assistant captures a new patient request, so nothing is missed.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -793,7 +793,7 @@ function SchedulingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Let patients pick available appointment slots directly in the chat.</p>
+      <p className="text-xs text-slate-500 mb-4">Allow patients to select available appointment slots directly in the chat, based on the availability you configure.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -863,7 +863,7 @@ function BrandingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500 mb-4">Control how the chat widget looks on your website.</p>
+      <p className="text-xs text-slate-500 mb-4">Customize how the chat widget looks on your website. Your branding stays consistent with your clinic identity.</p>
       <div className="space-y-4 max-w-lg">
         <div>
           <label htmlFor="assistant-name" className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -920,7 +920,7 @@ function EmbedSectionContent({
   return (
     <div className="px-5 pb-5 border-t border-slate-100 pt-4">
       <p className="text-xs text-slate-500 mb-4">
-        Paste this snippet into your website HTML to add the assistant chat widget.
+        Add this snippet to your website HTML to enable the chat widget. The assistant will only respond using your configured clinic data.
       </p>
       <div className="relative group">
         <pre className="bg-slate-50 p-4 rounded-lg text-xs text-slate-700 overflow-x-auto border border-slate-200 whitespace-pre-wrap">
@@ -1311,7 +1311,7 @@ export default function SettingsPage() {
           </>
         }
         title="Clinic settings"
-        description="Clinic details, assistant behavior, spreadsheet connections, notifications, and embed configuration."
+        description="Everything the assistant uses to respond to patients. Your clinic data stays under your control — nothing is assumed or pulled from outside sources."
       />
       <div className="workspace-stage">
         <div className="workspace-side-rail">

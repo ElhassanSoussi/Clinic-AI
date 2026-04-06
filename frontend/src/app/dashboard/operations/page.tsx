@@ -34,42 +34,13 @@ import type {
   WaitlistEntry,
 } from "@/types";
 
-function toDateTimeLocal(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60_000);
-  return local.toISOString().slice(0, 16);
-}
-
-function toIsoOrNull(value: string): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
-}
-
-function appointmentStatusLabel(status: OperationsLead["appointment_status"]): string {
-  if (status === "cancel_requested") return "Cancel requested";
-  if (status === "reschedule_requested") return "Reschedule requested";
-  if (status === "cancelled") return "Cancelled";
-  if (status === "completed") return "Completed";
-  if (status === "no_show") return "No-show";
-  if (status === "confirmed") return "Confirmed";
-  return "Open request";
-}
-
-function appointmentStatusClass(status: OperationsLead["appointment_status"]): string {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "cancel_requested" || status === "reschedule_requested") {
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-  if (status === "cancelled" || status === "no_show") {
-    return "bg-rose-50 text-rose-700 border-rose-200";
-  }
-  return "bg-slate-100 text-slate-700 border-slate-200";
-}
+import {
+  toDateTimeLocal,
+  toIsoOrNull,
+  appointmentStatusLabel,
+  appointmentStatusClass,
+} from "@/lib/format-helpers";
+import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
 
 function readinessStatusLabel(status: SystemReadinessItem["status"]): string {
   if (status === "configured") return "Configured";
@@ -165,14 +136,23 @@ export default function OperationsPage() {
     });
   }, []);
 
+  const runAutoFollowUps = async () => {
+    setSavingSettings(true);
+    try {
+      await api.frontdesk.runAutoFollowUps();
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to run auto follow-ups");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const clinicData = await api.clinics.getMyClinic();
-      if (clinicData.follow_up_automation_enabled) {
-        await api.frontdesk.runAutoFollowUps();
-      }
       const [operationsData, reminderPreviewData] = await Promise.all([
         api.frontdesk.getOperations(),
         api.frontdesk.getReminderPreview(),
@@ -413,11 +393,7 @@ export default function OperationsPage() {
         description="Reminders, recovery queues, SMS review, waitlist items, and action-required bookings. See what is blocked and what is moving."
       />
 
-      {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">
-          {error}
-        </div>
-      )}
+      <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
       {/* System readiness */}
       {systemReadiness && (
@@ -663,6 +639,15 @@ export default function OperationsPage() {
               className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
             />
           </div>
+          {followUpAutomationEnabled && (
+            <button
+              onClick={runAutoFollowUps}
+              disabled={savingSettings}
+              className="mt-1 rounded-lg border border-teal-200 bg-teal-50 px-3 py-1.5 text-[12px] font-semibold text-teal-700 transition-colors hover:bg-teal-100 disabled:opacity-50"
+            >
+              {savingSettings ? "Running..." : "Run follow-ups now"}
+            </button>
+          )}
         </div>
       </div>
 
