@@ -95,7 +95,9 @@ export default function ChatPage({
       setClinicName(b.name || "");
       setAssistantLabel(b.assistant_name || b.name || "Clinic Assistant");
       setClinicIsLive(b.is_live !== false);
-    }).catch(() => {});
+    }).catch(() => {
+      // Branding load is best-effort; chat still works with defaults.
+    });
   }, [slug]);
 
   useEffect(() => {

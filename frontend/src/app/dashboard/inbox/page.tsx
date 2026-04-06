@@ -106,7 +106,7 @@ export default function InboxPage() {
   if (error) return <ErrorState message={error} onRetry={loadInbox} />;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -115,15 +115,15 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="Every patient conversation in one place. Review, respond, or hand off."
+        description="Every patient conversation in one place — web chat, SMS, and staff notes. Review, respond, or hand off."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[240px_1fr_260px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_1fr_240px]">
         {/* Left rail — filters */}
         <aside className="hidden space-y-3 xl:block">
           {/* Metrics */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Conversation mix</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Conversation mix</p>
             <div className="mt-2.5 space-y-1.5">
               {[
                 { label: "All", value: counts.all, tone: "slate" as const },
@@ -137,8 +137,8 @@ export default function InboxPage() {
           </div>
 
           {/* Status filters */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Status</p>
             <div className="mt-2.5 space-y-1">
               {STATUS_FILTERS.map((filter) => {
                 const count = counts[filter.value];
@@ -162,8 +162,8 @@ export default function InboxPage() {
           </div>
 
           {/* Channel filters */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Channels</p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setChannelFilter("all")}
@@ -236,7 +236,7 @@ export default function InboxPage() {
                 : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match.`;
             }
             return (
-              <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+              <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
                 <EmptyState
                   icon={<Inbox className="w-5 h-5 text-slate-400" />}
                   title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
@@ -250,9 +250,9 @@ export default function InboxPage() {
                   <button
                   key={thread.id}
                   onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                  className="app-row-hover w-full rounded-lg border border-slate-100 bg-white px-4 py-3 text-left shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
+                  className="app-row-hover w-full rounded-lg border border-slate-100 bg-white px-3.5 py-2.5 text-left shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
                 >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
                     <div className="min-w-0 flex-1">
                       <div className="mb-1.5 flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-slate-900">{thread.customer_name}</p>
@@ -264,7 +264,7 @@ export default function InboxPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[13px] leading-relaxed text-slate-500">{thread.last_message_preview}</p>
+                      <p className="text-[12px] leading-relaxed text-slate-500">{thread.last_message_preview}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
                         {(thread.customer_phone || thread.customer_email) && (
                           <span>{thread.customer_phone || thread.customer_email}</span>
@@ -294,53 +294,53 @@ export default function InboxPage() {
 
         {/* Right rail — context */}
         <aside className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-violet-700">
-                <Bot className="h-3 w-3" />
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-50 text-violet-700">
+                <Bot className="h-2.5 w-2.5" />
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-slate-900">Operating model</p>
-                <p className="text-[10px] text-slate-400">Review, take over, or move patients forward</p>
+                <p className="text-[12px] font-semibold text-slate-900">Operating model</p>
+                <p className="text-[9px] text-slate-400">Review, take over, or move patients forward</p>
               </div>
             </div>
-            <div className="mt-3 space-y-2">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Review needed</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.needs_follow_up}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+            <div className="mt-2.5 space-y-1.5">
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Review needed</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.needs_follow_up}</p>
+                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
                   Threads waiting for staff review or follow-up.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Booked</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{counts.booked}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Booked</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{counts.booked}</p>
+                <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
                   Conversations that reached a booked outcome.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[13px] font-semibold text-slate-900">Focus areas</p>
-            <div className="mt-2.5 space-y-2">
-              <div className="flex items-start gap-2 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-50">
-                  <TriangleAlert className="h-3 w-3 text-amber-600" />
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[12px] font-semibold text-slate-900">Focus areas</p>
+            <div className="mt-2 space-y-1.5">
+              <div className="flex items-start gap-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-50">
+                  <TriangleAlert className="h-2.5 w-2.5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-slate-800">Follow-up pressure</p>
-                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Delayed replies, recovery threads, and unlinked items.</p>
+                  <p className="text-[10px] font-semibold text-slate-800">Follow-up pressure</p>
+                  <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Delayed replies, recovery threads, and unlinked items.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-teal-50">
-                  <CalendarDays className="h-3 w-3 text-teal-600" />
+              <div className="flex items-start gap-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-teal-50">
+                  <CalendarDays className="h-2.5 w-2.5 text-teal-600" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-slate-800">Booking handoff</p>
-                  <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">Contact, book, or add notes directly from the thread.</p>
+                  <p className="text-[10px] font-semibold text-slate-800">Booking handoff</p>
+                  <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">Contact, book, or add notes directly from the thread.</p>
                 </div>
               </div>
             </div>

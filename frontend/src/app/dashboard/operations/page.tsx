@@ -34,42 +34,13 @@ import type {
   WaitlistEntry,
 } from "@/types";
 
-function toDateTimeLocal(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60_000);
-  return local.toISOString().slice(0, 16);
-}
-
-function toIsoOrNull(value: string): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
-}
-
-function appointmentStatusLabel(status: OperationsLead["appointment_status"]): string {
-  if (status === "cancel_requested") return "Cancel requested";
-  if (status === "reschedule_requested") return "Reschedule requested";
-  if (status === "cancelled") return "Cancelled";
-  if (status === "completed") return "Completed";
-  if (status === "no_show") return "No-show";
-  if (status === "confirmed") return "Confirmed";
-  return "Open request";
-}
-
-function appointmentStatusClass(status: OperationsLead["appointment_status"]): string {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "cancel_requested" || status === "reschedule_requested") {
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-  if (status === "cancelled" || status === "no_show") {
-    return "bg-rose-50 text-rose-700 border-rose-200";
-  }
-  return "bg-slate-100 text-slate-700 border-slate-200";
-}
+import {
+  toDateTimeLocal,
+  toIsoOrNull,
+  appointmentStatusLabel,
+  appointmentStatusClass,
+} from "@/lib/format-helpers";
+import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
 
 function readinessStatusLabel(status: SystemReadinessItem["status"]): string {
   if (status === "configured") return "Configured";
@@ -165,14 +136,23 @@ export default function OperationsPage() {
     });
   }, []);
 
+  const runAutoFollowUps = async () => {
+    setSavingSettings(true);
+    try {
+      await api.frontdesk.runAutoFollowUps();
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to run auto follow-ups");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const clinicData = await api.clinics.getMyClinic();
-      if (clinicData.follow_up_automation_enabled) {
-        await api.frontdesk.runAutoFollowUps();
-      }
       const [operationsData, reminderPreviewData] = await Promise.all([
         api.frontdesk.getOperations(),
         api.frontdesk.getReminderPreview(),
@@ -401,7 +381,7 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -413,15 +393,11 @@ export default function OperationsPage() {
         description="Reminders, recovery queues, SMS review, waitlist items, and action-required bookings. See what is blocked and what is moving."
       />
 
-      {error && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">
-          {error}
-        </div>
-      )}
+      <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
       {/* System readiness */}
       {systemReadiness && (
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-teal-600" />
             <div>
@@ -435,19 +411,19 @@ export default function OperationsPage() {
           <div className="mb-3 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
             <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Configured</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{systemReadiness.configured_count}</p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{systemReadiness.configured_count}</p>
             </div>
             <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Partial</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{systemReadiness.partial_count}</p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{systemReadiness.partial_count}</p>
             </div>
             <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Missing</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{systemReadiness.missing_count}</p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{systemReadiness.missing_count}</p>
             </div>
             <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Blocked</p>
-              <p className="mt-1 text-xl font-bold text-slate-900">{systemReadiness.blocked_count}</p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{systemReadiness.blocked_count}</p>
             </div>
           </div>
 
@@ -475,7 +451,7 @@ export default function OperationsPage() {
       )}
 
       {/* Channel readiness */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <div className="mb-3 flex items-center gap-2">
           <PhoneMissed className="h-4 w-4 text-teal-600" />
           <div>
@@ -545,62 +521,62 @@ export default function OperationsPage() {
 
       {/* Outbound activity metrics */}
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5">
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Outbound SMS</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.outbound_sms_total ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.outbound_sms_total ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Real delivery attempts logged through the SMS channel.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">AI Replies</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.ai_replies_sent ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.ai_replies_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Assistant-generated SMS replies successfully sent to patients.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Human Review</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.human_review_required ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.human_review_required ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">SMS threads waiting for staff review before a reply goes out.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Suggested Sent</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.suggested_replies_sent ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.suggested_replies_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">AI drafts approved or edited by staff and sent by SMS.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Reminders Sent</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.reminders_sent ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.reminders_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Booked-request reminders successfully sent by SMS.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Missed-Call Texts</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.missed_call_texts_sent ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.missed_call_texts_sent ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Recovery texts sent after missed calls.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Manual Takeovers</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.manual_takeover_threads ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.manual_takeover_threads ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">SMS threads currently held for staff instead of AI auto-reply.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Failed or Skipped</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">
+          <p className="mt-1.5 text-lg font-bold text-slate-900">
             {(outboundActivity?.failed_sends ?? 0) + (outboundActivity?.skipped_sends ?? 0)}
           </p>
           <p className="mt-1 text-[10px] text-slate-500">Review why sending was blocked or failed.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">AI Reply Failures</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.ai_reply_failures ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.ai_reply_failures ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Assistant replies that could not be sent and still need staff review.</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Blocked for Review</p>
-          <p className="mt-1.5 text-xl font-bold text-slate-900">{outboundActivity?.blocked_for_review ?? 0}</p>
+          <p className="mt-1.5 text-lg font-bold text-slate-900">{outboundActivity?.blocked_for_review ?? 0}</p>
           <p className="mt-1 text-[10px] text-slate-500">Risky or unsupported SMS messages held for staff review.</p>
         </div>
       </div>
 
       {/* Reminder settings */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="mb-1.5 flex items-center gap-2">
@@ -663,11 +639,20 @@ export default function OperationsPage() {
               className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
             />
           </div>
+          {followUpAutomationEnabled && (
+            <button
+              onClick={runAutoFollowUps}
+              disabled={savingSettings}
+              className="mt-1 rounded-lg border border-teal-200 bg-teal-50 px-3 py-1.5 text-[12px] font-semibold text-teal-700 transition-colors hover:bg-teal-100 disabled:opacity-50"
+            >
+              {savingSettings ? "Running..." : "Run follow-ups now"}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Reminder delivery */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-semibold text-slate-900">Reminder delivery</h2>
@@ -751,8 +736,8 @@ export default function OperationsPage() {
       </div>
 
       {/* Recovery queue + Log form */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-[13px] font-semibold text-slate-900">Recovery queue</h2>
@@ -905,7 +890,7 @@ export default function OperationsPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
           <h2 className="text-[13px] font-bold text-slate-900">Log a recovery item</h2>
           <p className="mt-0.5 text-[10px] text-slate-400">
             This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
@@ -1000,7 +985,7 @@ export default function OperationsPage() {
       </div>
 
       {/* SMS review queue */}
-      <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-semibold text-slate-900">SMS review queue</h2>
@@ -1068,10 +1053,10 @@ export default function OperationsPage() {
       </div>
 
       {/* Bottom two-column: Bookings + Waitlist | Outbound + Action + Deposits */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="space-y-4">
           {/* Reminder-ready bookings */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Reminder-ready bookings</h2>
@@ -1244,7 +1229,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Waitlist */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Waitlist</h2>
@@ -1360,9 +1345,9 @@ export default function OperationsPage() {
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Recent outbound SMS */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-[13px] font-semibold text-slate-900">Recent outbound SMS</h2>
@@ -1402,7 +1387,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Action required */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-amber-600" />
               <h2 className="text-[13px] font-semibold text-slate-900">Action required</h2>
@@ -1460,7 +1445,7 @@ export default function OperationsPage() {
           </div>
 
           {/* Deposit tracking */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <Wallet className="h-4 w-4 text-violet-600" />
               <h2 className="text-[13px] font-semibold text-slate-900">Deposit tracking</h2>
@@ -1468,19 +1453,19 @@ export default function OperationsPage() {
             <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Required</p>
-                <p className="mt-1 text-xl font-bold text-slate-900">{operations.deposit_summary.required_count}</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{operations.deposit_summary.required_count}</p>
               </div>
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Requested</p>
-                <p className="mt-1 text-xl font-bold text-slate-900">{operations.deposit_summary.requested_count}</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{operations.deposit_summary.requested_count}</p>
               </div>
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Paid</p>
-                <p className="mt-1 text-xl font-bold text-slate-900">{operations.deposit_summary.paid_count}</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{operations.deposit_summary.paid_count}</p>
               </div>
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Waiting</p>
-                <p className="mt-1 text-xl font-bold text-slate-900">{operations.deposit_summary.waiting_count}</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{operations.deposit_summary.waiting_count}</p>
               </div>
             </div>
             <p className="text-[12px] leading-relaxed text-slate-600">

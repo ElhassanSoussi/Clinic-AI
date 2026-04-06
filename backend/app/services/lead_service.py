@@ -1,6 +1,7 @@
+from typing import Optional
+
 from app.dependencies import get_supabase
 from app.utils.logger import get_logger
-import threading
 
 logger = get_logger(__name__)
 
@@ -38,6 +39,7 @@ def create_lead(clinic_id: str, data: dict) -> dict:
     try:
         db.rpc("increment_monthly_leads", {"clinic_id_input": clinic_id}).execute()
     except Exception as e:
+        logger.warning(f"RPC increment_monthly_leads unavailable for clinic {clinic_id}, using fallback: {e}")
         # Fallback: non-atomic increment if RPC doesn't exist yet
         try:
             clinic_row = db.table("clinics").select("monthly_leads_used").eq("id", clinic_id).single().execute()
@@ -46,31 +48,10 @@ def create_lead(clinic_id: str, data: dict) -> dict:
         except Exception as e2:
             logger.error(f"Failed to increment monthly lead counter for clinic {clinic_id}: {e2}")
 
-    # Notifications & Syncs
-    try:
-        clinic = db.table("clinics").select("*").eq("id", clinic_id).single().execute()
-        
-        if clinic.data:
-            from app.services.spreadsheet_sync import append_lead_for_clinic
-
-            append_lead_for_clinic(clinic.data, result.data[0])
-            
-        # Email Notifications (Async Fire-and-Forget)
-        if clinic.data and clinic.data.get("notifications_enabled"):
-            from app.services.email_service import send_new_lead_email
-            threading.Thread(
-                target=send_new_lead_email, 
-                args=(clinic.data, result.data[0]),
-                daemon=True
-            ).start()
-            
-    except Exception as e:
-        logger.error(f"Failed to initiate background syncs/notifications: {e}")
-        
     return result.data[0]
 
 
-def get_leads(clinic_id: str, status_filter: str = None) -> list:
+def get_leads(clinic_id: str, status_filter: Optional[str] = None) -> list[dict]:
     db = get_supabase()
     query = db.table("leads").select("*").eq("clinic_id", clinic_id).order("created_at", desc=True)
     if status_filter:
@@ -105,16 +86,5 @@ def update_lead(clinic_id: str, lead_id: str, updates: dict) -> dict | None:
         .execute()
     )
     logger.info(f"Lead {lead_id} updated: {list(filtered.keys())}")
-
-    # Google Sheets Status Writeback
-    if "status" in filtered:
-        try:
-            from app.services.spreadsheet_sync import update_lead_status_for_clinic
-
-            clinic = db.table("clinics").select("*").eq("id", clinic_id).single().execute()
-            if clinic.data:
-                update_lead_status_for_clinic(clinic.data, lead_id, filtered["status"])
-        except Exception as e:
-            logger.error(f"Failed to initiate Google Sheets status sync: {e}")
 
     return result.data[0] if result.data else None

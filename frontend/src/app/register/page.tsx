@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
 import { getSupabasePublicEnvError } from "@/lib/env";
+import { isValidEmail } from "@/lib/utils";
 
 const OAuthButtons = dynamic(() => import("@/components/shared/OAuthButtons"), {
   ssr: false,
@@ -70,6 +71,11 @@ export default function RegisterPage() {
 
     if (!form.full_name.trim() || !form.email.trim() || !form.password.trim() || !form.clinic_name.trim()) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      setError("Please enter a valid email address.");
       return;
     }
 

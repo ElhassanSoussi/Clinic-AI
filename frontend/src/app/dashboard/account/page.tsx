@@ -96,7 +96,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -105,13 +105,13 @@ export default function AccountPage() {
           </>
         }
         title="Account & security"
-        description="Profile information, password, and the operator identity displayed across the workspace."
+        description="Your login credentials, display name, and workspace identity. Changes here affect how you appear across the product."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[240px_1fr_240px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_1fr_240px]">
         {/* Left rail */}
         <aside className="hidden xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Account overview</p>
             <div className="mt-3 space-y-2.5">
               <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
@@ -129,7 +129,7 @@ export default function AccountPage() {
         {/* Main content */}
         <div className="space-y-2">
         {/* Profile Section */}
-        <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <section className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("profile")}
@@ -171,7 +171,7 @@ export default function AccountPage() {
                     className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
-                    Email cannot be changed. Contact support if needed.
+                    Email is tied to your login. Contact support to change it.
                   </p>
                 </div>
                 <div>
@@ -201,7 +201,7 @@ export default function AccountPage() {
         </section>
 
         {/* Password Section */}
-        <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <section className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("password")}
@@ -279,7 +279,7 @@ export default function AccountPage() {
 
         {/* Right rail */}
         <aside className="hidden xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Security note</p>
             <div className="mt-3 space-y-2 text-[13px] leading-relaxed text-slate-500">
               <p>Your account controls the operator identity shown across the workspace.</p>

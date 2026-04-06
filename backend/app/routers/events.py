@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.dependencies import get_supabase
 from app.utils.logger import get_logger
@@ -8,12 +8,25 @@ logger = get_logger(__name__)
 router = APIRouter(tags=["events"])
 
 ALLOWED_EVENTS = {"demo_opened", "demo_message_sent", "demo_cta_clicked"}
+MAX_METADATA_KEYS = 5
 
 
 class EventCreate(BaseModel):
     event_type: str = Field(..., max_length=50)
     session_id: str = Field(default="", max_length=100)
     metadata: dict = Field(default_factory=dict)
+
+    @field_validator("metadata")
+    @classmethod
+    def cap_metadata(cls, v: dict) -> dict:
+        if len(v) > MAX_METADATA_KEYS:
+            raise ValueError(f"metadata must have at most {MAX_METADATA_KEYS} keys")
+        for key, val in v.items():
+            if len(str(key)) > 50:
+                raise ValueError("metadata key must be at most 50 characters")
+            if len(str(val)) > 200:
+                raise ValueError("metadata value must be at most 200 characters")
+        return v
 
 
 @router.post("/events", status_code=201)

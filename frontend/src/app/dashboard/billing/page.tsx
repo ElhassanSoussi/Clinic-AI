@@ -13,6 +13,7 @@ import {
   Crown,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { isSafeExternalUrl } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -71,7 +72,7 @@ export default function BillingPage() {
         api.billing.getPlans(),
       ]);
       setBilling(statusData);
-      setPlans(plansData);
+      setPlans(Array.isArray(plansData) ? plansData : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load billing");
     } finally {
@@ -123,6 +124,9 @@ export default function BillingPage() {
       const result = await api.billing.createPortal({
         return_url: `${globalThis.location.origin}/dashboard/billing`,
       });
+      if (!isSafeExternalUrl(result.portal_url)) {
+        throw new Error("Invalid billing portal URL returned by server.");
+      }
       globalThis.location.href = result.portal_url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open billing portal");
@@ -149,7 +153,7 @@ export default function BillingPage() {
   const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
-    <div className="space-y-5 max-w-4xl">
+    <div className="space-y-4 max-w-4xl">
       <PageHeader
         eyebrow={
           <>
@@ -158,7 +162,7 @@ export default function BillingPage() {
           </>
         }
         title="Plan & usage"
-        description="Current plan, usage this month, and upgrade options."
+        description="Current plan, monthly usage, and upgrade options. Payments are handled securely through Stripe."
       />
 
       {/* Stripe return feedback */}
@@ -174,7 +178,7 @@ export default function BillingPage() {
       )}
 
       {/* Current Plan Card */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -224,7 +228,7 @@ export default function BillingPage() {
       </div>
 
       {/* Usage Card */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-900 mb-4">Usage this month</h3>
         <div className="flex items-end justify-between mb-2">
           <span className="text-sm text-slate-600">
@@ -262,6 +266,11 @@ export default function BillingPage() {
       {/* Plans Comparison */}
       <div>
         <h3 className="text-sm font-semibold text-slate-900 mb-3">Compare plans</h3>
+        {plans.length === 0 ? (
+          <div className="rounded-xl border border-slate-100 bg-white p-5 text-sm text-slate-500 shadow-sm">
+            Plan details are temporarily unavailable. Your current billing status is still accurate above.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {plans.map((plan) => {
             const isCurrent = plan.id === billing.plan;
@@ -273,7 +282,7 @@ export default function BillingPage() {
             return (
               <div
                 key={plan.id}
-                className={`rounded-2xl border p-5 flex flex-col ${
+                className={`rounded-xl border p-5 flex flex-col ${
                   isCurrent
                     ? "border-teal-200 bg-teal-50/40 shadow-sm"
                     : "border-slate-100 bg-white shadow-sm"
@@ -330,14 +339,15 @@ export default function BillingPage() {
                   );
                 })()}
               </div>
-            );
+              );
           })}
         </div>
+        )}
       </div>
 
       {/* Manage via portal for existing subscribers */}
       {billing.has_stripe_subscription && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-slate-400" />
             <div className="flex-1">

@@ -145,7 +145,7 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <PageHeader
         eyebrow={
           <>
@@ -154,17 +154,17 @@ export default function OpportunitiesPage() {
           </>
         }
         title="Follow-up queue"
-        description="Stalled requests and missed-call recovery items that need attention."
+        description="Stalled requests and missed-call recovery threads that need your attention. Triage, queue, and resolve from one place."
       />
 
       {error && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">{error}</div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-700">{error}</div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_260px]">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
+        <div className="space-y-4">
           {/* Follow-up queue */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-semibold text-slate-900">Active queue</p>
@@ -177,7 +177,7 @@ export default function OpportunitiesPage() {
               <EmptyState
                 icon={<CheckCircle2 className="w-5 h-5 text-slate-400" />}
                 title="No queued follow-ups"
-                description="Add items from the list below to start tracking them here."
+                description="Move items from the triage list below into the active queue to start tracking them."
               />
             ) : (
               <div className="space-y-2.5">
@@ -246,11 +246,11 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Triage */}
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-4">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <div className="mb-2.5 flex items-center justify-between gap-3">
               <div>
-                <p className="text-[13px] font-semibold text-slate-900">Needs triage</p>
-                <p className="mt-0.5 text-[10px] text-slate-400">Rules-based risk items from conversations and requests.</p>
+                <p className="text-[12px] font-semibold text-slate-900">Needs triage</p>
+                <p className="mt-0.5 text-[9px] text-slate-400">Rules-based risk items from conversations and requests.</p>
               </div>
               <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">{triageItems.length} pending</span>
             </div>
@@ -259,7 +259,7 @@ export default function OpportunitiesPage() {
               <EmptyState
                 icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
                 title="No unqueued items"
-                description="All follow-up items are either resolved or already in the queue."
+                description="All follow-up items are either resolved or already in the active queue above."
               />
             ) : (
               <div className="space-y-2.5">
@@ -318,14 +318,14 @@ export default function OpportunitiesPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">Automation</p>
-            <div className="mt-2.5 rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-              <p className="text-[12px] font-semibold text-slate-900">Auto follow-up</p>
-              <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">
+          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-300">Automation</p>
+            <div className="mt-2 rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+              <p className="text-[11px] font-semibold text-slate-900">Auto follow-up</p>
+              <p className="mt-0.5 text-[9px] leading-relaxed text-slate-400">
                 Creates tasks from stalled conversations and aging requests.
               </p>
-              <label className="mt-2.5 inline-flex items-center gap-2 text-[12px] text-slate-700">
+              <label className="mt-2 inline-flex items-center gap-2 text-[11px] text-slate-700">
                 <input
                   type="checkbox"
                   checked={Boolean(clinic?.follow_up_automation_enabled)}
@@ -336,25 +336,19 @@ export default function OpportunitiesPage() {
                 {savingAutomation ? "Saving..." : "Enabled"}
               </label>
             </div>
-            <div className="mt-2.5 space-y-2">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">Queued</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{followUps.length}</p>
+            <div className="mt-2 space-y-1.5">
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">Queued</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{followUps.length}</p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">Needs triage</p>
-                <p className="mt-0.5 text-xl font-bold text-slate-900">{triageItems.length}</p>
+              <div className="rounded-md border border-slate-100/60 bg-slate-50/40 px-2.5 py-2">
+                <p className="text-[9px] text-slate-400">Needs triage</p>
+                <p className="mt-0.5 text-lg font-bold text-slate-900">{triageItems.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-300">How to use</p>
-            <div className="mt-2.5 space-y-1.5">
-              <p className="text-[10px] leading-relaxed text-slate-400">Keep stalled requests visible before they turn into lost bookings.</p>
-              <p className="text-[10px] leading-relaxed text-slate-400">Use queued follow-ups for manual ownership, then automate when ready.</p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

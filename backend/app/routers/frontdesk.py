@@ -3,7 +3,9 @@ from urllib.parse import parse_qsl
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
+from app.config import get_settings
 from app.dependencies import get_current_user
+from app.rate_limit import create_rate_limit_dependency
 from app.schemas.frontdesk import (
     AppointmentDepositRequest,
     AppointmentDepositResponse,
@@ -89,9 +91,14 @@ from app.services.frontdesk_service import (
 )
 
 router = APIRouter(prefix="/frontdesk", tags=["frontdesk"])
+settings = get_settings()
+sms_webhook_rate_limit = create_rate_limit_dependency(
+    "frontdesk_sms_webhook",
+    settings.rate_limit_sms_webhook_per_minute,
+)
 
 
-@router.post("/communications/twilio/inbound")
+@router.post("/communications/twilio/inbound", dependencies=[Depends(sms_webhook_rate_limit)])
 async def twilio_inbound_sms(request: Request):
     body_bytes = await request.body()
     params = dict(parse_qsl(body_bytes.decode("utf-8"), keep_blank_values=True))

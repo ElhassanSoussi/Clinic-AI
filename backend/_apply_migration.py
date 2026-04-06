@@ -5,8 +5,8 @@ Usage:
   # Option 1: Provide DATABASE_URL
   DATABASE_URL=postgresql://... python _apply_migration.py
 
-  # Option 2: Copy the SQL below and paste into the Supabase SQL Editor:
-  #   https://supabase.com/dashboard/project/rbmtphntktwlftplsvgj/sql
+  # Option 2: Copy the SQL below and paste into the Supabase SQL Editor
+  #   (use your project's SQL Editor URL from the Supabase dashboard).
 """
 
 import os
@@ -31,8 +31,7 @@ def main():
     if not db_url:
         print("=" * 60)
         print("No DATABASE_URL found.")
-        print("Please run this SQL in the Supabase SQL Editor:")
-        print("  https://supabase.com/dashboard/project/rbmtphntktwlftplsvgj/sql")
+        print("Please run this SQL in your Supabase project's SQL Editor.")
         print("=" * 60)
         print()
         print(MIGRATION_SQL)

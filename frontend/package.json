@@ -13,6 +13,7 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.47.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.0",
     "@vercel/speed-insights": "^2.0.0",

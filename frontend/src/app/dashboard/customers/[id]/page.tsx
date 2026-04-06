@@ -3,7 +3,7 @@
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Clock3, Mail, Phone, UserRound } from "lucide-react";
+import { ArrowLeft, Mail, Phone, UserRound } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { formatDateTime, timeAgo } from "@/lib/utils";
@@ -13,6 +13,8 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { CommunicationEvent, CustomerProfileDetail } from "@/types";
+import { depositStatusClass as depositBadgeClass, depositStatusLabel as depositBadgeLabel } from "@/lib/format-helpers";
+import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
 
 function timelineHref(profile: CustomerProfileDetail, item: CustomerProfileDetail["timeline"][number]): string | null {
   if (item.thread_id) {
@@ -40,28 +42,6 @@ function lastOutcomeClass(outcome: CustomerProfileDetail["last_outcome"]): strin
   if (outcome === "booked") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (outcome === "lost") return "bg-slate-100 text-slate-700 border-slate-200";
   return "bg-amber-50 text-amber-700 border-amber-200";
-}
-
-function depositBadgeClass(status: string): string {
-  if (status === "paid") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "requested" || status === "required") {
-    return "bg-amber-50 text-amber-700 border-amber-200";
-  }
-  if (status === "failed" || status === "expired") {
-    return "bg-rose-50 text-rose-700 border-rose-200";
-  }
-  if (status === "waived") return "bg-blue-50 text-blue-700 border-blue-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-}
-
-function depositBadgeLabel(status: string): string {
-  if (status === "requested") return "Deposit requested";
-  if (status === "required") return "Deposit required";
-  if (status === "paid") return "Deposit paid";
-  if (status === "failed") return "Deposit failed";
-  if (status === "expired") return "Deposit expired";
-  if (status === "waived") return "Deposit waived";
-  return "No deposit";
 }
 
 function smsStatusClass(profile: CustomerProfileDetail): string {
@@ -107,18 +87,19 @@ export default function CustomerProfilePage({
   const router = useRouter();
   const [profile, setProfile] = useState<CustomerProfileDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [smsBody, setSmsBody] = useState("");
   const [sendingSms, setSendingSms] = useState(false);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
-    setError("");
+    setLoadError("");
     try {
       const data = await api.frontdesk.getCustomer(id);
       setProfile(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load customer profile");
+      setLoadError(err instanceof Error ? err.message : "Failed to load customer profile");
     } finally {
       setLoading(false);
     }
@@ -141,14 +122,14 @@ export default function CustomerProfilePage({
       setSmsBody("");
       await loadProfile();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send SMS");
+      setActionError(err instanceof Error ? err.message : "Failed to send SMS");
     } finally {
       setSendingSms(false);
     }
   };
 
   if (loading) return <LoadingState message="Loading customer profile..." />;
-  if (error) return <ErrorState message={error} onRetry={loadProfile} />;
+  if (loadError) return <ErrorState message={loadError} onRetry={loadProfile} />;
   if (!profile) {
     return <ErrorState title="Not found" message="This customer profile could not be found." />;
   }
@@ -158,7 +139,7 @@ export default function CustomerProfilePage({
   );
 
   return (
-    <div className="max-w-6xl space-y-5">
+    <div className="max-w-6xl space-y-4">
       <button
         onClick={() => router.push("/dashboard/customers")}
         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
@@ -175,11 +156,13 @@ export default function CustomerProfilePage({
           </>
         }
         title={profile.name}
-        description="See the latest thread state, booking outcome, SMS handling context, and internal timeline for this contact."
+        description="Thread state, booking outcome, SMS handling, and timeline for this contact."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-5">
+      <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-4">
           <div className="app-card p-4">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
               <div>
@@ -279,7 +262,7 @@ export default function CustomerProfilePage({
                 </p>
                 <p className="text-[13px] text-blue-900 mt-0.5">{latestInboundSms.detail}</p>
                 {latestInboundSms.occurred_at && (
-                  <p className="text-[10px] text-blue-700/80 mt-1.5mt-1.5">
+                  <p className="text-[10px] text-blue-700/80 mt-1.5">
                     {formatDateTime(latestInboundSms.occurred_at)}
                   </p>
                 )}
@@ -300,7 +283,7 @@ export default function CustomerProfilePage({
             )}
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-4">
+          <div className="bg-white border border-slate-100 rounded-xl p-4">
             <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
               Recent requests
             </h2>
@@ -335,7 +318,7 @@ export default function CustomerProfilePage({
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
           <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
             Recent conversation history
           </h2>
@@ -371,7 +354,7 @@ export default function CustomerProfilePage({
           )}
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 h-fit">
+        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
           {profile.phone && (
             <div className="mb-4 pb-4 border-b border-slate-100">
               <h2 className="text-[13px] font-semibold text-slate-900 mb-2.5">
@@ -390,7 +373,7 @@ export default function CustomerProfilePage({
               <button
                 onClick={sendSms}
                 disabled={sendingSms || !smsBody.trim()}
-                className="mt-2.5 px-3 py-1.5 text-[12px] font-semiboldsemibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+                className="mt-2.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
               >
                 {sendingSms ? "Sending..." : "Send SMS"}
               </button>
@@ -432,15 +415,16 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-4">
-            <Clock3 className="w-3.5 h-3.5" />
-            SMS sends, reminders, and recovery activity all land in this same timeline. Future channels will stack onto the same history once they are connected.
-          </div>
+          {profile.timeline.length > 0 && (
+            <p className="text-[10px] text-slate-400 mt-4">
+              All channels and activity types appear in this timeline.
+            </p>
+          )}
         </div>
       </div>
     </div>

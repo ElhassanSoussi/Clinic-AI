@@ -68,6 +68,76 @@ async function seedAuth(page: Page) {
         }),
       });
     }
+    // Analytics — dashboard page accesses many numeric fields directly
+    if (url.includes("/frontdesk/analytics")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          conversations_total: 0,
+          leads_created: 0,
+          booked_requests: 0,
+          unresolved_count: 0,
+          follow_up_needed_count: 0,
+          potential_lost_patients: 0,
+          recovered_opportunities: 0,
+          estimated_value_recovered_cents: 0,
+          estimated_value_recovered_label: "$0",
+          lead_capture_rate: 0,
+          ai_resolution_estimate: 0,
+          ai_resolution_estimate_label: "0%",
+          ai_auto_handled_count: 0,
+          human_review_required_count: 0,
+          manual_takeover_threads: 0,
+          suggested_replies_sent_count: 0,
+          blocked_for_review_count: 0,
+          deposit_requested_count: 0,
+          deposit_paid_count: 0,
+          deposit_waiting_count: 0,
+          busiest_contact_hours: [],
+        }),
+      });
+    }
+    // Activity feed
+    if (url.includes("/activity")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    }
+    // Operations, opportunities, appointments, follow-ups, customers, training, knowledge
+    if (
+      url.includes("/frontdesk/operations") ||
+      url.includes("/frontdesk/opportunities") ||
+      url.includes("/frontdesk/follow-ups") ||
+      url.includes("/frontdesk/appointments") ||
+      url.includes("/frontdesk/customers") ||
+      url.includes("/frontdesk/reminders") ||
+      url.includes("/frontdesk/channels") ||
+      url.includes("/frontdesk/communications")
+    ) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    }
+    if (url.includes("/frontdesk/training")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          assistant_name: "AI Assistant",
+          knowledge_score: 0,
+          knowledge_status: "needs_work",
+          readiness_items: [],
+          knowledge_gaps: [],
+          custom_sources: [],
+        }),
+      });
+    }
+    // Default fallback — safe empty object
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -94,27 +164,9 @@ test.describe("Dashboard structure (seeded auth)", () => {
     // Wait for main dashboard layout to stabilize
     await page.waitForLoadState("networkidle");
 
-    // If error boundary shows, skip — this is a dev-server compilation issue
-    const errorBoundary = page.getByText("Something went wrong");
-    if (await errorBoundary.isVisible().catch(() => false)) {
-      test.skip();
-      return;
-    }
-
     // Wait for the sidebar <aside> with nav links inside
     const aside = page.locator("aside").filter({ has: page.locator("nav") }).first();
-    try {
-      await aside.waitFor({ state: "visible", timeout: 10000 });
-    } catch {
-      test.skip();
-      return;
-    }
-
-    // Re-check error boundary didn't appear during render
-    if (await errorBoundary.isVisible().catch(() => false)) {
-      test.skip();
-      return;
-    }
+    await aside.waitFor({ state: "visible", timeout: 15000 });
 
     const navLinks = [
       { href: "/dashboard", label: "Dashboard" },
@@ -152,8 +204,15 @@ test.describe("Dashboard structure (seeded auth)", () => {
     ];
 
     for (const route of routes) {
-      const response = await page.goto(route);
-      expect(response?.status()).toBeLessThan(500);
+      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+
+      if (response) {
+        expect(response.status()).toBeLessThan(500);
+      }
+
+      await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(new RegExp(`${route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+      await expect(page.locator("main")).toBeVisible();
     }
   });
 });

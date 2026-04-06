@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     app_name: str = "Clinic AI Front Desk"
     environment: Literal["development", "production"]
+    scheduler_enabled: bool = True
+    rate_limit_auth_per_minute: int = 10
+    rate_limit_chat_per_minute: int = 20
+    rate_limit_contact_per_minute: int = 10
+    rate_limit_sms_webhook_per_minute: int = 30
 
     # Optional integrations
     google_credentials_b64: str = ""
@@ -45,6 +50,7 @@ class Settings(BaseSettings):
     twilio_auth_token: str = ""
     twilio_from_number: str = ""
     twilio_messaging_service_sid: str = ""
+    sentry_dsn: str = ""
 
     model_config = SettingsConfigDict(
         env_file=str(Path(__file__).resolve().parents[1] / ".env"),
