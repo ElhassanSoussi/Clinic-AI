@@ -112,5 +112,6 @@
   "python.analysis.autoTranslateDocstrings": true,
   "githubPullRequests.experimental.useQuickChat": true,
   "chat.disableAIFeatures": false,
-  "dataWrangler.experiments.copilot.enabled": true
+  "dataWrangler.experiments.copilot.enabled": true,
+  "claudeCode.useTerminal": true
 }
