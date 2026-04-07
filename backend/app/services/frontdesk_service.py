@@ -5,7 +5,7 @@ import json
 import re
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any, Callable, Optional, TypedDict
 from uuid import uuid4
 
 from app.config import get_settings
@@ -120,6 +120,8 @@ CHANNEL_DEFAULTS: dict[str, dict[str, Any]] = {
 
 logger = get_logger(__name__)
 APPOINTMENT_VIEWS = {"all", "upcoming", "attention", "past", "cancelled"}
+TWILIO_SMS_LABEL = "Twilio SMS"
+SPREADSHEET_SYNC_LABEL = "Spreadsheet sync"
 
 SMS_DECISION_REASON_MESSAGES: dict[str, str] = {
     "safe_to_send": "The assistant reply is ready to send.",
@@ -134,6 +136,53 @@ SMS_DECISION_REASON_MESSAGES: dict[str, str] = {
     "ai_generation_failed": "The assistant could not generate an SMS reply.",
     "assistant_empty": "The assistant did not generate a reply.",
 }
+
+# ── Repeated string literals (S1192) ─────────────────────────────────────────
+_NO_ACTION_NEEDED = 'No action needed.'
+_RESEND_EMAIL_LABEL = 'Resend email'
+_UNKNOWN_CUSTOMER = 'Unknown customer'
+_UNKNOWN_PATIENT = 'Unknown patient'
+_EVENT_ID_PREFIX = 'event:'
+_KNOWLEDGE_SOURCES_MIGRATION_MSG = (
+    'Knowledge sources are not available until the latest database migration is applied.'
+)
+_CHANNEL_READINESS_MIGRATION_MSG = (
+    'Channel readiness is not available until the latest database migration is applied.'
+)
+
+
+class OutboundSmsRequest(TypedDict, total=False):
+    customer_name: str
+    customer_phone: str
+    customer_email: str
+    body: str
+    summary: str
+    lead_id: Optional[str]
+    conversation_id: Optional[str]
+    follow_up_task_id: Optional[str]
+    source_event_id: Optional[str]
+    event_type: str
+    require_automation: bool
+    automation_channel: str
+    sender_kind: str
+    persist_thread_message: bool
+    enqueue_retry_on_failure: bool
+
+
+class FollowUpTaskInput(TypedDict, total=False):
+    source_key: str
+    task_type: str
+    priority: str
+    title: str
+    detail: str
+    customer_name: str
+    customer_key: Optional[str]
+    lead_id: Optional[str]
+    conversation_id: Optional[str]
+    auto_generated: bool
+    due_at: Optional[datetime]
+    note: str
+    status: str
 
 
 def _parse_datetime(value: Optional[Any]) -> Optional[datetime]:
@@ -547,6 +596,27 @@ def _load_channel_connection_rows(clinic_id: str) -> list[dict[str, Any]]:
         return []
 
 
+def _determine_connection_status(
+    channel: str,
+    row: dict[str, Any],
+    defaults: dict[str, Any],
+    contact_value: str,
+    provider: str,
+    notes: str,
+    automation_enabled: bool,
+) -> tuple[str, str]:
+    if channel in {"web_chat", "manual"}:
+        return "connected", provider
+    sms_config = get_sms_configuration()
+    if channel in {"sms", "missed_call"} and sms_config["configured"]:
+        return "connected", "Twilio"
+    if contact_value or provider != defaults["provider"] or notes or automation_enabled:
+        return "ready_for_setup", provider
+    if row.get("connection_status") in CHANNEL_CONNECTION_STATUSES and channel not in {"web_chat", "manual"}:
+        return row["connection_status"], provider
+    return "not_connected", provider
+
+
 def _build_channel_readiness_item(
     clinic: dict[str, Any],
     row_by_channel: dict[str, dict[str, Any]],
@@ -554,7 +624,6 @@ def _build_channel_readiness_item(
 ) -> dict[str, Any]:
     defaults = CHANNEL_DEFAULTS[channel]
     row = row_by_channel.get(channel) or {}
-    sms_config = get_sms_configuration()
     contact_value = _safe_text(row.get("contact_value"))
     if not contact_value and channel in {"sms", "missed_call", "callback_request"}:
         contact_value = _safe_text(clinic.get("phone"))
@@ -564,17 +633,15 @@ def _build_channel_readiness_item(
     display_name = _safe_text(row.get("display_name")) or defaults["display_name"]
     automation_enabled = bool(row.get("automation_enabled"))
     notes = _safe_text(row.get("notes"))
-    if channel in {"web_chat", "manual"}:
-        connection_status = "connected"
-    elif channel in {"sms", "missed_call"} and sms_config["configured"]:
-        connection_status = "connected"
-        provider = "Twilio"
-    elif contact_value or provider != defaults["provider"] or notes or automation_enabled:
-        connection_status = "ready_for_setup"
-    else:
-        connection_status = "not_connected"
-    if row.get("connection_status") in CHANNEL_CONNECTION_STATUSES and channel not in {"web_chat", "manual"}:
-        connection_status = row["connection_status"]
+    connection_status, resolved_provider = _determine_connection_status(
+        channel,
+        row,
+        defaults,
+        contact_value,
+        provider,
+        notes,
+        automation_enabled,
+    )
     summary = {
         "connected": "Live now",
         "ready_for_setup": "Ready for provider setup",
@@ -583,7 +650,7 @@ def _build_channel_readiness_item(
     return {
         "id": row.get("id") or f"virtual:{channel}",
         "channel": channel,
-        "provider": provider,
+        "provider": resolved_provider,
         "connection_status": connection_status,
         "display_name": display_name,
         "contact_value": contact_value,
@@ -642,9 +709,265 @@ def _system_readiness_item(
     }
 
 
+def _build_twilio_readiness_item(settings: Any, sms_channel: dict[str, Any]) -> dict[str, Any]:
+    twilio_missing = []
+    if not settings.twilio_account_sid:
+        twilio_missing.append("TWILIO_ACCOUNT_SID")
+    if not settings.twilio_auth_token:
+        twilio_missing.append("TWILIO_AUTH_TOKEN")
+    if not (settings.twilio_from_number or settings.twilio_messaging_service_sid):
+        twilio_missing.append("TWILIO_FROM_NUMBER or TWILIO_MESSAGING_SERVICE_SID")
+
+    if len(twilio_missing) == 3:
+        return _system_readiness_item(
+            key="twilio_sms",
+            label=TWILIO_SMS_LABEL,
+            status="missing",
+            scope="feature",
+            summary="SMS is not configured on the server yet.",
+            detail="Inbound SMS, reminders, and text-back workflows stay disabled until Twilio credentials and a sender are set.",
+            action="Add the Twilio account SID, auth token, and a sender number or messaging service SID.",
+        )
+    elif twilio_missing:
+        return _system_readiness_item(
+            key="twilio_sms",
+            label=TWILIO_SMS_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Twilio setup is incomplete.",
+            detail="The SMS provider is only partially configured, so send and reply workflows remain blocked.",
+            action="Finish the missing Twilio values: " + ", ".join(twilio_missing),
+        )
+    elif sms_channel.get("connection_status") != "connected":
+        return _system_readiness_item(
+            key="twilio_sms",
+            label=TWILIO_SMS_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Twilio is configured, but the clinic SMS channel still needs activation.",
+            detail="The server can send SMS, but this clinic still needs its SMS channel saved with the live number and inbound webhook path.",
+            action="Confirm the Twilio number is mapped on the SMS channel and point inbound SMS to /api/frontdesk/communications/twilio/inbound.",
+        )
+    return _system_readiness_item(
+        key="twilio_sms",
+        label=TWILIO_SMS_LABEL,
+        status="configured",
+        scope="feature",
+        summary="Twilio SMS is configured.",
+        detail="Manual SMS, reminders, and two-way SMS threads are available when Twilio delivery is allowed by the account and carrier.",
+        action="Keep the live webhook URL current in local development.",
+    )
+
+
+def _check_excel_readiness(excel_ready: bool, excel_workbook_id: str) -> Optional[dict[str, Any]]:
+    if excel_ready and bool(excel_workbook_id):
+        return None
+    return _system_readiness_item(
+        key="google_sheets",
+        label=SPREADSHEET_SYNC_LABEL,
+        status="missing" if not excel_ready else "partially_configured",
+        scope="feature",
+        summary=(
+            "Microsoft Excel quick connect is not configured on the server yet."
+            if not excel_ready
+            else "Microsoft Excel quick connect is ready, but this clinic has not connected a workbook yet."
+        ),
+        detail=(
+            "Set Microsoft OAuth credentials before enabling Excel quick connect."
+            if not excel_ready
+            else "The runtime can connect to Excel, but no workbook is saved for this clinic."
+        ),
+        action=(
+            "Set MICROSOFT_OAUTH_CLIENT_ID and MICROSOFT_OAUTH_CLIENT_SECRET."
+            if not excel_ready
+            else "Use Connect with Microsoft in onboarding or settings."
+        ),
+    )
+
+
+def _check_google_readiness(google_ready: bool, google_sheet_id: str) -> Optional[dict[str, Any]]:
+    if google_ready and bool(google_sheet_id):
+        return None
+    if not google_ready:
+        return _system_readiness_item(
+            key="google_sheets",
+            label=SPREADSHEET_SYNC_LABEL,
+            status="blocked",
+            scope="feature",
+            summary="Google Sheets credentials are present, but the client could not initialize.",
+            detail="The configured Google credentials are invalid or do not match a supported format for Sheets access.",
+            action="Re-check the Google credentials payload and service-account access.",
+        )
+    return _system_readiness_item(
+        key="google_sheets",
+        label=SPREADSHEET_SYNC_LABEL,
+        status="partially_configured",
+        scope="feature",
+        summary="Google Sheets is ready on the server, but this clinic has not connected a sheet yet.",
+        detail="The runtime can access Google Sheets, but no spreadsheet is configured for this clinic.",
+        action="Use Connect with Google in onboarding or settings.",
+    )
+
+
+def _build_spreadsheet_readiness_item(
+    plan_id: str,
+    clinic: dict[str, Any],
+    google_ready: bool,
+    excel_ready: bool,
+) -> dict[str, Any]:
+    from app.services.pricing import has_feature
+
+    if not has_feature(plan_id, "google_sheets"):
+        return _system_readiness_item(
+            key="google_sheets",
+            label=SPREADSHEET_SYNC_LABEL,
+            status="blocked",
+            scope="feature",
+            summary="Spreadsheet sync is blocked on the current plan.",
+            detail="This clinic plan does not currently include spreadsheet sync.",
+            action="Switch to a plan that includes spreadsheet sync before connecting Google Sheets or Excel.",
+        )
+
+    spreadsheet_provider = _safe_text(clinic.get("spreadsheet_provider"))
+    excel_workbook_id = _safe_text(clinic.get("excel_workbook_id"))
+    google_sheet_id = _safe_text(clinic.get("google_sheet_id"))
+
+    if spreadsheet_provider == "excel":
+        excel_check = _check_excel_readiness(excel_ready, excel_workbook_id)
+        if excel_check:
+            return excel_check
+        return _system_readiness_item(
+            key="google_sheets",
+            label=SPREADSHEET_SYNC_LABEL,
+            status="configured",
+            scope="feature",
+            summary="Microsoft Excel is configured.",
+            detail="This clinic is connected to Excel and spreadsheet sync is ready.",
+            action=_NO_ACTION_NEEDED,
+        )
+
+    if not google_ready and not excel_ready:
+        return _system_readiness_item(
+            key="google_sheets",
+            label=SPREADSHEET_SYNC_LABEL,
+            status="missing",
+            scope="feature",
+            summary="Spreadsheet sync is not configured on the server yet.",
+            detail="Neither Google Sheets nor Microsoft Excel quick connect is configured for this environment.",
+            action="Set Google service credentials or Microsoft OAuth credentials.",
+        )
+
+    if spreadsheet_provider == "google":
+        google_check = _check_google_readiness(google_ready, google_sheet_id)
+        if google_check:
+            return google_check
+
+    if not spreadsheet_provider and (google_ready or excel_ready):
+        return _system_readiness_item(
+            key="google_sheets",
+            label=SPREADSHEET_SYNC_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Spreadsheet sync is available, but this clinic has not connected Google Sheets or Excel yet.",
+            detail="The server is ready for quick connect, but the clinic still needs to pick a spreadsheet provider.",
+            action="Use Connect with Google or Connect with Microsoft in onboarding or settings.",
+        )
+
+    return _system_readiness_item(
+        key="google_sheets",
+        label=SPREADSHEET_SYNC_LABEL,
+        status="configured",
+        scope="feature",
+        summary="Spreadsheet sync is configured.",
+        detail="This clinic has a saved spreadsheet connection for lead sync or availability checks.",
+        action=_NO_ACTION_NEEDED,
+    )
+
+
+def _build_email_readiness_item(
+    plan_id: str,
+    settings: Any,
+    clinic: dict[str, Any],
+) -> dict[str, Any]:
+    from app.services.pricing import has_feature
+
+    if not has_feature(plan_id, "email_notifications"):
+        return _system_readiness_item(
+            key="resend_email",
+            label=_RESEND_EMAIL_LABEL,
+            status="blocked",
+            scope="feature",
+            summary="Email notifications are blocked on the current plan.",
+            detail="Clinic email notifications require a Professional or Premium plan.",
+            action="Upgrade the clinic plan before enabling email notifications.",
+        )
+
+    resend_sender_ready = settings.resend_sender_configured
+    notification_target = _safe_text(clinic.get("notification_email")) or _safe_text(clinic.get("email"))
+    notifications_enabled = bool(clinic.get("notifications_enabled"))
+
+    if not settings.resend_api_key and not resend_sender_ready:
+        return _system_readiness_item(
+            key="resend_email",
+            label=_RESEND_EMAIL_LABEL,
+            status="missing",
+            scope="feature",
+            summary="Email notifications are not configured on the server yet.",
+            detail="The runtime is missing both the Resend API key and a sender identity, so notification email cannot be sent.",
+            action="Set RESEND_API_KEY and either RESEND_FROM_EMAIL or RESEND_FROM_DOMAIN.",
+        )
+
+    if not settings.resend_api_key or not resend_sender_ready:
+        missing_parts = []
+        if not settings.resend_api_key:
+            missing_parts.append("RESEND_API_KEY")
+        if not resend_sender_ready:
+            missing_parts.append("RESEND_FROM_EMAIL or RESEND_FROM_DOMAIN")
+        return _system_readiness_item(
+            key="resend_email",
+            label=_RESEND_EMAIL_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Email notifications are partially configured.",
+            detail="The server is missing part of the email sender setup, so notification email stays disabled.",
+            action="Add the missing email values: " + ", ".join(missing_parts),
+        )
+
+    if not notifications_enabled:
+        return _system_readiness_item(
+            key="resend_email",
+            label=_RESEND_EMAIL_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Resend is configured, but clinic notifications are turned off.",
+            detail="The email sender is ready on the server, but this clinic has not enabled notifications yet.",
+            action="Turn on email notifications in Settings when you want lead alerts sent.",
+        )
+
+    if not notification_target:
+        return _system_readiness_item(
+            key="resend_email",
+            label=_RESEND_EMAIL_LABEL,
+            status="partially_configured",
+            scope="feature",
+            summary="Resend is configured, but no notification recipient is set for this clinic.",
+            detail="The product can send email, but there is no clinic notification address to receive alerts.",
+            action="Add a notification email in Settings.",
+        )
+
+    return _system_readiness_item(
+        key="resend_email",
+        label=_RESEND_EMAIL_LABEL,
+        status="configured",
+        scope="feature",
+        summary="Resend email notifications are configured.",
+        detail="The server has a valid sender setup and this clinic has notifications enabled with a destination address.",
+        action=_NO_ACTION_NEEDED,
+    )
+
+
 def build_system_readiness(clinic_id: str) -> dict[str, Any]:
     from app.services.google_sheets import get_gspread_client
-    from app.services.pricing import has_feature
 
     settings = get_settings()
     db = get_supabase()
@@ -668,260 +991,17 @@ def build_system_readiness(clinic_id: str) -> dict[str, Any]:
             scope="core",
             summary="Clinic AI responses are available.",
             detail="The assistant runtime key is configured and the core AI workflow is ready.",
-            action="No action needed.",
-        )
+            action=_NO_ACTION_NEEDED,
+        ),
+        _build_twilio_readiness_item(settings, sms_channel),
+        _build_spreadsheet_readiness_item(
+            plan_id,
+            clinic,
+            settings.google_credentials_configured and bool(get_gspread_client()),
+            settings.microsoft_oauth_configured,
+        ),
+        _build_email_readiness_item(plan_id, settings, clinic),
     ]
-
-    twilio_missing = []
-    if not settings.twilio_account_sid:
-        twilio_missing.append("TWILIO_ACCOUNT_SID")
-    if not settings.twilio_auth_token:
-        twilio_missing.append("TWILIO_AUTH_TOKEN")
-    if not (settings.twilio_from_number or settings.twilio_messaging_service_sid):
-        twilio_missing.append("TWILIO_FROM_NUMBER or TWILIO_MESSAGING_SERVICE_SID")
-
-    if len(twilio_missing) == 3:
-        items.append(
-            _system_readiness_item(
-                key="twilio_sms",
-                label="Twilio SMS",
-                status="missing",
-                scope="feature",
-                summary="SMS is not configured on the server yet.",
-                detail="Inbound SMS, reminders, and text-back workflows stay disabled until Twilio credentials and a sender are set.",
-                action="Add the Twilio account SID, auth token, and a sender number or messaging service SID.",
-            )
-        )
-    elif twilio_missing:
-        items.append(
-            _system_readiness_item(
-                key="twilio_sms",
-                label="Twilio SMS",
-                status="partially_configured",
-                scope="feature",
-                summary="Twilio setup is incomplete.",
-                detail="The SMS provider is only partially configured, so send and reply workflows remain blocked.",
-                action="Finish the missing Twilio values: " + ", ".join(twilio_missing),
-            )
-        )
-    elif sms_channel.get("connection_status") != "connected":
-        items.append(
-            _system_readiness_item(
-                key="twilio_sms",
-                label="Twilio SMS",
-                status="partially_configured",
-                scope="feature",
-                summary="Twilio is configured, but the clinic SMS channel still needs activation.",
-                detail="The server can send SMS, but this clinic still needs its SMS channel saved with the live number and inbound webhook path.",
-                action="Confirm the Twilio number is mapped on the SMS channel and point inbound SMS to /api/frontdesk/communications/twilio/inbound.",
-            )
-        )
-    else:
-        items.append(
-            _system_readiness_item(
-                key="twilio_sms",
-                label="Twilio SMS",
-                status="configured",
-                scope="feature",
-                summary="Twilio SMS is configured.",
-                detail="Manual SMS, reminders, and two-way SMS threads are available when Twilio delivery is allowed by the account and carrier.",
-                action="Keep the live webhook URL current in local development.",
-            )
-        )
-
-    spreadsheet_provider = _safe_text(clinic.get("spreadsheet_provider"))
-    google_ready = settings.google_credentials_configured and bool(get_gspread_client())
-    excel_ready = settings.microsoft_oauth_configured
-
-    if not has_feature(plan_id, "google_sheets"):
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="blocked",
-                scope="feature",
-                summary="Spreadsheet sync is blocked on the current plan.",
-                detail="This clinic plan does not currently include spreadsheet sync.",
-                action="Switch to a plan that includes spreadsheet sync before connecting Google Sheets or Excel.",
-            )
-        )
-    elif spreadsheet_provider == "excel":
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="configured" if excel_ready and _safe_text(clinic.get("excel_workbook_id")) else "missing",
-                scope="feature",
-                summary=(
-                    "Microsoft Excel is configured."
-                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
-                    else "Microsoft Excel quick connect is not configured on the server yet."
-                ),
-                detail=(
-                    "This clinic is connected to Excel and spreadsheet sync is ready."
-                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
-                    else "Set Microsoft OAuth credentials before enabling Excel quick connect."
-                ),
-                action=(
-                    "No action needed."
-                    if excel_ready and _safe_text(clinic.get("excel_workbook_id"))
-                    else "Set MICROSOFT_OAUTH_CLIENT_ID and MICROSOFT_OAUTH_CLIENT_SECRET."
-                ),
-            )
-        )        
-    elif not google_ready and not excel_ready:
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="missing",
-                scope="feature",
-                summary="Spreadsheet sync is not configured on the server yet.",
-                detail="Neither Google Sheets nor Microsoft Excel quick connect is configured for this environment.",
-                action="Set Google service credentials or Microsoft OAuth credentials.",
-            )
-        )
-    elif spreadsheet_provider == "google" and not google_ready:
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="blocked",
-                scope="feature",
-                summary="Google Sheets credentials are present, but the client could not initialize.",
-                detail="The configured Google credentials are invalid or do not match a supported format for Sheets access.",
-                action="Re-check the Google credentials payload and service-account access.",
-            )
-        )
-    elif spreadsheet_provider == "excel" and not _safe_text(clinic.get("excel_workbook_id")):
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="partially_configured",
-                scope="feature",
-                summary="Microsoft Excel quick connect is ready, but this clinic has not connected a workbook yet.",
-                detail="The runtime can connect to Excel, but no workbook is saved for this clinic.",
-                action="Use Connect with Microsoft in onboarding or settings.",
-            )
-        )
-    elif spreadsheet_provider == "google" and not _safe_text(clinic.get("google_sheet_id")):
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="partially_configured",
-                scope="feature",
-                summary="Google Sheets is ready on the server, but this clinic has not connected a sheet yet.",
-                detail="The runtime can access Google Sheets, but no spreadsheet is configured for this clinic.",
-                action="Use Connect with Google in onboarding or settings.",
-            )
-        )
-    elif not spreadsheet_provider and (google_ready or excel_ready):
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="partially_configured",
-                scope="feature",
-                summary="Spreadsheet sync is available, but this clinic has not connected Google Sheets or Excel yet.",
-                detail="The server is ready for quick connect, but the clinic still needs to pick a spreadsheet provider.",
-                action="Use Connect with Google or Connect with Microsoft in onboarding or settings.",
-            )
-        )
-    else:
-        items.append(
-            _system_readiness_item(
-                key="google_sheets",
-                label="Spreadsheet sync",
-                status="configured",
-                scope="feature",
-                summary="Spreadsheet sync is configured.",
-                detail="This clinic has a saved spreadsheet connection for lead sync or availability checks.",
-                action="No action needed.",
-            )
-        )
-
-    resend_sender_ready = settings.resend_sender_configured
-    notification_target = _safe_text(clinic.get("notification_email")) or _safe_text(clinic.get("email"))
-    notifications_enabled = bool(clinic.get("notifications_enabled"))
-    if not has_feature(plan_id, "email_notifications"):
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="blocked",
-                scope="feature",
-                summary="Email notifications are blocked on the current plan.",
-                detail="Clinic email notifications require a Professional or Premium plan.",
-                action="Upgrade the clinic plan before enabling email notifications.",
-            )
-        )
-    elif not settings.resend_api_key and not resend_sender_ready:
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="missing",
-                scope="feature",
-                summary="Email notifications are not configured on the server yet.",
-                detail="The runtime is missing both the Resend API key and a sender identity, so notification email cannot be sent.",
-                action="Set RESEND_API_KEY and either RESEND_FROM_EMAIL or RESEND_FROM_DOMAIN.",
-            )
-        )
-    elif not settings.resend_api_key or not resend_sender_ready:
-        missing_parts = []
-        if not settings.resend_api_key:
-            missing_parts.append("RESEND_API_KEY")
-        if not resend_sender_ready:
-            missing_parts.append("RESEND_FROM_EMAIL or RESEND_FROM_DOMAIN")
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="partially_configured",
-                scope="feature",
-                summary="Email notifications are partially configured.",
-                detail="The server is missing part of the email sender setup, so notification email stays disabled.",
-                action="Add the missing email values: " + ", ".join(missing_parts),
-            )
-        )
-    elif not notifications_enabled:
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="partially_configured",
-                scope="feature",
-                summary="Resend is configured, but clinic notifications are turned off.",
-                detail="The email sender is ready on the server, but this clinic has not enabled notifications yet.",
-                action="Turn on email notifications in Settings when you want lead alerts sent.",
-            )
-        )
-    elif not notification_target:
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="partially_configured",
-                scope="feature",
-                summary="Resend is configured, but no notification recipient is set for this clinic.",
-                detail="The product can send email, but there is no clinic notification address to receive alerts.",
-                action="Add a notification email in Settings.",
-            )
-        )
-    else:
-        items.append(
-            _system_readiness_item(
-                key="resend_email",
-                label="Resend email",
-                status="configured",
-                scope="feature",
-                summary="Resend email notifications are configured.",
-                detail="The server has a valid sender setup and this clinic has notifications enabled with a destination address.",
-                action="No action needed.",
-            )
-        )
 
     stripe_state = stripe_readiness_summary()
     items.append(
@@ -935,35 +1015,35 @@ def build_system_readiness(clinic_id: str) -> dict[str, Any]:
             action=(
                 "Add the missing Stripe values: " + ", ".join(stripe_state.get("missing") or [])
                 if stripe_state.get("missing")
-                else "No action needed."
+                else _NO_ACTION_NEEDED
             ),
         )
     )
 
-    if settings.admin_tools_configured:
-        items.append(
-            _system_readiness_item(
-                key="admin_tools",
-                label="Admin tooling",
-                status="configured",
-                scope="internal",
-                summary="Protected admin routes are enabled.",
-                detail="The admin secret is configured, so internal admin routes can be used with the matching header.",
-                action="Keep the admin secret restricted to internal operators only.",
-            )
+    items.append(
+        _system_readiness_item(
+            key="admin_tools",
+            label="Admin tooling",
+            status="configured" if settings.admin_tools_configured else "missing",
+            scope="internal",
+            summary=(
+                "Protected admin routes are enabled."
+                if settings.admin_tools_configured
+                else "Protected admin routes are disabled."
+            ),
+            detail=(
+                "The admin secret is configured, so internal admin routes can be used with the matching header."
+                if settings.admin_tools_configured
+                else "ADMIN_SECRET is not set, so internal admin endpoints intentionally stay unavailable."
+            ),
+            action=(
+                "Keep the admin secret restricted to internal operators only."
+                if settings.admin_tools_configured
+                else "Set ADMIN_SECRET only if you need the protected admin capability."
+            ),
         )
-    else:
-        items.append(
-            _system_readiness_item(
-                key="admin_tools",
-                label="Admin tooling",
-                status="missing",
-                scope="internal",
-                summary="Protected admin routes are disabled.",
-                detail="ADMIN_SECRET is not set, so internal admin endpoints intentionally stay unavailable.",
-                action="Set ADMIN_SECRET only if you need the protected admin capability.",
-            )
-        )
+    )
+
     configured_count = sum(1 for item in items if item["status"] == "configured")
     partial_count = sum(1 for item in items if item["status"] == "partially_configured")
     missing_count = sum(1 for item in items if item["status"] == "missing")
@@ -1008,9 +1088,12 @@ def _normalize_communication_event_row(event: dict[str, Any]) -> dict[str, Any]:
     event["skipped_reason"] = _safe_text(event.get("skipped_reason"))
     event["thread_key"] = _thread_key_for_event(event)
     sender_kind = _payload_field(event, "sender_kind")
-    event["sender_kind"] = sender_kind if sender_kind in MESSAGE_SENDER_KINDS else (
-        "patient" if _safe_text(event.get("direction")) == "inbound" else "staff"
-    )
+    if sender_kind in MESSAGE_SENDER_KINDS:
+        event["sender_kind"] = sender_kind
+    elif _safe_text(event.get("direction")) == "inbound":
+        event["sender_kind"] = "patient"
+    else:
+        event["sender_kind"] = "staff"
     event["auto_reply_status"] = _payload_field(event, "auto_reply_status")
     event["auto_reply_reason"] = _payload_field(event, "auto_reply_reason")
     event["ai_confidence"] = _normalize_sms_ai_confidence(_payload_field(event, "ai_confidence"))
@@ -1027,7 +1110,6 @@ def _normalize_communication_event_row(event: dict[str, Any]) -> dict[str, Any]:
 
 
 def _create_communication_event_record(
-    clinic_id: str,
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     db = get_supabase()
@@ -1489,19 +1571,27 @@ def _assess_sms_reply_confidence(
             else ("medium", "low_confidence")
         )
     if intent == "booking":
-        if next_state.startswith("booking") or next_state == "booking_complete" or has_existing_request:
-            return "high", "safe_to_send"
-        return "medium", "low_confidence"
-    if has_existing_request and (
-        prior_state.startswith("booking")
-        or prior_state == "booking_complete"
-        or "?" in user_message
-        or len(_safe_text(user_message).split()) >= 3
-    ):
+        return _assess_booking_confidence(next_state, has_existing_request)
+    if has_existing_request and _user_message_indicates_engagement(user_message, prior_state):
         return "high", "safe_to_send"
     if len(_safe_text(user_message).split()) <= 2:
         return "medium", "low_confidence"
     return "low", "unsupported_question"
+
+
+def _assess_booking_confidence(next_state: str, has_existing_request: bool) -> tuple[str, str]:
+    if next_state.startswith("booking") or next_state == "booking_complete" or has_existing_request:
+        return "high", "safe_to_send"
+    return "medium", "low_confidence"
+
+
+def _user_message_indicates_engagement(user_message: str, prior_state: str) -> bool:
+    return (
+        prior_state.startswith("booking")
+        or prior_state == "booking_complete"
+        or "?" in user_message
+        or len(_safe_text(user_message).split()) >= 3
+    )
 
 
 def _update_auto_reply_state(event: dict[str, Any], *, status: str, reason: str = "") -> dict[str, Any]:
@@ -1530,6 +1620,34 @@ def _thread_has_pending_suggested_reply(clinic_id: str, thread_key: str) -> bool
     return False
 
 
+def _normalize_and_set_payload_field(
+    payload: dict[str, Any],
+    key: str,
+    value: Optional[str],
+    normalizer: callable = _safe_text,
+) -> None:
+    if value is None:
+        return
+    normalized = normalizer(value)
+    if normalized:
+        payload[key] = normalized
+    else:
+        payload.pop(key, None)
+
+
+def _set_payload_field(
+    payload: dict[str, Any],
+    key: str,
+    value: Any,
+) -> None:
+    if value is None:
+        return
+    if value:
+        payload[key] = value
+    else:
+        payload.pop(key, None)
+
+
 def _update_sms_review_state(
     event: dict[str, Any],
     *,
@@ -1544,59 +1662,15 @@ def _update_sms_review_state(
     pending_booking_data: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     payload = _to_json_dict(event.get("payload"))
-    if confidence is not None:
-        normalized_confidence = _normalize_sms_ai_confidence(confidence)
-        if normalized_confidence:
-            payload["ai_confidence"] = normalized_confidence
-        else:
-            payload.pop("ai_confidence", None)
-    if reason_code is not None:
-        resolved_reason_code = _safe_text(reason_code)
-        if resolved_reason_code:
-            payload["ai_decision_reason"] = resolved_reason_code
-        else:
-            payload.pop("ai_decision_reason", None)
-    if auto_reply_status is not None:
-        resolved_status = _safe_text(auto_reply_status)
-        if resolved_status:
-            payload["auto_reply_status"] = resolved_status
-        else:
-            payload.pop("auto_reply_status", None)
-    if auto_reply_reason is not None:
-        resolved_reason = _safe_text(auto_reply_reason)
-        if resolved_reason:
-            payload["auto_reply_reason"] = resolved_reason
-        else:
-            payload.pop("auto_reply_reason", None)
-    if suggested_reply_text is not None:
-        resolved_text = _safe_text(suggested_reply_text)
-        if resolved_text:
-            payload["suggested_reply_text"] = resolved_text
-        else:
-            payload.pop("suggested_reply_text", None)
-    if suggested_reply_status is not None:
-        normalized_status = _normalize_suggested_reply_status(suggested_reply_status)
-        if normalized_status:
-            payload["suggested_reply_status"] = normalized_status
-        else:
-            payload.pop("suggested_reply_status", None)
-    if suggested_reply_sent_event_id is not None:
-        resolved_sent_event = _safe_text(suggested_reply_sent_event_id)
-        if resolved_sent_event:
-            payload["suggested_reply_sent_event_id"] = resolved_sent_event
-        else:
-            payload.pop("suggested_reply_sent_event_id", None)
-    if pending_next_state is not None:
-        resolved_state = _safe_text(pending_next_state)
-        if resolved_state:
-            payload["pending_next_state"] = resolved_state
-        else:
-            payload.pop("pending_next_state", None)
-    if pending_booking_data is not None:
-        if pending_booking_data:
-            payload["pending_booking_data"] = pending_booking_data
-        else:
-            payload.pop("pending_booking_data", None)
+    _normalize_and_set_payload_field(payload, "ai_confidence", confidence, _normalize_sms_ai_confidence)
+    _normalize_and_set_payload_field(payload, "ai_decision_reason", reason_code)
+    _normalize_and_set_payload_field(payload, "auto_reply_status", auto_reply_status)
+    _normalize_and_set_payload_field(payload, "auto_reply_reason", auto_reply_reason)
+    _normalize_and_set_payload_field(payload, "suggested_reply_text", suggested_reply_text)
+    _normalize_and_set_payload_field(payload, "suggested_reply_status", suggested_reply_status, _normalize_suggested_reply_status)
+    _normalize_and_set_payload_field(payload, "suggested_reply_sent_event_id", suggested_reply_sent_event_id)
+    _normalize_and_set_payload_field(payload, "pending_next_state", pending_next_state)
+    _set_payload_field(payload, "pending_booking_data", pending_booking_data)
     return payload
 
 
@@ -1620,6 +1694,84 @@ def _sms_review_required(event: dict[str, Any]) -> bool:
     return confidence == "blocked" and reason_code in {"risky_content", "unsupported_question"}
 
 
+def _find_source_event(clinic_id: str, source_event_id: Optional[str]) -> Optional[dict[str, Any]]:
+    source_event_id = _safe_text(source_event_id)
+    if not source_event_id:
+        return None
+    source_event = _maybe_single_data(
+        get_supabase()
+        .table("communication_events")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("id", source_event_id)
+    )
+    return _normalize_communication_event_row(source_event) if source_event else None
+
+
+def _find_matched_lead(clinic_id: str, lead_id: Optional[str], customer_phone: str) -> Optional[dict[str, Any]]:
+    if lead_id:
+        matched = _maybe_single_data(
+            get_supabase()
+            .table("leads")
+            .select("*")
+            .eq("clinic_id", clinic_id)
+            .eq("id", lead_id)
+        )
+        if matched:
+            return matched
+    if customer_phone:
+        return _find_matching_lead_by_phone(clinic_id, customer_phone)
+    return None
+
+
+def _resolve_customer_details(
+    customer_name: str,
+    customer_phone: str,
+    customer_email: str,
+    matched_lead: Optional[dict[str, Any]],
+    source_event: Optional[dict[str, Any]],
+) -> tuple[str, str, str]:
+    resolved_name = _safe_text(customer_name) or _safe_text((matched_lead or {}).get("patient_name")) or _safe_text((source_event or {}).get("customer_name")) or _UNKNOWN_CUSTOMER
+    resolved_phone = _safe_text(customer_phone) or _safe_text((matched_lead or {}).get("patient_phone")) or _safe_text((source_event or {}).get("customer_phone"))
+    resolved_email = _safe_text(customer_email) or _safe_text((matched_lead or {}).get("patient_email")) or _safe_text((source_event or {}).get("customer_email"))
+    return resolved_name, resolved_phone, resolved_email
+
+
+def _resolve_customer_key(
+    source_event: Optional[dict[str, Any]],
+    matched_lead: Optional[dict[str, Any]],
+    resolved_name: str,
+    resolved_phone: str,
+    resolved_email: str,
+) -> str:
+    if source_event and _safe_text(source_event.get("customer_key")):
+        return _safe_text(source_event.get("customer_key"))
+    if matched_lead:
+        return _customer_key(_normalize_identity(matched_lead))
+    return _customer_key_from_fields(resolved_name, resolved_phone, resolved_email, f"sms:{uuid4().hex}")
+
+
+def _resolve_thread_key(
+    source_event: Optional[dict[str, Any]],
+    latest_event: Optional[dict[str, Any]],
+    resolved_lead_id: str,
+    resolved_customer_key: str,
+    resolved_phone: str,
+) -> str:
+    if source_event and _safe_text(source_event.get("thread_key")):
+        return _safe_text(source_event.get("thread_key"))
+    if latest_event and _safe_text(latest_event.get("thread_key")):
+        return _safe_text(latest_event.get("thread_key"))
+    if resolved_lead_id:
+        return f"sms:lead:{resolved_lead_id}"
+    if resolved_customer_key:
+        return f"sms:customer:{resolved_customer_key}"
+    normalized_phone = _normalize_phone(resolved_phone)
+    if normalized_phone:
+        return f"sms:phone:{normalized_phone}"
+    return f"sms:thread:{uuid4().hex}"
+
+
 def _resolve_sms_thread_context(
     clinic_id: str,
     *,
@@ -1630,48 +1782,22 @@ def _resolve_sms_thread_context(
     conversation_id: Optional[str] = None,
     source_event_id: Optional[str] = None,
 ) -> dict[str, Any]:
-    db = get_supabase()
-    source_event = None
-    source_event_id = _safe_text(source_event_id)
-    if source_event_id:
-        source_event = _maybe_single_data(
-            db.table("communication_events")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .eq("id", source_event_id)
-        )
-        if source_event:
-            source_event = _normalize_communication_event_row(source_event)
-
-    matched_lead = None
-    if lead_id:
-        matched_lead = _maybe_single_data(
-            db.table("leads")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .eq("id", lead_id)
-        )
-    if matched_lead is None and customer_phone:
-        matched_lead = _find_matching_lead_by_phone(clinic_id, customer_phone)
-
+    source_event = _find_source_event(clinic_id, source_event_id)
+    matched_lead = _find_matched_lead(clinic_id, lead_id, customer_phone)
+    
+    resolved_name, resolved_phone, resolved_email = _resolve_customer_details(
+        customer_name,
+        customer_phone,
+        customer_email,
+        matched_lead,
+        source_event,
+    )
+    
     resolved_lead_id = _safe_text((matched_lead or {}).get("id")) or _safe_text((source_event or {}).get("lead_id")) or _safe_text(lead_id)
-    resolved_name = _safe_text(customer_name) or _safe_text((matched_lead or {}).get("patient_name")) or _safe_text((source_event or {}).get("customer_name")) or "Unknown customer"
-    resolved_phone = _safe_text(customer_phone) or _safe_text((matched_lead or {}).get("patient_phone")) or _safe_text((source_event or {}).get("customer_phone"))
-    resolved_email = _safe_text(customer_email) or _safe_text((matched_lead or {}).get("patient_email")) or _safe_text((source_event or {}).get("customer_email"))
-    resolved_customer_key = (
-        _safe_text((source_event or {}).get("customer_key"))
-        or (_customer_key(_normalize_identity(matched_lead)) if matched_lead else "")
-        or _customer_key_from_fields(resolved_name, resolved_phone, resolved_email, f"sms:{uuid4().hex}")
-    )
+    resolved_customer_key = _resolve_customer_key(source_event, matched_lead, resolved_name, resolved_phone, resolved_email)
+    
     latest_event = _find_latest_sms_thread_event(clinic_id, resolved_phone)
-    thread_key = (
-        _safe_text((source_event or {}).get("thread_key"))
-        or _safe_text((latest_event or {}).get("thread_key"))
-        or (f"sms:lead:{resolved_lead_id}" if resolved_lead_id else "")
-        or (f"sms:customer:{resolved_customer_key}" if resolved_customer_key else "")
-        or (f"sms:phone:{_normalize_phone(resolved_phone)}" if _normalize_phone(resolved_phone) else "")
-        or f"sms:thread:{uuid4().hex}"
-    )
+    thread_key = _resolve_thread_key(source_event, latest_event, resolved_lead_id, resolved_customer_key, resolved_phone)
 
     return {
         "source_event": source_event,
@@ -1685,188 +1811,478 @@ def _resolve_sms_thread_context(
     }
 
 
-def build_inbox_items(clinic_id: str, limit: int = 100) -> list[dict[str, Any]]:
-    settings = _load_frontdesk_settings(clinic_id)
-    conversations, messages_by_conversation, leads_by_id = _load_conversations_for_clinic(clinic_id, limit)
-    communication_events = _load_communication_events(clinic_id, limit)
-    sms_conversations_by_id, sms_conversations_by_session = _load_sms_conversation_maps(clinic_id)
-    readiness_by_channel = _channel_readiness_map(clinic_id)
-    items: list[dict[str, Any]] = []
+def _resolve_conversation_timestamps(
+    conversation: dict[str, Any],
+    messages: list[dict[str, Any]],
+) -> tuple[Optional[datetime], datetime]:
+    last_message = messages[-1] if messages else None
+    updated_at = (
+        _parse_datetime((last_message or {}).get("created_at"))
+        or _parse_datetime(conversation.get("updated_at"))
+        or _parse_datetime(conversation.get("created_at"))
+    )
+    last_message_role = (last_message or {}).get("role")
+    return last_message_role, updated_at
 
+
+def _resolve_inbox_conversation_timestamps(
+    conversation: dict[str, Any],
+    messages: list[dict[str, Any]],
+) -> tuple[Optional[datetime], Optional[str]]:
+    last_message = messages[-1] if messages else None
+    updated_at = (
+        _parse_datetime((last_message or {}).get("created_at"))
+        or _parse_datetime(conversation.get("updated_at"))
+        or _parse_datetime(conversation.get("created_at"))
+    )
+    last_message_role = (last_message or {}).get("role")
+    return updated_at, last_message_role
+
+
+def _resolve_inbox_conversation_customer(
+    lead: Optional[dict[str, Any]],
+) -> tuple[str, Optional[str], str, str, Optional[str]]:
+    customer_name = (lead or {}).get("patient_name") or "Visitor"
+    customer_key = _customer_key(_normalize_identity(lead)) if lead else None
+    lead_phone = (lead or {}).get("patient_phone", "")
+    lead_email = (lead or {}).get("patient_email", "")
+    lead_status = (lead or {}).get("status")
+    return customer_name, customer_key, lead_phone, lead_email, lead_status
+
+
+def _build_inbox_conversation_item(
+    conversation: dict[str, Any],
+    messages_by_conversation: dict[str, list[dict[str, Any]]],
+    leads_by_id: dict[str, dict[str, Any]],
+    clinic_id: str,
+    follow_up_delay_minutes: int,
+) -> dict[str, Any]:
+    messages = messages_by_conversation.get(conversation["id"], [])
+    lead = leads_by_id.get(conversation.get("lead_id") or "")
+    
+    updated_at, last_message_role = _resolve_inbox_conversation_timestamps(conversation, messages)
+    customer_name, customer_key, lead_phone, lead_email, lead_status = _resolve_inbox_conversation_customer(lead)
+    
+    derived_status = _derive_conversation_status(
+        lead,
+        updated_at,
+        delay_minutes=follow_up_delay_minutes,
+    )
+    preview = (
+        (messages[-1] if messages else {}).get("content")
+        or (conversation.get("summary") or "").strip()
+        or "Conversation started"
+    )
+    ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation)
+    conversation_summary = (conversation.get("summary") or "").strip() or None
+    
+    return {
+        "id": _thread_key("conversation", conversation["id"]),
+        "thread_type": "conversation",
+        "session_id": conversation["session_id"],
+        "customer_key": customer_key,
+        "customer_name": customer_name,
+        "customer_phone": lead_phone,
+        "customer_email": lead_email,
+        "channel": _channel_for_conversation(conversation, lead),
+        "lead_id": conversation.get("lead_id"),
+        "lead_status": lead_status,
+        "derived_status": derived_status,
+        "last_intent": conversation.get("last_intent"),
+        "summary": conversation_summary,
+        "last_message_preview": _truncate(preview),
+        "last_message_role": last_message_role,
+        "last_message_at": updated_at,
+        "conversation_started_at": _parse_datetime(conversation.get("created_at")),
+        "updated_at": _parse_datetime(conversation.get("updated_at")),
+        "requires_attention": derived_status == "needs_follow_up",
+        "unlinked": not bool(conversation.get("lead_id")),
+        "thread_conversation_id": conversation["id"],
+        "manual_takeover": bool(conversation.get("manual_takeover")),
+        "ai_auto_reply_enabled": ai_auto_reply_enabled,
+        "ai_auto_reply_ready": ai_auto_reply_ready,
+    }
+
+
+def _should_skip_event_thread(thread_events: list[dict[str, Any]]) -> bool:
+    return bool(
+        thread_events
+        and all(
+            _normalize_channel(event.get("channel"), "manual") == "manual"
+            and _safe_text(event.get("direction")) == "internal"
+            and _safe_text(event.get("event_type")) == "note"
+            for event in thread_events
+        )
+    )
+
+
+def _get_event_thread_lead(
+    primary_event: dict[str, Any],
+    latest_event: dict[str, Any],
+    leads_by_id: dict[str, dict[str, Any]],
+) -> Optional[dict[str, Any]]:
+    lead_id = (
+        _safe_text(primary_event.get("lead_id"))
+        or _safe_text(latest_event.get("lead_id"))
+        or ""
+    )
+    return leads_by_id.get(lead_id)
+
+
+def _find_event_thread_conversation(
+    thread_events: list[dict[str, Any]],
+    event_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+    thread_key: str,
+) -> Optional[dict[str, Any]]:
+    conversation_row = next(
+        (
+            event_conversations_by_id.get(_safe_text(event.get("conversation_id")))
+            for event in reversed(thread_events)
+            if event_conversations_by_id.get(_safe_text(event.get("conversation_id")))
+        ),
+        None,
+    )
+    return conversation_row or sms_conversations_by_session.get(thread_key)
+
+
+def _is_event_thread_unlinked(
+    primary_event: dict[str, Any],
+    latest_event: dict[str, Any],
+) -> bool:
+    return not bool(
+        _safe_text(primary_event.get("lead_id"))
+        or _safe_text(latest_event.get("lead_id"))
+        or _safe_text(primary_event.get("conversation_id"))
+        or _safe_text(latest_event.get("conversation_id"))
+    )
+
+
+def _extract_event_thread_latest_events(
+    thread_events: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any], Optional[dict[str, Any]], Optional[dict[str, Any]]]:
+    """Extract latest events of different types from thread."""
+    latest_event = thread_events[-1]
+    latest_outbound = next(
+        (event for event in reversed(thread_events) if _safe_text(event.get("direction")) == "outbound"),
+        None,
+    )
+    latest_inbound_reply = _thread_latest_inbound_reply(thread_events)
+    return latest_event, latest_outbound, latest_inbound_reply, _primary_event_for_thread(thread_events)
+
+
+def _resolve_event_thread_customer(
+    primary_event: dict[str, Any],
+    latest_event: dict[str, Any],
+    lead: Optional[dict[str, Any]],
+) -> tuple[str, str, str, str]:
+    """Resolve customer details from multiple sources."""
+    customer_name = (
+        _safe_text(latest_event.get("customer_name"))
+        or _safe_text(primary_event.get("customer_name"))
+        or (lead or {}).get("patient_name")
+        or _UNKNOWN_CUSTOMER
+    )
+    customer_phone = (
+        _safe_text(latest_event.get("customer_phone"))
+        or _safe_text(primary_event.get("customer_phone"))
+        or (lead or {}).get("patient_phone", "")
+    )
+    customer_email = (
+        _safe_text(latest_event.get("customer_email"))
+        or _safe_text(primary_event.get("customer_email"))
+        or (lead or {}).get("patient_email", "")
+    )
+    customer_key = (
+        _safe_text(primary_event.get("customer_key"))
+        or _safe_text(latest_event.get("customer_key"))
+    )
+    return customer_name, customer_phone, customer_email, customer_key
+
+
+def _build_event_outbound_state(
+    event: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    """Extract outbound event state."""
+    if not event:
+        return {
+            "status": None,
+            "summary": None,
+            "reason": None,
+            "at": None,
+        }
+    return {
+        "status": _safe_text(event.get("status")) or None,
+        "summary": _safe_text(event.get("summary")),
+        "reason": _safe_text(event.get("failure_reason")) or _safe_text(event.get("skipped_reason")),
+        "at": _parse_datetime(event.get("sent_at")) or _parse_datetime(event.get("created_at")),
+    }
+
+
+def _build_event_inbound_state(
+    event: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    """Extract inbound event state."""
+    if not event:
+        return {
+            "status": None,
+            "summary": None,
+            "at": None,
+        }
+    return {
+        "status": _safe_text(event.get("status")) or None,
+        "summary": _safe_text(event.get("summary")) or _safe_text(event.get("content")),
+        "at": _parse_datetime(event.get("occurred_at")) or _parse_datetime(event.get("created_at")),
+    }
+
+
+def _build_inbox_event_item(
+    thread_key: str,
+    thread_events: list[dict[str, Any]],
+    leads_by_id: dict[str, dict[str, Any]],
+    event_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+    clinic_id: str,
+    follow_up_delay_minutes: int,
+) -> dict[str, Any]:
+    latest_event, latest_outbound, latest_inbound_reply, primary_event = _extract_event_thread_latest_events(thread_events)
+    conversation_row = _find_event_thread_conversation(
+        thread_events,
+        event_conversations_by_id,
+        sms_conversations_by_session,
+        thread_key,
+    )
+    occurred_at = _event_timestamp(latest_event)
+    lead = _get_event_thread_lead(primary_event, latest_event, leads_by_id)
+    
+    derived_status = (
+        _derive_conversation_status(lead, occurred_at, delay_minutes=follow_up_delay_minutes)
+        if lead
+        else _derive_event_thread_status(thread_events)
+    )
+    ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation_row)
+    customer_name, customer_phone, customer_email, customer_key = _resolve_event_thread_customer(
+        primary_event, latest_event, lead
+    )
+    
+    outbound_state = _build_event_outbound_state(latest_outbound)
+    inbound_state = _build_event_inbound_state(latest_inbound_reply)
+    
+    return {
+        "id": _thread_key("event", thread_key),
+        "thread_type": "event",
+        "session_id": _safe_text(latest_event.get("external_id")) or primary_event["id"],
+        "customer_key": customer_key,
+        "customer_name": customer_name,
+        "customer_phone": customer_phone,
+        "customer_email": customer_email,
+        "channel": _normalize_channel(primary_event.get("channel"), "manual"),
+        "lead_id": _safe_text(primary_event.get("lead_id")) or _safe_text(latest_event.get("lead_id")) or None,
+        "lead_status": (lead or {}).get("status"),
+        "derived_status": derived_status,
+        "last_intent": latest_event.get("event_type"),
+        "summary": _safe_text(primary_event.get("summary")) or None,
+        "last_message_preview": _truncate(_communication_preview(latest_event)),
+        "last_message_role": _last_message_role_for_direction(_safe_text(latest_event.get("direction")) or "inbound"),
+        "last_message_at": occurred_at,
+        "conversation_started_at": _event_timestamp(primary_event),
+        "updated_at": _parse_datetime(latest_event.get("updated_at")) or occurred_at,
+        "requires_attention": derived_status == "needs_follow_up",
+        "unlinked": _is_event_thread_unlinked(primary_event, latest_event),
+        "latest_outbound_status": outbound_state["status"],
+        "latest_outbound_summary": outbound_state["summary"],
+        "latest_outbound_reason": outbound_state["reason"],
+        "latest_outbound_at": outbound_state["at"],
+        "latest_inbound_status": inbound_state["status"],
+        "latest_inbound_summary": inbound_state["summary"],
+        "latest_inbound_at": inbound_state["at"],
+        "thread_conversation_id": (conversation_row or {}).get("id"),
+        "manual_takeover": bool((conversation_row or {}).get("manual_takeover")),
+        "ai_auto_reply_enabled": ai_auto_reply_enabled,
+        "ai_auto_reply_ready": ai_auto_reply_ready,
+    }
+
+
+def _load_additional_leads_for_events(
+    communication_events: list[dict[str, Any]],
+    leads_by_id: dict[str, dict[str, Any]],
+) -> None:
     event_lead_ids = {
         _safe_text(event.get("lead_id"))
         for event in communication_events
         if _safe_text(event.get("lead_id")) and _safe_text(event.get("lead_id")) not in leads_by_id
     }
-    if event_lead_ids:
-        db = get_supabase()
-        event_leads = (
-            db.table("leads")
-            .select("*")
-            .in_("id", list(event_lead_ids))
-            .execute()
-            .data
-            or []
-        )
-        leads_by_id.update({lead["id"]: lead for lead in event_leads})
+    if not event_lead_ids:
+        return
+    
+    db = get_supabase()
+    event_leads = (
+        db.table("leads")
+        .select("*")
+        .in_("id", list(event_lead_ids))
+        .execute()
+        .data
+        or []
+    )
+    leads_by_id.update({lead["id"]: lead for lead in event_leads})
 
+
+def _load_event_conversations(
+    communication_events: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
     event_conversation_ids = {
         _safe_text(event.get("conversation_id"))
         for event in communication_events
         if _safe_text(event.get("conversation_id"))
     }
-    event_conversations_by_id: dict[str, dict[str, Any]] = {}
-    if event_conversation_ids:
-        db = get_supabase()
-        event_conversations = (
-            db.table("conversations")
-            .select("*")
-            .in_("id", list(event_conversation_ids))
-            .execute()
-            .data
-            or []
-        )
-        event_conversations_by_id = {row["id"]: row for row in event_conversations}
+    if not event_conversation_ids:
+        return {}
+    
+    db = get_supabase()
+    event_conversations = (
+        db.table("conversations")
+        .select("*")
+        .in_("id", list(event_conversation_ids))
+        .execute()
+        .data
+        or []
+    )
+    return {row["id"]: row for row in event_conversations}
+
+
+def build_inbox_items(clinic_id: str, limit: int = 100) -> list[dict[str, Any]]:
+    settings = _load_frontdesk_settings(clinic_id)
+    conversations, messages_by_conversation, leads_by_id = _load_conversations_for_clinic(clinic_id, limit)
+    communication_events = _load_communication_events(clinic_id, limit)
+    _, sms_conversations_by_session = _load_sms_conversation_maps(clinic_id)
+    items: list[dict[str, Any]] = []
+
+    _load_additional_leads_for_events(communication_events, leads_by_id)
+    event_conversations_by_id = _load_event_conversations(communication_events)
 
     for conversation in conversations:
-        messages = messages_by_conversation.get(conversation["id"], [])
-        lead = leads_by_id.get(conversation.get("lead_id") or "")
-        last_message = messages[-1] if messages else None
-        updated_at = _parse_datetime((last_message or {}).get("created_at")) or _parse_datetime(conversation.get("updated_at")) or _parse_datetime(conversation.get("created_at"))
-        derived_status = _derive_conversation_status(
-            lead,
-            updated_at,
-            delay_minutes=settings["follow_up_delay_minutes"],
+        item = _build_inbox_conversation_item(
+            conversation,
+            messages_by_conversation,
+            leads_by_id,
+            clinic_id,
+            settings["follow_up_delay_minutes"],
         )
-        customer_name = (lead or {}).get("patient_name") or "Visitor"
-        customer_key = _customer_key(_normalize_identity(lead)) if lead else None
-        preview = (
-            (last_message or {}).get("content")
-            or (conversation.get("summary") or "").strip()
-            or "Conversation started"
-        )
-        ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation)
-        items.append(
-            {
-                "id": _thread_key("conversation", conversation["id"]),
-                "thread_type": "conversation",
-                "session_id": conversation["session_id"],
-                "customer_key": customer_key,
-                "customer_name": customer_name,
-                "customer_phone": (lead or {}).get("patient_phone", ""),
-                "customer_email": (lead or {}).get("patient_email", ""),
-                "channel": _channel_for_conversation(conversation, lead),
-                "lead_id": conversation.get("lead_id"),
-                "lead_status": (lead or {}).get("status"),
-                "derived_status": derived_status,
-                "last_intent": conversation.get("last_intent"),
-                "summary": (conversation.get("summary") or "").strip() or None,
-                "last_message_preview": _truncate(preview),
-                "last_message_role": (last_message or {}).get("role"),
-                "last_message_at": updated_at,
-                "conversation_started_at": _parse_datetime(conversation.get("created_at")),
-                "updated_at": _parse_datetime(conversation.get("updated_at")),
-                "requires_attention": derived_status == "needs_follow_up",
-                "unlinked": not bool(conversation.get("lead_id")),
-                "thread_conversation_id": conversation["id"],
-                "manual_takeover": bool(conversation.get("manual_takeover")),
-                "ai_auto_reply_enabled": ai_auto_reply_enabled,
-                "ai_auto_reply_ready": ai_auto_reply_ready,
-            }
-        )
+        items.append(item)
 
     event_threads = _group_communication_threads(communication_events)
     for thread_key, thread_events in event_threads.items():
-        if thread_events and all(
-            _normalize_channel(event.get("channel"), "manual") == "manual"
-            and _safe_text(event.get("direction")) == "internal"
-            and _safe_text(event.get("event_type")) == "note"
-            for event in thread_events
-        ):
+        if _should_skip_event_thread(thread_events):
             continue
-        primary_event = _primary_event_for_thread(thread_events)
-        latest_event = thread_events[-1]
-        latest_outbound = next(
-            (event for event in reversed(thread_events) if _safe_text(event.get("direction")) == "outbound"),
-            None,
+        
+        item = _build_inbox_event_item(
+            thread_key,
+            thread_events,
+            leads_by_id,
+            event_conversations_by_id,
+            sms_conversations_by_session,
+            clinic_id,
+            settings["follow_up_delay_minutes"],
         )
-        latest_inbound_reply = _thread_latest_inbound_reply(thread_events)
-        conversation_row = next(
-            (
-                event_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-                for event in reversed(thread_events)
-                if event_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-            ),
-            None,
-        ) or sms_conversations_by_session.get(thread_key)
-        occurred_at = _event_timestamp(latest_event)
-        lead = leads_by_id.get(
-            _safe_text(primary_event.get("lead_id"))
-            or _safe_text(latest_event.get("lead_id"))
-            or ""
-        )
-        derived_status = (
-            _derive_conversation_status(
-                lead,
-                occurred_at,
-                delay_minutes=settings["follow_up_delay_minutes"],
-            )
-            if lead
-            else _derive_event_thread_status(thread_events)
-        )
-        ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation_row)
-        customer_name = (
-            _safe_text(latest_event.get("customer_name"))
-            or _safe_text(primary_event.get("customer_name"))
-            or (lead or {}).get("patient_name")
-            or "Unknown customer"
-        )
-        items.append(
-            {
-                "id": _thread_key("event", thread_key),
-                "thread_type": "event",
-                "session_id": _safe_text(latest_event.get("external_id")) or primary_event["id"],
-                "customer_key": _safe_text(primary_event.get("customer_key")) or _safe_text(latest_event.get("customer_key")),
-                "customer_name": customer_name,
-                "customer_phone": _safe_text(latest_event.get("customer_phone")) or _safe_text(primary_event.get("customer_phone")) or (lead or {}).get("patient_phone", ""),
-                "customer_email": _safe_text(latest_event.get("customer_email")) or _safe_text(primary_event.get("customer_email")) or (lead or {}).get("patient_email", ""),
-                "channel": _normalize_channel(primary_event.get("channel"), "manual"),
-                "lead_id": _safe_text(primary_event.get("lead_id")) or _safe_text(latest_event.get("lead_id")) or None,
-                "lead_status": (lead or {}).get("status"),
-                "derived_status": derived_status,
-                "last_intent": latest_event.get("event_type"),
-                "summary": _safe_text(primary_event.get("summary")) or None,
-                "last_message_preview": _truncate(_communication_preview(latest_event)),
-                "last_message_role": _last_message_role_for_direction(_safe_text(latest_event.get("direction")) or "inbound"),
-                "last_message_at": occurred_at,
-                "conversation_started_at": _event_timestamp(primary_event),
-                "updated_at": _parse_datetime(latest_event.get("updated_at")) or occurred_at,
-                "requires_attention": derived_status == "needs_follow_up",
-                "unlinked": not bool(
-                    _safe_text(primary_event.get("lead_id"))
-                    or _safe_text(latest_event.get("lead_id"))
-                    or _safe_text(primary_event.get("conversation_id"))
-                    or _safe_text(latest_event.get("conversation_id"))
-                ),
-                "latest_outbound_status": _safe_text((latest_outbound or {}).get("status")) or None,
-                "latest_outbound_summary": _safe_text((latest_outbound or {}).get("summary")),
-                "latest_outbound_reason": _safe_text((latest_outbound or {}).get("failure_reason")) or _safe_text((latest_outbound or {}).get("skipped_reason")),
-                "latest_outbound_at": _parse_datetime((latest_outbound or {}).get("sent_at")) or _parse_datetime((latest_outbound or {}).get("created_at")),
-                "latest_inbound_status": _safe_text((latest_inbound_reply or {}).get("status")) or None,
-                "latest_inbound_summary": _safe_text((latest_inbound_reply or {}).get("summary")) or _safe_text((latest_inbound_reply or {}).get("content")),
-                "latest_inbound_at": _parse_datetime((latest_inbound_reply or {}).get("occurred_at")) or _parse_datetime((latest_inbound_reply or {}).get("created_at")),
-                "thread_conversation_id": (conversation_row or {}).get("id"),
-                "manual_takeover": bool((conversation_row or {}).get("manual_takeover")),
-                "ai_auto_reply_enabled": ai_auto_reply_enabled,
-                "ai_auto_reply_ready": ai_auto_reply_ready,
-            }
-        )
+        items.append(item)
 
     items.sort(
         key=lambda row: row.get("last_message_at") or row.get("updated_at") or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )
     return items
+
+
+def _load_conversation_thread_detail(
+    db: Any,
+    clinic_id: str,
+    conversation_id: str,
+    lead_id: Optional[str],
+) -> tuple[list[dict[str, Any]], Optional[dict[str, Any]], list[dict[str, Any]]]:
+    messages = (
+        db.table("conversation_messages")
+        .select("*")
+        .eq("conversation_id", conversation_id)
+        .order("created_at")
+        .execute()
+        .data
+        or []
+    )
+    related_events = [
+        event
+        for event in _load_communication_events(clinic_id, limit=200)
+        if event.get("conversation_id") == conversation_id or (lead_id and event.get("lead_id") == lead_id)
+    ]
+    related_events.sort(key=_event_timestamp)
+    return messages, None, related_events
+
+
+def _thread_primary_outbound_fields(
+    latest_outbound: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "latest_outbound_status": _safe_text((latest_outbound or {}).get("status")) or None,
+        "latest_outbound_summary": _safe_text((latest_outbound or {}).get("summary")),
+        "latest_outbound_reason": _safe_text((latest_outbound or {}).get("failure_reason"))
+        or _safe_text((latest_outbound or {}).get("skipped_reason")),
+        "latest_outbound_at": _parse_datetime((latest_outbound or {}).get("sent_at"))
+        or _parse_datetime((latest_outbound or {}).get("created_at")),
+    }
+
+
+def _thread_primary_inbound_fields(
+    latest_inbound_reply: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "latest_inbound_status": _safe_text((latest_inbound_reply or {}).get("status")) or None,
+        "latest_inbound_summary": _safe_text((latest_inbound_reply or {}).get("summary"))
+        or _safe_text((latest_inbound_reply or {}).get("content")),
+        "latest_inbound_at": _parse_datetime((latest_inbound_reply or {}).get("occurred_at"))
+        or _parse_datetime((latest_inbound_reply or {}).get("created_at")),
+    }
+
+
+def _decorate_thread_primary_event(related_events: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
+    if not related_events:
+        return None
+    communication_event = _primary_event_for_thread(related_events)
+    latest_outbound = next(
+        (event for event in reversed(related_events) if _safe_text(event.get("direction")) == "outbound"),
+        None,
+    )
+    latest_inbound_reply = _thread_latest_inbound_reply(related_events)
+    communication_event.update(_thread_primary_outbound_fields(latest_outbound))
+    communication_event.update(_thread_primary_inbound_fields(latest_inbound_reply))
+    return communication_event
+
+
+def _load_event_thread_detail(
+    clinic_id: str,
+    conversation_id: str,
+) -> tuple[list[dict[str, Any]], Optional[dict[str, Any]], list[dict[str, Any]]]:
+    thread_key = conversation_id.split(_EVENT_ID_PREFIX, 1)[1]
+    related_events = [
+        event
+        for event in _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
+        if _safe_text(event.get("thread_key")) == thread_key
+    ]
+    related_events.sort(key=_event_timestamp)
+    return [], _decorate_thread_primary_event(related_events), related_events
+
+
+def _load_conversation_detail_lead(
+    db: Any,
+    clinic_id: str,
+    lead_id: Optional[str],
+) -> Optional[dict[str, Any]]:
+    if not lead_id:
+        return None
+    return _maybe_single_data(
+        db.table("leads")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("id", lead_id)
+    )
 
 
 def get_conversation_detail(clinic_id: str, conversation_id: str) -> Optional[dict[str, Any]]:
@@ -1876,61 +2292,17 @@ def get_conversation_detail(clinic_id: str, conversation_id: str) -> Optional[di
         return None
 
     db = get_supabase()
-    messages: list[dict[str, Any]] = []
-    lead = None
-    communication_event = None
-    related_events: list[dict[str, Any]] = []
-
     if conversation["thread_type"] == "conversation":
-        raw_conversation_id = conversation_id
-        messages = (
-            db.table("conversation_messages")
-            .select("*")
-            .eq("conversation_id", raw_conversation_id)
-            .order("created_at")
-            .execute()
-            .data
-            or []
+        messages, communication_event, related_events = _load_conversation_thread_detail(
+            db,
+            clinic_id,
+            conversation_id,
+            conversation.get("lead_id"),
         )
-        related_events = [
-            event
-            for event in _load_communication_events(clinic_id, limit=200)
-            if (
-                event.get("conversation_id") == raw_conversation_id
-                or (conversation.get("lead_id") and event.get("lead_id") == conversation.get("lead_id"))
-            )
-        ]
-        related_events.sort(key=_event_timestamp)
     else:
-        thread_key = conversation_id.split("event:", 1)[1]
-        related_events = [
-            event
-            for event in _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
-            if _safe_text(event.get("thread_key")) == thread_key
-        ]
-        related_events.sort(key=_event_timestamp)
-        if related_events:
-            communication_event = _primary_event_for_thread(related_events)
-            latest_outbound = next(
-                (event for event in reversed(related_events) if _safe_text(event.get("direction")) == "outbound"),
-                None,
-            )
-            latest_inbound_reply = _thread_latest_inbound_reply(related_events)
-            communication_event["latest_outbound_status"] = _safe_text((latest_outbound or {}).get("status")) or None
-            communication_event["latest_outbound_summary"] = _safe_text((latest_outbound or {}).get("summary"))
-            communication_event["latest_outbound_reason"] = _safe_text((latest_outbound or {}).get("failure_reason")) or _safe_text((latest_outbound or {}).get("skipped_reason"))
-            communication_event["latest_outbound_at"] = _parse_datetime((latest_outbound or {}).get("sent_at")) or _parse_datetime((latest_outbound or {}).get("created_at"))
-            communication_event["latest_inbound_status"] = _safe_text((latest_inbound_reply or {}).get("status")) or None
-            communication_event["latest_inbound_summary"] = _safe_text((latest_inbound_reply or {}).get("summary")) or _safe_text((latest_inbound_reply or {}).get("content"))
-            communication_event["latest_inbound_at"] = _parse_datetime((latest_inbound_reply or {}).get("occurred_at")) or _parse_datetime((latest_inbound_reply or {}).get("created_at"))
+        messages, communication_event, related_events = _load_event_thread_detail(clinic_id, conversation_id)
 
-    if conversation.get("lead_id"):
-        lead = _maybe_single_data(
-            db.table("leads")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .eq("id", conversation["lead_id"])
-        )
+    lead = _load_conversation_detail_lead(db, clinic_id, conversation.get("lead_id"))
 
     return {
         "thread_type": conversation["thread_type"],
@@ -1940,6 +2312,440 @@ def get_conversation_detail(clinic_id: str, conversation_id: str) -> Optional[di
         "communication_event": communication_event,
         "related_events": related_events,
     }
+
+
+def _ensure_customer_group(
+    grouped: dict[str, dict[str, Any]],
+    customer_key: str,
+    *,
+    name: str,
+    phone: str,
+    email: str,
+    occurred_at: Optional[datetime] = None,
+) -> dict[str, Any]:
+    group = grouped.setdefault(
+        customer_key,
+        {
+            "key": customer_key,
+            "name": _safe_text(name) or _UNKNOWN_PATIENT,
+            "phone": _safe_text(phone),
+            "email": _safe_text(email),
+            "lead_count": 0,
+            "booked_count": 0,
+            "open_request_count": 0,
+            "total_interactions": 0,
+            "last_outcome": "open",
+            "follow_up_needed": False,
+            "last_interaction_at": occurred_at,
+            "latest_note": "",
+            "latest_sms_thread_id": None,
+            "latest_sms_manual_takeover": False,
+            "latest_sms_ai_auto_reply_enabled": False,
+            "latest_sms_ai_auto_reply_ready": False,
+            "latest_sms_pending_review": False,
+            "latest_sms_confidence": "",
+            "latest_sms_at": None,
+            "recent_requests": [],
+            "recent_conversations": [],
+            "timeline": [],
+            "conversation_ids": set(),
+            "event_ids": set(),
+            "lead_ids": set(),
+            "active_follow_up_count": 0,
+        },
+    )
+    if not group["phone"] and phone:
+        group["phone"] = _safe_text(phone)
+    if not group["email"] and email:
+        group["email"] = _safe_text(email)
+    if group["name"] == _UNKNOWN_PATIENT and _safe_text(name):
+        group["name"] = _safe_text(name)
+    if occurred_at and (group["last_interaction_at"] is None or occurred_at > group["last_interaction_at"]):
+        group["last_interaction_at"] = occurred_at
+    return group
+
+
+def _update_customer_sms_state(
+    group: dict[str, Any],
+    *,
+    thread_id: Optional[str],
+    occurred_at: Optional[datetime],
+    conversation_row: Optional[dict[str, Any]],
+    event: Optional[dict[str, Any]] = None,
+    clinic_id: str,
+) -> None:
+    if not thread_id or occurred_at is None:
+        return
+    current = group.get("latest_sms_at")
+    if current is not None and occurred_at <= current:
+        return
+    ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation_row)
+    group["latest_sms_thread_id"] = thread_id
+    group["latest_sms_manual_takeover"] = bool((conversation_row or {}).get("manual_takeover"))
+    group["latest_sms_ai_auto_reply_enabled"] = ai_auto_reply_enabled
+    group["latest_sms_ai_auto_reply_ready"] = ai_auto_reply_ready
+    group["latest_sms_pending_review"] = bool((event or {}).get("operator_review_required"))
+    group["latest_sms_confidence"] = _normalize_sms_ai_confidence((event or {}).get("ai_confidence"))
+    group["latest_sms_at"] = occurred_at
+
+
+def _process_single_lead_conversation(
+    conversation: dict[str, Any],
+    lead: dict[str, Any],
+    group: dict[str, Any],
+    *,
+    messages_by_conversation: dict[str, list[dict[str, Any]]],
+    settings: dict[str, Any],
+    clinic_id: str,
+) -> None:
+    """Process a single conversation for a lead."""
+    messages = messages_by_conversation.get(conversation["id"], [])
+    last_message = messages[-1] if messages else None
+    updated_at = _parse_datetime((last_message or {}).get("created_at")) or _parse_datetime(conversation.get("updated_at"))
+    
+    if updated_at and (group["last_interaction_at"] is None or updated_at > group["last_interaction_at"]):
+        group["last_interaction_at"] = updated_at
+    
+    channel = _channel_for_conversation(conversation, lead)
+    preview = _truncate(
+        (last_message or {}).get("content")
+        or (conversation.get("summary") or "").strip()
+        or "Conversation started"
+    )
+    
+    derived_status = _derive_conversation_status(
+        lead,
+        updated_at,
+        delay_minutes=settings["follow_up_delay_minutes"],
+    )
+    
+    group["recent_conversations"].append(
+        {
+            "id": conversation["id"],
+            "thread_type": "conversation",
+            "channel": channel,
+            "derived_status": derived_status,
+            "last_message_preview": preview,
+            "last_message_at": updated_at,
+            "updated_at": _parse_datetime(conversation.get("updated_at")),
+            "lead_id": lead["id"],
+            "manual_takeover": bool(conversation.get("manual_takeover")),
+            "ai_auto_reply_enabled": _sms_thread_auto_reply_state(clinic_id, conversation)[0],
+        }
+    )
+    
+    if channel == "sms":
+        _update_customer_sms_state(
+            group,
+            thread_id=_thread_key("conversation", conversation["id"]),
+            occurred_at=updated_at,
+            conversation_row=conversation,
+            event=None,
+            clinic_id=clinic_id,
+        )
+    
+    group["total_interactions"] += 1
+    group["timeline"].append(
+        {
+            "id": f"conversation:{conversation['id']}",
+            "item_type": "conversation",
+            "title": "Chat conversation",
+            "detail": preview,
+            "channel": channel,
+            "status": derived_status,
+            "occurred_at": updated_at,
+            "lead_id": lead["id"],
+            "conversation_id": conversation["id"],
+            "thread_id": _thread_key("conversation", conversation["id"]),
+        }
+    )
+
+
+def _add_lead_conversations_to_group(
+    lead: dict[str, Any],
+    group: dict[str, Any],
+    *,
+    conversations_by_lead: dict[str, list[dict[str, Any]]],
+    messages_by_conversation: dict[str, list[dict[str, Any]]],
+    settings: dict[str, Any],
+    clinic_id: str,
+) -> None:
+    for conversation in conversations_by_lead.get(lead["id"], []):
+        if conversation["id"] in group["conversation_ids"]:
+            continue
+        group["conversation_ids"].add(conversation["id"])
+        _process_single_lead_conversation(
+            conversation,
+            lead,
+            group,
+            messages_by_conversation=messages_by_conversation,
+            settings=settings,
+            clinic_id=clinic_id,
+        )
+
+
+def _add_lead_to_customer_group(
+    lead: dict[str, Any],
+    grouped: dict[str, dict[str, Any]],
+    lead_to_customer_key: dict[str, str],
+    *,
+    conversations_by_lead: dict[str, list[dict[str, Any]]],
+    messages_by_conversation: dict[str, list[dict[str, Any]]],
+    settings: dict[str, Any],
+    clinic_id: str,
+) -> None:
+    customer_key = _customer_key(_normalize_identity(lead))
+    lead_to_customer_key[lead["id"]] = customer_key
+    lead_updated = _parse_datetime(lead.get("updated_at")) or _parse_datetime(lead.get("created_at"))
+    group = _ensure_customer_group(
+        grouped,
+        customer_key,
+        name=lead.get("patient_name") or "",
+        phone=lead.get("patient_phone") or "",
+        email=lead.get("patient_email") or "",
+        occurred_at=lead_updated,
+    )
+    if lead["id"] not in group["lead_ids"]:
+        group["lead_ids"].add(lead["id"])
+        group["lead_count"] += 1
+        if lead.get("status") == "booked":
+            group["booked_count"] += 1
+        if lead.get("status") in {"new", "contacted"}:
+            group["open_request_count"] += 1
+    note = _safe_text(lead.get("notes"))
+    if note and not group["latest_note"]:
+        group["latest_note"] = note
+    group["recent_requests"].append(lead)
+    group["total_interactions"] += 1
+    group["timeline"].append(
+        {
+            "id": f"lead:{lead['id']}",
+            "item_type": "request",
+            "title": lead.get("reason_for_visit") or "Appointment request",
+            "detail": lead.get("preferred_datetime_text") or lead.get("notes") or "Patient request captured.",
+            "channel": _normalize_channel(lead.get("source"), "manual"),
+            "status": lead.get("status"),
+            "occurred_at": lead_updated,
+            "lead_id": lead["id"],
+        }
+    )
+    _add_lead_conversations_to_group(
+        lead,
+        group,
+        conversations_by_lead=conversations_by_lead,
+        messages_by_conversation=messages_by_conversation,
+        settings=settings,
+        clinic_id=clinic_id,
+    )
+
+
+def _resolve_event_customer_key(
+    event: dict[str, Any],
+    lead_to_customer_key: dict[str, str],
+) -> str:
+    customer_key = event.get("customer_key") or lead_to_customer_key.get(event.get("lead_id") or "")
+    if customer_key:
+        return customer_key
+    return _customer_key_from_fields(
+        event.get("customer_name") or "",
+        event.get("customer_phone") or "",
+        event.get("customer_email") or "",
+        f"event:{event['id']}",
+    )
+
+
+def _event_conversation_row(
+    event: dict[str, Any],
+    sms_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+) -> Optional[dict[str, Any]]:
+    conversation_id = _safe_text(event.get("conversation_id"))
+    if conversation_id:
+        return sms_conversations_by_id.get(conversation_id)
+    return sms_conversations_by_session.get(_safe_text(event.get("thread_key")))
+
+
+def _update_event_group_state(
+    group: dict[str, Any],
+    event: dict[str, Any],
+    preview: str,
+) -> None:
+    if preview and not group["latest_note"]:
+        group["latest_note"] = preview
+    group["total_interactions"] += 1
+    if _safe_text(event.get("status")) not in {"completed", "dismissed"}:
+        group["follow_up_needed"] = True
+
+
+def _append_event_group_timeline(
+    group: dict[str, Any],
+    event: dict[str, Any],
+    preview: str,
+    occurred_at: Optional[datetime],
+    channel: str,
+) -> None:
+    group["timeline"].append(
+        {
+            "id": f"communication:{event['id']}",
+            "item_type": "communication_event",
+            "title": _communication_title(event),
+            "detail": preview,
+            "channel": channel,
+            "status": _safe_text(event.get("status")) or "new",
+            "occurred_at": occurred_at,
+            "lead_id": event.get("lead_id"),
+            "conversation_id": event.get("conversation_id"),
+            "thread_id": _thread_key("event", _safe_text(event.get("thread_key")) or event["id"]),
+            "communication_event_id": event["id"],
+        }
+    )
+
+
+def _add_communication_event_to_customer_group(
+    event: dict[str, Any],
+    grouped: dict[str, dict[str, Any]],
+    lead_to_customer_key: dict[str, str],
+    *,
+    sms_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+    clinic_id: str,
+) -> None:
+    customer_key = _resolve_event_customer_key(event, lead_to_customer_key)
+    occurred_at = _parse_datetime(event.get("occurred_at")) or _parse_datetime(event.get("created_at"))
+    group = _ensure_customer_group(
+        grouped,
+        customer_key,
+        name=event.get("customer_name") or "",
+        phone=event.get("customer_phone") or "",
+        email=event.get("customer_email") or "",
+        occurred_at=occurred_at,
+    )
+    if event["id"] in group["event_ids"]:
+        return
+    group["event_ids"].add(event["id"])
+    preview = _truncate(_communication_preview(event))
+    _update_event_group_state(group, event, preview)
+    conversation_row = _event_conversation_row(
+        event,
+        sms_conversations_by_id,
+        sms_conversations_by_session,
+    )
+    channel = _normalize_channel(event.get("channel"), "manual")
+    if channel == "sms":
+        _update_customer_sms_state(
+            group,
+            thread_id=_thread_key("event", _safe_text(event.get("thread_key")) or event["id"]),
+            occurred_at=occurred_at,
+            conversation_row=conversation_row,
+            event=event,
+            clinic_id=clinic_id,
+        )
+    _append_event_group_timeline(group, event, preview, occurred_at, channel)
+
+
+def _add_follow_up_task_to_customer_group(
+    task: dict[str, Any],
+    grouped: dict[str, dict[str, Any]],
+    lead_to_customer_key: dict[str, str],
+) -> None:
+    customer_key = _safe_text(task.get("customer_key")) or lead_to_customer_key.get(task.get("lead_id") or "")
+    if not customer_key:
+        return
+    occurred_at = _parse_datetime(task.get("updated_at")) or _parse_datetime(task.get("created_at"))
+    group = _ensure_customer_group(
+        grouped,
+        customer_key,
+        name=task.get("customer_name") or "",
+        phone="",
+        email="",
+        occurred_at=occurred_at,
+    )
+    group["total_interactions"] += 1
+    if _safe_text(task.get("status")) != "completed":
+        group["active_follow_up_count"] += 1
+        group["follow_up_needed"] = True
+    group["timeline"].append(
+        {
+            "id": f"followup:{task['id']}",
+            "item_type": "follow_up",
+            "title": task.get("title") or "Follow-up task",
+            "detail": task.get("detail") or task.get("note") or "Follow-up work tracked for this customer.",
+            "status": task.get("status"),
+            "occurred_at": occurred_at,
+            "lead_id": task.get("lead_id"),
+            "conversation_id": task.get("conversation_id"),
+            "thread_id": task.get("conversation_id"),
+            "follow_up_task_id": task["id"],
+        }
+    )
+
+
+def _add_waitlist_entry_to_customer_group(
+    entry: dict[str, Any],
+    grouped: dict[str, dict[str, Any]],
+    lead_to_customer_key: dict[str, str],
+) -> None:
+    customer_key = _safe_text(entry.get("customer_key")) or lead_to_customer_key.get(entry.get("lead_id") or "")
+    if not customer_key:
+        customer_key = _customer_key_from_fields(
+            entry.get("patient_name") or "",
+            entry.get("patient_phone") or "",
+            entry.get("patient_email") or "",
+            f"waitlist:{entry['id']}",
+        )
+    occurred_at = _parse_datetime(entry.get("updated_at")) or _parse_datetime(entry.get("created_at"))
+    group = _ensure_customer_group(
+        grouped,
+        customer_key,
+        name=entry.get("patient_name") or "",
+        phone=entry.get("patient_phone") or "",
+        email=entry.get("patient_email") or "",
+        occurred_at=occurred_at,
+    )
+    group["total_interactions"] += 1
+    group["timeline"].append(
+        {
+            "id": f"waitlist:{entry['id']}",
+            "item_type": "waitlist",
+            "title": "Waitlist entry",
+            "detail": entry.get("service_requested") or entry.get("preferred_times") or "Customer added to the waitlist.",
+            "status": entry.get("status"),
+            "occurred_at": occurred_at,
+            "lead_id": entry.get("lead_id"),
+            "waitlist_entry_id": entry["id"],
+        }
+    )
+
+
+def _normalize_customer_profile(profile: dict[str, Any]) -> dict[str, Any]:
+    profile["recent_requests"] = sorted(
+        profile["recent_requests"],
+        key=lambda row: _parse_datetime(row.get("updated_at")) or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )[:5]
+    profile["recent_conversations"] = sorted(
+        profile["recent_conversations"],
+        key=lambda row: row.get("last_message_at") or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )[:5]
+    profile["timeline"] = sorted(
+        profile["timeline"],
+        key=lambda row: row.get("occurred_at") or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )[:12]
+    profile["conversation_count"] = len(profile.pop("conversation_ids"))
+    profile.pop("event_ids", None)
+    profile.pop("lead_ids", None)
+    profile.pop("latest_sms_at", None)
+    active_follow_up_count = profile.pop("active_follow_up_count", 0)
+    if profile["open_request_count"] > 0 or active_follow_up_count > 0:
+        profile["last_outcome"] = "open"
+        profile["follow_up_needed"] = True
+    elif profile["booked_count"] > 0:
+        profile["last_outcome"] = "booked"
+    elif profile["lead_count"] > 0 or profile["total_interactions"] > 0:
+        profile["last_outcome"] = "lost"
+    return profile
 
 
 def _build_customer_profile_groups(clinic_id: str) -> list[dict[str, Any]]:
@@ -1979,319 +2785,27 @@ def _build_customer_profile_groups(clinic_id: str) -> list[dict[str, Any]]:
     grouped: dict[str, dict[str, Any]] = {}
     lead_to_customer_key: dict[str, str] = {}
 
-    def ensure_group(customer_key: str, *, name: str, phone: str, email: str, occurred_at: Optional[datetime] = None) -> dict[str, Any]:
-        group = grouped.setdefault(
-            customer_key,
-            {
-                "key": customer_key,
-                "name": _safe_text(name) or "Unknown patient",
-                "phone": _safe_text(phone),
-                "email": _safe_text(email),
-                "lead_count": 0,
-                "booked_count": 0,
-                "open_request_count": 0,
-                "total_interactions": 0,
-                "last_outcome": "open",
-                "follow_up_needed": False,
-                "last_interaction_at": occurred_at,
-                "latest_note": "",
-                "latest_sms_thread_id": None,
-                "latest_sms_manual_takeover": False,
-                "latest_sms_ai_auto_reply_enabled": False,
-                "latest_sms_ai_auto_reply_ready": False,
-                "latest_sms_pending_review": False,
-                "latest_sms_confidence": "",
-                "latest_sms_at": None,
-                "recent_requests": [],
-                "recent_conversations": [],
-                "timeline": [],
-                "conversation_ids": set(),
-                "event_ids": set(),
-                "lead_ids": set(),
-                "active_follow_up_count": 0,
-            },
-        )
-        if not group["phone"] and phone:
-            group["phone"] = _safe_text(phone)
-        if not group["email"] and email:
-            group["email"] = _safe_text(email)
-        if group["name"] == "Unknown patient" and _safe_text(name):
-            group["name"] = _safe_text(name)
-        if occurred_at and (group["last_interaction_at"] is None or occurred_at > group["last_interaction_at"]):
-            group["last_interaction_at"] = occurred_at
-        return group
-
-    def update_latest_sms_state(
-        group: dict[str, Any],
-        *,
-        thread_id: Optional[str],
-        occurred_at: Optional[datetime],
-        conversation_row: Optional[dict[str, Any]],
-        event: Optional[dict[str, Any]] = None,
-    ) -> None:
-        if not thread_id or occurred_at is None:
-            return
-        current = group.get("latest_sms_at")
-        if current is not None and occurred_at <= current:
-            return
-        ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(
-            clinic_id,
-            conversation_row,
-        )
-        group["latest_sms_thread_id"] = thread_id
-        group["latest_sms_manual_takeover"] = bool((conversation_row or {}).get("manual_takeover"))
-        group["latest_sms_ai_auto_reply_enabled"] = ai_auto_reply_enabled
-        group["latest_sms_ai_auto_reply_ready"] = ai_auto_reply_ready
-        group["latest_sms_pending_review"] = bool((event or {}).get("operator_review_required"))
-        group["latest_sms_confidence"] = _normalize_sms_ai_confidence((event or {}).get("ai_confidence"))
-        group["latest_sms_at"] = occurred_at
-
     for lead in leads:
-        customer_key = _customer_key(_normalize_identity(lead))
-        lead_to_customer_key[lead["id"]] = customer_key
-        lead_updated = _parse_datetime(lead.get("updated_at")) or _parse_datetime(lead.get("created_at"))
-        group = ensure_group(
-            customer_key,
-            name=lead.get("patient_name") or "",
-            phone=lead.get("patient_phone") or "",
-            email=lead.get("patient_email") or "",
-            occurred_at=lead_updated,
+        _add_lead_to_customer_group(
+            lead, grouped, lead_to_customer_key,
+            conversations_by_lead=conversations_by_lead,
+            messages_by_conversation=messages_by_conversation,
+            settings=settings,
+            clinic_id=clinic_id,
         )
-        if lead["id"] not in group["lead_ids"]:
-            group["lead_ids"].add(lead["id"])
-            group["lead_count"] += 1
-            if lead.get("status") == "booked":
-                group["booked_count"] += 1
-            if lead.get("status") in {"new", "contacted"}:
-                group["open_request_count"] += 1
-        note = _safe_text(lead.get("notes"))
-        if note and not group["latest_note"]:
-            group["latest_note"] = note
-        group["recent_requests"].append(lead)
-        group["total_interactions"] += 1
-        group["timeline"].append(
-            {
-                "id": f"lead:{lead['id']}",
-                "item_type": "request",
-                "title": lead.get("reason_for_visit") or "Appointment request",
-                "detail": lead.get("preferred_datetime_text") or lead.get("notes") or "Patient request captured.",
-                "channel": _normalize_channel(lead.get("source"), "manual"),
-                "status": lead.get("status"),
-                "occurred_at": lead_updated,
-                "lead_id": lead["id"],
-            }
-        )
-
-        for conversation in conversations_by_lead.get(lead["id"], []):
-            if conversation["id"] in group["conversation_ids"]:
-                continue
-            group["conversation_ids"].add(conversation["id"])
-            messages = messages_by_conversation.get(conversation["id"], [])
-            last_message = messages[-1] if messages else None
-            updated_at = _parse_datetime((last_message or {}).get("created_at")) or _parse_datetime(conversation.get("updated_at"))
-            if updated_at and (group["last_interaction_at"] is None or updated_at > group["last_interaction_at"]):
-                group["last_interaction_at"] = updated_at
-            channel = _channel_for_conversation(conversation, lead)
-            preview = _truncate(
-                (last_message or {}).get("content")
-                or (conversation.get("summary") or "").strip()
-                or "Conversation started"
-            )
-            group["recent_conversations"].append(
-                {
-                    "id": conversation["id"],
-                    "thread_type": "conversation",
-                    "channel": channel,
-                    "derived_status": _derive_conversation_status(
-                        lead,
-                        updated_at,
-                        delay_minutes=settings["follow_up_delay_minutes"],
-                    ),
-                    "last_message_preview": preview,
-                    "last_message_at": updated_at,
-                    "updated_at": _parse_datetime(conversation.get("updated_at")),
-                    "lead_id": lead["id"],
-                    "manual_takeover": bool(conversation.get("manual_takeover")),
-                    "ai_auto_reply_enabled": _sms_thread_auto_reply_state(clinic_id, conversation)[0],
-                }
-            )
-            if channel == "sms":
-                update_latest_sms_state(
-                    group,
-                    thread_id=_thread_key("conversation", conversation["id"]),
-                    occurred_at=updated_at,
-                    conversation_row=conversation,
-                    event=None,
-                )
-            group["total_interactions"] += 1
-            group["timeline"].append(
-                {
-                    "id": f"conversation:{conversation['id']}",
-                    "item_type": "conversation",
-                    "title": "Chat conversation",
-                    "detail": preview,
-                    "channel": channel,
-                    "status": _derive_conversation_status(
-                        lead,
-                        updated_at,
-                        delay_minutes=settings["follow_up_delay_minutes"],
-                    ),
-                    "occurred_at": updated_at,
-                    "lead_id": lead["id"],
-                    "conversation_id": conversation["id"],
-                    "thread_id": _thread_key("conversation", conversation["id"]),
-                }
-            )
-
     for event in communication_events:
-        customer_key = event.get("customer_key") or lead_to_customer_key.get(event.get("lead_id") or "")
-        if not customer_key:
-            customer_key = _customer_key_from_fields(
-                event.get("customer_name") or "",
-                event.get("customer_phone") or "",
-                event.get("customer_email") or "",
-                f"event:{event['id']}",
-            )
-        occurred_at = _parse_datetime(event.get("occurred_at")) or _parse_datetime(event.get("created_at"))
-        group = ensure_group(
-            customer_key,
-            name=event.get("customer_name") or "",
-            phone=event.get("customer_phone") or "",
-            email=event.get("customer_email") or "",
-            occurred_at=occurred_at,
+        _add_communication_event_to_customer_group(
+            event, grouped, lead_to_customer_key,
+            sms_conversations_by_id=sms_conversations_by_id,
+            sms_conversations_by_session=sms_conversations_by_session,
+            clinic_id=clinic_id,
         )
-        if event["id"] in group["event_ids"]:
-            continue
-        group["event_ids"].add(event["id"])
-        preview = _truncate(_communication_preview(event))
-        if preview and not group["latest_note"]:
-            group["latest_note"] = preview
-        group["total_interactions"] += 1
-        if _safe_text(event.get("status")) not in {"completed", "dismissed"}:
-            group["follow_up_needed"] = True
-        conversation_row = (
-            sms_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-            if _safe_text(event.get("conversation_id"))
-            else sms_conversations_by_session.get(_safe_text(event.get("thread_key")))
-        )
-        channel = _normalize_channel(event.get("channel"), "manual")
-        if channel == "sms":
-            update_latest_sms_state(
-                group,
-                thread_id=_thread_key("event", _safe_text(event.get("thread_key")) or event["id"]),
-                occurred_at=occurred_at,
-                conversation_row=conversation_row,
-                event=event,
-            )
-        group["timeline"].append(
-            {
-                "id": f"communication:{event['id']}",
-                "item_type": "communication_event",
-                "title": _communication_title(event),
-                "detail": preview,
-                "channel": channel,
-                "status": _safe_text(event.get("status")) or "new",
-                "occurred_at": occurred_at,
-                "lead_id": event.get("lead_id"),
-                "conversation_id": event.get("conversation_id"),
-                "thread_id": _thread_key("event", _safe_text(event.get("thread_key")) or event["id"]),
-                "communication_event_id": event["id"],
-            }
-        )
-
     for task in follow_up_tasks:
-        customer_key = _safe_text(task.get("customer_key")) or lead_to_customer_key.get(task.get("lead_id") or "")
-        if not customer_key:
-            continue
-        occurred_at = _parse_datetime(task.get("updated_at")) or _parse_datetime(task.get("created_at"))
-        group = ensure_group(
-            customer_key,
-            name=task.get("customer_name") or "",
-            phone="",
-            email="",
-            occurred_at=occurred_at,
-        )
-        group["total_interactions"] += 1
-        if _safe_text(task.get("status")) != "completed":
-            group["active_follow_up_count"] += 1
-            group["follow_up_needed"] = True
-        group["timeline"].append(
-            {
-                "id": f"followup:{task['id']}",
-                "item_type": "follow_up",
-                "title": task.get("title") or "Follow-up task",
-                "detail": task.get("detail") or task.get("note") or "Follow-up work tracked for this customer.",
-                "status": task.get("status"),
-                "occurred_at": occurred_at,
-                "lead_id": task.get("lead_id"),
-                "conversation_id": task.get("conversation_id"),
-                "thread_id": task.get("conversation_id"),
-                "follow_up_task_id": task["id"],
-            }
-        )
-
+        _add_follow_up_task_to_customer_group(task, grouped, lead_to_customer_key)
     for entry in waitlist_entries:
-        customer_key = _safe_text(entry.get("customer_key")) or lead_to_customer_key.get(entry.get("lead_id") or "")
-        if not customer_key:
-            customer_key = _customer_key_from_fields(
-                entry.get("patient_name") or "",
-                entry.get("patient_phone") or "",
-                entry.get("patient_email") or "",
-                f"waitlist:{entry['id']}",
-            )
-        occurred_at = _parse_datetime(entry.get("updated_at")) or _parse_datetime(entry.get("created_at"))
-        group = ensure_group(
-            customer_key,
-            name=entry.get("patient_name") or "",
-            phone=entry.get("patient_phone") or "",
-            email=entry.get("patient_email") or "",
-            occurred_at=occurred_at,
-        )
-        group["total_interactions"] += 1
-        group["timeline"].append(
-            {
-                "id": f"waitlist:{entry['id']}",
-                "item_type": "waitlist",
-                "title": "Waitlist entry",
-                "detail": entry.get("service_requested") or entry.get("preferred_times") or "Customer added to the waitlist.",
-                "status": entry.get("status"),
-                "occurred_at": occurred_at,
-                "lead_id": entry.get("lead_id"),
-                "waitlist_entry_id": entry["id"],
-            }
-        )
+        _add_waitlist_entry_to_customer_group(entry, grouped, lead_to_customer_key)
 
-    profiles: list[dict[str, Any]] = []
-    for profile in grouped.values():
-        profile["recent_requests"] = sorted(
-            profile["recent_requests"],
-            key=lambda row: _parse_datetime(row.get("updated_at")) or datetime.min.replace(tzinfo=timezone.utc),
-            reverse=True,
-        )[:5]
-        profile["recent_conversations"] = sorted(
-            profile["recent_conversations"],
-            key=lambda row: row.get("last_message_at") or datetime.min.replace(tzinfo=timezone.utc),
-            reverse=True,
-        )[:5]
-        profile["timeline"] = sorted(
-            profile["timeline"],
-            key=lambda row: row.get("occurred_at") or datetime.min.replace(tzinfo=timezone.utc),
-            reverse=True,
-        )[:12]
-        profile["conversation_count"] = len(profile.pop("conversation_ids"))
-        profile.pop("event_ids", None)
-        profile.pop("lead_ids", None)
-        profile.pop("latest_sms_at", None)
-        active_follow_up_count = profile.pop("active_follow_up_count", 0)
-        if profile["open_request_count"] > 0 or active_follow_up_count > 0:
-            profile["last_outcome"] = "open"
-            profile["follow_up_needed"] = True
-        elif profile["booked_count"] > 0:
-            profile["last_outcome"] = "booked"
-        elif profile["lead_count"] > 0 or profile["total_interactions"] > 0:
-            profile["last_outcome"] = "lost"
-        profiles.append(profile)
-
+    profiles = [_normalize_customer_profile(profile) for profile in grouped.values()]
     profiles.sort(
         key=lambda row: row.get("last_interaction_at") or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
@@ -2311,47 +2825,120 @@ def get_customer_profile(clinic_id: str, customer_key: str) -> Optional[dict[str
     return next((profile for profile in profiles if profile["key"] == customer_key), None)
 
 
-def build_opportunities(clinic_id: str) -> list[dict[str, Any]]:
-    db = get_supabase()
-    settings = _load_frontdesk_settings(clinic_id)
-    opportunities: list[dict[str, Any]] = []
-    inbox_items = build_inbox_items(clinic_id, limit=200)
-    communication_events = _load_communication_events(clinic_id, limit=200)
-    latest_inbound_by_thread = _latest_thread_event_by_direction(communication_events, "inbound")
-    now = datetime.now(timezone.utc)
-    existing_tasks = {
-        task["source_key"]: task
-        for task in _load_follow_up_tasks(clinic_id, include_completed=True)
+def _build_abandoned_conversation_opportunity(item: dict[str, Any]) -> dict[str, Any]:
+    """Build opportunity for unlinked conversation needing follow-up."""
+    occurred_at = item.get("last_message_at") or item.get("updated_at")
+    return {
+        "id": f"conversation:{item['id']}",
+        "type": "abandoned_conversation",
+        "title": "Conversation ended before contact details were captured",
+        "detail": item["last_message_preview"] or "Patient stopped responding before completing the intake.",
+        "priority": "high",
+        "customer_key": item.get("customer_key"),
+        "customer_name": item["customer_name"],
+        "occurred_at": occurred_at,
+        "conversation_id": item["id"],
+        "lead_id": None,
+        "derived_status": item["derived_status"],
     }
 
-    def append_opportunity(item: dict[str, Any]) -> None:
-        task = existing_tasks.get(item["id"])
-        if task and task.get("status") == "completed":
-            return
-        if task:
-            item["follow_up_task_id"] = task["id"]
-            item["follow_up_task_status"] = task["status"]
-        opportunities.append(item)
 
+def _build_communication_event_opportunity(event: dict[str, Any]) -> dict[str, Any]:
+    """Build opportunity for missed-call or callback-request communication events."""
+    is_missed_call = event.get("channel") == "missed_call"
+    return {
+        "id": f"communication:{event['id']}",
+        "type": "follow_up_needed",
+        "title": "Missed-call recovery is waiting" if is_missed_call else "Callback request still needs a response",
+        "detail": _communication_preview(event),
+        "priority": "high" if is_missed_call else "medium",
+        "customer_key": event.get("customer_key"),
+        "customer_name": event.get("customer_name") or _UNKNOWN_CUSTOMER,
+        "occurred_at": _parse_datetime(event.get("occurred_at")) or _parse_datetime(event.get("created_at")),
+        "conversation_id": None,
+        "lead_id": event.get("lead_id"),
+        "derived_status": "needs_follow_up",
+    }
+
+
+def _build_new_lead_opportunity(lead: dict[str, Any], updated_at: datetime) -> Optional[dict[str, Any]]:
+    """Build opportunity for new stale lead."""
+    return {
+        "id": f"lead:new:{lead['id']}",
+        "type": "new_lead_stale",
+        "title": "New request still waiting for outreach",
+        "detail": lead.get("reason_for_visit") or "Patient requested an appointment but has not been worked yet.",
+        "priority": "high",
+        "customer_key": _customer_key(_normalize_identity(lead)),
+        "customer_name": lead.get("patient_name") or _UNKNOWN_PATIENT,
+        "occurred_at": updated_at,
+        "conversation_id": None,
+        "lead_id": lead["id"],
+        "derived_status": "needs_follow_up",
+    }
+
+
+def _build_contacted_lead_opportunity(lead: dict[str, Any], updated_at: datetime) -> Optional[dict[str, Any]]:
+    """Build opportunity for contacted lead needing follow-up nudge."""
+    return {
+        "id": f"lead:contacted:{lead['id']}",
+        "type": "follow_up_needed",
+        "title": "Patient may need a follow-up nudge",
+        "detail": lead.get("preferred_datetime_text") or "A contacted request has not reached a booked outcome yet.",
+        "priority": "medium",
+        "customer_key": _customer_key(_normalize_identity(lead)),
+        "customer_name": lead.get("patient_name") or _UNKNOWN_PATIENT,
+        "occurred_at": updated_at,
+        "conversation_id": None,
+        "lead_id": lead["id"],
+        "derived_status": "needs_follow_up",
+    }
+
+
+def _should_add_opportunity_task(
+    item: dict[str, Any],
+    existing_tasks: dict[str, dict[str, Any]],
+) -> bool:
+    """Check if opportunity should be added (not already completed)."""
+    task = existing_tasks.get(item["id"])
+    if task and task.get("status") == "completed":
+        return False
+    return True
+
+
+def _attach_task_to_opportunity(
+    item: dict[str, Any],
+    existing_tasks: dict[str, dict[str, Any]],
+) -> None:
+    """Attach existing task info to opportunity if available."""
+    task = existing_tasks.get(item["id"])
+    if task:
+        item["follow_up_task_id"] = task["id"]
+        item["follow_up_task_status"] = task["status"]
+
+
+def _process_inbox_opportunities(
+    inbox_items: list[dict[str, Any]],
+    existing_tasks: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Extract abandoned conversation opportunities from inbox."""
+    opportunities: list[dict[str, Any]] = []
     for item in inbox_items:
-        occurred_at = item.get("last_message_at") or item.get("updated_at")
         if item["unlinked"] and item["derived_status"] == "needs_follow_up":
-            append_opportunity(
-                {
-                    "id": f"conversation:{item['id']}",
-                    "type": "abandoned_conversation",
-                    "title": "Conversation ended before contact details were captured",
-                    "detail": item["last_message_preview"] or "Patient stopped responding before completing the intake.",
-                    "priority": "high",
-                    "customer_key": item.get("customer_key"),
-                    "customer_name": item["customer_name"],
-                    "occurred_at": occurred_at,
-                    "conversation_id": item["id"],
-                    "lead_id": None,
-                    "derived_status": item["derived_status"],
-                }
-            )
+            opportunity = _build_abandoned_conversation_opportunity(item)
+            if _should_add_opportunity_task(opportunity, existing_tasks):
+                _attach_task_to_opportunity(opportunity, existing_tasks)
+                opportunities.append(opportunity)
+    return opportunities
 
+
+def _process_communication_event_opportunities(
+    communication_events: list[dict[str, Any]],
+    latest_inbound_by_thread: dict[str, dict[str, Any]],
+    existing_tasks: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Extract missed-call and callback opportunities from events."""
+    opportunities: list[dict[str, Any]] = []
     for event in communication_events:
         if _safe_text(event.get("status")) in {"completed", "dismissed"}:
             continue
@@ -2360,23 +2947,49 @@ def build_opportunities(clinic_id: str) -> list[dict[str, Any]]:
         latest_inbound = latest_inbound_by_thread.get(_safe_text(event.get("thread_key")))
         if latest_inbound and latest_inbound["id"] != event["id"]:
             continue
-        append_opportunity(
-            {
-                "id": f"communication:{event['id']}",
-                "type": "follow_up_needed",
-                "title": "Missed-call recovery is waiting"
-                if event.get("channel") == "missed_call"
-                else "Callback request still needs a response",
-                "detail": _communication_preview(event),
-                "priority": "high" if event.get("channel") == "missed_call" else "medium",
-                "customer_key": event.get("customer_key"),
-                "customer_name": event.get("customer_name") or "Unknown customer",
-                "occurred_at": _parse_datetime(event.get("occurred_at")) or _parse_datetime(event.get("created_at")),
-                "conversation_id": None,
-                "lead_id": event.get("lead_id"),
-                "derived_status": "needs_follow_up",
-            }
-        )
+        opportunity = _build_communication_event_opportunity(event)
+        if _should_add_opportunity_task(opportunity, existing_tasks):
+            _attach_task_to_opportunity(opportunity, existing_tasks)
+            opportunities.append(opportunity)
+    return opportunities
+
+
+def _process_lead_opportunities(
+    leads: list[dict[str, Any]],
+    now: datetime,
+    follow_up_delay_minutes: int,
+    existing_tasks: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Extract stale and contacted lead opportunities."""
+    opportunities: list[dict[str, Any]] = []
+    for lead in leads:
+        updated_at = _parse_datetime(lead.get("updated_at")) or _parse_datetime(lead.get("created_at"))
+        if not updated_at:
+            continue
+        age = now - updated_at
+        opportunity = None
+        if lead.get("status") == "new" and age >= timedelta(minutes=follow_up_delay_minutes):
+            opportunity = _build_new_lead_opportunity(lead, updated_at)
+        elif lead.get("status") == "contacted" and age >= timedelta(hours=24):
+            opportunity = _build_contacted_lead_opportunity(lead, updated_at)
+        
+        if opportunity and _should_add_opportunity_task(opportunity, existing_tasks):
+            _attach_task_to_opportunity(opportunity, existing_tasks)
+            opportunities.append(opportunity)
+    return opportunities
+
+
+def build_opportunities(clinic_id: str) -> list[dict[str, Any]]:
+    db = get_supabase()
+    settings = _load_frontdesk_settings(clinic_id)
+    inbox_items = build_inbox_items(clinic_id, limit=200)
+    communication_events = _load_communication_events(clinic_id, limit=200)
+    latest_inbound_by_thread = _latest_thread_event_by_direction(communication_events, "inbound")
+    now = datetime.now(timezone.utc)
+    existing_tasks = {
+        task["source_key"]: task
+        for task in _load_follow_up_tasks(clinic_id, include_completed=True)
+    }
 
     leads = (
         db.table("leads")
@@ -2387,49 +3000,113 @@ def build_opportunities(clinic_id: str) -> list[dict[str, Any]]:
         .data
         or []
     )
-    for lead in leads:
-        updated_at = _parse_datetime(lead.get("updated_at")) or _parse_datetime(lead.get("created_at"))
-        if not updated_at:
-            continue
-        age = now - updated_at
-        if lead.get("status") == "new" and age >= timedelta(minutes=settings["follow_up_delay_minutes"]):
-            append_opportunity(
-                {
-                    "id": f"lead:new:{lead['id']}",
-                    "type": "new_lead_stale",
-                    "title": "New request still waiting for outreach",
-                    "detail": lead.get("reason_for_visit") or "Patient requested an appointment but has not been worked yet.",
-                    "priority": "high",
-                    "customer_key": _customer_key(_normalize_identity(lead)),
-                    "customer_name": lead.get("patient_name") or "Unknown patient",
-                    "occurred_at": updated_at,
-                    "conversation_id": None,
-                    "lead_id": lead["id"],
-                    "derived_status": "needs_follow_up",
-                }
-            )
-        elif lead.get("status") == "contacted" and age >= timedelta(hours=24):
-            append_opportunity(
-                {
-                    "id": f"lead:contacted:{lead['id']}",
-                    "type": "follow_up_needed",
-                    "title": "Patient may need a follow-up nudge",
-                    "detail": lead.get("preferred_datetime_text") or "A contacted request has not reached a booked outcome yet.",
-                    "priority": "medium",
-                    "customer_key": _customer_key(_normalize_identity(lead)),
-                    "customer_name": lead.get("patient_name") or "Unknown patient",
-                    "occurred_at": updated_at,
-                    "conversation_id": None,
-                    "lead_id": lead["id"],
-                    "derived_status": "needs_follow_up",
-                }
-            )
+
+    opportunities: list[dict[str, Any]] = []
+    opportunities.extend(_process_inbox_opportunities(inbox_items, existing_tasks))
+    opportunities.extend(_process_communication_event_opportunities(communication_events, latest_inbound_by_thread, existing_tasks))
+    opportunities.extend(_process_lead_opportunities(leads, now, settings["follow_up_delay_minutes"], existing_tasks))
 
     opportunities.sort(
         key=lambda item: item.get("occurred_at") or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )
     return opportunities
+
+
+def _count_user_contact_hours(db: Any, conversation_ids: list[str]) -> Counter:
+    user_hours = Counter()
+    if not conversation_ids:
+        return user_hours
+    messages = (
+        db.table("conversation_messages")
+        .select("conversation_id, role, created_at")
+        .in_("conversation_id", conversation_ids)
+        .eq("role", "user")
+        .execute()
+        .data
+        or []
+    )
+    for message in messages:
+        created_at = _parse_datetime(message.get("created_at"))
+        if created_at:
+            user_hours[created_at.hour] += 1
+    return user_hours
+
+
+def _build_busiest_hours(user_hours: Counter) -> list[dict[str, Any]]:
+    return [
+        {
+            "hour": hour,
+            "label": datetime(2024, 1, 1, hour, 0).strftime("%-I %p"),
+            "count": count,
+        }
+        for hour, count in user_hours.most_common(4)
+    ]
+
+
+def _count_resolved_conversations(conversations: list[dict[str, Any]], leads_by_id: dict[str, dict[str, Any]]) -> int:
+    resolved = 0
+    for conversation in conversations:
+        lead = leads_by_id.get(conversation.get("lead_id"))
+        if (lead and lead.get("status") in {"booked", "closed"}) or conversation.get("last_intent") == "booking_complete":
+            resolved += 1
+    return resolved
+
+
+def _count_sms_statistics(inbound_sms_events: list[dict[str, Any]]) -> dict[str, int]:
+    return {
+        "ai_auto_handled_count": sum(
+            1
+            for event in inbound_sms_events
+            if _normalize_sms_ai_confidence(event.get("ai_confidence")) == "high"
+            and _safe_text(event.get("auto_reply_status")) in {"sent", "delivered"}
+        ),
+        "human_review_required_count": sum(1 for event in inbound_sms_events if event.get("operator_review_required")),
+        "suggested_replies_sent_count": sum(
+            1
+            for event in inbound_sms_events
+            if _normalize_suggested_reply_status(event.get("suggested_reply_status")) in {"sent", "edited_sent"}
+        ),
+        "blocked_for_review_count": sum(
+            1
+            for event in inbound_sms_events
+            if _normalize_sms_ai_confidence(event.get("ai_confidence")) == "blocked"
+            and _safe_text(event.get("ai_decision_reason")) in {"risky_content", "unsupported_question"}
+        ),
+    }
+
+
+def _count_deposit_statistics(leads: list[dict[str, Any]]) -> dict[str, int]:
+    return {
+        "deposits_requested_count": sum(1 for lead in leads if _normalize_deposit_status(lead.get("deposit_status")) == "requested"),
+        "deposits_paid_count": sum(1 for lead in leads if _normalize_deposit_status(lead.get("deposit_status")) == "paid"),
+        "appointments_waiting_on_deposit_count": sum(
+            1
+            for lead in leads
+            if bool(lead.get("deposit_required"))
+            and _safe_text(lead.get("appointment_status")) == "confirmed"
+            and _normalize_deposit_status(lead.get("deposit_status")) not in {"paid", "waived", "not_required"}
+        ),
+    }
+
+
+def _get_manual_takeover_threads_count(db: Any, clinic_id: str) -> int:
+    try:
+        return sum(
+            1
+            for _ in (
+                db.table("conversations")
+                .select("id")
+                .eq("clinic_id", clinic_id)
+                .eq("channel", "sms")
+                .eq("manual_takeover", True)
+                .execute()
+                .data
+                or []
+            )
+        )
+    except Exception:
+        return 0
 
 
 def build_frontdesk_analytics(clinic_id: str) -> dict[str, Any]:
@@ -2454,84 +3131,35 @@ def build_frontdesk_analytics(clinic_id: str) -> dict[str, Any]:
     follow_up_tasks = _load_follow_up_tasks(clinic_id, include_completed=True)
     communication_events = _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
 
-    user_hours = Counter()
     conversation_ids = [conversation["id"] for conversation in conversations]
-    if conversation_ids:
-        messages = (
-            db.table("conversation_messages")
-            .select("conversation_id, role, created_at")
-            .in_("conversation_id", conversation_ids)
-            .eq("role", "user")
-            .execute()
-            .data
-            or []
-        )
-        for message in messages:
-            created_at = _parse_datetime(message.get("created_at"))
-            if created_at is None:
-                continue
-            user_hours[created_at.hour] += 1
-
-    busiest_contact_hours = [
-        {
-            "hour": hour,
-            "label": datetime(2024, 1, 1, hour, 0).strftime("%-I %p"),
-            "count": count,
-        }
-        for hour, count in user_hours.most_common(4)
-    ]
+    user_hours = _count_user_contact_hours(db, conversation_ids)
+    busiest_contact_hours = _build_busiest_hours(user_hours)
 
     conversations_total = len(conversations)
     leads_created = len(leads)
     booked_requests = sum(1 for lead in leads if lead.get("status") == "booked")
-    resolved_conversations = 0
-    for conversation in conversations:
-        lead = next((lead for lead in leads if lead["id"] == conversation.get("lead_id")), None)
-        if lead and lead.get("status") in {"booked", "closed"}:
-            resolved_conversations += 1
-        elif conversation.get("last_intent") == "booking_complete":
-            resolved_conversations += 1
+    leads_by_id = {lead["id"]: lead for lead in leads}
+    resolved_conversations = _count_resolved_conversations(conversations, leads_by_id)
 
     captured_conversations = sum(1 for conversation in conversations if conversation.get("lead_id"))
     lead_capture_rate = round((captured_conversations / conversations_total) * 100, 1) if conversations_total else 0.0
     ai_resolution_estimate = round((resolved_conversations / conversations_total) * 100, 1) if conversations_total else 0.0
     recovered_tasks = [task for task in follow_up_tasks if task.get("status") == "completed"]
-    leads_by_id = {lead["id"]: lead for lead in leads}
     inbound_sms_events = [
         event
         for event in communication_events
         if _safe_text(event.get("direction")) == "inbound" and _normalize_channel(event.get("channel"), "") == "sms"
     ]
-    try:
-        manual_takeover_threads = sum(
-            1
-            for conversation in (
-                db.table("conversations")
-                .select("id")
-                .eq("clinic_id", clinic_id)
-                .eq("channel", "sms")
-                .eq("manual_takeover", True)
-                .execute()
-                .data
-                or []
-            )
-        )
-    except Exception:
-        manual_takeover_threads = 0
+    
+    manual_takeover_threads = _get_manual_takeover_threads_count(db, clinic_id)
     estimated_value_recovered_cents = sum(
         int(leads_by_id[task["lead_id"]].get("deposit_amount_cents") or 0)
         for task in recovered_tasks
         if task.get("lead_id") in leads_by_id
     )
-    deposits_requested_count = sum(1 for lead in leads if _normalize_deposit_status(lead.get("deposit_status")) == "requested")
-    deposits_paid_count = sum(1 for lead in leads if _normalize_deposit_status(lead.get("deposit_status")) == "paid")
-    appointments_waiting_on_deposit_count = sum(
-        1
-        for lead in leads
-        if bool(lead.get("deposit_required"))
-        and _safe_text(lead.get("appointment_status")) == "confirmed"
-        and _normalize_deposit_status(lead.get("deposit_status")) not in {"paid", "waived", "not_required"}
-    )
+    
+    sms_stats = _count_sms_statistics(inbound_sms_events)
+    deposit_stats = _count_deposit_statistics(leads)
 
     return {
         "conversations_total": conversations_total,
@@ -2546,73 +3174,30 @@ def build_frontdesk_analytics(clinic_id: str) -> dict[str, Any]:
         "lead_capture_rate": lead_capture_rate,
         "ai_resolution_estimate": ai_resolution_estimate,
         "ai_resolution_estimate_label": "Estimate based on conversations that reached booking completion or ended in a booked/closed request.",
-        "ai_auto_handled_count": sum(
-            1
-            for event in inbound_sms_events
-            if _normalize_sms_ai_confidence(event.get("ai_confidence")) == "high"
-            and _safe_text(event.get("auto_reply_status")) in {"sent", "delivered"}
-        ),
-        "human_review_required_count": sum(1 for event in inbound_sms_events if event.get("operator_review_required")),
+        "ai_auto_handled_count": sms_stats["ai_auto_handled_count"],
+        "human_review_required_count": sms_stats["human_review_required_count"],
         "manual_takeover_threads": manual_takeover_threads,
-        "suggested_replies_sent_count": sum(
-            1
-            for event in inbound_sms_events
-            if _normalize_suggested_reply_status(event.get("suggested_reply_status")) in {"sent", "edited_sent"}
-        ),
-        "blocked_for_review_count": sum(
-            1
-            for event in inbound_sms_events
-            if _normalize_sms_ai_confidence(event.get("ai_confidence")) == "blocked"
-            and _safe_text(event.get("ai_decision_reason")) in {"risky_content", "unsupported_question"}
-        ),
-        "deposits_requested_count": deposits_requested_count,
-        "deposits_paid_count": deposits_paid_count,
-        "appointments_waiting_on_deposit_count": appointments_waiting_on_deposit_count,
+        "suggested_replies_sent_count": sms_stats["suggested_replies_sent_count"],
+        "blocked_for_review_count": sms_stats["blocked_for_review_count"],
+        "deposits_requested_count": deposit_stats["deposits_requested_count"],
+        "deposits_paid_count": deposit_stats["deposits_paid_count"],
+        "appointments_waiting_on_deposit_count": deposit_stats["appointments_waiting_on_deposit_count"],
         "busiest_contact_hours": busiest_contact_hours,
     }
 
 
-def build_training_overview(clinic_id: str) -> dict[str, Any]:
-    db = get_supabase()
-    clinic = _maybe_single_data(
-        db.table("clinics")
-        .select("*")
-        .eq("id", clinic_id)
-    )
-    if not clinic:
-        return {
-            "clinic_name": "",
-            "assistant_name": "",
-            "knowledge_score": 0,
-            "knowledge_status": "not_configured",
-            "readiness_items": [],
-            "knowledge_gaps": [],
-            "custom_sources": [],
-        }
-
+def _build_training_readiness_items(
+    clinic: dict[str, Any],
+    custom_sources: list[dict[str, Any]],
+    doc_stats: dict[str, Any],
+) -> list[dict[str, Any]]:
     services = _to_json_list(clinic.get("services"))
     faq = _to_json_list(clinic.get("faq"))
     hours = _to_json_dict(clinic.get("business_hours"))
-    try:
-        custom_sources = (
-            db.table("knowledge_sources")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .order("updated_at", desc=True)
-            .execute()
-            .data
-            or []
-        )
-    except Exception:
-        custom_sources = []
+    greeting = (clinic.get("greeting_message") or "").strip()
+    fallback = (clinic.get("fallback_message") or "").strip()
 
-    try:
-        from app.services.knowledge_service import get_document_stats
-        doc_stats = get_document_stats(clinic_id)
-    except Exception:
-        doc_stats = {"documents": [], "document_count": 0, "ready_count": 0, "processing_count": 0, "failed_count": 0, "total_chunks": 0}
-
-    readiness_items = [
+    return [
         {
             "key": "services",
             "label": "Services and pricing",
@@ -2634,8 +3219,8 @@ def build_training_overview(clinic_id: str) -> dict[str, Any]:
         {
             "key": "assistant_messages",
             "label": "Assistant tone and fallback",
-            "configured": bool((clinic.get("greeting_message") or "").strip()) and bool((clinic.get("fallback_message") or "").strip()),
-            "detail": "Greeting and fallback messages set" if (clinic.get("greeting_message") or "").strip() and (clinic.get("fallback_message") or "").strip() else "Greeting or fallback message still missing",
+            "configured": bool(greeting and fallback),
+            "detail": "Greeting and fallback messages set" if greeting and fallback else "Greeting or fallback message still missing",
         },
         {
             "key": "manual_sources",
@@ -2651,16 +3236,57 @@ def build_training_overview(clinic_id: str) -> dict[str, Any]:
         },
     ]
 
+
+def _determine_knowledge_status(knowledge_score: int) -> str:
+    if knowledge_score >= 80:
+        return "strong"
+    if knowledge_score >= 50:
+        return "partial"
+    return "needs_setup"
+
+
+def build_training_overview(clinic_id: str) -> dict[str, Any]:
+    db = get_supabase()
+    clinic = _maybe_single_data(
+        db.table("clinics")
+        .select("*")
+        .eq("id", clinic_id)
+    )
+    if not clinic:
+        return {
+            "clinic_name": "",
+            "assistant_name": "",
+            "knowledge_score": 0,
+            "knowledge_status": "not_configured",
+            "readiness_items": [],
+            "knowledge_gaps": [],
+            "custom_sources": [],
+        }
+
+    try:
+        custom_sources = (
+            db.table("knowledge_sources")
+            .select("*")
+            .eq("clinic_id", clinic_id)
+            .order("updated_at", desc=True)
+            .execute()
+            .data
+            or []
+        )
+    except Exception:
+        custom_sources = []
+
+    try:
+        from app.services.knowledge_service import get_document_stats
+        doc_stats = get_document_stats(clinic_id)
+    except Exception:
+        doc_stats = {"documents": [], "document_count": 0, "ready_count": 0, "processing_count": 0, "failed_count": 0, "total_chunks": 0}
+
+    readiness_items = _build_training_readiness_items(clinic, custom_sources, doc_stats)
     configured_count = sum(1 for item in readiness_items if item["configured"])
     knowledge_score = round((configured_count / len(readiness_items)) * 100) if readiness_items else 0
+    knowledge_status = _determine_knowledge_status(knowledge_score)
     knowledge_gaps = [item["label"] for item in readiness_items if not item["configured"]]
-
-    if knowledge_score >= 80:
-        knowledge_status = "strong"
-    elif knowledge_score >= 50:
-        knowledge_status = "partial"
-    else:
-        knowledge_status = "needs_setup"
 
     return {
         "clinic_name": clinic.get("name", ""),
@@ -2698,7 +3324,7 @@ def create_knowledge_source(clinic_id: str, title: str, content: str) -> dict[st
             .execute()
         )
     except Exception as exc:
-        raise RuntimeError("Knowledge sources are not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_KNOWLEDGE_SOURCES_MIGRATION_MSG) from exc
     return result.data[0]
 
 
@@ -2721,7 +3347,7 @@ def update_knowledge_source(clinic_id: str, source_id: str, updates: dict[str, A
             .execute()
         )
     except Exception as exc:
-        raise RuntimeError("Knowledge sources are not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_KNOWLEDGE_SOURCES_MIGRATION_MSG) from exc
     return result.data[0] if result.data else None
 
 
@@ -2736,7 +3362,7 @@ def delete_knowledge_source(clinic_id: str, source_id: str) -> bool:
             .execute()
         )
     except Exception as exc:
-        raise RuntimeError("Knowledge sources are not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_KNOWLEDGE_SOURCES_MIGRATION_MSG) from exc
     return bool(result.data)
 
 
@@ -2831,34 +3457,15 @@ def build_reminder_previews(clinic_id: str) -> list[dict[str, Any]]:
     return previews
 
 
-def _communication_event_payload(
-    *,
-    clinic_id: str,
-    thread_key: str,
-    channel: str,
-    direction: str,
-    event_type: str,
-    status: str,
-    customer_name: str,
-    customer_phone: str,
-    customer_email: str,
-    summary: str,
-    content: str,
-    customer_key: Optional[str] = None,
-    lead_id: Optional[str] = None,
-    conversation_id: Optional[str] = None,
-    waitlist_entry_id: Optional[str] = None,
-    follow_up_task_id: Optional[str] = None,
-    provider: str = "",
-    external_id: str = "",
-    provider_message_id: str = "",
-    failure_reason: str = "",
-    skipped_reason: str = "",
-    payload: Optional[dict[str, Any]] = None,
-    occurred_at: Optional[datetime] = None,
-    sent_at: Optional[datetime] = None,
-    delivered_at: Optional[datetime] = None,
-) -> dict[str, Any]:
+def _communication_event_payload(event_data: dict[str, Any]) -> dict[str, Any]:
+    clinic_id = event_data.get("clinic_id", "")
+    channel = event_data.get("channel", "manual")
+    customer_name = event_data.get("customer_name", "")
+    customer_phone = event_data.get("customer_phone", "")
+    customer_email = event_data.get("customer_email", "")
+    customer_key = event_data.get("customer_key")
+    occurred_at = event_data.get("occurred_at")
+    
     timestamp = occurred_at or _current_timestamp()
     resolved_customer_key = customer_key or _customer_key_from_fields(
         customer_name,
@@ -2868,30 +3475,30 @@ def _communication_event_payload(
     )
     return {
         "clinic_id": clinic_id,
-        "thread_key": thread_key,
+        "thread_key": event_data.get("thread_key", ""),
         "channel": channel,
-        "direction": direction,
-        "event_type": event_type,
-        "status": status,
+        "direction": event_data.get("direction", "inbound"),
+        "event_type": event_data.get("event_type", "message"),
+        "status": event_data.get("status", "new"),
         "customer_key": resolved_customer_key,
-        "customer_name": _safe_text(customer_name) or "Unknown customer",
+        "customer_name": _safe_text(customer_name) or _UNKNOWN_CUSTOMER,
         "customer_phone": _safe_text(customer_phone),
         "customer_email": _safe_text(customer_email),
-        "summary": _safe_text(summary),
-        "content": _safe_text(content),
-        "lead_id": lead_id,
-        "conversation_id": conversation_id,
-        "waitlist_entry_id": waitlist_entry_id,
-        "follow_up_task_id": follow_up_task_id,
-        "provider": provider,
-        "external_id": external_id,
-        "provider_message_id": provider_message_id,
-        "failure_reason": failure_reason,
-        "skipped_reason": skipped_reason,
-        "payload": payload or {},
+        "summary": _safe_text(event_data.get("summary", "")),
+        "content": _safe_text(event_data.get("content", "")),
+        "lead_id": event_data.get("lead_id"),
+        "conversation_id": event_data.get("conversation_id"),
+        "waitlist_entry_id": event_data.get("waitlist_entry_id"),
+        "follow_up_task_id": event_data.get("follow_up_task_id"),
+        "provider": event_data.get("provider", ""),
+        "external_id": event_data.get("external_id", ""),
+        "provider_message_id": event_data.get("provider_message_id", ""),
+        "failure_reason": event_data.get("failure_reason", ""),
+        "skipped_reason": event_data.get("skipped_reason", ""),
+        "payload": event_data.get("payload") or {},
         "occurred_at": timestamp,
-        "sent_at": sent_at,
-        "delivered_at": delivered_at,
+        "sent_at": event_data.get("sent_at"),
+        "delivered_at": event_data.get("delivered_at"),
     }
 
 
@@ -2911,7 +3518,7 @@ def _find_inbound_sms_clinic(to_phone: str) -> str:
             or []
         )
     except Exception as exc:
-        raise RuntimeError("Channel readiness is not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_CHANNEL_READINESS_MIGRATION_MSG) from exc
 
     exact_matches = [
         row
@@ -2967,39 +3574,30 @@ def _upsert_inbound_reply_state(
         )
 
 
-async def _run_sms_auto_reply(
+def _update_inbound_sms_review_state(
     clinic_id: str,
+    inbound_event: dict[str, Any],
     *,
+    lead_id: Optional[str] = None,
+    **state_kwargs: Any,
+) -> None:
+    updates: dict[str, Any] = {
+        "payload": _update_sms_review_state(inbound_event, **state_kwargs),
+    }
+    if lead_id is not None:
+        updates["lead_id"] = lead_id
+    _update_communication_event_record(clinic_id, inbound_event["id"], updates)
+
+
+async def _generate_sms_auto_reply_result(
+    clinic_id: str,
+    clinic: dict[str, Any],
     conversation: dict[str, Any],
     inbound_event: dict[str, Any],
     user_message: str,
 ) -> Optional[dict[str, Any]]:
-    clinic = _load_clinic_record(clinic_id)
-    reason_code, blocked_reason = _sms_auto_reply_block_reason(clinic, conversation, user_message)
-    if blocked_reason:
-        persist_user_message(get_supabase(), conversation["id"], user_message)
-        _update_communication_event_record(
-            clinic_id,
-            inbound_event["id"],
-            {
-                "payload": _update_sms_review_state(
-                    inbound_event,
-                    confidence="blocked",
-                    reason_code=reason_code,
-                    auto_reply_status="blocked",
-                    auto_reply_reason=blocked_reason,
-                    suggested_reply_text="",
-                    suggested_reply_status="",
-                    suggested_reply_sent_event_id="",
-                    pending_next_state="",
-                    pending_booking_data={},
-                ),
-            },
-        )
-        return None
-
     try:
-        result = await process_conversation_turn(
+        return await process_conversation_turn(
             get_supabase(),
             clinic,
             conversation,
@@ -3011,80 +3609,57 @@ async def _run_sms_auto_reply(
         )
     except Exception as exc:
         logger.warning("SMS auto-reply generation failed for clinic %s thread %s: %s", clinic_id, conversation.get("id"), exc)
-        _update_communication_event_record(
+        _update_inbound_sms_review_state(
             clinic_id,
-            inbound_event["id"],
-            {
-                "payload": _update_sms_review_state(
-                    inbound_event,
-                    confidence="blocked",
-                    reason_code="ai_generation_failed",
-                    auto_reply_status="failed",
-                    auto_reply_reason=_sms_decision_message("ai_generation_failed"),
-                    suggested_reply_text="",
-                    suggested_reply_status="",
-                    suggested_reply_sent_event_id="",
-                    pending_next_state="",
-                    pending_booking_data={},
-                ),
-            },
-        )
-        return None
-    reply_text = _safe_text(result.get("reply"))
-    if not reply_text:
-        _update_communication_event_record(
-            clinic_id,
-            inbound_event["id"],
-            {
-                "payload": _update_sms_review_state(
-                    inbound_event,
-                    confidence="blocked",
-                    reason_code="assistant_empty",
-                    auto_reply_status="blocked",
-                    auto_reply_reason=_sms_decision_message("assistant_empty"),
-                    suggested_reply_text="",
-                    suggested_reply_status="",
-                    suggested_reply_sent_event_id="",
-                    pending_next_state="",
-                    pending_booking_data={},
-                ),
-            },
+            inbound_event,
+            confidence="blocked",
+            reason_code="ai_generation_failed",
+            auto_reply_status="failed",
+            auto_reply_reason=_sms_decision_message("ai_generation_failed"),
+            suggested_reply_text="",
+            suggested_reply_status="",
+            suggested_reply_sent_event_id="",
+            pending_next_state="",
+            pending_booking_data={},
         )
         return None
 
-    confidence, confidence_reason = _assess_sms_reply_confidence(
-        clinic,
-        conversation,
-        user_message,
-        reply_text,
-        result,
+
+def _queue_sms_suggested_reply_for_review(
+    clinic_id: str,
+    inbound_event: dict[str, Any],
+    reply_text: str,
+    confidence: str,
+    confidence_reason: str,
+    next_state: str,
+    booking_data: dict[str, Any],
+) -> None:
+    _update_inbound_sms_review_state(
+        clinic_id,
+        inbound_event,
+        confidence=confidence,
+        reason_code=confidence_reason,
+        auto_reply_status="needs_review",
+        auto_reply_reason=_sms_decision_message(confidence_reason),
+        suggested_reply_text=reply_text,
+        suggested_reply_status="pending",
+        suggested_reply_sent_event_id="",
+        pending_next_state=next_state,
+        pending_booking_data=booking_data,
     )
-    next_state = _safe_text(result.get("intent"))
-    booking_data = result.get("booking_data") or {}
 
-    if confidence != "high":
-        _update_communication_event_record(
-            clinic_id,
-            inbound_event["id"],
-            {
-                "payload": _update_sms_review_state(
-                    inbound_event,
-                    confidence=confidence,
-                    reason_code=confidence_reason,
-                    auto_reply_status="needs_review",
-                    auto_reply_reason=_sms_decision_message(confidence_reason),
-                    suggested_reply_text=reply_text,
-                    suggested_reply_status="pending",
-                    suggested_reply_sent_event_id="",
-                    pending_next_state=next_state,
-                    pending_booking_data=booking_data,
-                ),
-            },
-        )
-        return None
 
+def _send_sms_auto_reply_event(
+    clinic_id: str,
+    conversation: dict[str, Any],
+    inbound_event: dict[str, Any],
+    result: dict[str, Any],
+    reply_text: str,
+    next_state: str,
+    booking_data: dict[str, Any],
+) -> Optional[dict[str, Any]]:
     try:
-        outbound_event = send_outbound_sms(
+        return send_outbound_sms(
             clinic_id,
             customer_name=_safe_text(inbound_event.get("customer_name")),
             customer_phone=_safe_text(inbound_event.get("customer_phone")),
@@ -3102,50 +3677,151 @@ async def _run_sms_auto_reply(
         )
     except Exception as exc:
         logger.warning("SMS auto-reply send failed for clinic %s thread %s: %s", clinic_id, conversation.get("id"), exc)
-        _update_communication_event_record(
+        _update_inbound_sms_review_state(
             clinic_id,
-            inbound_event["id"],
-            {
-                "lead_id": result.get("lead_id") or inbound_event.get("lead_id"),
-                "payload": _update_sms_review_state(
-                    inbound_event,
-                    confidence="high",
-                    reason_code="safe_to_send",
-                    auto_reply_status="failed",
-                    auto_reply_reason="The assistant reply could not be sent.",
-                    suggested_reply_text=reply_text,
-                    suggested_reply_status="pending",
-                    suggested_reply_sent_event_id="",
-                    pending_next_state=next_state,
-                    pending_booking_data=booking_data,
-                ),
-            },
+            inbound_event,
+            lead_id=result.get("lead_id") or inbound_event.get("lead_id"),
+            confidence="high",
+            reason_code="safe_to_send",
+            auto_reply_status="failed",
+            auto_reply_reason="The assistant reply could not be sent.",
+            suggested_reply_text=reply_text,
+            suggested_reply_status="pending",
+            suggested_reply_sent_event_id="",
+            pending_next_state=next_state,
+            pending_booking_data=booking_data,
         )
         return None
+
+
+def _finalize_sms_auto_reply(
+    clinic_id: str,
+    conversation: dict[str, Any],
+    inbound_event: dict[str, Any],
+    result: dict[str, Any],
+    outbound_event: dict[str, Any],
+    reply_text: str,
+    next_state: str,
+    booking_data: dict[str, Any],
+) -> dict[str, Any]:
     status = _safe_text(outbound_event.get("status")) or "failed"
     reason = _safe_text(outbound_event.get("failure_reason")) or _safe_text(outbound_event.get("skipped_reason"))
-    if status in {"sent", "delivered"}:
+    success = status in {"sent", "delivered"}
+    if success:
         _apply_sms_conversation_progress(conversation["id"], next_state, booking_data)
-    _update_communication_event_record(
+    _update_inbound_sms_review_state(
         clinic_id,
-        inbound_event["id"],
-        {
-            "lead_id": result.get("lead_id") or inbound_event.get("lead_id"),
-            "payload": _update_sms_review_state(
-                inbound_event,
-                confidence="high",
-                reason_code="safe_to_send",
-                auto_reply_status=status if status in {"sent", "delivered"} else "failed",
-                auto_reply_reason=reason or _sms_decision_message("safe_to_send"),
-                suggested_reply_text="" if status in {"sent", "delivered"} else reply_text,
-                suggested_reply_status="" if status in {"sent", "delivered"} else "pending",
-                suggested_reply_sent_event_id=_safe_text(outbound_event.get("id")) if status in {"sent", "delivered"} else "",
-                pending_next_state="" if status in {"sent", "delivered"} else next_state,
-                pending_booking_data={} if status in {"sent", "delivered"} else booking_data,
-            ),
-        },
+        inbound_event,
+        lead_id=result.get("lead_id") or inbound_event.get("lead_id"),
+        confidence="high",
+        reason_code="safe_to_send",
+        auto_reply_status=status if success else "failed",
+        auto_reply_reason=reason or _sms_decision_message("safe_to_send"),
+        suggested_reply_text="" if success else reply_text,
+        suggested_reply_status="" if success else "pending",
+        suggested_reply_sent_event_id=_safe_text(outbound_event.get("id")) if success else "",
+        pending_next_state="" if success else next_state,
+        pending_booking_data={} if success else booking_data,
     )
     return outbound_event
+
+
+async def _run_sms_auto_reply(
+    clinic_id: str,
+    *,
+    conversation: dict[str, Any],
+    inbound_event: dict[str, Any],
+    user_message: str,
+) -> Optional[dict[str, Any]]:
+    clinic = _load_clinic_record(clinic_id)
+    reason_code, blocked_reason = _sms_auto_reply_block_reason(clinic, conversation, user_message)
+    if blocked_reason:
+        persist_user_message(get_supabase(), conversation["id"], user_message)
+        _update_inbound_sms_review_state(
+            clinic_id,
+            inbound_event,
+            confidence="blocked",
+            reason_code=reason_code,
+            auto_reply_status="blocked",
+            auto_reply_reason=blocked_reason,
+            suggested_reply_text="",
+            suggested_reply_status="",
+            suggested_reply_sent_event_id="",
+            pending_next_state="",
+            pending_booking_data={},
+        )
+        return None
+
+    result = await _generate_sms_auto_reply_result(
+        clinic_id,
+        clinic,
+        conversation,
+        inbound_event,
+        user_message,
+    )
+    if not result:
+        return None
+
+    reply_text = _safe_text(result.get("reply"))
+    if not reply_text:
+        _update_inbound_sms_review_state(
+            clinic_id,
+            inbound_event,
+            confidence="blocked",
+            reason_code="assistant_empty",
+            auto_reply_status="blocked",
+            auto_reply_reason=_sms_decision_message("assistant_empty"),
+            suggested_reply_text="",
+            suggested_reply_status="",
+            suggested_reply_sent_event_id="",
+            pending_next_state="",
+            pending_booking_data={},
+        )
+        return None
+
+    confidence, confidence_reason = _assess_sms_reply_confidence(
+        clinic,
+        conversation,
+        user_message,
+        reply_text,
+        result,
+    )
+    next_state = _safe_text(result.get("intent"))
+    booking_data = result.get("booking_data") or {}
+
+    if confidence != "high":
+        _queue_sms_suggested_reply_for_review(
+            clinic_id,
+            inbound_event,
+            reply_text,
+            confidence,
+            confidence_reason,
+            next_state,
+            booking_data,
+        )
+        return None
+
+    outbound_event = _send_sms_auto_reply_event(
+        clinic_id,
+        conversation,
+        inbound_event,
+        result,
+        reply_text,
+        next_state,
+        booking_data,
+    )
+    if not outbound_event:
+        return None
+    return _finalize_sms_auto_reply(
+        clinic_id,
+        conversation,
+        inbound_event,
+        result,
+        outbound_event,
+        reply_text,
+        next_state,
+        booking_data,
+    )
 
 
 async def process_inbound_twilio_sms(
@@ -3187,36 +3863,37 @@ async def process_inbound_twilio_sms(
     context["conversation_id"] = conversation["id"]
     summary = _truncate(payload["body"], 120) or "Inbound SMS received"
     event = _create_communication_event_record(
-        clinic_id,
         _communication_event_payload(
-            clinic_id=clinic_id,
-            thread_key=context["thread_key"],
-            channel="sms",
-            direction="inbound",
-            event_type="message",
-            status="new",
-            customer_key=context["customer_key"],
-            customer_name=context["customer_name"],
-            customer_phone=context["customer_phone"],
-            customer_email=context["customer_email"],
-            summary=summary,
-            content=payload["body"],
-            lead_id=context["lead_id"],
-            conversation_id=context["conversation_id"],
-            provider="twilio",
-            external_id=payload["message_sid"],
-            provider_message_id=payload["message_sid"],
-            payload={
-                "account_sid": payload["account_sid"],
-                "messaging_service_sid": payload["messaging_service_sid"],
-                "to_phone": payload["to_phone"],
-                "signature_verified": signature_verified,
-                "from_city": payload["from_city"],
-                "from_state": payload["from_state"],
-                "from_country": payload["from_country"],
-                "sender_kind": "patient",
-            },
-            occurred_at=_current_timestamp(),
+            {
+                "clinic_id": clinic_id,
+                "thread_key": context["thread_key"],
+                "channel": "sms",
+                "direction": "inbound",
+                "event_type": "message",
+                "status": "new",
+                "customer_key": context["customer_key"],
+                "customer_name": context["customer_name"],
+                "customer_phone": context["customer_phone"],
+                "customer_email": context["customer_email"],
+                "summary": summary,
+                "content": payload["body"],
+                "lead_id": context["lead_id"],
+                "conversation_id": context["conversation_id"],
+                "provider": "twilio",
+                "external_id": payload["message_sid"],
+                "provider_message_id": payload["message_sid"],
+                "payload": {
+                    "account_sid": payload["account_sid"],
+                    "messaging_service_sid": payload["messaging_service_sid"],
+                    "to_phone": payload["to_phone"],
+                    "signature_verified": signature_verified,
+                    "from_city": payload["from_city"],
+                    "from_state": payload["from_state"],
+                    "from_country": payload["from_country"],
+                    "sender_kind": "patient",
+                },
+                "occurred_at": _current_timestamp(),
+            }
         ),
     )
     _upsert_inbound_reply_state(
@@ -3234,41 +3911,47 @@ async def process_inbound_twilio_sms(
     return event
 
 
-def send_outbound_sms(
-    clinic_id: str,
-    *,
-    customer_name: str,
-    customer_phone: str,
-    customer_email: str = "",
-    body: str,
-    summary: str,
-    lead_id: Optional[str] = None,
-    conversation_id: Optional[str] = None,
-    follow_up_task_id: Optional[str] = None,
-    source_event_id: Optional[str] = None,
-    event_type: str = "message",
-    require_automation: bool = False,
-    automation_channel: str = "sms",
-    sender_kind: str = "staff",
-    persist_thread_message: bool = True,
-    enqueue_retry_on_failure: bool = True,
-) -> dict[str, Any]:
+def _normalize_outbound_sms_request(
+    message: Optional[OutboundSmsRequest],
+    legacy_kwargs: dict[str, Any],
+) -> OutboundSmsRequest:
+    request: OutboundSmsRequest = dict(message or {})
+    request.update(legacy_kwargs)
+    request["customer_name"] = _safe_text(request.get("customer_name"))
+    request["customer_phone"] = _safe_text(request.get("customer_phone"))
+    request["customer_email"] = _safe_text(request.get("customer_email"))
+    request["body"] = _safe_text(request.get("body"))
+    request["summary"] = _safe_text(request.get("summary"))
+    event_type = _safe_text(request.get("event_type")) or "message"
     if event_type not in COMMUNICATION_EVENT_TYPES:
         raise ValueError("Invalid communication event type.")
+    request["event_type"] = event_type
+    sender_kind = _safe_text(request.get("sender_kind")) or "staff"
+    request["sender_kind"] = sender_kind if sender_kind in MESSAGE_SENDER_KINDS else "staff"
+    request["automation_channel"] = _safe_text(request.get("automation_channel")) or "sms"
+    request["require_automation"] = bool(request.get("require_automation"))
+    request["persist_thread_message"] = bool(request.get("persist_thread_message", True))
+    request["enqueue_retry_on_failure"] = bool(request.get("enqueue_retry_on_failure", True))
+    return request
 
+
+def _prepare_outbound_sms_event(
+    clinic_id: str,
+    request: OutboundSmsRequest,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     context = _resolve_sms_thread_context(
         clinic_id,
-        customer_name=customer_name,
-        customer_phone=customer_phone,
-        customer_email=customer_email,
-        lead_id=lead_id,
-        conversation_id=conversation_id,
-        source_event_id=source_event_id,
+        customer_name=request["customer_name"],
+        customer_phone=request["customer_phone"],
+        customer_email=request["customer_email"],
+        lead_id=request.get("lead_id"),
+        conversation_id=request.get("conversation_id"),
+        source_event_id=request.get("source_event_id"),
     )
-    payload = {
-        "source_event_id": _safe_text(source_event_id),
-        "message_kind": event_type,
-        "sender_kind": sender_kind if sender_kind in MESSAGE_SENDER_KINDS else "staff",
+    metadata = {
+        "source_event_id": _safe_text(request.get("source_event_id")),
+        "message_kind": request["event_type"],
+        "sender_kind": request["sender_kind"],
     }
     conversation = _ensure_sms_thread_conversation(
         clinic_id,
@@ -3277,38 +3960,43 @@ def send_outbound_sms(
         conversation_id=context["conversation_id"],
     )
     context["conversation_id"] = conversation["id"]
-    can_send, blocked_reason = _sms_can_send(
-        clinic_id,
-        require_automation=require_automation,
-        channel=automation_channel,
-    )
     base_event = _communication_event_payload(
-        clinic_id=clinic_id,
-        thread_key=context["thread_key"],
-        channel="sms",
-        direction="outbound",
-        event_type=event_type,
-        status="queued",
-        customer_key=context["customer_key"],
-        customer_name=context["customer_name"],
-        customer_phone=context["customer_phone"],
-        customer_email=context["customer_email"],
-        summary=summary,
-        content=body,
-        lead_id=context["lead_id"],
-        conversation_id=context["conversation_id"],
-        follow_up_task_id=follow_up_task_id,
-        provider="twilio",
-        payload=payload,
+        {
+            "clinic_id": clinic_id,
+            "thread_key": context["thread_key"],
+            "channel": "sms",
+            "direction": "outbound",
+            "event_type": request["event_type"],
+            "status": "queued",
+            "customer_key": context["customer_key"],
+            "customer_name": context["customer_name"],
+            "customer_phone": context["customer_phone"],
+            "customer_email": context["customer_email"],
+            "summary": request["summary"],
+            "content": request["body"],
+            "lead_id": context["lead_id"],
+            "conversation_id": context["conversation_id"],
+            "follow_up_task_id": request.get("follow_up_task_id"),
+            "provider": "twilio",
+            "payload": metadata,
+        }
     )
+    return context, base_event
 
-    if not can_send:
-        base_event["status"] = "skipped"
-        base_event["skipped_reason"] = blocked_reason
-        return _create_communication_event_record(clinic_id, base_event)
 
-    queued_event = _create_communication_event_record(clinic_id, base_event)
-    result = send_sms_message(context["customer_phone"], body)
+def _record_skipped_outbound_sms(base_event: dict[str, Any], blocked_reason: str) -> dict[str, Any]:
+    base_event["status"] = "skipped"
+    base_event["skipped_reason"] = blocked_reason
+    return _create_communication_event_record(base_event)
+
+
+def _deliver_outbound_sms(
+    clinic_id: str,
+    queued_event: dict[str, Any],
+    customer_phone: str,
+    body: str,
+) -> dict[str, Any]:
+    result = send_sms_message(customer_phone, body)
     occurred_at = _current_timestamp()
     updated = _update_communication_event_record(
         clinic_id,
@@ -3331,6 +4019,14 @@ def send_outbound_sms(
     )
     if not updated:
         raise RuntimeError("Communication event could not be updated after sending.")
+    return updated
+
+
+def _log_outbound_sms_result(
+    clinic_id: str,
+    updated: dict[str, Any],
+    context: dict[str, Any],
+) -> None:
     logger.info(
         "sms_send_result clinic_id=%s event_id=%s status=%s lead_id=%s conversation_id=%s",
         clinic_id,
@@ -3339,82 +4035,154 @@ def send_outbound_sms(
         context.get("lead_id") or "",
         context.get("conversation_id") or "",
     )
-    if enqueue_retry_on_failure and _safe_text(updated.get("status")) == "failed":
-        try:
-            from app.services.background_jobs import enqueue_background_job
 
-            enqueue_background_job(
-                clinic_id,
-                "retry_communication_event",
-                {"event_id": updated["id"]},
-                available_at=datetime.now(timezone.utc) + timedelta(minutes=10),
-                max_attempts=3,
-            )
-        except Exception as exc:
-            logger.error(
-                "retry_job_enqueue_failed clinic_id=%s event_id=%s error=%s",
-                clinic_id,
-                updated.get("id"),
-                exc,
-            )
-    source_event = None
-    source_event_id = _safe_text(source_event_id)
-    if source_event_id:
-        source_event = _maybe_single_data(
-            get_supabase()
-            .table("communication_events")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .eq("id", source_event_id)
+
+def _enqueue_outbound_sms_retry(
+    clinic_id: str,
+    updated: dict[str, Any],
+    should_enqueue: bool,
+) -> None:
+    if not (should_enqueue and _safe_text(updated.get("status")) == "failed"):
+        return
+    try:
+        from app.services.background_jobs import enqueue_background_job
+
+        enqueue_background_job(
+            clinic_id,
+            "retry_communication_event",
+            {"event_id": updated["id"]},
+            available_at=datetime.now(timezone.utc) + timedelta(minutes=10),
+            max_attempts=3,
         )
-        if source_event:
-            source_event = _normalize_communication_event_row(source_event)
-            if (
-                _normalize_channel(source_event.get("channel"), "") == "sms"
-                and _safe_text(source_event.get("direction")) == "inbound"
-                and _normalize_suggested_reply_status(source_event.get("suggested_reply_status")) == "pending"
-            ):
-                success = _safe_text(updated.get("status")) in {"sent", "delivered"}
-                _update_communication_event_record(
-                    clinic_id,
-                    source_event_id,
-                    {
-                        "payload": _update_sms_review_state(
-                            source_event,
-                            confidence=source_event.get("ai_confidence") or "medium",
-                            reason_code=source_event.get("ai_decision_reason") or "low_confidence",
-                            auto_reply_status=_safe_text(updated.get("status")) or "failed",
-                            auto_reply_reason=_safe_text(updated.get("failure_reason"))
-                            or _safe_text(updated.get("skipped_reason"))
-                            or ("Reply sent by staff." if sender_kind == "staff" else "Reply sent."),
-                            suggested_reply_status=("edited_sent" if sender_kind == "staff" else "sent") if success else "pending",
-                            suggested_reply_sent_event_id=_safe_text(updated.get("id")) if success else "",
-                            pending_next_state="" if success else _payload_field(source_event, "pending_next_state"),
-                            pending_booking_data={} if success else _to_json_dict(_to_json_dict(source_event.get("payload")).get("pending_booking_data")),
-                        ),
-                    },
-                )
-                if success and source_event.get("conversation_id"):
-                    _apply_sms_conversation_progress(
-                        source_event["conversation_id"],
-                        _payload_field(source_event, "pending_next_state"),
-                        _to_json_dict(_to_json_dict(source_event.get("payload")).get("pending_booking_data")),
-                    )
-    if (
-        persist_thread_message
+    except Exception as exc:
+        logger.error(
+            "retry_job_enqueue_failed clinic_id=%s event_id=%s error=%s",
+            clinic_id,
+            updated.get("id"),
+            exc,
+        )
+
+
+def _load_sms_source_event(clinic_id: str, source_event_id: str) -> Optional[dict[str, Any]]:
+    if not source_event_id:
+        return None
+    source_event = _maybe_single_data(
+        get_supabase()
+        .table("communication_events")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("id", source_event_id)
+    )
+    return _normalize_communication_event_row(source_event) if source_event else None
+
+
+def _source_event_has_pending_suggested_reply(source_event: Optional[dict[str, Any]]) -> bool:
+    return bool(
+        source_event
+        and _normalize_channel(source_event.get("channel"), "") == "sms"
+        and _safe_text(source_event.get("direction")) == "inbound"
+        and _normalize_suggested_reply_status(source_event.get("suggested_reply_status")) == "pending"
+    )
+
+
+def _suggested_reply_delivery_status(success: bool, sender_kind: str) -> str:
+    if not success:
+        return "pending"
+    return "edited_sent" if sender_kind == "staff" else "sent"
+
+
+def _sync_source_event_after_outbound_sms(
+    clinic_id: str,
+    request: OutboundSmsRequest,
+    updated: dict[str, Any],
+) -> None:
+    source_event_id = _safe_text(request.get("source_event_id"))
+    source_event = _load_sms_source_event(clinic_id, source_event_id)
+    if not _source_event_has_pending_suggested_reply(source_event):
+        return
+
+    assert source_event is not None
+    success = _safe_text(updated.get("status")) in {"sent", "delivered"}
+    _update_communication_event_record(
+        clinic_id,
+        source_event_id,
+        {
+            "payload": _update_sms_review_state(
+                source_event,
+                confidence=source_event.get("ai_confidence") or "medium",
+                reason_code=source_event.get("ai_decision_reason") or "low_confidence",
+                auto_reply_status=_safe_text(updated.get("status")) or "failed",
+                auto_reply_reason=_safe_text(updated.get("failure_reason"))
+                or _safe_text(updated.get("skipped_reason"))
+                or (
+                    "Reply sent by staff."
+                    if request["sender_kind"] == "staff"
+                    else "Reply sent."
+                ),
+                suggested_reply_status=_suggested_reply_delivery_status(success, request["sender_kind"]),
+                suggested_reply_sent_event_id=_safe_text(updated.get("id")) if success else "",
+                pending_next_state="" if success else _payload_field(source_event, "pending_next_state"),
+                pending_booking_data={} if success else _to_json_dict(_to_json_dict(source_event.get("payload")).get("pending_booking_data")),
+            ),
+        },
+    )
+    if success and source_event.get("conversation_id"):
+        _apply_sms_conversation_progress(
+            source_event["conversation_id"],
+            _payload_field(source_event, "pending_next_state"),
+            _to_json_dict(_to_json_dict(source_event.get("payload")).get("pending_booking_data")),
+        )
+
+
+def _persist_outbound_sms_message(
+    context: dict[str, Any],
+    updated: dict[str, Any],
+    request: OutboundSmsRequest,
+) -> None:
+    if not (
+        request["persist_thread_message"]
         and _safe_text(updated.get("status")) in {"sent", "delivered"}
         and context["conversation_id"]
     ):
-        if payload["sender_kind"] == "assistant":
-            persist_assistant_message(get_supabase(), context["conversation_id"], body)
-        elif payload["sender_kind"] == "staff":
-            get_supabase().table("conversation_messages").insert(
-                {
-                    "conversation_id": context["conversation_id"],
-                    "role": "system",
-                    "content": f"Staff SMS reply: {body}",
-                }
-            ).execute()
+        return
+    if request["sender_kind"] == "assistant":
+        persist_assistant_message(get_supabase(), context["conversation_id"], request["body"])
+    elif request["sender_kind"] == "staff":
+        get_supabase().table("conversation_messages").insert(
+            {
+                "conversation_id": context["conversation_id"],
+                "role": "system",
+                "content": f"Staff SMS reply: {request['body']}",
+            }
+        ).execute()
+
+
+def send_outbound_sms(
+    clinic_id: str,
+    message: Optional[OutboundSmsRequest] = None,
+    **legacy_kwargs: Any,
+) -> dict[str, Any]:
+    request = _normalize_outbound_sms_request(message, legacy_kwargs)
+    context, base_event = _prepare_outbound_sms_event(clinic_id, request)
+    can_send, blocked_reason = _sms_can_send(
+        clinic_id,
+        require_automation=request["require_automation"],
+        channel=request["automation_channel"],
+    )
+    if not can_send:
+        return _record_skipped_outbound_sms(base_event, blocked_reason)
+
+    queued_event = _create_communication_event_record(base_event)
+    updated = _deliver_outbound_sms(
+        clinic_id,
+        queued_event,
+        context["customer_phone"],
+        request["body"],
+    )
+    _log_outbound_sms_result(clinic_id, updated, context)
+    _enqueue_outbound_sms_retry(clinic_id, updated, request["enqueue_retry_on_failure"])
+    _sync_source_event_after_outbound_sms(clinic_id, request, updated)
+    _persist_outbound_sms_message(context, updated, request)
     return updated
 
 
@@ -3609,29 +4377,200 @@ def _create_internal_deposit_event(
     amount_cents: int,
 ) -> dict[str, Any]:
     return _create_communication_event_record(
-        clinic_id,
         _communication_event_payload(
-            clinic_id=clinic_id,
-            thread_key=f"lead:{lead['id']}:deposit",
-            channel="manual",
-            direction="internal",
-            event_type="deposit_request",
-            status="completed",
-            customer_key=customer_key,
-            customer_name=customer_name,
-            customer_phone=customer_phone,
-            customer_email=customer_email,
-            summary="Deposit link created for manual sharing",
-            content=checkout_url,
-            lead_id=lead["id"],
-            conversation_id=conversation_id,
-            payload={
-                "amount_cents": amount_cents,
-                "sender_kind": "system",
-            },
-            occurred_at=_current_timestamp(),
+            {
+                "clinic_id": clinic_id,
+                "thread_key": f"lead:{lead['id']}:deposit",
+                "channel": "manual",
+                "direction": "internal",
+                "event_type": "deposit_request",
+                "customer_key": customer_key,
+                "customer_name": customer_name,
+                "customer_phone": customer_phone,
+                "customer_email": customer_email,
+                "summary": "Deposit link created for manual sharing",
+                "content": checkout_url,
+                "lead_id": lead["id"],
+                "conversation_id": conversation_id,
+                "payload": {
+                    "amount_cents": amount_cents,
+                    "sender_kind": "system",
+                },
+                "occurred_at": _current_timestamp(),
+                "status": "completed",
+            }
         ),
     )
+
+
+def _load_deposit_request_lead(
+    db: Any,
+    clinic_id: str,
+    lead_id: str,
+) -> Optional[dict[str, Any]]:
+    return _maybe_single_data(
+        db.table("leads")
+        .select(
+            "id, clinic_id, patient_name, patient_phone, patient_email, reason_for_visit, preferred_datetime_text, "
+            "status, appointment_status, appointment_starts_at, appointment_ends_at, reminder_status, reminder_scheduled_for, "
+            "reminder_note, deposit_required, deposit_amount_cents, deposit_status, deposit_checkout_session_id, "
+            "deposit_payment_intent_id, deposit_requested_at, deposit_paid_at, source, notes, created_at, updated_at"
+        )
+        .eq("clinic_id", clinic_id)
+        .eq("id", lead_id)
+    )
+
+
+def _validate_deposit_request_lead(lead: dict[str, Any], amount_cents: int) -> None:
+    if _safe_text(lead.get("status")) != "booked" or _safe_text(lead.get("appointment_status")) != "confirmed":
+        raise ValueError("Only confirmed booked appointments can request a deposit.")
+    if amount_cents <= 0:
+        raise ValueError("Add a deposit amount greater than zero.")
+    if _normalize_deposit_status(lead.get("deposit_status")) == "paid":
+        raise ValueError("This appointment deposit has already been paid.")
+
+
+def _load_deposit_request_clinic(db: Any, clinic_id: str) -> dict[str, Any]:
+    return (
+        _maybe_single_data(
+            db.table("clinics")
+            .select("id, name, phone, email")
+            .eq("id", clinic_id)
+        )
+        or {}
+    )
+
+
+def _create_deposit_request_checkout(
+    clinic: dict[str, Any],
+    lead: dict[str, Any],
+    amount_cents: int,
+    lead_id: str,
+) -> dict[str, Any]:
+    ready, blocked_reason = stripe_ready_for_payments()
+    if not ready:
+        raise RuntimeError(blocked_reason)
+    success_url, cancel_url = _deposit_checkout_urls(lead_id)
+    return create_deposit_checkout_session(
+        clinic,
+        lead,
+        amount_cents,
+        success_url,
+        cancel_url,
+    )
+
+
+def _update_deposit_request_lead(
+    db: Any,
+    clinic_id: str,
+    lead_id: str,
+    checkout: dict[str, Any],
+    amount_cents: int,
+) -> Optional[dict[str, Any]]:
+    requested_at = _current_timestamp().isoformat()
+    update_payload = {
+        "deposit_required": True,
+        "deposit_amount_cents": amount_cents,
+        "deposit_status": "requested",
+        "deposit_checkout_session_id": checkout["checkout_session_id"],
+        "deposit_payment_intent_id": checkout["payment_intent_id"],
+        "deposit_requested_at": requested_at,
+        "deposit_paid_at": None,
+    }
+    result = (
+        db.table("leads")
+        .update(update_payload)
+        .eq("clinic_id", clinic_id)
+        .eq("id", lead_id)
+        .execute()
+    )
+    return result.data[0] if result.data else None
+
+
+def _deposit_request_customer_context(lead: dict[str, Any]) -> dict[str, str]:
+    return {
+        "customer_name": _safe_text(lead.get("patient_name")) or _UNKNOWN_PATIENT,
+        "customer_phone": _safe_text(lead.get("patient_phone")),
+        "customer_email": _safe_text(lead.get("patient_email")),
+        "customer_key": _customer_key(_normalize_identity(lead)),
+    }
+
+
+def _deliver_deposit_request(
+    clinic_id: str,
+    lead_id: str,
+    updated_lead: dict[str, Any],
+    clinic: dict[str, Any],
+    checkout: dict[str, Any],
+    amount_cents: int,
+    latest_conversation: dict[str, Any],
+    recipient: dict[str, str],
+    send_sms: bool,
+) -> tuple[Optional[dict[str, Any]], str, str]:
+    if send_sms and recipient["customer_phone"]:
+        communication_event = send_outbound_sms(
+            clinic_id,
+            customer_name=recipient["customer_name"],
+            customer_phone=recipient["customer_phone"],
+            customer_email=recipient["customer_email"],
+            body=_deposit_request_sms_body(
+                _safe_text(clinic.get("name")) or "Clinic AI",
+                recipient["customer_name"],
+                checkout["checkout_url"],
+                amount_cents,
+            ),
+            summary="Appointment deposit request",
+            lead_id=lead_id,
+            conversation_id=latest_conversation.get("id"),
+            event_type="deposit_request",
+            sender_kind="system",
+            persist_thread_message=False,
+        )
+        blocked_reason = (
+            _safe_text(communication_event.get("failure_reason"))
+            or _safe_text(communication_event.get("skipped_reason"))
+        )
+        return communication_event, _safe_text(communication_event.get("status")), blocked_reason
+
+    if send_sms:
+        blocked_reason = "A patient phone number is required before the deposit link can be sent by SMS."
+        communication_event = _create_communication_event_record(
+            _communication_event_payload(
+                {
+                    "clinic_id": clinic_id,
+                    "thread_key": f"lead:{lead_id}:deposit",
+                    "channel": "sms",
+                    "direction": "outbound",
+                    "event_type": "deposit_request",
+                    "status": "skipped",
+                    "customer_key": recipient["customer_key"],
+                    "customer_name": recipient["customer_name"],
+                    "customer_phone": recipient["customer_phone"],
+                    "customer_email": recipient["customer_email"],
+                    "summary": "Appointment deposit request",
+                    "content": checkout["checkout_url"],
+                    "lead_id": lead_id,
+                    "conversation_id": latest_conversation.get("id"),
+                    "skipped_reason": blocked_reason,
+                    "payload": {"amount_cents": amount_cents, "sender_kind": "system"},
+                    "occurred_at": _current_timestamp(),
+                }
+            ),
+        )
+        return communication_event, "skipped", blocked_reason
+
+    communication_event = _create_internal_deposit_event(
+        clinic_id,
+        lead=updated_lead,
+        customer_key=recipient["customer_key"],
+        customer_name=recipient["customer_name"],
+        customer_phone=recipient["customer_phone"],
+        customer_email=recipient["customer_email"],
+        conversation_id=latest_conversation.get("id"),
+        checkout_url=checkout["checkout_url"],
+        amount_cents=amount_cents,
+    )
+    return communication_event, "manual_only", ""
 
 
 def request_appointment_deposit(
@@ -3643,136 +4582,30 @@ def request_appointment_deposit(
 ) -> Optional[dict[str, Any]]:
     try:
         db = get_supabase()
-        lead = _maybe_single_data(
-            db.table("leads")
-            .select(
-                "id, clinic_id, patient_name, patient_phone, patient_email, reason_for_visit, preferred_datetime_text, "
-                "status, appointment_status, appointment_starts_at, appointment_ends_at, reminder_status, reminder_scheduled_for, "
-                "reminder_note, deposit_required, deposit_amount_cents, deposit_status, deposit_checkout_session_id, "
-                "deposit_payment_intent_id, deposit_requested_at, deposit_paid_at, source, notes, created_at, updated_at"
-            )
-            .eq("clinic_id", clinic_id)
-            .eq("id", lead_id)
-        )
+        lead = _load_deposit_request_lead(db, clinic_id, lead_id)
         if not lead:
             return None
-        if _safe_text(lead.get("status")) != "booked" or _safe_text(lead.get("appointment_status")) != "confirmed":
-            raise ValueError("Only confirmed booked appointments can request a deposit.")
-        if amount_cents <= 0:
-            raise ValueError("Add a deposit amount greater than zero.")
-        if _normalize_deposit_status(lead.get("deposit_status")) == "paid":
-            raise ValueError("This appointment deposit has already been paid.")
+        _validate_deposit_request_lead(lead, amount_cents)
 
-        clinic = _maybe_single_data(
-            db.table("clinics")
-            .select("id, name, phone, email")
-            .eq("id", clinic_id)
-        ) or {}
-        ready, blocked_reason = stripe_ready_for_payments()
-        if not ready:
-            raise RuntimeError(blocked_reason)
-
-        success_url, cancel_url = _deposit_checkout_urls(lead_id)
-        checkout = create_deposit_checkout_session(
-            clinic,
-            lead,
-            amount_cents,
-            success_url,
-            cancel_url,
-        )
-
-        requested_at = _current_timestamp().isoformat()
-        update_payload = {
-            "deposit_required": True,
-            "deposit_amount_cents": amount_cents,
-            "deposit_status": "requested",
-            "deposit_checkout_session_id": checkout["checkout_session_id"],
-            "deposit_payment_intent_id": checkout["payment_intent_id"],
-            "deposit_requested_at": requested_at,
-            "deposit_paid_at": None,
-        }
-        result = (
-            db.table("leads")
-            .update(update_payload)
-            .eq("clinic_id", clinic_id)
-            .eq("id", lead_id)
-            .execute()
-        )
-        updated_lead = result.data[0] if result.data else None
+        clinic = _load_deposit_request_clinic(db, clinic_id)
+        checkout = _create_deposit_request_checkout(clinic, lead, amount_cents, lead_id)
+        updated_lead = _update_deposit_request_lead(db, clinic_id, lead_id, checkout, amount_cents)
         if not updated_lead:
             return None
 
         latest_conversation = _load_latest_conversations_by_lead(clinic_id).get(lead_id) or {}
-        customer_name = _safe_text(lead.get("patient_name")) or "Unknown patient"
-        customer_phone = _safe_text(lead.get("patient_phone"))
-        customer_email = _safe_text(lead.get("patient_email"))
-        customer_key = _customer_key(_normalize_identity(lead))
-        communication_event: Optional[dict[str, Any]] = None
-        sms_delivery_status = ""
-        response_blocked_reason = ""
-
-        if send_sms and customer_phone:
-            communication_event = send_outbound_sms(
-                clinic_id,
-                customer_name=customer_name,
-                customer_phone=customer_phone,
-                customer_email=customer_email,
-                body=_deposit_request_sms_body(
-                    _safe_text(clinic.get("name")) or "Clinic AI",
-                    customer_name,
-                    checkout["checkout_url"],
-                    amount_cents,
-                ),
-                summary="Appointment deposit request",
-                lead_id=lead_id,
-                conversation_id=latest_conversation.get("id"),
-                event_type="deposit_request",
-                sender_kind="system",
-                persist_thread_message=False,
-            )
-            sms_delivery_status = _safe_text(communication_event.get("status"))
-            response_blocked_reason = (
-                _safe_text(communication_event.get("failure_reason"))
-                or _safe_text(communication_event.get("skipped_reason"))
-            )
-        elif send_sms:
-            communication_event = _create_communication_event_record(
-                clinic_id,
-                _communication_event_payload(
-                    clinic_id=clinic_id,
-                    thread_key=f"lead:{lead_id}:deposit",
-                    channel="sms",
-                    direction="outbound",
-                    event_type="deposit_request",
-                    status="skipped",
-                    customer_key=customer_key,
-                    customer_name=customer_name,
-                    customer_phone=customer_phone,
-                    customer_email=customer_email,
-                    summary="Appointment deposit request",
-                    content=checkout["checkout_url"],
-                    lead_id=lead_id,
-                    conversation_id=latest_conversation.get("id"),
-                    skipped_reason="A patient phone number is required before the deposit link can be sent by SMS.",
-                    payload={"amount_cents": amount_cents, "sender_kind": "system"},
-                    occurred_at=_current_timestamp(),
-                ),
-            )
-            sms_delivery_status = "skipped"
-            response_blocked_reason = "A patient phone number is required before the deposit link can be sent by SMS."
-        else:
-            communication_event = _create_internal_deposit_event(
-                clinic_id,
-                lead=updated_lead,
-                customer_key=customer_key,
-                customer_name=customer_name,
-                customer_phone=customer_phone,
-                customer_email=customer_email,
-                conversation_id=latest_conversation.get("id"),
-                checkout_url=checkout["checkout_url"],
-                amount_cents=amount_cents,
-            )
-            sms_delivery_status = "manual_only"
+        recipient = _deposit_request_customer_context(lead)
+        communication_event, sms_delivery_status, response_blocked_reason = _deliver_deposit_request(
+            clinic_id,
+            lead_id,
+            updated_lead,
+            clinic,
+            checkout,
+            amount_cents,
+            latest_conversation,
+            recipient,
+            send_sms,
+        )
 
         return {
             "lead": updated_lead,
@@ -3836,7 +4669,7 @@ def send_missed_call_text_back(
     clinic = _load_frontdesk_settings(clinic_id)
     outbound = send_outbound_sms(
         clinic_id,
-        customer_name=_safe_text(event.get("customer_name")) or "Unknown customer",
+        customer_name=_safe_text(event.get("customer_name")) or _UNKNOWN_CUSTOMER,
         customer_phone=_safe_text(event.get("customer_phone")),
         customer_email=_safe_text(event.get("customer_email")),
         body=_missed_call_text_back_preview(clinic["name"]),
@@ -3886,7 +4719,7 @@ def run_auto_follow_up_tasks(clinic_id: str, force: bool = False) -> dict[str, A
             title=opportunity["title"],
             detail=opportunity["detail"],
             customer_key=opportunity.get("customer_key"),
-            customer_name=opportunity.get("customer_name") or "Unknown patient",
+            customer_name=opportunity.get("customer_name") or _UNKNOWN_PATIENT,
             lead_id=opportunity.get("lead_id"),
             conversation_id=opportunity.get("conversation_id"),
             auto_generated=True,
@@ -3901,89 +4734,128 @@ def run_auto_follow_up_tasks(clinic_id: str, force: bool = False) -> dict[str, A
     }
 
 
-def create_follow_up_task(
-    clinic_id: str,
-    source_key: str,
-    task_type: str,
-    priority: str,
-    title: str,
-    detail: str,
-    customer_name: str,
-    customer_key: Optional[str] = None,
-    lead_id: Optional[str] = None,
-    conversation_id: Optional[str] = None,
-    auto_generated: bool = False,
-    due_at: Optional[datetime] = None,
-    note: str = "",
-    status: str = "open",
-) -> dict[str, Any]:
-    if task_type not in FOLLOW_UP_TASK_TYPES:
+def _normalize_follow_up_task_input(
+    task_data: Optional[FollowUpTaskInput],
+    legacy_kwargs: dict[str, Any],
+) -> FollowUpTaskInput:
+    request: FollowUpTaskInput = dict(task_data or {})
+    request.update(legacy_kwargs)
+    request["task_type"] = _safe_text(request.get("task_type"))
+    request["priority"] = _safe_text(request.get("priority"))
+    request["status"] = _safe_text(request.get("status")) or "open"
+    request["title"] = _safe_text(request.get("title"))
+    request["detail"] = _safe_text(request.get("detail"))
+    request["customer_name"] = _safe_text(request.get("customer_name"))
+    request["customer_key"] = _safe_text(request.get("customer_key")) or None
+    request["note"] = _safe_text(request.get("note"))
+    request["auto_generated"] = bool(request.get("auto_generated"))
+    return request
+
+
+def _validate_follow_up_task_input(request: FollowUpTaskInput) -> None:
+    if request["task_type"] not in FOLLOW_UP_TASK_TYPES:
         raise ValueError("Invalid follow-up task type.")
-    if priority not in FOLLOW_UP_PRIORITIES:
+    if request["priority"] not in FOLLOW_UP_PRIORITIES:
         raise ValueError("Invalid follow-up priority.")
-    if status not in FOLLOW_UP_TASK_STATUSES:
+    if request["status"] not in FOLLOW_UP_TASK_STATUSES:
         raise ValueError("Invalid follow-up task status.")
 
-    db = get_supabase()
-    payload = {
+
+def _build_follow_up_task_payload(
+    clinic_id: str,
+    request: FollowUpTaskInput,
+) -> dict[str, Any]:
+    return {
         "clinic_id": clinic_id,
-        "source_key": source_key,
-        "task_type": task_type,
-        "priority": priority,
-        "title": _safe_text(title),
-        "detail": _safe_text(detail),
-        "customer_key": _safe_text(customer_key),
-        "customer_name": _safe_text(customer_name) or "Unknown patient",
-        "lead_id": lead_id,
-        "conversation_id": conversation_id,
-        "auto_generated": auto_generated,
-        "due_at": _serialize_datetime(due_at or datetime.now(timezone.utc)),
-        "note": _safe_text(note),
-        "status": status,
+        "source_key": request.get("source_key"),
+        "task_type": request["task_type"],
+        "priority": request["priority"],
+        "title": request["title"],
+        "detail": request["detail"],
+        "customer_key": request["customer_key"] or "",
+        "customer_name": request["customer_name"] or _UNKNOWN_PATIENT,
+        "lead_id": request.get("lead_id"),
+        "conversation_id": request.get("conversation_id"),
+        "auto_generated": request["auto_generated"],
+        "due_at": _serialize_datetime(request.get("due_at") or datetime.now(timezone.utc)),
+        "note": request["note"],
+        "status": request["status"],
         "last_action_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def _update_existing_follow_up_task(
+    db: Any,
+    clinic_id: str,
+    existing: dict[str, Any],
+    payload: dict[str, Any],
+    auto_generated: bool,
+) -> dict[str, Any]:
+    if existing.get("status") == "completed" and auto_generated:
+        payload["status"] = "completed"
+    update_payload = {k: v for k, v in payload.items() if k != "clinic_id"}
+    try:
+        result = (
+            db.table("follow_up_tasks")
+            .update(update_payload)
+            .eq("clinic_id", clinic_id)
+            .eq("id", existing["id"])
+            .execute()
+        )
+    except Exception as exc:
+        if "auto_generated" not in str(exc):
+            raise
+        update_payload.pop("auto_generated", None)
+        result = (
+            db.table("follow_up_tasks")
+            .update(update_payload)
+            .eq("clinic_id", clinic_id)
+            .eq("id", existing["id"])
+            .execute()
+        )
+    return result.data[0]
+
+
+def _insert_follow_up_task(db: Any, payload: dict[str, Any]) -> Any:
+    try:
+        return db.table("follow_up_tasks").insert(payload).execute()
+    except Exception as exc:
+        if "auto_generated" not in str(exc):
+            raise
+        payload.pop("auto_generated", None)
+        return db.table("follow_up_tasks").insert(payload).execute()
+
+
+def create_follow_up_task(
+    clinic_id: str,
+    task_data: Optional[FollowUpTaskInput] = None,
+    **legacy_kwargs: Any,
+) -> dict[str, Any]:
+    request = _normalize_follow_up_task_input(task_data, legacy_kwargs)
+    _validate_follow_up_task_input(request)
+
+    db = get_supabase()
+    payload = _build_follow_up_task_payload(clinic_id, request)
     try:
         existing = _maybe_single_data(
             db.table("follow_up_tasks")
             .select("*")
             .eq("clinic_id", clinic_id)
-            .eq("source_key", source_key)
+            .eq("source_key", request.get("source_key"))
         )
         if existing:
-            if existing.get("status") == "completed" and auto_generated:
-                payload["status"] = "completed"
-            update_payload = {k: v for k, v in payload.items() if k != "clinic_id"}
-            try:
-                result = (
-                    db.table("follow_up_tasks")
-                    .update(update_payload)
-                    .eq("clinic_id", clinic_id)
-                    .eq("id", existing["id"])
-                    .execute()
-                )
-            except Exception as exc:
-                if "auto_generated" not in str(exc):
-                    raise
-                update_payload.pop("auto_generated", None)
-                result = (
-                    db.table("follow_up_tasks")
-                    .update(update_payload)
-                    .eq("clinic_id", clinic_id)
-                    .eq("id", existing["id"])
-                    .execute()
-                )
-            return result.data[0]
-        try:
-            result = db.table("follow_up_tasks").insert(payload).execute()
-        except Exception as exc:
-            if "auto_generated" not in str(exc):
-                raise
-            payload.pop("auto_generated", None)
-            result = db.table("follow_up_tasks").insert(payload).execute()
+            return _update_existing_follow_up_task(
+                db,
+                clinic_id,
+                existing,
+                payload,
+                request["auto_generated"],
+            )
+        result = _insert_follow_up_task(db, payload)
     except Exception as exc:
         raise RuntimeError("Follow-up tasks are not available until the latest database migration is applied.") from exc
     task = result.data[0]
-    task.setdefault("auto_generated", auto_generated)
+    task.setdefault("auto_generated", request["auto_generated"])
     return task
 
 
@@ -4051,7 +4923,7 @@ def _operation_lead_payload(
 
     return {
         "lead_id": lead["id"],
-        "patient_name": lead.get("patient_name") or "Unknown patient",
+        "patient_name": lead.get("patient_name") or _UNKNOWN_PATIENT,
         "patient_phone": lead.get("patient_phone") or "",
         "patient_email": lead.get("patient_email") or "",
         "reason_for_visit": lead.get("reason_for_visit") or "",
@@ -4224,6 +5096,114 @@ def _deposit_request_sms_body(
     )
 
 
+def _latest_open_follow_up_by_lead(
+    follow_up_tasks: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    open_follow_up_by_lead: dict[str, dict[str, Any]] = {}
+    for task in follow_up_tasks:
+        lead_id = _safe_text(task.get("lead_id"))
+        if not lead_id or _safe_text(task.get("status")) == "completed":
+            continue
+        current = open_follow_up_by_lead.get(lead_id)
+        if current is None or _event_timestamp(task) > _event_timestamp(current):
+            open_follow_up_by_lead[lead_id] = task
+    return open_follow_up_by_lead
+
+
+def _should_include_appointment_lead(lead: dict[str, Any]) -> bool:
+    appointment_status = _safe_text(lead.get("appointment_status")) or "request_open"
+    return _safe_text(lead.get("status")) == "booked" or appointment_status != "request_open"
+
+
+def _appointment_reminder_reason(
+    clinic_id: str,
+    settings: dict[str, Any],
+    payload: dict[str, Any],
+) -> str:
+    if payload["reminder_status"] == "sent":
+        return ""
+    return _appointment_reminder_blocked_reason(clinic_id, settings, payload)
+
+
+def _appointment_source(
+    lead: dict[str, Any],
+    latest_conversation: dict[str, Any],
+) -> str:
+    return _normalize_channel(
+        latest_conversation.get("channel") or lead.get("source"),
+        _normalize_channel(lead.get("source"), "web_chat"),
+    )
+
+
+def _deposit_request_delivery_status(event: dict[str, Any]) -> str:
+    if _normalize_channel(event.get("channel"), "manual") != "sms":
+        return ""
+    return _safe_text(event.get("status"))
+
+
+def _build_appointment_record(
+    clinic_id: str,
+    settings: dict[str, Any],
+    lead: dict[str, Any],
+    latest_conversation: dict[str, Any],
+    latest_deposit_event: dict[str, Any],
+    follow_up: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    payload = _operation_lead_payload(
+        settings["name"],
+        settings["reminder_enabled"],
+        settings["reminder_lead_hours"],
+        lead,
+    )
+    reminder_blocked_reason = _appointment_reminder_reason(clinic_id, settings, payload)
+    record = {
+        "lead_id": lead["id"],
+        "customer_key": _customer_key(_normalize_identity(lead)),
+        "thread_id": _thread_key("conversation", latest_conversation["id"]) if latest_conversation.get("id") else None,
+        "patient_name": payload["patient_name"],
+        "patient_phone": payload["patient_phone"],
+        "patient_email": payload["patient_email"],
+        "reason_for_visit": payload["reason_for_visit"],
+        "preferred_datetime_text": payload["preferred_datetime_text"],
+        "source": _appointment_source(lead, latest_conversation),
+        "lead_status": payload["lead_status"],
+        "appointment_status": payload["appointment_status"],
+        "appointment_starts_at": payload["appointment_starts_at"],
+        "appointment_ends_at": payload["appointment_ends_at"],
+        "reminder_status": payload["reminder_status"],
+        "reminder_scheduled_for": payload["reminder_scheduled_for"],
+        "reminder_ready": bool(payload["reminder_ready"]) and not reminder_blocked_reason,
+        "reminder_blocked_reason": reminder_blocked_reason,
+        "deposit_required": payload["deposit_required"],
+        "deposit_amount_cents": payload["deposit_amount_cents"],
+        "deposit_status": payload["deposit_status"],
+        "deposit_requested_at": payload["deposit_requested_at"],
+        "deposit_paid_at": payload["deposit_paid_at"],
+        "deposit_request_delivery_status": _deposit_request_delivery_status(latest_deposit_event),
+        "deposit_request_delivery_reason": _deposit_delivery_reason(latest_deposit_event),
+        "follow_up_open": follow_up is not None,
+        "follow_up_task_id": (follow_up or {}).get("id"),
+        "notes": _safe_text(lead.get("notes")),
+        "updated_at": payload["updated_at"],
+    }
+    record["needs_attention"] = _appointment_needs_attention(record, reminder_blocked_reason)
+    return record
+
+
+def _sort_appointments(appointments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    appointments.sort(
+        key=lambda item: item["updated_at"] or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )
+    appointments.sort(
+        key=lambda item: (
+            0 if item["appointment_starts_at"] else 1,
+            item["appointment_starts_at"] or datetime.max.replace(tzinfo=timezone.utc),
+        )
+    )
+    return appointments
+
+
 def build_appointments(clinic_id: str, view: str = "all") -> list[dict[str, Any]]:
     normalized_view = view if view in APPOINTMENT_VIEWS else "all"
     db = get_supabase()
@@ -4242,91 +5222,114 @@ def build_appointments(clinic_id: str, view: str = "all") -> list[dict[str, Any]
         clinic_id,
         event_type="deposit_request",
     )
-    follow_up_tasks = _load_follow_up_tasks(clinic_id, include_completed=False)
-    open_follow_up_by_lead: dict[str, dict[str, Any]] = {}
-    for task in follow_up_tasks:
-        lead_id = _safe_text(task.get("lead_id"))
-        if not lead_id:
-            continue
-        if _safe_text(task.get("status")) == "completed":
-            continue
-        current = open_follow_up_by_lead.get(lead_id)
-        if current is None or _event_timestamp(task) > _event_timestamp(current):
-            open_follow_up_by_lead[lead_id] = task
+    open_follow_up_by_lead = _latest_open_follow_up_by_lead(
+        _load_follow_up_tasks(clinic_id, include_completed=False)
+    )
 
     appointments: list[dict[str, Any]] = []
     for lead in leads:
-        appointment_status = _safe_text(lead.get("appointment_status")) or "request_open"
-        if _safe_text(lead.get("status")) != "booked" and appointment_status == "request_open":
+        if not _should_include_appointment_lead(lead):
             continue
-        payload = _operation_lead_payload(
-            settings["name"],
-            settings["reminder_enabled"],
-            settings["reminder_lead_hours"],
-            lead,
-        )
-        reminder_blocked_reason = _appointment_reminder_blocked_reason(
+        record = _build_appointment_record(
             clinic_id,
             settings,
-            payload,
-        ) if payload["reminder_status"] != "sent" else ""
-        follow_up = open_follow_up_by_lead.get(lead["id"])
-        latest_conversation = latest_conversations.get(lead["id"]) or {}
-        latest_deposit_event = latest_deposit_events.get(lead["id"]) or {}
-        source = _normalize_channel(
-            latest_conversation.get("channel") or lead.get("source"),
-            _normalize_channel(lead.get("source"), "web_chat"),
+            lead,
+            latest_conversations.get(lead["id"]) or {},
+            latest_deposit_events.get(lead["id"]) or {},
+            open_follow_up_by_lead.get(lead["id"]),
         )
-        customer_key = _customer_key(_normalize_identity(lead))
-        record = {
-            "lead_id": lead["id"],
-            "customer_key": customer_key,
-            "thread_id": _thread_key("conversation", latest_conversation["id"]) if latest_conversation.get("id") else None,
-            "patient_name": payload["patient_name"],
-            "patient_phone": payload["patient_phone"],
-            "patient_email": payload["patient_email"],
-            "reason_for_visit": payload["reason_for_visit"],
-            "preferred_datetime_text": payload["preferred_datetime_text"],
-            "source": source,
-            "lead_status": payload["lead_status"],
-            "appointment_status": payload["appointment_status"],
-            "appointment_starts_at": payload["appointment_starts_at"],
-            "appointment_ends_at": payload["appointment_ends_at"],
-            "reminder_status": payload["reminder_status"],
-            "reminder_scheduled_for": payload["reminder_scheduled_for"],
-            "reminder_ready": bool(payload["reminder_ready"]) and not reminder_blocked_reason,
-            "reminder_blocked_reason": reminder_blocked_reason,
-            "deposit_required": payload["deposit_required"],
-            "deposit_amount_cents": payload["deposit_amount_cents"],
-            "deposit_status": payload["deposit_status"],
-            "deposit_requested_at": payload["deposit_requested_at"],
-            "deposit_paid_at": payload["deposit_paid_at"],
-            "deposit_request_delivery_status": (
-                _safe_text(latest_deposit_event.get("status"))
-                if _normalize_channel(latest_deposit_event.get("channel"), "manual") == "sms"
-                else ""
-            ),
-            "deposit_request_delivery_reason": _deposit_delivery_reason(latest_deposit_event),
-            "follow_up_open": follow_up is not None,
-            "follow_up_task_id": (follow_up or {}).get("id"),
-            "notes": _safe_text(lead.get("notes")),
-            "updated_at": payload["updated_at"],
-        }
-        record["needs_attention"] = _appointment_needs_attention(record, reminder_blocked_reason)
         if _appointment_matches_view(record, normalized_view):
             appointments.append(record)
 
-    appointments.sort(
-        key=lambda item: item["updated_at"] or datetime.min.replace(tzinfo=timezone.utc),
-        reverse=True,
+    return _sort_appointments(appointments)
+
+
+def _include_communication_queue_event(event: dict[str, Any]) -> bool:
+    return (
+        event.get("channel") in {"missed_call", "callback_request"}
+        and _safe_text(event.get("status")) not in {"completed", "dismissed"}
     )
-    appointments.sort(
-        key=lambda item: (
-            0 if item["appointment_starts_at"] else 1,
-            item["appointment_starts_at"] or datetime.max.replace(tzinfo=timezone.utc),
-        )
+
+
+def _communication_queue_inbound_events(
+    event: dict[str, Any],
+    latest_inbound_by_thread: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], Optional[dict[str, Any]]]:
+    latest_inbound = latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}
+    latest_inbound_other = latest_inbound if latest_inbound.get("id") != event["id"] else None
+    return latest_inbound, latest_inbound_other
+
+
+def _build_communication_queue_outbound_fields(
+    event: dict[str, Any],
+    latest_outbound_by_source: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    latest_outbound = latest_outbound_by_source.get(event["id"]) or {}
+    return {
+        "latest_outbound_status": _safe_text(latest_outbound.get("status")) or None,
+        "latest_outbound_summary": _safe_text(latest_outbound.get("summary")),
+        "latest_outbound_reason": _safe_text(latest_outbound.get("failure_reason"))
+        or _safe_text(latest_outbound.get("skipped_reason")),
+        "latest_outbound_at": _parse_datetime(latest_outbound.get("sent_at"))
+        or _parse_datetime(latest_outbound.get("created_at")),
+    }
+
+
+def _build_communication_queue_inbound_fields(
+    event: dict[str, Any],
+    latest_inbound_by_thread: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    latest_inbound, latest_inbound_other = _communication_queue_inbound_events(event, latest_inbound_by_thread)
+    return {
+        "latest_inbound_status": _safe_text((latest_inbound_other or {}).get("status")) or None,
+        "latest_inbound_summary": _safe_text((latest_inbound_other or {}).get("summary"))
+        or _safe_text((latest_inbound_other or {}).get("content")),
+        "latest_inbound_at": _parse_datetime((latest_inbound_other or {}).get("occurred_at"))
+        or _parse_datetime((latest_inbound_other or {}).get("created_at")),
+        "ai_confidence": _normalize_sms_ai_confidence(latest_inbound.get("ai_confidence")),
+        "ai_decision_reason": _safe_text(latest_inbound.get("ai_decision_reason")),
+        "suggested_reply_text": _safe_text(latest_inbound.get("suggested_reply_text")),
+        "suggested_reply_status": _normalize_suggested_reply_status(latest_inbound.get("suggested_reply_status")),
+        "suggested_reply_sent_event_id": _safe_text(latest_inbound.get("suggested_reply_sent_event_id")),
+        "operator_review_required": bool(latest_inbound.get("operator_review_required")),
+    }
+
+
+def _communication_queue_conversation_row(
+    event: dict[str, Any],
+    sms_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+) -> Optional[dict[str, Any]]:
+    return (
+        sms_conversations_by_id.get(_safe_text(event.get("conversation_id")))
+        or sms_conversations_by_session.get(_safe_text(event.get("thread_key")))
     )
-    return appointments
+
+
+def _build_communication_queue_item(
+    clinic_id: str,
+    event: dict[str, Any],
+    latest_outbound_by_source: dict[str, dict[str, Any]],
+    latest_inbound_by_thread: dict[str, dict[str, Any]],
+    sms_conversations_by_id: dict[str, dict[str, Any]],
+    sms_conversations_by_session: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    conversation_row = _communication_queue_conversation_row(
+        event,
+        sms_conversations_by_id,
+        sms_conversations_by_session,
+    )
+    ai_auto_reply_enabled, ai_auto_reply_ready = _sms_thread_auto_reply_state(clinic_id, conversation_row)
+    return {
+        **event,
+        "summary": _safe_text(event.get("summary")),
+        "content": _safe_text(event.get("content")),
+        **_build_communication_queue_outbound_fields(event, latest_outbound_by_source),
+        **_build_communication_queue_inbound_fields(event, latest_inbound_by_thread),
+        "manual_takeover": bool((conversation_row or {}).get("manual_takeover")),
+        "ai_auto_reply_enabled": ai_auto_reply_enabled,
+        "ai_auto_reply_ready": ai_auto_reply_ready,
+    }
 
 
 def build_communication_queue(clinic_id: str) -> list[dict[str, Any]]:
@@ -4335,68 +5338,16 @@ def build_communication_queue(clinic_id: str) -> list[dict[str, Any]]:
     latest_outbound_by_source = _latest_related_outbound_events(events)
     latest_inbound_by_thread = _latest_thread_event_by_direction(events, "inbound")
     queue = [
-        {
-            **event,
-            "summary": _safe_text(event.get("summary")),
-            "content": _safe_text(event.get("content")),
-            "latest_outbound_status": _safe_text((latest_outbound_by_source.get(event["id"]) or {}).get("status")) or None,
-            "latest_outbound_summary": _safe_text((latest_outbound_by_source.get(event["id"]) or {}).get("summary")),
-            "latest_outbound_reason": _safe_text((latest_outbound_by_source.get(event["id"]) or {}).get("failure_reason"))
-            or _safe_text((latest_outbound_by_source.get(event["id"]) or {}).get("skipped_reason")),
-            "latest_outbound_at": _parse_datetime((latest_outbound_by_source.get(event["id"]) or {}).get("sent_at"))
-            or _parse_datetime((latest_outbound_by_source.get(event["id"]) or {}).get("created_at")),
-            "latest_inbound_status": (
-                _safe_text((latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("status"))
-                if (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("id") != event["id"]
-                else None
-            ) or None,
-            "latest_inbound_summary": (
-                _safe_text((latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("summary"))
-                or _safe_text((latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("content"))
-            ) if (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("id") != event["id"] else "",
-            "latest_inbound_at": (
-                _parse_datetime((latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("occurred_at"))
-                or _parse_datetime((latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("created_at"))
-            ) if (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("id") != event["id"] else None,
-            "ai_confidence": _normalize_sms_ai_confidence(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("ai_confidence")
-            ),
-            "ai_decision_reason": _safe_text(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("ai_decision_reason")
-            ),
-            "suggested_reply_text": _safe_text(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("suggested_reply_text")
-            ),
-            "suggested_reply_status": _normalize_suggested_reply_status(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("suggested_reply_status")
-            ),
-            "suggested_reply_sent_event_id": _safe_text(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("suggested_reply_sent_event_id")
-            ),
-            "manual_takeover": bool(
-                (
-                    sms_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-                    or sms_conversations_by_session.get(_safe_text(event.get("thread_key")))
-                    or {}
-                ).get("manual_takeover")
-            ),
-            "ai_auto_reply_enabled": _sms_thread_auto_reply_state(
-                clinic_id,
-                sms_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-                or sms_conversations_by_session.get(_safe_text(event.get("thread_key"))),
-            )[0],
-            "ai_auto_reply_ready": _sms_thread_auto_reply_state(
-                clinic_id,
-                sms_conversations_by_id.get(_safe_text(event.get("conversation_id")))
-                or sms_conversations_by_session.get(_safe_text(event.get("thread_key"))),
-            )[1],
-            "operator_review_required": bool(
-                (latest_inbound_by_thread.get(_safe_text(event.get("thread_key"))) or {}).get("operator_review_required")
-            ),
-        }
+        _build_communication_queue_item(
+            clinic_id,
+            event,
+            latest_outbound_by_source,
+            latest_inbound_by_thread,
+            sms_conversations_by_id,
+            sms_conversations_by_session,
+        )
         for event in events
-        if event.get("channel") in {"missed_call", "callback_request"}
-        and _safe_text(event.get("status")) not in {"completed", "dismissed"}
+        if _include_communication_queue_event(event)
     ]
     queue.sort(
         key=lambda row: _parse_datetime(row.get("occurred_at")) or _parse_datetime(row.get("created_at")) or datetime.min.replace(tzinfo=timezone.utc),
@@ -4478,7 +5429,7 @@ def _build_outbound_activity(clinic_id: str) -> tuple[dict[str, Any], list[dict[
     try:
         manual_takeover_threads = sum(
             1
-            for conversation in (
+            for _ in (
                 get_supabase()
                 .table("conversations")
                 .select("id")
@@ -4540,14 +5491,50 @@ def _build_outbound_activity(clinic_id: str) -> tuple[dict[str, Any], list[dict[
     return summary, events[:12]
 
 
+def _safe_operations_builder(
+    clinic_id: str,
+    label: str,
+    default: Any,
+    builder: Callable[[], Any],
+) -> Any:
+    try:
+        return builder()
+    except Exception as exc:
+        logger.warning("operations_overview: %s failed clinic_id=%s error=%s", label, clinic_id, exc)
+        return default
+
+
+def _build_operations_request_lists(
+    clinic: dict[str, Any],
+    leads: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    reminder_candidates: list[dict[str, Any]] = []
+    action_required_requests: list[dict[str, Any]] = []
+    for lead in leads:
+        payload = _operation_lead_payload(
+            clinic["name"],
+            clinic["reminder_enabled"],
+            clinic["reminder_lead_hours"],
+            lead,
+        )
+        if payload["appointment_status"] in {"cancel_requested", "reschedule_requested", "no_show"}:
+            action_required_requests.append(payload)
+        elif lead.get("status") == "booked":
+            reminder_candidates.append(payload)
+    return reminder_candidates, action_required_requests
+
+
 def build_operations_overview(clinic_id: str) -> dict[str, Any]:
     db = get_supabase()
     clinic = _load_frontdesk_settings(clinic_id)
     reminder_enabled = clinic["reminder_enabled"]
     reminder_lead_hours = clinic["reminder_lead_hours"]
 
-    try:
-        leads: list[dict[str, Any]] = (
+    leads: list[dict[str, Any]] = _safe_operations_builder(
+        clinic_id,
+        "leads",
+        [],
+        lambda: (
             db.table("leads")
             .select("*")
             .eq("clinic_id", clinic_id)
@@ -4555,13 +5542,13 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
             .execute()
             .data
             or []
-        )
-    except Exception as exc:
-        logger.warning("operations_overview: failed to load leads clinic_id=%s error=%s", clinic_id, exc)
-        leads = []
-
-    try:
-        waitlist_entries: list[dict[str, Any]] = (
+        ),
+    )
+    waitlist_entries: list[dict[str, Any]] = _safe_operations_builder(
+        clinic_id,
+        "waitlist_entries",
+        [],
+        lambda: (
             db.table("waitlist_entries")
             .select("*")
             .eq("clinic_id", clinic_id)
@@ -4569,20 +5556,9 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
             .execute()
             .data
             or []
-        )
-    except Exception as exc:
-        logger.warning("operations_overview: waitlist_entries unavailable clinic_id=%s error=%s", clinic_id, exc)
-        waitlist_entries = []
-
-    reminder_candidates: list[dict[str, Any]] = []
-    action_required_requests: list[dict[str, Any]] = []
-    for lead in leads:
-        payload = _operation_lead_payload(clinic["name"], reminder_enabled, reminder_lead_hours, lead)
-        appointment_status = payload["appointment_status"]
-        if appointment_status in {"cancel_requested", "reschedule_requested", "no_show"}:
-            action_required_requests.append(payload)
-        elif lead.get("status") == "booked":
-            reminder_candidates.append(payload)
+        ),
+    )
+    reminder_candidates, action_required_requests = _build_operations_request_lists(clinic, leads)
 
     deposit_summary = {
         "required_count": sum(1 for lead in leads if lead.get("deposit_required")),
@@ -4603,49 +5579,51 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
         "note": "Deposit requests use real Stripe checkout links. Payment stays pending until Stripe confirms the appointment deposit.",
     }
 
-    try:
-        reminder_preview = build_reminder_previews(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: reminder_previews failed clinic_id=%s error=%s", clinic_id, exc)
-        reminder_preview = []
+    reminder_preview = _safe_operations_builder(
+        clinic_id,
+        "reminder_previews",
+        [],
+        lambda: build_reminder_previews(clinic_id),
+    )
     due_reminders = [item for item in reminder_preview if item.get("is_due")]
 
-    try:
-        outbound_activity, recent_outbound_messages = _build_outbound_activity(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: outbound_activity failed clinic_id=%s error=%s", clinic_id, exc)
-        outbound_activity, recent_outbound_messages = _empty_outbound_activity(), []
-
-    try:
-        channel_readiness = build_channel_readiness(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: channel_readiness failed clinic_id=%s error=%s", clinic_id, exc)
-        channel_readiness = []
-
-    try:
-        system_readiness = build_system_readiness(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: system_readiness failed clinic_id=%s error=%s", clinic_id, exc)
-        system_readiness = {
+    outbound_activity, recent_outbound_messages = _safe_operations_builder(
+        clinic_id,
+        "outbound_activity",
+        (_empty_outbound_activity(), []),
+        lambda: _build_outbound_activity(clinic_id),
+    )
+    channel_readiness = _safe_operations_builder(
+        clinic_id,
+        "channel_readiness",
+        [],
+        lambda: build_channel_readiness(clinic_id),
+    )
+    system_readiness = _safe_operations_builder(
+        clinic_id,
+        "system_readiness",
+        {
             "overall_status": "attention",
             "configured_count": 0,
             "partial_count": 0,
             "missing_count": 0,
             "blocked_count": 0,
             "items": [],
-        }
-
-    try:
-        communication_queue = build_communication_queue(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: communication_queue failed clinic_id=%s error=%s", clinic_id, exc)
-        communication_queue = []
-
-    try:
-        review_queue = build_sms_review_queue(clinic_id)
-    except Exception as exc:
-        logger.warning("operations_overview: review_queue failed clinic_id=%s error=%s", clinic_id, exc)
-        review_queue = []
+        },
+        lambda: build_system_readiness(clinic_id),
+    )
+    communication_queue = _safe_operations_builder(
+        clinic_id,
+        "communication_queue",
+        [],
+        lambda: build_communication_queue(clinic_id),
+    )
+    review_queue = _safe_operations_builder(
+        clinic_id,
+        "review_queue",
+        [],
+        lambda: build_sms_review_queue(clinic_id),
+    )
 
     return {
         "reminder_enabled": reminder_enabled,
@@ -4664,6 +5642,58 @@ def build_operations_overview(clinic_id: str) -> dict[str, Any]:
         "recent_outbound_messages": recent_outbound_messages,
         "outbound_activity": outbound_activity,
     }
+
+
+def _build_channel_payload(
+    clinic_id: str,
+    normalized_channel: str,
+    updates: dict[str, Any],
+    existing: Optional[dict[str, Any]],
+) -> dict[str, Any]:
+    """Build channel connection payload."""
+    payload = {
+        "clinic_id": clinic_id,
+        "channel": normalized_channel,
+        "provider": _safe_text(updates.get("provider")) or _safe_text((existing or {}).get("provider")) or CHANNEL_DEFAULTS[normalized_channel]["provider"],
+        "display_name": _safe_text(updates.get("display_name")) or _safe_text((existing or {}).get("display_name")) or CHANNEL_DEFAULTS[normalized_channel]["display_name"],
+        "contact_value": _safe_text(updates.get("contact_value")) or _safe_text((existing or {}).get("contact_value")),
+        "automation_enabled": bool(updates.get("automation_enabled")) if "automation_enabled" in updates else bool((existing or {}).get("automation_enabled")),
+        "notes": _safe_text(updates.get("notes")) or _safe_text((existing or {}).get("notes")),
+    }
+    return payload
+
+
+def _resolve_contact_value(
+    payload: dict[str, Any],
+    normalized_channel: str,
+    clinic: dict[str, Any],
+) -> None:
+    """Resolve contact value for channel if not provided."""
+    if payload["contact_value"]:
+        return
+    if normalized_channel in {"sms", "missed_call", "callback_request"}:
+        payload["contact_value"] = _safe_text(clinic.get("phone"))
+    if payload["contact_value"]:
+        return
+    if normalized_channel in {"sms", "missed_call"}:
+        payload["contact_value"] = _safe_text(get_sms_sender_identity())
+
+
+def _resolve_connection_status(
+    payload: dict[str, Any],
+    normalized_channel: str,
+) -> None:
+    """Resolve connection status for channel."""
+    if normalized_channel in {"web_chat", "manual"}:
+        payload["connection_status"] = "connected"
+        payload["automation_enabled"] = True
+    elif normalized_channel in {"sms", "missed_call"} and get_sms_configuration()["configured"]:
+        payload["connection_status"] = "connected"
+        payload["provider"] = "Twilio"
+    elif payload["provider"] != CHANNEL_DEFAULTS[normalized_channel]["provider"] or payload["contact_value"] or payload["notes"]:
+        payload["connection_status"] = "ready_for_setup"
+    else:
+        payload["connection_status"] = "not_connected"
 
 
 def update_channel_connection(
@@ -4689,31 +5719,11 @@ def update_channel_connection(
             .eq("channel", normalized_channel)
         )
     except Exception as exc:
-        raise RuntimeError("Channel readiness is not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_CHANNEL_READINESS_MIGRATION_MSG) from exc
 
-    payload = {
-        "clinic_id": clinic_id,
-        "channel": normalized_channel,
-        "provider": _safe_text(updates.get("provider")) or _safe_text((existing or {}).get("provider")) or CHANNEL_DEFAULTS[normalized_channel]["provider"],
-        "display_name": _safe_text(updates.get("display_name")) or _safe_text((existing or {}).get("display_name")) or CHANNEL_DEFAULTS[normalized_channel]["display_name"],
-        "contact_value": _safe_text(updates.get("contact_value")) or _safe_text((existing or {}).get("contact_value")),
-        "automation_enabled": bool(updates.get("automation_enabled")) if "automation_enabled" in updates else bool((existing or {}).get("automation_enabled")),
-        "notes": _safe_text(updates.get("notes")) or _safe_text((existing or {}).get("notes")),
-    }
-    if not payload["contact_value"] and normalized_channel in {"sms", "missed_call", "callback_request"}:
-        payload["contact_value"] = _safe_text(clinic.get("phone"))
-    if not payload["contact_value"] and normalized_channel in {"sms", "missed_call"}:
-        payload["contact_value"] = _safe_text(get_sms_sender_identity())
-    if normalized_channel in {"web_chat", "manual"}:
-        payload["connection_status"] = "connected"
-        payload["automation_enabled"] = True
-    elif normalized_channel in {"sms", "missed_call"} and get_sms_configuration()["configured"]:
-        payload["connection_status"] = "connected"
-        payload["provider"] = "Twilio"
-    elif payload["provider"] != CHANNEL_DEFAULTS[normalized_channel]["provider"] or payload["contact_value"] or payload["notes"]:
-        payload["connection_status"] = "ready_for_setup"
-    else:
-        payload["connection_status"] = "not_connected"
+    payload = _build_channel_payload(clinic_id, normalized_channel, updates, existing)
+    _resolve_contact_value(payload, normalized_channel, clinic)
+    _resolve_connection_status(payload, normalized_channel)
 
     try:
         if existing:
@@ -4721,10 +5731,48 @@ def update_channel_connection(
         else:
             db.table("channel_connections").insert(payload).execute()
     except Exception as exc:
-        raise RuntimeError("Channel readiness is not available until the latest database migration is applied.") from exc
+        raise RuntimeError(_CHANNEL_READINESS_MIGRATION_MSG) from exc
 
     refreshed = build_channel_readiness(clinic_id)
     return next((item for item in refreshed if item["channel"] == normalized_channel), None)
+
+
+def _handle_missed_call_event(clinic_id: str, event: dict[str, Any]) -> dict[str, Any]:
+    db = get_supabase()
+    task = create_follow_up_task(
+        clinic_id=clinic_id,
+        source_key=f"communication:{event['id']}",
+        task_type="follow_up_needed",
+        priority="high",
+        title="Missed call recovery",
+        detail=_safe_text(event.get("summary")) or "Missed call logged for recovery.",
+        customer_key=event.get("customer_key"),
+        customer_name=event.get("customer_name") or _UNKNOWN_CUSTOMER,
+        lead_id=event.get("lead_id"),
+        conversation_id=event.get("conversation_id"),
+        auto_generated=True,
+        due_at=_parse_datetime(event.get("occurred_at")) or _current_timestamp(),
+        status="open",
+    )
+    event = _update_communication_event_record(
+        clinic_id,
+        event["id"],
+        {"follow_up_task_id": task["id"]},
+    ) or event
+
+    readiness = _channel_readiness_map(clinic_id)
+    missed_call_ready = readiness.get("missed_call") or {}
+    if missed_call_ready.get("automation_enabled"):
+        send_missed_call_text_back(clinic_id, event["id"], require_automation=True)
+        refreshed = _maybe_single_data(
+            db.table("communication_events")
+            .select("*")
+            .eq("clinic_id", clinic_id)
+            .eq("id", event["id"])
+        )
+        if refreshed:
+            event = _normalize_communication_event_row(refreshed)
+    return event
 
 
 def create_communication_event(clinic_id: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -4738,6 +5786,7 @@ def create_communication_event(clinic_id: str, data: dict[str, Any]) -> dict[str
     customer_email = _safe_text(data.get("customer_email"))
     if not (customer_phone or customer_email or customer_name):
         raise ValueError("Add at least a name, phone number, or email address.")
+    
     context = _resolve_sms_thread_context(
         clinic_id,
         customer_name=customer_name,
@@ -4748,59 +5797,30 @@ def create_communication_event(clinic_id: str, data: dict[str, Any]) -> dict[str
     )
 
     event = _create_communication_event_record(
-        clinic_id,
         _communication_event_payload(
-            clinic_id=clinic_id,
-            thread_key=context["thread_key"],
-            channel=channel,
-            direction="inbound",
-            event_type=event_type,
-            status="new",
-            customer_key=context["customer_key"],
-            customer_name=context["customer_name"],
-            customer_phone=context["customer_phone"],
-            customer_email=context["customer_email"],
-            summary=_safe_text(data.get("summary")) or ("Missed call logged for recovery." if channel == "missed_call" else "Callback request logged for follow-up."),
-            content=_safe_text(data.get("content")),
-            lead_id=context["lead_id"],
-            conversation_id=context["conversation_id"],
-            occurred_at=_current_timestamp(),
+            {
+                "clinic_id": clinic_id,
+                "thread_key": context["thread_key"],
+                "channel": channel,
+                "direction": "inbound",
+                "event_type": event_type,
+                "status": "new",
+                "customer_key": context["customer_key"],
+                "customer_name": context["customer_name"],
+                "customer_phone": context["customer_phone"],
+                "customer_email": context["customer_email"],
+                "summary": _safe_text(data.get("summary")) or ("Missed call logged for recovery." if channel == "missed_call" else "Callback request logged for follow-up."),
+                "content": _safe_text(data.get("content")),
+                "lead_id": context["lead_id"],
+                "conversation_id": context["conversation_id"],
+                "occurred_at": _current_timestamp(),
+            }
         ),
     )
-    db = get_supabase()
+
     if channel == "missed_call":
-        task = create_follow_up_task(
-            clinic_id=clinic_id,
-            source_key=f"communication:{event['id']}",
-            task_type="follow_up_needed",
-            priority="high",
-            title="Missed call recovery",
-            detail=_safe_text(event.get("summary")) or "Missed call logged for recovery.",
-            customer_key=event.get("customer_key"),
-            customer_name=event.get("customer_name") or "Unknown customer",
-            lead_id=event.get("lead_id"),
-            conversation_id=event.get("conversation_id"),
-            auto_generated=True,
-            due_at=_parse_datetime(event.get("occurred_at")) or _current_timestamp(),
-            status="open",
-        )
-        event = _update_communication_event_record(
-            clinic_id,
-            event["id"],
-            {"follow_up_task_id": task["id"]},
-        ) or event
-        readiness = _channel_readiness_map(clinic_id)
-        missed_call_ready = readiness.get("missed_call") or {}
-        if missed_call_ready.get("automation_enabled"):
-            send_missed_call_text_back(clinic_id, event["id"], require_automation=True)
-            refreshed = _maybe_single_data(
-                db.table("communication_events")
-                .select("*")
-                .eq("clinic_id", clinic_id)
-                .eq("id", event["id"])
-            )
-            if refreshed:
-                event = _normalize_communication_event_row(refreshed)
+        event = _handle_missed_call_event(clinic_id, event)
+    
     return event
 
 
@@ -4839,10 +5859,10 @@ def _link_thread_to_lead(
     related_events = resolved["related_events"]
     thread_conversation_id = resolved["thread_conversation_id"]
     customer_key = _customer_key(_normalize_identity(lead))
-    customer_name = lead.get("patient_name") or conversation.get("customer_name") or "Unknown patient"
+    customer_name = lead.get("patient_name") or conversation.get("customer_name") or _UNKNOWN_PATIENT
 
-    if thread_id.startswith("event:"):
-        thread_key = thread_id.split("event:", 1)[1]
+    if thread_id.startswith(_EVENT_ID_PREFIX):
+        thread_key = thread_id.split(_EVENT_ID_PREFIX, 1)[1]
         primary_event = resolved["communication_event"] or _primary_event_for_thread(related_events)
         sms_conversation = _ensure_sms_thread_conversation(
             clinic_id,
@@ -4882,60 +5902,64 @@ def _link_thread_to_lead(
     return lead
 
 
-def convert_thread_to_lead(
+def _convert_event_thread_to_lead(
     clinic_id: str,
     thread_id: str,
-    data: Optional[dict[str, Any]] = None,
+    thread_key: str,
+    payload: dict[str, Any],
 ) -> Optional[dict[str, Any]]:
+    """Convert event thread to lead."""
     db = get_supabase()
-    payload = data or {}
-    if thread_id.startswith("event:"):
-        thread_key = thread_id.split("event:", 1)[1]
-        thread_events = [
-            event
-            for event in _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
-            if _safe_text(event.get("thread_key")) == thread_key
-        ]
-        if not thread_events:
-            return None
-        event = _primary_event_for_thread(thread_events)
-        if event.get("lead_id"):
-            return _maybe_single_data(
-                db.table("leads")
-                .select("*")
-                .eq("clinic_id", clinic_id)
-                .eq("id", event["lead_id"])
-            )
-
-        patient_name = _safe_text(payload.get("patient_name")) or _safe_text(event.get("customer_name"))
-        patient_phone = _safe_text(payload.get("patient_phone")) or _safe_text(event.get("customer_phone"))
-        patient_email = _safe_text(payload.get("patient_email")) or _safe_text(event.get("customer_email"))
-        if not (patient_name or patient_phone or patient_email):
-            raise ValueError("Add a name, phone number, or email before converting this thread into a request.")
-        existing_lead = _find_matching_lead_by_identity(
-            clinic_id,
-            phone=patient_phone,
-            email=patient_email,
+    thread_events = [
+        event
+        for event in _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
+        if _safe_text(event.get("thread_key")) == thread_key
+    ]
+    if not thread_events:
+        return None
+    
+    event = _primary_event_for_thread(thread_events)
+    if event.get("lead_id"):
+        return _maybe_single_data(
+            db.table("leads")
+            .select("*")
+            .eq("clinic_id", clinic_id)
+            .eq("id", event["lead_id"])
         )
-        if existing_lead:
-            return _link_thread_to_lead(clinic_id, thread_id, existing_lead)
 
-        from app.services.lead_service import create_lead
+    patient_name = _safe_text(payload.get("patient_name")) or _safe_text(event.get("customer_name"))
+    patient_phone = _safe_text(payload.get("patient_phone")) or _safe_text(event.get("customer_phone"))
+    patient_email = _safe_text(payload.get("patient_email")) or _safe_text(event.get("customer_email"))
+    if not (patient_name or patient_phone or patient_email):
+        raise ValueError("Add a name, phone number, or email before converting this thread into a request.")
+    
+    existing_lead = _find_matching_lead_by_identity(clinic_id, phone=patient_phone, email=patient_email)
+    if existing_lead:
+        return _link_thread_to_lead(clinic_id, thread_id, existing_lead)
 
-        lead = create_lead(
-            clinic_id,
-            {
-                "patient_name": patient_name or "Manual front desk lead",
-                "patient_phone": patient_phone,
-                "patient_email": patient_email,
-                "reason_for_visit": _safe_text(payload.get("reason_for_visit")) or _safe_text(event.get("summary")) or "Callback request",
-                "preferred_datetime_text": _safe_text(payload.get("preferred_datetime_text")),
-                "source": _normalize_channel(event.get("channel"), "manual"),
-                "notes": _safe_text(payload.get("notes")) or _safe_text(event.get("content")),
-            },
-        )
-        return _link_thread_to_lead(clinic_id, thread_id, lead)
+    from app.services.lead_service import create_lead
+    lead = create_lead(
+        clinic_id,
+        {
+            "patient_name": patient_name or "Manual front desk lead",
+            "patient_phone": patient_phone,
+            "patient_email": patient_email,
+            "reason_for_visit": _safe_text(payload.get("reason_for_visit")) or _safe_text(event.get("summary")) or "Callback request",
+            "preferred_datetime_text": _safe_text(payload.get("preferred_datetime_text")),
+            "source": _normalize_channel(event.get("channel"), "manual"),
+            "notes": _safe_text(payload.get("notes")) or _safe_text(event.get("content")),
+        },
+    )
+    return _link_thread_to_lead(clinic_id, thread_id, lead)
 
+
+def _convert_conversation_thread_to_lead(
+    clinic_id: str,
+    thread_id: str,
+    payload: dict[str, Any],
+) -> Optional[dict[str, Any]]:
+    """Convert conversation thread to lead."""
+    db = get_supabase()
     conversation = _maybe_single_data(
         db.table("conversations")
         .select("*")
@@ -4944,6 +5968,7 @@ def convert_thread_to_lead(
     )
     if not conversation:
         return None
+    
     if conversation.get("lead_id"):
         return _maybe_single_data(
             db.table("leads")
@@ -4957,11 +5982,8 @@ def convert_thread_to_lead(
     patient_email = _safe_text(payload.get("patient_email"))
     if not (patient_name or patient_phone or patient_email):
         raise ValueError("Add a name, phone number, or email before converting this thread into a request.")
-    existing_lead = _find_matching_lead_by_identity(
-        clinic_id,
-        phone=patient_phone,
-        email=patient_email,
-    )
+    
+    existing_lead = _find_matching_lead_by_identity(clinic_id, phone=patient_phone, email=patient_email)
     if existing_lead:
         return _link_thread_to_lead(clinic_id, thread_id, existing_lead)
 
@@ -4974,8 +5996,8 @@ def convert_thread_to_lead(
         .data
         or []
     )
+    
     from app.services.lead_service import create_lead
-
     lead = create_lead(
         clinic_id,
         {
@@ -4991,6 +6013,19 @@ def convert_thread_to_lead(
     return _link_thread_to_lead(clinic_id, thread_id, lead)
 
 
+def convert_thread_to_lead(
+    clinic_id: str,
+    thread_id: str,
+    data: Optional[dict[str, Any]] = None,
+) -> Optional[dict[str, Any]]:
+    payload = data or {}
+    if thread_id.startswith(_EVENT_ID_PREFIX):
+        thread_key = thread_id.split(_EVENT_ID_PREFIX, 1)[1]
+        return _convert_event_thread_to_lead(clinic_id, thread_id, thread_key, payload)
+    
+    return _convert_conversation_thread_to_lead(clinic_id, thread_id, payload)
+
+
 def update_thread_control(
     clinic_id: str,
     thread_id: str,
@@ -5000,8 +6035,8 @@ def update_thread_control(
     db = get_supabase()
     try:
         conversation = None
-        if thread_id.startswith("event:"):
-            thread_key = thread_id.split("event:", 1)[1]
+        if thread_id.startswith(_EVENT_ID_PREFIX):
+            thread_key = thread_id.split(_EVENT_ID_PREFIX, 1)[1]
             thread_events = [
                 event
                 for event in _load_communication_events(clinic_id, limit=400, include_all_statuses=True)
@@ -5056,7 +6091,6 @@ def update_thread_control(
 def _complete_thread_follow_up_tasks(
     clinic_id: str,
     *,
-    thread_id: str,
     lead_id: Optional[str],
     conversation_id: Optional[str],
     related_events: list[dict[str, Any]],
@@ -5087,6 +6121,42 @@ def _complete_thread_follow_up_tasks(
         )
 
 
+def _build_thread_workflow_payload(
+    lead: dict[str, Any],
+    status_value: str,
+    appointment_starts_at: Optional[datetime],
+    appointment_ends_at: Optional[datetime],
+    booking_note: str,
+    reason_for_visit: str,
+    preferred_datetime_text: str,
+) -> dict[str, Any]:
+    """Build payload for thread workflow update."""
+    payload: dict[str, Any] = {"status": status_value}
+    
+    if reason_for_visit:
+        payload["reason_for_visit"] = reason_for_visit
+    if preferred_datetime_text:
+        payload["preferred_datetime_text"] = preferred_datetime_text
+    if booking_note:
+        payload["notes"] = _merge_note_text(_safe_text(lead.get("notes")), booking_note)
+
+    if status_value == "booked":
+        if appointment_starts_at is None:
+            raise ValueError("Add an appointment date and time before marking this request as booked.")
+        payload["appointment_status"] = "confirmed"
+        payload["appointment_starts_at"] = appointment_starts_at
+        payload["appointment_ends_at"] = appointment_ends_at
+        if not preferred_datetime_text:
+            payload["preferred_datetime_text"] = _format_appointment_summary(appointment_starts_at)
+    elif status_value == "closed":
+        if _safe_text(lead.get("appointment_status")) not in {"confirmed", "completed"}:
+            payload["appointment_status"] = "cancelled"
+            payload["reminder_status"] = "not_ready"
+            payload["reminder_scheduled_for"] = None
+
+    return payload
+
+
 def update_thread_workflow(
     clinic_id: str,
     thread_id: str,
@@ -5109,29 +6179,10 @@ def update_thread_workflow(
     reason_for_visit = _safe_text(updates.get("reason_for_visit"))
     preferred_datetime_text = _safe_text(updates.get("preferred_datetime_text"))
 
-    payload: dict[str, Any] = {
-        "status": status_value,
-    }
-    if reason_for_visit:
-        payload["reason_for_visit"] = reason_for_visit
-    if preferred_datetime_text:
-        payload["preferred_datetime_text"] = preferred_datetime_text
-    if booking_note:
-        payload["notes"] = _merge_note_text(_safe_text(lead.get("notes")), booking_note)
-
-    if status_value == "booked":
-        if appointment_starts_at is None:
-            raise ValueError("Add an appointment date and time before marking this request as booked.")
-        payload["appointment_status"] = "confirmed"
-        payload["appointment_starts_at"] = appointment_starts_at
-        payload["appointment_ends_at"] = appointment_ends_at
-        if not preferred_datetime_text:
-            payload["preferred_datetime_text"] = _format_appointment_summary(appointment_starts_at)
-    elif status_value == "closed":
-        if _safe_text(lead.get("appointment_status")) not in {"confirmed", "completed"}:
-            payload["appointment_status"] = "cancelled"
-            payload["reminder_status"] = "not_ready"
-            payload["reminder_scheduled_for"] = None
+    payload = _build_thread_workflow_payload(
+        lead, status_value, appointment_starts_at, appointment_ends_at,
+        booking_note, reason_for_visit, preferred_datetime_text,
+    )
 
     updated = update_lead_operations(clinic_id, lead["id"], payload)
     if not updated:
@@ -5152,13 +6203,125 @@ def update_thread_workflow(
     }[status_value]
     _complete_thread_follow_up_tasks(
         clinic_id,
-        thread_id=thread_id,
         lead_id=updated["id"],
         conversation_id=resolved.get("thread_conversation_id"),
         related_events=resolved.get("related_events") or [],
         note=_merge_note_text(follow_up_note, booking_note),
     )
     return updated
+
+
+def _validate_appointment_updates(
+    provided: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate and filter appointment update fields."""
+    filtered: dict[str, Any] = {}
+    
+    if "status" in provided:
+        status_value = _safe_text(provided.get("status")).lower()
+        if status_value not in {"new", "contacted", "booked", "closed"}:
+            raise ValueError("Invalid lead status.")
+        filtered["status"] = status_value
+
+    if "appointment_status" in provided:
+        appointment_status = _safe_text(provided.get("appointment_status")).lower()
+        if appointment_status not in APPOINTMENT_STATUSES:
+            raise ValueError("Invalid appointment status.")
+        filtered["appointment_status"] = appointment_status
+
+    if "appointment_starts_at" in provided:
+        filtered["appointment_starts_at"] = _serialize_datetime(provided.get("appointment_starts_at"))
+    if "appointment_ends_at" in provided:
+        filtered["appointment_ends_at"] = _serialize_datetime(provided.get("appointment_ends_at"))
+    if "reason_for_visit" in provided:
+        filtered["reason_for_visit"] = _safe_text(provided.get("reason_for_visit"))
+    if "preferred_datetime_text" in provided:
+        filtered["preferred_datetime_text"] = _safe_text(provided.get("preferred_datetime_text"))
+    
+    return filtered
+
+
+def _add_note_to_updates(
+    filtered: dict[str, Any],
+    provided: dict[str, Any],
+    current: dict[str, Any],
+) -> None:
+    """Add note field to updates if provided."""
+    if "note" in provided and _safe_text(provided.get("note")):
+        filtered["notes"] = _merge_note_text(_safe_text(current.get("notes")), _safe_text(provided.get("note")))
+
+
+def _apply_confirmed_status_rules(
+    filtered: dict[str, Any],
+    appointment_starts_at: Optional[datetime],
+    reminder_enabled: bool,
+    reminder_lead_hours: int,
+    current: dict[str, Any],
+) -> None:
+    """Apply rules for confirmed appointment status."""
+    filtered.setdefault("status", "booked")
+    if reminder_enabled and appointment_starts_at is not None:
+        filtered["reminder_status"] = "ready"
+        filtered["reminder_scheduled_for"] = (
+            appointment_starts_at - timedelta(hours=reminder_lead_hours)
+        ).isoformat()
+    else:
+        filtered.setdefault("reminder_status", current.get("reminder_status") or "not_ready")
+    if appointment_starts_at is not None and not _safe_text(filtered.get("preferred_datetime_text")):
+        filtered["preferred_datetime_text"] = _format_appointment_summary(appointment_starts_at)
+
+
+def _apply_cancelled_status_rules(
+    filtered: dict[str, Any],
+    appointment_status: str,
+) -> None:
+    """Apply rules for cancelled/reschedule appointment statuses."""
+    is_final_closed = appointment_status in {"cancelled", "no_show"}
+    filtered.setdefault("status", "closed" if is_final_closed else "contacted")
+    filtered["reminder_status"] = "not_ready"
+    filtered["reminder_scheduled_for"] = None
+
+
+def _apply_completed_status_rules(
+    filtered: dict[str, Any],
+    current: dict[str, Any],
+) -> None:
+    """Apply rules for completed appointment status."""
+    filtered.setdefault("status", "closed")
+    filtered["reminder_status"] = "sent" if _safe_text(current.get("reminder_status")) == "sent" else "not_ready"
+    filtered["reminder_scheduled_for"] = None
+
+
+def _apply_request_open_status_rules(
+    filtered: dict[str, Any],
+) -> None:
+    """Apply rules for request_open appointment status."""
+    filtered.setdefault("status", "contacted")
+    filtered["reminder_status"] = "not_ready"
+    filtered["reminder_scheduled_for"] = None
+    if "appointment_starts_at" not in filtered:
+        filtered["appointment_starts_at"] = None
+    if "appointment_ends_at" not in filtered:
+        filtered["appointment_ends_at"] = None
+
+
+def _apply_appointment_status_rules(
+    filtered: dict[str, Any],
+    appointment_status: str,
+    appointment_starts_at: Optional[datetime],
+    reminder_enabled: bool,
+    reminder_lead_hours: int,
+    current: dict[str, Any],
+) -> None:
+    """Apply status-specific rules to appointment updates."""
+    if appointment_status == "confirmed":
+        _apply_confirmed_status_rules(filtered, appointment_starts_at, reminder_enabled, reminder_lead_hours, current)
+    elif appointment_status in {"cancel_requested", "reschedule_requested", "cancelled", "no_show"}:
+        _apply_cancelled_status_rules(filtered, appointment_status)
+    elif appointment_status == "completed":
+        _apply_completed_status_rules(filtered, current)
+    elif appointment_status == "request_open":
+        _apply_request_open_status_rules(filtered)
 
 
 def update_appointment(
@@ -5189,29 +6352,8 @@ def update_appointment(
     if not provided:
         raise ValueError("No appointment changes were provided.")
 
-    filtered: dict[str, Any] = {}
-    if "status" in provided:
-        status_value = _safe_text(provided.get("status")).lower()
-        if status_value not in {"new", "contacted", "booked", "closed"}:
-            raise ValueError("Invalid lead status.")
-        filtered["status"] = status_value
-
-    if "appointment_status" in provided:
-        appointment_status = _safe_text(provided.get("appointment_status")).lower()
-        if appointment_status not in APPOINTMENT_STATUSES:
-            raise ValueError("Invalid appointment status.")
-        filtered["appointment_status"] = appointment_status
-
-    if "appointment_starts_at" in provided:
-        filtered["appointment_starts_at"] = _serialize_datetime(provided.get("appointment_starts_at"))
-    if "appointment_ends_at" in provided:
-        filtered["appointment_ends_at"] = _serialize_datetime(provided.get("appointment_ends_at"))
-    if "reason_for_visit" in provided:
-        filtered["reason_for_visit"] = _safe_text(provided.get("reason_for_visit"))
-    if "preferred_datetime_text" in provided:
-        filtered["preferred_datetime_text"] = _safe_text(provided.get("preferred_datetime_text"))
-    if "note" in provided and _safe_text(provided.get("note")):
-        filtered["notes"] = _merge_note_text(_safe_text(current.get("notes")), _safe_text(provided.get("note")))
+    filtered = _validate_appointment_updates(provided)
+    _add_note_to_updates(filtered, provided, current)
 
     clinic = _maybe_single_data(
         db.table("clinics")
@@ -5231,33 +6373,14 @@ def update_appointment(
     if appointment_status == "confirmed" and appointment_starts_at is None:
         raise ValueError("Add an appointment date and time before confirming this booking.")
 
-    if appointment_status == "confirmed":
-        filtered.setdefault("status", "booked")
-        if reminder_enabled and appointment_starts_at is not None:
-            filtered["reminder_status"] = "ready"
-            filtered["reminder_scheduled_for"] = (
-                appointment_starts_at - timedelta(hours=reminder_lead_hours)
-            ).isoformat()
-        else:
-            filtered.setdefault("reminder_status", current.get("reminder_status") or "not_ready")
-        if appointment_starts_at is not None and not _safe_text(filtered.get("preferred_datetime_text")):
-            filtered["preferred_datetime_text"] = _format_appointment_summary(appointment_starts_at)
-    elif appointment_status in {"cancel_requested", "reschedule_requested", "cancelled", "no_show"}:
-        filtered.setdefault("status", "closed" if appointment_status in {"cancelled", "no_show"} else "contacted")
-        filtered["reminder_status"] = "not_ready"
-        filtered["reminder_scheduled_for"] = None
-    elif appointment_status == "completed":
-        filtered.setdefault("status", "closed")
-        filtered["reminder_status"] = "sent" if _safe_text(current.get("reminder_status")) == "sent" else "not_ready"
-        filtered["reminder_scheduled_for"] = None
-    elif appointment_status == "request_open":
-        filtered.setdefault("status", "contacted")
-        filtered["reminder_status"] = "not_ready"
-        filtered["reminder_scheduled_for"] = None
-        if "appointment_starts_at" not in filtered:
-            filtered["appointment_starts_at"] = None
-        if "appointment_ends_at" not in filtered:
-            filtered["appointment_ends_at"] = None
+    _apply_appointment_status_rules(
+        filtered,
+        appointment_status,
+        appointment_starts_at,
+        reminder_enabled,
+        reminder_lead_hours,
+        current,
+    )
 
     result = (
         db.table("leads")
@@ -5296,30 +6419,31 @@ def create_thread_note(
     communication_event = resolved.get("communication_event") or {}
     thread_type = resolved["detail"]["thread_type"]
     thread_key = (
-        thread_id.split("event:", 1)[1]
+        thread_id.split(_EVENT_ID_PREFIX, 1)[1]
         if thread_type == "event"
         else _safe_text(conversation.get("session_id")) or f"conversation:{conversation['id']}"
     )
 
     return _create_communication_event_record(
-        clinic_id,
         _communication_event_payload(
-            clinic_id=clinic_id,
-            thread_key=thread_key,
-            channel="manual",
-            direction="internal",
-            event_type="note",
-            status="completed",
-            customer_key=conversation.get("customer_key"),
-            customer_name=conversation.get("customer_name") or lead.get("patient_name") or communication_event.get("customer_name") or "Unknown customer",
-            customer_phone=conversation.get("customer_phone") or lead.get("patient_phone") or communication_event.get("customer_phone") or "",
-            customer_email=conversation.get("customer_email") or lead.get("patient_email") or communication_event.get("customer_email") or "",
-            summary="Internal note",
-            content=note_text,
-            lead_id=(lead or {}).get("id") or communication_event.get("lead_id"),
-            conversation_id=resolved.get("thread_conversation_id") or communication_event.get("conversation_id"),
-            payload={"sender_kind": "staff"},
-            occurred_at=_current_timestamp(),
+            {
+                "clinic_id": clinic_id,
+                "thread_key": thread_key,
+                "channel": "manual",
+                "direction": "internal",
+                "event_type": "note",
+                "status": "completed",
+                "customer_key": conversation.get("customer_key"),
+                "customer_name": conversation.get("customer_name") or lead.get("patient_name") or communication_event.get("customer_name") or _UNKNOWN_CUSTOMER,
+                "customer_phone": conversation.get("customer_phone") or lead.get("patient_phone") or communication_event.get("customer_phone") or "",
+                "customer_email": conversation.get("customer_email") or lead.get("patient_email") or communication_event.get("customer_email") or "",
+                "summary": "Internal note",
+                "content": note_text,
+                "lead_id": (lead or {}).get("id") or communication_event.get("lead_id"),
+                "conversation_id": resolved.get("thread_conversation_id") or communication_event.get("conversation_id"),
+                "payload": {"sender_kind": "staff"},
+                "occurred_at": _current_timestamp(),
+            }
         ),
     )
 
@@ -5342,11 +6466,7 @@ def update_communication_event(
     return _update_communication_event_record(clinic_id, event_id, filtered)
 
 
-def update_lead_operations(
-    clinic_id: str,
-    lead_id: str,
-    updates: dict[str, Any],
-) -> Optional[dict[str, Any]]:
+def _normalize_lead_operations_updates(updates: dict[str, Any]) -> dict[str, Any]:
     filtered = {
         key: _serialize_datetime(value)
         for key, value in updates.items()
@@ -5358,55 +6478,93 @@ def update_lead_operations(
         raise ValueError("Invalid reminder status.")
     if "deposit_status" in filtered:
         filtered["deposit_status"] = _normalize_deposit_status(filtered["deposit_status"])
-    if "deposit_status" in filtered and filtered["deposit_status"] not in DEPOSIT_STATUSES:
-        raise ValueError("Invalid deposit status.")
+        if filtered["deposit_status"] not in DEPOSIT_STATUSES:
+            raise ValueError("Invalid deposit status.")
+    return filtered
+
+
+def _load_lead_operations_context(
+    db: Any,
+    clinic_id: str,
+    lead_id: str,
+) -> tuple[Optional[dict[str, Any]], bool, int]:
+    current = _maybe_single_data(
+        db.table("leads")
+        .select("*")
+        .eq("clinic_id", clinic_id)
+        .eq("id", lead_id)
+    )
+    if not current:
+        return None, False, 24
+    clinic = _maybe_single_data(
+        db.table("clinics")
+        .select("reminder_enabled, reminder_lead_hours")
+        .eq("id", clinic_id)
+    ) or {}
+    return current, bool(clinic.get("reminder_enabled")), int(clinic.get("reminder_lead_hours") or 24)
+
+
+def _apply_lead_operation_reminder_rules(
+    filtered: dict[str, Any],
+    current: dict[str, Any],
+    reminder_enabled: bool,
+    reminder_lead_hours: int,
+) -> None:
+    appointment_status = filtered.get("appointment_status", current.get("appointment_status") or "request_open")
+    appointment_starts_at = _parse_datetime(
+        filtered.get("appointment_starts_at") or current.get("appointment_starts_at")
+    )
+    if appointment_status in {"cancel_requested", "reschedule_requested", "cancelled", "no_show"}:
+        filtered["reminder_status"] = "not_ready"
+        filtered["reminder_scheduled_for"] = None
+        return
+    if appointment_status == "confirmed" and appointment_starts_at is not None:
+        if reminder_enabled:
+            filtered.setdefault("reminder_status", "ready")
+            filtered["reminder_scheduled_for"] = (
+                appointment_starts_at - timedelta(hours=reminder_lead_hours)
+            ).isoformat()
+        else:
+            filtered.setdefault("reminder_status", current.get("reminder_status") or "not_ready")
+
+
+def _apply_lead_operation_deposit_rules(
+    filtered: dict[str, Any],
+    current: dict[str, Any],
+) -> None:
+    if filtered.get("deposit_required") is False:
+        filtered["deposit_amount_cents"] = None
+        filtered["deposit_checkout_session_id"] = ""
+        filtered["deposit_payment_intent_id"] = ""
+        filtered["deposit_requested_at"] = None
+        filtered["deposit_paid_at"] = None
+        filtered["deposit_status"] = "not_required"
+        return
+    if filtered.get("deposit_required") is True and "deposit_status" not in filtered:
+        filtered["deposit_status"] = _normalize_deposit_status(current.get("deposit_status")) or "required"
+
+
+def update_lead_operations(
+    clinic_id: str,
+    lead_id: str,
+    updates: dict[str, Any],
+) -> Optional[dict[str, Any]]:
+    filtered = _normalize_lead_operations_updates(updates)
     if not filtered:
         return None
 
     db = get_supabase()
     try:
-        current = _maybe_single_data(
-            db.table("leads")
-            .select("*")
-            .eq("clinic_id", clinic_id)
-            .eq("id", lead_id)
-        )
+        current, reminder_enabled, reminder_lead_hours = _load_lead_operations_context(db, clinic_id, lead_id)
         if not current:
             return None
-
-        clinic = _maybe_single_data(
-            db.table("clinics")
-            .select("reminder_enabled, reminder_lead_hours")
-            .eq("id", clinic_id)
-        ) or {}
-        reminder_enabled = bool(clinic.get("reminder_enabled"))
-        reminder_lead_hours = int(clinic.get("reminder_lead_hours") or 24)
-        appointment_status = filtered.get("appointment_status", current.get("appointment_status") or "request_open")
-        appointment_starts_at = _parse_datetime(
-            filtered.get("appointment_starts_at") or current.get("appointment_starts_at")
+        _apply_lead_operation_reminder_rules(
+            filtered,
+            current,
+            reminder_enabled,
+            reminder_lead_hours,
         )
-
-        if appointment_status in {"cancel_requested", "reschedule_requested", "cancelled", "no_show"}:
-            filtered["reminder_status"] = "not_ready"
-            filtered["reminder_scheduled_for"] = None
-        elif appointment_status == "confirmed" and appointment_starts_at is not None:
-            if reminder_enabled:
-                filtered.setdefault("reminder_status", "ready")
-                filtered["reminder_scheduled_for"] = (
-                    appointment_starts_at - timedelta(hours=reminder_lead_hours)
-                ).isoformat()
-            else:
-                filtered.setdefault("reminder_status", current.get("reminder_status") or "not_ready")
-
-        if filtered.get("deposit_required") is False:
-            filtered["deposit_amount_cents"] = None
-            filtered["deposit_checkout_session_id"] = ""
-            filtered["deposit_payment_intent_id"] = ""
-            filtered["deposit_requested_at"] = None
-            filtered["deposit_paid_at"] = None
-            filtered["deposit_status"] = "not_required"
-        elif filtered.get("deposit_required") is True and "deposit_status" not in filtered:
-            filtered["deposit_status"] = _normalize_deposit_status(current.get("deposit_status")) or "required"
+        _apply_lead_operation_deposit_rules(filtered, current)
 
         result = (
             db.table("leads")
@@ -5428,7 +6586,7 @@ def create_waitlist_entry(
         "clinic_id": clinic_id,
         "lead_id": data.get("lead_id"),
         "customer_key": _safe_text(data.get("customer_key")),
-        "patient_name": _safe_text(data.get("patient_name")) or "Unknown patient",
+        "patient_name": _safe_text(data.get("patient_name")) or _UNKNOWN_PATIENT,
         "patient_phone": _safe_text(data.get("patient_phone")),
         "patient_email": _safe_text(data.get("patient_email")),
         "service_requested": _safe_text(data.get("service_requested")),

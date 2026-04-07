@@ -1,4 +1,5 @@
-from typing import Annotated
+import asyncio
+from typing import Annotated, Any
 from urllib.parse import parse_qsl
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, UploadFile, status
@@ -92,6 +93,16 @@ from app.services.frontdesk_service import (
     update_waitlist_entry,
     mark_appointment_deposit_not_required,
 )
+
+_APPOINTMENT_NOT_FOUND = "Appointment not found."
+_COMMUNICATION_EVENT_NOT_FOUND = "Communication event not found."
+_CONVERSATION_THREAD_NOT_FOUND = "Conversation thread not found."
+_BACKGROUND_TASKS: set[asyncio.Task[Any]] = set()
+
+
+def _track_background_task(task: asyncio.Task[Any]) -> None:
+    _BACKGROUND_TASKS.add(task)
+    task.add_done_callback(_BACKGROUND_TASKS.discard)
 
 router = APIRouter(prefix="/frontdesk", tags=["frontdesk"])
 settings = get_settings()
@@ -268,7 +279,7 @@ async def edit_appointment(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_APPOINTMENT_NOT_FOUND)
     return updated
 
 
@@ -290,7 +301,7 @@ async def create_appointment_deposit_request(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_APPOINTMENT_NOT_FOUND)
     return result
 
 
@@ -304,7 +315,7 @@ async def clear_appointment_deposit_requirement(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_APPOINTMENT_NOT_FOUND)
     return updated
 
 
@@ -415,7 +426,7 @@ async def edit_communication_event(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Communication event not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_COMMUNICATION_EVENT_NOT_FOUND)
     return updated
 
 
@@ -431,7 +442,7 @@ async def send_text_back(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Communication event not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_COMMUNICATION_EVENT_NOT_FOUND)
     return event
 
 
@@ -476,7 +487,7 @@ async def send_thread_suggested_reply(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Communication event not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_COMMUNICATION_EVENT_NOT_FOUND)
     return event
 
 
@@ -492,7 +503,7 @@ async def discard_thread_suggested_reply(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Communication event not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_COMMUNICATION_EVENT_NOT_FOUND)
     return event
 
 
@@ -511,7 +522,7 @@ async def edit_thread_control(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation thread not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_CONVERSATION_THREAD_NOT_FOUND)
     return updated
 
 
@@ -532,7 +543,7 @@ async def edit_thread_workflow(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation thread not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_CONVERSATION_THREAD_NOT_FOUND)
     return updated
 
 
@@ -553,7 +564,7 @@ async def add_thread_note(
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     if not note:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation thread not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_CONVERSATION_THREAD_NOT_FOUND)
     return note
 
 
@@ -717,8 +728,7 @@ async def upload_training_document(
         storage_path=storage_path,
     )
 
-    import asyncio
-    asyncio.create_task(ingest_document(clinic_id, doc["id"], file_bytes, ext))
+    _track_background_task(asyncio.create_task(ingest_document(clinic_id, doc["id"], file_bytes, ext)))
 
     return doc
 
@@ -769,7 +779,6 @@ async def reprocess_training_document(
             detail="Could not retrieve original file from storage.",
         ) from exc
 
-    import asyncio
-    asyncio.create_task(ingest_document(clinic_id, document_id, file_bytes, doc["file_type"]))
+    _track_background_task(asyncio.create_task(ingest_document(clinic_id, document_id, file_bytes, doc["file_type"])))
 
     return {"success": True, "status": "processing"}
