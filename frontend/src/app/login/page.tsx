@@ -3,7 +3,15 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Bot, Loader2, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  Bot,
+  Loader2,
+  ArrowLeft,
+  ShieldCheck,
+  Eye,
+  Users,
+  LayoutGrid,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
@@ -27,14 +35,11 @@ function formatOAuthError(raw: string | null): string {
 
 function readCookie(name: string): string | null {
   if (globalThis.document === undefined) return null;
-
   const prefix = `${name}=`;
   const match = document.cookie
     .split("; ")
     .find((entry) => entry.startsWith(prefix));
-
   if (!match) return null;
-
   return match.slice(prefix.length);
 }
 
@@ -42,6 +47,25 @@ function clearCookie(name: string) {
   if (globalThis.document === undefined) return;
   document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
 }
+
+const trustPoints = [
+  {
+    icon: Eye,
+    text: "Every conversation is visible to your team",
+  },
+  {
+    icon: Users,
+    text: "Staff can review or take over any thread",
+  },
+  {
+    icon: ShieldCheck,
+    text: "Grounded in your clinic information only",
+  },
+  {
+    icon: LayoutGrid,
+    text: "Inbox, appointments, and follow-up in one place",
+  },
+];
 
 export default function LoginPage() {
   const { login, setAuthenticatedUser } = useAuth();
@@ -52,10 +76,12 @@ export default function LoginPage() {
   const [oauthError, setOauthError] = useState("");
   const [queryReady, setQueryReady] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"professional" | "premium" | null>(null);
+
   const supabaseConfigError =
     typeof getSupabasePublicEnvError === "function"
       ? getSupabasePublicEnvError()?.message ?? ""
       : "";
+
   const microsoftEnabled = OAUTH_PROVIDERS.some(
     (provider) => provider.id === "azure" && provider.enabled !== false
   );
@@ -122,67 +148,97 @@ export default function LoginPage() {
 
   return (
     <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+      {/* Back link */}
       <Link
         href="/"
-        className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-2 text-sm font-semibold text-[#64748B] shadow-sm transition-colors hover:text-[#0F172A]"
+        className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-2 text-sm font-medium text-[#64748B] shadow-sm transition-colors hover:text-[#0F172A]"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="h-4 w-4" />
         Back
       </Link>
+
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
-        <div className="auth-shell grid w-full max-w-6xl gap-8 p-5 sm:p-6 lg:grid-cols-[0.96fr_1.04fr] lg:p-8">
-          <div className="hidden rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-8 lg:flex lg:flex-col lg:justify-between">
+        <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
+
+          {/* Left panel — marketing */}
+          <div className="hidden flex-col justify-between rounded-l-[0.75rem] border-r border-[#E2E8F0] bg-[#F8FAFC] p-8 lg:flex xl:p-10">
             <div>
-              <div className="app-page-kicker mb-6">
-                <Sparkles className="h-3.5 w-3.5" />
-                Premium clinic workspace
+              <Link href="/" className="inline-flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+                  <Bot className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none text-[#0F172A]">Clinic AI</p>
+                  <p className="mt-0.5 text-[11px] leading-none text-[#64748B]">AI front-desk OS</p>
+                </div>
+              </Link>
+
+              <div className="mt-10">
+                <div className="marketing-kicker mb-5">
+                  <ShieldCheck className="h-3 w-3" />
+                  Your workspace is ready
+                </div>
+                <h1 className="text-2xl font-bold leading-snug tracking-tight text-[#0F172A]">
+                  Welcome back. Your front desk is waiting.
+                </h1>
+                <p className="mt-4 text-sm leading-7 text-[#475569]">
+                  Pick up where you left off — conversations, appointment requests, follow-up items, and your AI training workspace are all in one place.
+                </p>
               </div>
-              <h1 className="max-w-lg text-2xl font-semibold text-[#0F172A]">
-                Welcome back. Your front desk is waiting.
-              </h1>
-              <p className="mt-6 max-w-lg text-sm leading-6 text-[#475569]">
-                Pick up where you left off — conversations, bookings, and follow-up items are all in one place.
-              </p>
-              <div className="mt-8 grid gap-3">
-                {[
-                  "Web chat and SMS in one inbox",
-                  "Staff can review or take over any thread",
-                  "Appointments, follow-up, and operations together",
-                ].map((item) => (
-                  <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0F172A]">
-                    <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
-                    {item}
+
+              <div className="mt-8 space-y-3">
+                {trustPoints.map((item) => (
+                  <div
+                    key={item.text}
+                    className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3 shadow-sm"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-medium text-[#0F172A]">{item.text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="workspace-rail-card p-5">
-              <p className="workspace-section-label">What stays true</p>
-              <div className="mt-4 space-y-3 text-sm text-[#475569]">
+            <div className="mt-8 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+                What stays true
+              </p>
+              <div className="mt-4 space-y-2.5 text-sm leading-6 text-[#475569]">
                 <p>The assistant only uses information you configure.</p>
                 <p>Staff can review or take over any conversation at any time.</p>
                 <p>Inbox, appointments, and follow-up stay connected in one workspace.</p>
               </div>
+              <Link
+                href="/trust"
+                className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0F766E] hover:text-[#115E59]"
+              >
+                Read our trust approach
+              </Link>
             </div>
           </div>
 
-          <div className="flex items-center">
-            <div className="mx-auto w-full max-w-xl">
+          {/* Right panel — form */}
+          <div className="flex items-center justify-center p-8 xl:p-12">
+            <div className="w-full max-w-md">
               <div className="mb-8 text-center">
-                <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0F766E] shadow-sm">
-                    <Bot className="w-6 h-6 text-white" />
+                {/* Mobile logo */}
+                <Link href="/" className="mb-6 inline-flex items-center gap-2.5 lg:hidden">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+                    <Bot className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-lg font-semibold text-[#0F172A]">Clinic AI</span>
+                  <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h1 className="text-2xl font-semibold text-[#0F172A]">Sign in to your clinic workspace</h1>
+                <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                  Sign in to your workspace
+                </h2>
                 <p className="mt-2 text-sm text-[#64748B]">
-                  Continue into your inbox, appointments, follow-up queue, and training workspace.
+                  Continue to your inbox, appointments, and AI training panel.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="landing-shell p-8 sm:p-9">
+              <div className="landing-shell p-8">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}
@@ -191,7 +247,8 @@ export default function LoginPage() {
 
                 {selectedPlan && (
                   <div className="mb-4 rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-4 py-3 text-sm text-[#115E59]">
-                    Sign in to continue to checkout for the {selectedPlan} plan.
+                    Sign in to continue to checkout for the{" "}
+                    <span className="font-semibold capitalize">{selectedPlan}</span> plan.
                   </div>
                 )}
 
@@ -201,7 +258,7 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
                     <label
                       htmlFor="email"
@@ -214,7 +271,7 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="you@clinic.com"
                       required
                     />
@@ -232,45 +289,46 @@ export default function LoginPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="Enter your password"
                       required
                     />
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !!supabaseConfigError}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    "Sign In"
-                  )}
-                </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !!supabaseConfigError}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </button>
+                </form>
 
                 <OAuthButtons
                   disabled={loading || !!supabaseConfigError || !queryReady}
                   nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
                 />
 
-                <p className="mt-4 text-center text-sm text-[#64748B]">
+                <p className="mt-5 text-center text-sm text-[#64748B]">
                   Don&apos;t have an account?{" "}
                   <Link
                     href={selectedPlan ? `/register?plan=${selectedPlan}` : "/register"}
                     className="font-semibold text-[#0F766E] hover:text-[#115E59]"
                   >
-                    Create one
+                    Start free trial
                   </Link>
                 </p>
-              </form>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

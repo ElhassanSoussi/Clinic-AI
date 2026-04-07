@@ -3,7 +3,14 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Bot, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  Bot,
+  Loader2,
+  ShieldCheck,
+  Check,
+  BrainCircuit,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { getPaidPlanId, startCheckoutForPlan } from "@/lib/billing-checkout";
@@ -18,6 +25,31 @@ type RegisterFormSubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
 >[0];
 
+const setupSteps = [
+  "Guided setup takes under 15 minutes",
+  "Configure services, hours, and FAQs from real clinic data",
+  "Test the assistant with a live preview before going live",
+  "Your team sees everything from day one",
+];
+
+const highlights = [
+  {
+    icon: ShieldCheck,
+    title: "You stay in control",
+    body: "Staff can review, edit, or take over any AI conversation at any time.",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Grounded in your clinic info",
+    body: "The assistant only uses what you configure — no generic answers.",
+  },
+  {
+    icon: Users,
+    title: "One workspace for the whole team",
+    body: "Inbox, appointments, and follow-up visible to everyone from day one.",
+  },
+];
+
 export default function RegisterPage() {
   const { loginWithOnboarding, setAuthenticatedUser } = useAuth();
   const [form, setForm] = useState({
@@ -30,6 +62,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [queryReady, setQueryReady] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"professional" | "premium" | null>(null);
+
   const supabaseConfigError =
     typeof getSupabasePublicEnvError === "function"
       ? getSupabasePublicEnvError()?.message ?? ""
@@ -41,7 +74,6 @@ export default function RegisterPage() {
         getPaidPlanId(new URLSearchParams(globalThis.location.search).get("plan"))
       );
     }
-
     setQueryReady(true);
   }, []);
 
@@ -58,9 +90,7 @@ export default function RegisterPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  async function submitRegistration(
-    e: RegisterFormSubmitEvent
-  ) {
+  async function submitRegistration(e: RegisterFormSubmitEvent) {
     e.preventDefault();
     setError("");
 
@@ -69,7 +99,12 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!form.full_name.trim() || !form.email.trim() || !form.password.trim() || !form.clinic_name.trim()) {
+    if (
+      !form.full_name.trim() ||
+      !form.email.trim() ||
+      !form.password.trim() ||
+      !form.clinic_name.trim()
+    ) {
       setError("Please fill in all fields.");
       return;
     }
@@ -90,7 +125,8 @@ export default function RegisterPage() {
 
       if (!res.access_token) {
         setError(
-          res.message || "Account created. Check your email to confirm your address before signing in."
+          res.message ||
+            "Account created. Check your email to confirm your address before signing in."
         );
         return;
       }
@@ -109,72 +145,99 @@ export default function RegisterPage() {
     }
   }
 
-  const handleSubmit = (
-    e: RegisterFormSubmitEvent
-  ) => {
+  const handleSubmit = (e: RegisterFormSubmitEvent) => {
     void submitRegistration(e);
   };
 
   return (
     <div className="app-shell-bg min-h-screen overflow-hidden px-4 py-10 sm:px-6">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
-        <div className="auth-shell grid w-full max-w-6xl gap-8 p-5 sm:p-6 lg:grid-cols-[0.96fr_1.04fr] lg:p-8">
-          <div className="hidden rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-8 lg:flex lg:flex-col lg:justify-between">
+        <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
+
+          {/* Left panel — marketing */}
+          <div className="hidden flex-col justify-between rounded-l-xl border-r border-[#E2E8F0] bg-[#F8FAFC] p-8 lg:flex xl:p-10">
             <div>
-              <div className="app-page-kicker mb-6">
-                <Sparkles className="h-3.5 w-3.5" />
-                Set up a clinic workspace
+              <Link href="/" className="inline-flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+                  <Bot className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none text-[#0F172A]">Clinic AI</p>
+                  <p className="mt-0.5 text-[11px] leading-none text-[#64748B]">AI front-desk OS</p>
+                </div>
+              </Link>
+
+              <div className="mt-10">
+                <div className="marketing-kicker mb-5">
+                  <ShieldCheck className="h-3 w-3" />
+                  14-day free trial
+                </div>
+                <h1 className="text-2xl font-bold leading-snug tracking-tight text-[#0F172A]">
+                  Set up your clinic&apos;s AI front desk in minutes.
+                </h1>
+                <p className="mt-4 text-sm leading-7 text-[#475569]">
+                  Add your clinic details, configure the assistant with your real information, and give your team a single workspace from first inquiry to confirmed booking.
+                </p>
               </div>
-              <h1 className="max-w-lg text-2xl font-semibold text-[#0F172A]">
-                Set up your clinic workspace in minutes.
-              </h1>
-              <p className="mt-6 max-w-lg text-sm leading-6 text-[#475569]">
-                Add your clinic details, configure the assistant with real information, and give your team a single workspace from inquiry to booking.
-              </p>
-              <div className="mt-8 grid gap-3">
-                {[
-                  "Guided setup takes under 15 minutes",
-                  "Inbox, pipeline, appointments, and operations included",
-                  "Staff review and takeover built in from the start",
-                ].map((item) => (
-                  <div key={item} className="app-card-muted flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#0F172A]">
-                    <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
-                    {item}
+
+              <ul className="mt-8 space-y-3">
+                {setupSteps.map((step) => (
+                  <li key={step} className="flex items-start gap-3 text-sm text-[#475569]">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                      <Check className="h-3.5 w-3.5" />
+                    </div>
+                    {step}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 space-y-3">
+                {highlights.map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] p-4 shadow-sm"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <p className="text-sm font-semibold text-[#0F172A]">{item.title}</p>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[#64748B]">{item.body}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="workspace-rail-card p-5">
-              <p className="workspace-section-label">You stay in control</p>
-              <div className="mt-4 space-y-3 text-sm text-[#475569]">
-                <p>You decide what information the assistant uses.</p>
-                <p>Configure services, hours, and FAQs from real clinic data.</p>
-                <p>Your team sees everything — conversations, bookings, and follow-up — from day one.</p>
-              </div>
-            </div>
+            <p className="mt-6 text-xs text-[#94A3B8]">
+              No credit card required. Cancel anytime.{" "}
+              <Link href="/trust" className="font-medium text-[#64748B] hover:text-[#0F172A]">
+                How we handle trust
+              </Link>
+              .
+            </p>
           </div>
 
-          <div className="flex items-center">
-            <div className="mx-auto w-full max-w-xl">
+          {/* Right panel — form */}
+          <div className="flex items-center justify-center p-8 xl:p-12">
+            <div className="w-full max-w-md">
               <div className="mb-8 text-center">
-                <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0F766E] shadow-sm">
-                    <Bot className="w-6 h-6 text-white" />
+                {/* Mobile logo */}
+                <Link href="/" className="mb-6 inline-flex items-center gap-2.5 lg:hidden">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+                    <Bot className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-lg font-semibold text-[#0F172A]">
-                    Clinic AI
-                  </span>
+                  <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h1 className="text-2xl font-semibold text-[#0F172A]">
+                <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
                   Create your clinic workspace
-                </h1>
+                </h2>
                 <p className="mt-2 text-sm text-[#64748B]">
-                  Set up your account and move straight into guided onboarding.
+                  Free for 14 days. Set up and into guided onboarding in minutes.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="landing-shell p-8 sm:p-9">
+              <div className="landing-shell p-8">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}
@@ -183,7 +246,8 @@ export default function RegisterPage() {
 
                 {selectedPlan && (
                   <div className="mb-4 rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-4 py-3 text-sm text-[#115E59]">
-                    Create your account to continue to checkout for the {selectedPlan} plan.
+                    Create your account to continue to checkout for the{" "}
+                    <span className="font-semibold capitalize">{selectedPlan}</span> plan.
                   </div>
                 )}
 
@@ -193,20 +257,20 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label
                       htmlFor="full_name"
                       className="mb-1.5 block text-sm font-medium text-[#0F172A]"
                     >
-                      Full Name
+                      Full name
                     </label>
                     <input
                       id="full_name"
                       type="text"
                       value={form.full_name}
                       onChange={(e) => updateField("full_name", e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="Dr. Jane Smith"
                       required
                     />
@@ -217,14 +281,14 @@ export default function RegisterPage() {
                       htmlFor="clinic_name"
                       className="mb-1.5 block text-sm font-medium text-[#0F172A]"
                     >
-                      Clinic Name
+                      Clinic name
                     </label>
                     <input
                       id="clinic_name"
                       type="text"
                       value={form.clinic_name}
                       onChange={(e) => updateField("clinic_name", e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="Sunrise Medical Clinic"
                       required
                     />
@@ -242,7 +306,7 @@ export default function RegisterPage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => updateField("email", e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="you@clinic.com"
                       required
                     />
@@ -260,35 +324,35 @@ export default function RegisterPage() {
                       type="password"
                       value={form.password}
                       onChange={(e) => updateField("password", e.target.value)}
-                      className="app-input"
+                      className="app-input py-2.5"
                       placeholder="At least 6 characters"
                       required
                       minLength={6}
                     />
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !!supabaseConfigError}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {submitLabel}
-                    </>
-                  ) : (
-                    submitLabel
-                  )}
-                </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !!supabaseConfigError}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {submitLabel}
+                      </>
+                    ) : (
+                      submitLabel
+                    )}
+                  </button>
+                </form>
 
                 <OAuthButtons
                   disabled={loading || !!supabaseConfigError || !queryReady}
                   nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
                 />
 
-                <p className="mt-4 text-center text-sm text-[#64748B]">
+                <p className="mt-5 text-center text-sm text-[#64748B]">
                   Already have an account?{" "}
                   <Link
                     href={selectedPlan ? `/login?plan=${selectedPlan}` : "/login"}
@@ -297,9 +361,10 @@ export default function RegisterPage() {
                     Sign in
                   </Link>
                 </p>
-              </form>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

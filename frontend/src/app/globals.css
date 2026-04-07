@@ -399,3 +399,129 @@ a {
   background-color: var(--color-app-bg);
   border-color: var(--color-app-border-strong);
 }
+
+/* ─── Marketing / Landing layout helpers ─── */
+.landing-hero-grid {
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 1280px) {
+  .landing-hero-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.marketing-section {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+.marketing-section-alt {
+  background: var(--color-app-bg);
+}
+
+.marketing-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-app-primary);
+  text-transform: uppercase;
+}
+
+.marketing-h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-app-text);
+}
+
+@media (min-width: 640px) {
+  .marketing-h1 {
+    font-size: 3.25rem;
+  }
+}
+
+.marketing-h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--color-app-text);
+}
+
+@media (min-width: 640px) {
+  .marketing-h2 {
+    font-size: 2.25rem;
+  }
+}
+
+.marketing-lead {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--color-app-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .marketing-lead {
+    font-size: 1.0625rem;
+  }
+}
+
+.marketing-feature-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .marketing-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .marketing-feature-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.marketing-card {
+  background: var(--color-app-surface);
+  border: 1px solid var(--color-app-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.04);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.marketing-card:hover {
+  box-shadow: 0 4px 16px rgb(15 23 42 / 0.07);
+  border-color: var(--color-app-border-strong);
+}
+
+.marketing-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: var(--color-app-primary-light);
+  color: var(--color-app-primary-hover);
+  flex-shrink: 0;
+}
