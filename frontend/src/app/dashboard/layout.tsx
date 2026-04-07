@@ -42,8 +42,8 @@ const sidebarNav = [
   { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical },
   { href: "/dashboard/activity", label: "Activity", icon: Activity },
   { href: "/dashboard/training", label: "AI Training", icon: Sparkles },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 function settingsHref(section?: string | null): string {
@@ -288,7 +288,7 @@ export default function DashboardLayout({
         {clinic && (
           <div className="mx-3 mb-1.5 rounded-md border border-slate-200/70 bg-slate-50/70 px-2.5 py-2">
             <p className="truncate text-xs font-semibold text-slate-800">{clinic.name}</p>
-            {statusCfg && (
+            {statusCfg && systemStatus?.status !== "LIVE" && (
               <span className={`mt-0.5 inline-flex items-center gap-1.5 text-[10px] font-medium ${statusCfg.color}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                 {statusCfg.label}
