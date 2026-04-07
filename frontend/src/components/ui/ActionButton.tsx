@@ -14,10 +14,12 @@ interface ActionButtonProps {
 }
 
 const VARIANT_MAP = {
-  primary: "bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-sm shadow-teal-600/20 hover:from-teal-700 hover:to-teal-800",
-  secondary: "bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-300",
-  ghost: "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-  danger: "bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100",
+  primary:
+    "bg-[#0F766E] text-white shadow-sm hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2",
+  secondary:
+    "bg-white border border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]",
+  ghost: "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]",
+  danger: "bg-red-50 border border-red-200 text-[#DC2626] hover:bg-red-100",
 };
 
 const SIZE_MAP = {

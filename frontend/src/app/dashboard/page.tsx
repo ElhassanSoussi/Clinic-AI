@@ -167,9 +167,9 @@ export default function DashboardPage() {
     return (
       <EmptyState
         icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
-          title="Setup not complete"
-          description="Complete your clinic details in settings so the assistant knows how to respond accurately."
-          action={
+        title="Setup not complete"
+        description="Complete your clinic details in settings so the assistant knows how to respond accurately."
+        action={
           <button
             onClick={() => router.push(settingsHref())}
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
@@ -205,6 +205,11 @@ export default function DashboardPage() {
     { label: "Deposits paid", value: analytics.deposits_paid_count, icon: CheckCircle2, tone: "emerald" as const },
     { label: "Waiting on deposit", value: analytics.appointments_waiting_on_deposit_count, icon: AlertTriangle, tone: "rose" as const },
   ];
+
+  const busiestHourMaxCount = Math.max(
+    ...(analytics.busiest_contact_hours?.map((item) => item.count) ?? [0]),
+    1,
+  );
 
   return (
     <div className="space-y-4">
@@ -257,25 +262,25 @@ export default function DashboardPage() {
       {billing && (
         <div className="space-y-3">
           {billing.monthly_lead_limit !== -1 &&
-          billing.monthly_leads_used >= billing.monthly_lead_limit &&
-          billing.plan !== "trial" && (
-            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
-                  <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
+            billing.monthly_leads_used >= billing.monthly_lead_limit &&
+            billing.plan !== "trial" && (
+              <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
+                    <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
+                  </div>
+                  <Link
+                    href="/dashboard/billing"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700"
+                  >
+                    <Zap className="h-3 w-3" />
+                    Upgrade
+                  </Link>
                 </div>
-                <Link
-                  href="/dashboard/billing"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700"
-                >
-                  <Zap className="h-3 w-3" />
-                  Upgrade
-                </Link>
               </div>
-            </div>
-          )}
+            )}
 
           {billing.subscription_status === "past_due" && (
             <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
@@ -358,7 +363,7 @@ export default function DashboardPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Appointments</p>
                 <p className="mt-1.5 text-[13px] font-semibold text-slate-900">Manage bookings, reminders, and deposits</p>
               </div>
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-50 text-violet-600">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -409,28 +414,25 @@ export default function DashboardPage() {
               />
             ) : (
               <div className="space-y-3">
-                {analytics.busiest_contact_hours.map((bucket) => (
-                  <div key={bucket.hour} className="flex items-center gap-3">
-                    <div className="w-20 text-xs font-medium text-slate-600">{bucket.label}</div>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full bg-linear-to-r from-teal-500 to-violet-500"
-                        style={{ // NOSONAR — dynamic percentage requires inline style
-                          width: `${Math.max(
-                            20,
-                            (bucket.count /
-                              Math.max(
-                                ...analytics.busiest_contact_hours.map((item) => item.count),
-                                1,
-                              )) *
-                              100,
-                          )}%`,
-                        }}
-                      />
+                {analytics.busiest_contact_hours.map((bucket) => {
+                  const barUnits = Math.max(20, (bucket.count / busiestHourMaxCount) * 100);
+                  return (
+                    <div key={bucket.hour} className="flex items-center gap-3">
+                      <div className="w-20 text-xs font-medium text-slate-600">{bucket.label}</div>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <svg
+                          className="block h-full w-full text-[#0F766E]"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          aria-hidden
+                        >
+                          <rect width={barUnits} height="100" fill="currentColor" />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-medium text-slate-600">{bucket.count}</span>
                     </div>
-                    <span className="text-xs font-medium text-slate-600">{bucket.count}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </SurfaceCard>
@@ -439,7 +441,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <SurfaceCard
               title="Opportunities"
-            description="Stalled requests and follow-up items that may need action."
+              description="Stalled requests and follow-up items that may need action."
               action={
                 <Link
                   href="/dashboard/opportunities"
@@ -453,8 +455,8 @@ export default function DashboardPage() {
               {opportunities.length === 0 ? (
                 <EmptyState
                   icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
-                title="No follow-up items"
-                description="Stalled or at-risk booking requests will surface here when they need attention."
+                  title="No follow-up items"
+                  description="Stalled or at-risk booking requests will surface here when they need attention."
                 />
               ) : (
                 <div className="space-y-2">
@@ -474,11 +476,10 @@ export default function DashboardPage() {
                         className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 transition-all hover:border-slate-200 hover:bg-slate-50/60"
                       >
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                            opportunity.priority === "high"
-                              ? "bg-rose-50 text-rose-600"
-                              : "bg-amber-50 text-amber-600"
-                          }`}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
+                            ? "bg-rose-50 text-rose-600"
+                            : "bg-amber-50 text-amber-600"
+                            }`}
                         >
                           <AlertTriangle className="h-3.5 w-3.5" />
                         </div>
@@ -557,13 +558,13 @@ export default function DashboardPage() {
 
           {/* All caught up */}
           {analytics.conversations_total > 0 &&
-          analytics.follow_up_needed_count === 0 &&
-          analytics.unresolved_count === 0 && (
-            <div className="flex items-center justify-center gap-2 py-3 text-xs font-semibold text-emerald-600">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              All caught up — no unresolved requests need attention.
-            </div>
-          )}
+            analytics.follow_up_needed_count === 0 &&
+            analytics.unresolved_count === 0 && (
+              <div className="flex items-center justify-center gap-2 py-3 text-xs font-semibold text-emerald-600">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                All caught up — no unresolved requests need attention.
+              </div>
+            )}
         </div>
 
         {/* ── Right rail ── */}

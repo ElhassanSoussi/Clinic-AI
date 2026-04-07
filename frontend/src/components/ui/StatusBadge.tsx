@@ -4,7 +4,7 @@ type StatusBadgeTone = "teal" | "violet" | "blue" | "amber" | "emerald" | "rose"
 
 const TONE_MAP: Record<StatusBadgeTone, { bg: string; text: string; dot: string; border: string }> = {
   teal: { bg: "bg-teal-50", text: "text-teal-700", dot: "bg-teal-500", border: "border-teal-100" },
-  violet: { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-500", border: "border-violet-100" },
+  violet: { bg: "bg-[#CCFBF1]", text: "text-[#115E59]", dot: "bg-[#0F766E]", border: "border-[#99f6e4]" },
   blue: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-100" },
   amber: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-100" },
   emerald: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-100" },

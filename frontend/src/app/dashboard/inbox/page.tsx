@@ -27,12 +27,12 @@ const STATUS_FILTERS: {
   value: "all" | "open" | "needs_follow_up" | "booked" | "handled";
   label: string;
 }[] = [
-  { value: "all", label: "All" },
-  { value: "open", label: "Open" },
-  { value: "needs_follow_up", label: "Needs follow-up" },
-  { value: "booked", label: "Booked" },
-  { value: "handled", label: "Handled" },
-];
+    { value: "all", label: "All" },
+    { value: "open", label: "Open" },
+    { value: "needs_follow_up", label: "Needs follow-up" },
+    { value: "booked", label: "Booked" },
+    { value: "handled", label: "Handled" },
+  ];
 
 export default function InboxPage() {
   const router = useRouter();
@@ -147,11 +147,10 @@ export default function InboxPage() {
                   <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                      active
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${active
                         ? "bg-teal-50/60 text-teal-800"
                         : "text-slate-500 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <span>{filter.label}</span>
                     <span className={`text-[11px] ${active ? "text-teal-500" : "text-slate-400"}`}>{count}</span>
@@ -167,11 +166,10 @@ export default function InboxPage() {
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setChannelFilter("all")}
-                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                  channelFilter === "all"
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${channelFilter === "all"
                     ? "bg-slate-900 text-white"
                     : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 All <span className="ml-1 text-[10px] opacity-70">{channelCounts.all}</span>
               </button>
@@ -182,9 +180,8 @@ export default function InboxPage() {
                   <button
                     key={channel}
                     onClick={() => setChannelFilter(channel)}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                      active ? config.className : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                    }`}
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${active ? config.className : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                      }`}
                   >
                     {config.label}
                     <span className="ml-1 text-[10px] opacity-70">{channelCounts[channel] ?? 0}</span>
@@ -218,9 +215,8 @@ export default function InboxPage() {
                 <button
                   key={filter.value}
                   onClick={() => setStatusFilter(filter.value)}
-                  className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                    active ? "bg-violet-50 text-violet-700" : "text-slate-500 hover:bg-slate-50"
-                  }`}
+                  className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${active ? "bg-[#CCFBF1] text-[#0F766E]" : "text-[#64748B] hover:bg-[#F8FAFC]"
+                    }`}
                 >
                   {filter.label} <span className="text-[10px] opacity-60">{counts[filter.value]}</span>
                 </button>
@@ -247,7 +243,7 @@ export default function InboxPage() {
           })() : (
             <div className="space-y-2">
               {filtered.map((thread) => (
-                  <button
+                <button
                   key={thread.id}
                   onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
                   className="app-row-hover w-full rounded-lg border border-slate-100 bg-white px-3.5 py-2.5 text-left shadow-sm transition-all hover:border-slate-200 hover:shadow-md"
@@ -296,7 +292,7 @@ export default function InboxPage() {
         <aside className="hidden space-y-3 xl:block">
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="flex items-center gap-2">
-              <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-50 text-violet-700">
+              <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
                 <Bot className="h-2.5 w-2.5" />
               </div>
               <div>

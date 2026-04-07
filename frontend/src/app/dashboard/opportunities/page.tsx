@@ -196,7 +196,7 @@ export default function OpportunitiesPage() {
                               {task.status === "snoozed" ? "Snoozed" : "Queued"}
                             </span>
                             {task.auto_generated && (
-                              <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">Auto</span>
+                              <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-semibold text-[#475569]">Auto</span>
                             )}
                             <span className="text-[10px] text-slate-400">{task.customer_name}</span>
                           </div>

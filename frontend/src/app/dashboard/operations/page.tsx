@@ -1451,7 +1451,7 @@ export default function OperationsPage() {
           {/* Deposit tracking */}
           <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-violet-600" />
+              <Wallet className="h-4 w-4 text-[#0F766E]" />
               <h2 className="text-[13px] font-semibold text-slate-900">Deposit tracking</h2>
             </div>
             <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">

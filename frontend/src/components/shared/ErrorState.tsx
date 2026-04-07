@@ -15,15 +15,15 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50">
-        <AlertTriangle className="h-4 w-4 text-rose-500" />
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
+        <AlertTriangle className="h-4 w-4 text-[#DC2626]" />
       </div>
-      <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-      <p className="mt-1 max-w-sm text-[13px] leading-relaxed text-slate-500">{message}</p>
+      <h3 className="text-sm font-semibold text-[#0F172A]">{title}</h3>
+      <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#64748B]">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-3 rounded-lg bg-teal-600 px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-teal-700"
+          className="mt-4 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
         >
           Try again
         </button>

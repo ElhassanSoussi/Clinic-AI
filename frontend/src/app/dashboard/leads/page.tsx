@@ -217,7 +217,7 @@ function renderLeadsContent({
                     {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                   </span>
                   {lead.appointment_status ? (
-                    <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                    <span className="rounded-md bg-[#CCFBF1] px-2 py-0.5 text-[10px] font-semibold text-[#115E59]">
                       {lead.appointment_status.replaceAll("_", " ")}
                     </span>
                   ) : null}
@@ -326,12 +326,12 @@ export default function LeadsPage() {
 
   const filtered = search
     ? leads.filter(
-        (l) =>
-          l.patient_name.toLowerCase().includes(search.toLowerCase()) ||
-          l.patient_phone.includes(search) ||
-          l.patient_email.toLowerCase().includes(search.toLowerCase()) ||
-          l.reason_for_visit.toLowerCase().includes(search.toLowerCase())
-      )
+      (l) =>
+        l.patient_name.toLowerCase().includes(search.toLowerCase()) ||
+        l.patient_phone.includes(search) ||
+        l.patient_email.toLowerCase().includes(search.toLowerCase()) ||
+        l.reason_for_visit.toLowerCase().includes(search.toLowerCase())
+    )
     : leads;
 
   const usageWarningBanner = buildUsageWarningBanner(clinic);
@@ -383,9 +383,8 @@ export default function LeadsPage() {
                   <button
                     key={opt.value}
                     onClick={() => setStatusFilter(opt.value)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                      active ? "bg-teal-50/60 text-teal-800" : "text-slate-500 hover:bg-slate-50"
-                    }`}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${active ? "bg-teal-50/60 text-teal-800" : "text-slate-500 hover:bg-slate-50"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     <span className={`text-[11px] ${active ? "text-teal-500" : "text-slate-400"}`}>{count}</span>
@@ -406,9 +405,8 @@ export default function LeadsPage() {
                 <button
                   key={opt.value}
                   onClick={() => setStatusFilter(opt.value)}
-                  className={`rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
-                    active ? "bg-teal-50/60 text-teal-800" : "text-slate-500 hover:bg-slate-50"
-                  }`}
+                  className={`rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${active ? "bg-teal-50/60 text-teal-800" : "text-slate-500 hover:bg-slate-50"
+                    }`}
                 >
                   {opt.label}
                 </button>
