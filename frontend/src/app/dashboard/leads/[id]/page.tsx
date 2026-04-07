@@ -61,9 +61,9 @@ const QUICK_ACTIONS: {
       target: "closed",
       label: "Mark closed",
       icon: XCircle,
-      bg: "bg-slate-100",
-      hover: "hover:bg-slate-200",
-      text: "text-slate-600",
+      bg: "bg-[#F1F5F9]",
+      hover: "hover:bg-[#F8FAFC]",
+      text: "text-[#475569]",
     },
   ];
 
@@ -159,10 +159,10 @@ export default function LeadDetailPage({
     );
 
   return (
-    <div className="max-w-4xl space-y-4">
+    <div className="max-w-4xl space-y-6">
       <Link
         href="/dashboard/leads"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Leads
@@ -200,51 +200,51 @@ export default function LeadDetailPage({
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900 mb-4">
+      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
           Contact information
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-              <User className="w-4 h-4 text-slate-500" />
+            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
+              <User className="w-4 h-4 text-[#475569]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Name</p>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-xs text-[#475569]">Name</p>
+              <p className="text-sm font-medium text-[#0F172A]">
                 {lead.patient_name}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-              <Phone className="w-4 h-4 text-slate-500" />
+            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
+              <Phone className="w-4 h-4 text-[#475569]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Phone</p>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-xs text-[#475569]">Phone</p>
+              <p className="text-sm font-medium text-[#0F172A]">
                 {lead.patient_phone || "—"}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-              <Mail className="w-4 h-4 text-slate-500" />
+            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
+              <Mail className="w-4 h-4 text-[#475569]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Email</p>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-xs text-[#475569]">Email</p>
+              <p className="text-sm font-medium text-[#0F172A]">
                 {lead.patient_email || "—"}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-slate-500" />
+            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
+              <Calendar className="w-4 h-4 text-[#475569]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500">Source</p>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-xs text-[#475569]">Source</p>
+              <p className="text-sm font-medium text-[#0F172A]">
                 {sourceLabel(lead.source, lead.slot_source)}
               </p>
             </div>
@@ -252,25 +252,25 @@ export default function LeadDetailPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900 mb-4">
+      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
           Visit details
         </h2>
         <div className="space-y-4">
           <div>
-            <p className="text-xs text-slate-500 mb-1">Reason for Visit</p>
-            <p className="text-sm text-slate-700">
+            <p className="text-xs text-[#475569] mb-1">Reason for Visit</p>
+            <p className="text-sm text-[#0F172A]">
               {lead.reason_for_visit || "Not specified"}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-slate-400" />
+            <Clock className="w-4 h-4 text-[#64748B]" />
             <div>
-              <p className="text-xs text-slate-500">Preferred Date/Time</p>
-              <p className="text-sm text-slate-700">
+              <p className="text-xs text-[#475569]">Preferred Date/Time</p>
+              <p className="text-sm text-[#0F172A]">
                 {lead.preferred_datetime_text || "Not specified"}
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-xs text-[#64748B] mt-0.5">
                 {lead.slot_source === "availability" || lead.slot_row_index
                   ? "Source: Availability slot"
                   : "Source: Manual preferred time"}
@@ -278,15 +278,15 @@ export default function LeadDetailPage({
             </div>
           </div>
           {lead.slot_row_index && (
-            <div className="mt-4 p-3 bg-teal-50 border border-teal-100 rounded-lg flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
-                <Calendar className="w-4 h-4 text-teal-600" />
+            <div className="mt-4 p-3 bg-[#CCFBF1] border border-[#99f6e4] rounded-lg flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#CCFBF1] flex items-center justify-center shrink-0">
+                <Calendar className="w-4 h-4 text-[#0F766E]" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-teal-800 uppercase tracking-wider">
+                <p className="text-xs font-bold text-[#115E59] uppercase tracking-wider">
                   Confirmed slot
                 </p>
-                <p className="text-xs text-teal-700">
+                <p className="text-xs text-[#115E59]">
                   This appointment is linked to row{" "}
                   <strong>{lead.slot_row_index}</strong> in your Availability
                   sheet.
@@ -298,14 +298,14 @@ export default function LeadDetailPage({
       </div>
 
       {chatMessages.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-slate-500" />
+            <h2 className="text-sm font-semibold text-[#0F172A] flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-[#475569]" />
               Chat conversation
             </h2>
             {conversationId && (
-              <span className="text-[11px] text-slate-400">
+              <span className="text-xs text-[#64748B]">
                 {chatMessages.length} message{chatMessages.length !== 1 ? "s" : ""}
               </span>
             )}
@@ -318,8 +318,8 @@ export default function LeadDetailPage({
               >
                 <div
                   className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${msg.role === "user"
-                      ? "bg-teal-600 text-white rounded-br-sm"
-                      : "bg-slate-100 text-slate-700 rounded-bl-sm"
+                      ? "bg-[#0F766E] text-white rounded-br-sm"
+                      : "bg-[#F1F5F9] text-[#0F172A] rounded-bl-sm"
                     }`}
                 >
                   {msg.content}
@@ -330,8 +330,8 @@ export default function LeadDetailPage({
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900 mb-4">
+      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
           Update request
         </h2>
 
@@ -339,7 +339,7 @@ export default function LeadDetailPage({
           <div>
             <label
               htmlFor="lead-status"
-              className="block text-sm font-medium text-slate-700 mb-1.5"
+              className="block text-sm font-medium text-[#0F172A] mb-1.5"
             >
               Status
             </label>
@@ -347,7 +347,7 @@ export default function LeadDetailPage({
               id="lead-status"
               value={status}
               onChange={(e) => setStatus(e.target.value as LeadStatus)}
-              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -360,7 +360,7 @@ export default function LeadDetailPage({
           <div>
             <label
               htmlFor="lead-notes"
-              className="block text-sm font-medium text-slate-700 mb-1.5"
+              className="block text-sm font-medium text-[#0F172A] mb-1.5"
             >
               Internal Notes
             </label>
@@ -369,7 +369,7 @@ export default function LeadDetailPage({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
-              className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder:text-slate-400 resize-none"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] placeholder:text-[#64748B] resize-none"
               placeholder="Add internal notes about this request..."
             />
           </div>
@@ -381,7 +381,7 @@ export default function LeadDetailPage({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -96,7 +96,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -111,16 +111,16 @@ export default function AccountPage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_1fr_240px]">
         {/* Left rail */}
         <aside className="hidden xl:block">
-          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Account overview</p>
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Account overview</p>
             <div className="mt-3 space-y-2.5">
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">Signed in as</p>
-                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{user?.email || "Unknown"}</p>
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-xs text-[#64748B]">Signed in as</p>
+                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">{user?.email || "Unknown"}</p>
               </div>
-              <div className="rounded-lg border border-slate-100/60 bg-slate-50/40 px-3 py-2.5">
-                <p className="text-[10px] text-slate-400">Role</p>
-                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">Owner</p>
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-xs text-[#64748B]">Role</p>
+                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Owner</p>
               </div>
             </div>
           </div>
@@ -129,26 +129,26 @@ export default function AccountPage() {
         {/* Main content */}
         <div className="space-y-2">
         {/* Profile Section */}
-        <section className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <section className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("profile")}
-            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-[#F8FAFC] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-900">Profile</h2>
+              <User className="w-4 h-4 text-[#475569]" />
+              <h2 className="text-sm font-semibold text-[#0F172A]">Profile</h2>
             </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openSections.has("profile") ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSections.has("profile") ? "rotate-180" : ""}`} />
           </button>
           {openSections.has("profile") && (
-            <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+            <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
               {profileFeedback && (
                 <Feedback state={profileFeedback} />
               )}
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="full-name" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <label htmlFor="full-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     Full name
                   </label>
                   <input
@@ -156,11 +156,11 @@ export default function AccountPage() {
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="account-email" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <label htmlFor="account-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     Email
                   </label>
                   <input
@@ -168,17 +168,17 @@ export default function AccountPage() {
                     type="email"
                     value={user?.email || ""}
                     disabled
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] text-[#475569] cursor-not-allowed"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="text-xs text-[#64748B] mt-1">
                     Email is tied to your login. Contact support to change it.
                   </p>
                 </div>
                 <div>
-                  <span className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <span className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     Role
                   </span>
-                  <span className="inline-flex items-center px-3 py-1.5 text-[13px] font-medium text-teal-700 bg-teal-50 rounded-lg">
+                  <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
                     Owner
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export default function AccountPage() {
                   <button
                     onClick={handleSaveProfile}
                     disabled={savingProfile || !fullName.trim()}
-                    className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {savingProfile ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -201,26 +201,26 @@ export default function AccountPage() {
         </section>
 
         {/* Password Section */}
-        <section className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <section className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection("password")}
-            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-[#F8FAFC] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-slate-500" />
-              <h2 className="text-sm font-semibold text-slate-900">Change password</h2>
+              <Lock className="w-4 h-4 text-[#475569]" />
+              <h2 className="text-sm font-semibold text-[#0F172A]">Change password</h2>
             </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openSections.has("password") ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSections.has("password") ? "rotate-180" : ""}`} />
           </button>
           {openSections.has("password") && (
-            <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+            <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
               {passwordFeedback && (
                 <Feedback state={passwordFeedback} />
               )}
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="current-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <label htmlFor="current-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     Current password
                   </label>
                   <input
@@ -228,12 +228,12 @@ export default function AccountPage() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                     autoComplete="current-password"
                   />
                 </div>
                 <div>
-                  <label htmlFor="new-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <label htmlFor="new-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     New password
                   </label>
                   <input
@@ -241,12 +241,12 @@ export default function AccountPage() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                     autoComplete="new-password"
                   />
                 </div>
                 <div>
-                  <label htmlFor="confirm-password" className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                  <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
                     Confirm new password
                   </label>
                   <input
@@ -254,7 +254,7 @@ export default function AccountPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-100 rounded-lg bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                     autoComplete="new-password"
                   />
                 </div>
@@ -262,7 +262,7 @@ export default function AccountPage() {
                   <button
                     onClick={handleChangePassword}
                     disabled={savingPassword}
-                    className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {savingPassword ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -279,9 +279,9 @@ export default function AccountPage() {
 
         {/* Right rail */}
         <aside className="hidden xl:block">
-          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Security note</p>
-            <div className="mt-3 space-y-2 text-[13px] leading-relaxed text-slate-500">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Security note</p>
+            <div className="mt-3 space-y-2 text-sm leading-relaxed text-[#475569]">
               <p>Your account controls the operator identity shown across the workspace.</p>
               <p>Use this page to keep sign-in secure without changing the rest of the clinic configuration.</p>
             </div>

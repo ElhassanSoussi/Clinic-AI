@@ -245,7 +245,7 @@ export default function DashboardLayout({
   /* ─── Loading / auth guard ─── */
   if (isLoading || showSetupFlow) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
         <div className="h-7 w-7 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
       </div>
     );
@@ -289,7 +289,7 @@ export default function DashboardLayout({
           <div className="mx-3 mb-1.5 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
             <p className="truncate text-xs font-semibold text-[#0F172A]">{clinic.name}</p>
             {statusCfg && systemStatus?.status !== "LIVE" && (
-              <span className={`mt-0.5 inline-flex items-center gap-1.5 text-[10px] font-medium ${statusCfg.color}`}>
+              <span className={`mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium ${statusCfg.color}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                 {statusCfg.label}
               </span>
@@ -317,7 +317,7 @@ export default function DashboardLayout({
                   }`} />
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                  <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-xs font-bold text-white">
                     {newLeadCount}
                   </span>
                 )}
@@ -403,7 +403,7 @@ export default function DashboardLayout({
                   <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
                   {item.label}
                   {item.label === "Leads" && newLeadCount > 0 && (
-                    <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+                    <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-xs font-bold text-white">
                       {newLeadCount}
                     </span>
                   )}

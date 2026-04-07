@@ -45,7 +45,7 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={() => loadActivity()} />;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -59,7 +59,7 @@ export default function ActivityPage() {
           <button
             onClick={() => loadActivity(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
           >
             {refreshing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -74,15 +74,15 @@ export default function ActivityPage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_240px]">
         <div>
           {events.length === 0 ? (
-            <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+            <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
               <EmptyState
-                icon={<Activity className="w-5 h-5 text-slate-400" />}
+                icon={<Activity className="w-5 h-5 text-[#64748B]" />}
                 title="No activity yet"
                 description="Events will appear here once patients begin interacting with the assistant."
               />
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white shadow-sm">
+            <div className="divide-y divide-[#E2E8F0] rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
               {events.map((event, i) => {
                 const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
                 const Icon = config.icon;
@@ -99,16 +99,16 @@ export default function ActivityPage() {
                       {isLead ? (
                         <Link
                           href={`/dashboard/leads/${event.resource_id}`}
-                          className="text-[13px] font-medium text-slate-900 hover:text-teal-700"
+                          className="text-sm font-medium text-[#0F172A] hover:text-[#115E59]"
                         >
                           {event.title}
                         </Link>
                       ) : (
-                        <p className="text-[13px] font-medium text-slate-900">{event.title}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">{event.title}</p>
                       )}
-                      <p className="mt-0.5 text-[11px] text-slate-500">{event.detail}</p>
+                      <p className="mt-0.5 text-xs text-[#475569]">{event.detail}</p>
                     </div>
-                    <span className="shrink-0 text-[11px] text-slate-400">{timeAgo(event.timestamp)}</span>
+                    <span className="shrink-0 text-xs text-[#64748B]">{timeAgo(event.timestamp)}</span>
                   </div>
                 );
               })}
@@ -117,13 +117,13 @@ export default function ActivityPage() {
         </div>
 
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Feed summary</p>
-            <div className="mt-2 rounded-md border border-slate-200/60 bg-slate-50/60 px-2.5 py-2">
-              <p className="text-[10px] text-slate-500">Events loaded</p>
-              <p className="mt-0.5 text-lg font-bold text-slate-900">{events.length}</p>
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Feed summary</p>
+            <div className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+              <p className="text-xs text-[#475569]">Events loaded</p>
+              <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{events.length}</p>
             </div>
-            <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+            <p className="mt-2 text-xs leading-relaxed text-[#475569]">
               Trace what changed without jumping between inbox, leads, and appointments.
             </p>
           </div>

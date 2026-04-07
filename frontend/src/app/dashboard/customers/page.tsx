@@ -55,7 +55,7 @@ export default function CustomersPage() {
   const customersNeedingAttention = customers.filter((customer) => customer.open_request_count > 0).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -72,25 +72,25 @@ export default function CustomersPage() {
           {/* Search + summary */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
               <input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by patient, phone, or email..."
-                className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-[13px] text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
               />
             </div>
-            <span className="rounded-md bg-teal-50/60 px-2 py-0.5 text-[10px] font-semibold text-teal-700">
+            <span className="rounded-md bg-[#CCFBF1]/90 px-2 py-0.5 text-xs font-semibold text-[#115E59]">
               {customers.length} profiles
             </span>
           </div>
 
           {/* List */}
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+            <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
               <EmptyState
-                icon={<UserRound className="w-5 h-5 text-slate-400" />}
+                icon={<UserRound className="w-5 h-5 text-[#64748B]" />}
                 title={customers.length === 0 ? "No patients yet" : "No patients match your search"}
                 description={
                   customers.length === 0
@@ -105,16 +105,16 @@ export default function CustomersPage() {
                 <Link
                   key={customer.key}
                   href={`/dashboard/customers/${customer.key}`}
-                  className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm transition-all hover:border-teal-200"
+                  className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition-all hover:border-[#99f6e4]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-slate-900">{customer.name}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500">
+                      <p className="text-sm font-semibold text-[#0F172A]">{customer.name}</p>
+                      <p className="mt-0.5 text-xs text-[#475569]">
                         {customer.phone || customer.email || "No contact saved"}
                       </p>
                     </div>
-                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#64748B]" />
                   </div>
 
                   <div className="mt-2 grid grid-cols-4 gap-1.5">
@@ -125,13 +125,13 @@ export default function CustomersPage() {
                       { label: "Open", val: customer.open_request_count },
                     ].map((stat) => (
                       <div key={stat.label}>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400">{stat.label}</p>
-                        <p className="mt-0.5 text-[13px] font-bold text-slate-900">{stat.val}</p>
+                        <p className="text-xs uppercase tracking-widest text-[#64748B]">{stat.label}</p>
+                        <p className="mt-0.5 text-sm font-bold text-[#0F172A]">{stat.val}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-2.5 flex items-center justify-between gap-3 text-[11px] text-slate-500">
+                  <div className="mt-2.5 flex items-center justify-between gap-3 text-xs text-[#475569]">
                     <span>
                       Last{" "}
                       {customer.last_interaction_at
@@ -150,8 +150,8 @@ export default function CustomersPage() {
 
         {/* Right rail */}
         <div className="hidden space-y-3 xl:block">
-          <div className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Overview</p>
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Overview</p>
             <div className="mt-2.5 space-y-2">
               <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
               <MetricCard label="With bookings" value={customersWithBookings} icon={ContactRound} tone="emerald" />

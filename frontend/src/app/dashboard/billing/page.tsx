@@ -24,7 +24,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   trialing: { label: "Trial", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
   canceled: { label: "Canceled", color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
   past_due: { label: "Past due", color: "text-red-700", bg: "bg-red-50 border-red-200" },
-  inactive: { label: "Inactive", color: "text-slate-700", bg: "bg-slate-50 border-slate-200" },
+  inactive: { label: "Inactive", color: "text-[#0F172A]", bg: "bg-[#F8FAFC] border-[#E2E8F0]" },
 };
 
 const PLAN_ICONS: Record<string, React.ReactNode> = {
@@ -50,7 +50,7 @@ function formatDate(iso: string | undefined): string {
 function usageBarClass(isAtLimit: boolean, usagePercent: number): string {
   if (isAtLimit) return "bg-red-500";
   if (usagePercent > 80) return "bg-amber-500";
-  return "bg-teal-500";
+  return "bg-[#0F766E]";
 }
 
 export default function BillingPage() {
@@ -153,7 +153,7 @@ export default function BillingPage() {
   const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
-    <div className="space-y-4 max-w-4xl">
+    <div className="space-y-6 max-w-4xl">
       <PageHeader
         eyebrow={
           <>
@@ -167,33 +167,33 @@ export default function BillingPage() {
 
       {/* Stripe return feedback */}
       {successMsg && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 text-[13px] text-emerald-800">
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 text-sm text-emerald-800">
           <strong>{successMsg}</strong> It may take a moment to reflect.
         </div>
       )}
       {canceledMsg && (
-        <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3 text-[13px] text-amber-800">
+        <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3 text-sm text-amber-800">
           {canceledMsg}
         </div>
       )}
 
       {/* Current Plan Card */}
-      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600">
+              <div className="w-10 h-10 rounded-lg bg-[#CCFBF1] flex items-center justify-center text-[#0F766E]">
                 {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">{billing.plan_name}</h2>
+                <h2 className="text-lg font-semibold text-[#0F172A]">{billing.plan_name}</h2>
                 <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${statusInfo.bg} ${statusInfo.color}`}>
                   {statusInfo.label}
                 </span>
               </div>
             </div>
             {isTrial && trialEndsStr && (
-              <p className={`text-sm mt-2 ${isTrialExpired ? "text-red-600 font-medium" : "text-slate-500"}`}>
+              <p className={`text-sm mt-2 ${isTrialExpired ? "text-red-600 font-medium" : "text-[#475569]"}`}>
                 {isTrialExpired ? "Trial expired on " : "Trial ends "}
                 {trialEndsStr}
               </p>
@@ -214,7 +214,7 @@ export default function BillingPage() {
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors"
             >
               {portalLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -228,19 +228,19 @@ export default function BillingPage() {
       </div>
 
       {/* Usage Card */}
-      <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-900 mb-4">Usage this month</h3>
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-[#0F172A] mb-4">Usage this month</h3>
         <div className="flex items-end justify-between mb-2">
-          <span className="text-sm text-slate-600">
+          <span className="text-sm text-[#475569]">
             Patient requests captured
           </span>
-          <span className="text-sm font-medium text-slate-900">
+          <span className="text-sm font-medium text-[#0F172A]">
             {billing.monthly_leads_used}
             {billing.monthly_lead_limit === -1 ? "" : ` / ${billing.monthly_lead_limit}`}
           </span>
         </div>
         {billing.monthly_lead_limit !== -1 && (
-          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-[#F1F5F9] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${usageBarColor}`}
               style={{ width: usageWidth }} // NOSONAR — dynamic percentage requires inline style
@@ -248,7 +248,7 @@ export default function BillingPage() {
           </div>
         )}
         {billing.monthly_lead_limit === -1 && (
-          <p className="text-xs text-slate-400 mt-1">Unlimited requests on your current plan</p>
+          <p className="text-xs text-[#64748B] mt-1">Unlimited requests on your current plan</p>
         )}
         {isAtLimit && (
           <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
@@ -265,9 +265,9 @@ export default function BillingPage() {
 
       {/* Plans Comparison */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-900 mb-3">Compare plans</h3>
+        <h3 className="text-sm font-semibold text-[#0F172A] mb-3">Compare plans</h3>
         {plans.length === 0 ? (
-          <div className="rounded-xl border border-slate-100 bg-white p-5 text-sm text-slate-500 shadow-sm">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 text-sm text-[#475569] shadow-sm">
             Plan details are temporarily unavailable. Your current billing status is still accurate above.
           </div>
         ) : (
@@ -284,23 +284,23 @@ export default function BillingPage() {
                 key={plan.id}
                 className={`rounded-xl border p-5 flex flex-col ${
                   isCurrent
-                    ? "border-teal-200 bg-teal-50/40 shadow-sm"
-                    : "border-slate-100 bg-white shadow-sm"
+                    ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
+                    : "border-[#E2E8F0] bg-white shadow-sm"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-teal-100 text-teal-600" : "bg-slate-100 text-slate-500"}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-[#CCFBF1] text-[#0F766E]" : "bg-[#F1F5F9] text-[#475569]"}`}>
                     {PLAN_ICONS[plan.id] || PLAN_ICONS.trial}
                   </div>
-                  <h4 className="text-base font-semibold text-slate-900">{plan.name}</h4>
+                  <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
                 </div>
-                <p className="text-sm text-slate-500 mb-3">{plan.description}</p>
-                <p className="text-2xl font-bold text-slate-900 mb-4">
+                <p className="text-sm text-[#475569] mb-3">{plan.description}</p>
+                <p className="text-2xl font-bold text-[#0F172A] mb-4">
                   {formatPrice(plan.monthly_price_cents)}
                 </p>
                 <ul className="space-y-2 mb-6 flex-1">
                   {plan.features.map((f) => (
-                    <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-slate-600">
+                    <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-[#475569]">
                       <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
                       {f}
                     </li>
@@ -310,7 +310,7 @@ export default function BillingPage() {
                 {(() => {
                   if (isCurrent) {
                     return (
-                      <div className="w-full py-2.5 text-center text-sm font-medium text-teal-700 bg-teal-100 rounded-lg">
+                      <div className="w-full py-2.5 text-center text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
                         Current plan
                       </div>
                     );
@@ -320,7 +320,7 @@ export default function BillingPage() {
                       <button
                         onClick={() => handleUpgrade(plan.id)}
                         disabled={checkoutLoading === plan.id}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 transition-colors"
                       >
                         {checkoutLoading === plan.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -333,7 +333,7 @@ export default function BillingPage() {
                     );
                   }
                   return (
-                    <div className="w-full py-2.5 text-center text-sm font-medium text-slate-400 bg-slate-50 rounded-lg border border-slate-200">
+                    <div className="w-full py-2.5 text-center text-sm font-medium text-[#64748B] bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
                       {isDowngrade ? "Current or lower tier" : "Free"}
                     </div>
                   );
@@ -347,19 +347,19 @@ export default function BillingPage() {
 
       {/* Manage via portal for existing subscribers */}
       {billing.has_stripe_subscription && (
-        <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <CreditCard className="w-5 h-5 text-slate-400" />
+            <CreditCard className="w-5 h-5 text-[#64748B]" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-slate-900">Payment & invoices</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h3 className="text-sm font-semibold text-[#0F172A]">Payment & invoices</h3>
+              <p className="text-xs text-[#475569] mt-0.5">
                 Update your payment method, download invoices, or manage your subscription through the Stripe portal.
               </p>
             </div>
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors"
             >
               {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
               Open portal

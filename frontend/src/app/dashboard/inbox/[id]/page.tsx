@@ -187,10 +187,10 @@ function RightRailActions({
             />
           )}
 
-          <h2 className="text-sm font-semibold text-slate-900 mb-3">
+          <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
             {isEventThread ? "Reply by SMS" : "Send SMS"}
           </h2>
-          <p className="text-xs text-slate-500 mb-3">
+          <p className="text-xs text-[#475569] mb-3">
             {isEventThread
               ? "Continue the same SMS thread from here. Delivery status will update in the conversation."
               : "Send a real outbound text to this patient. Delivery status will be logged below."}
@@ -205,7 +205,7 @@ function RightRailActions({
           <button
             onClick={onSendSms}
             disabled={savingAction === "sms" || !smsBody.trim()}
-            className="mt-3 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            className="mt-3 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] transition-colors disabled:opacity-50"
           >
             {savingAction === "sms" ? "Sending..." : "Send SMS"}
           </button>
@@ -214,32 +214,32 @@ function RightRailActions({
 
       {!isEventThread && relatedEvents.length > 0 && (
         <div className="app-card p-4 sm:p-5">
-          <h2 className="text-sm font-semibold text-slate-900 mb-4">
+          <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
             SMS activity
           </h2>
           <div className="space-y-3">
             {relatedEvents.map((event) => (
-              <div key={event.id} className="rounded-xl border border-slate-200 px-4 py-3">
+              <div key={event.id} className="rounded-xl border border-[#E2E8F0] px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <ChannelBadge channel={event.channel} withIcon />
                   {event.sender_kind === "assistant" && (
-                    <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                    <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
                       AI
                     </span>
                   )}
                   {event.sender_kind === "staff" && (
-                    <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                    <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
                       Manual
                     </span>
                   )}
                   <CommunicationEventStatusBadge status={event.status} />
                 </div>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-[#0F172A]">
                   {smsEventTitle(event.sender_kind, event.event_type)}
                 </p>
-                <p className="text-sm text-slate-600 mt-1 leading-relaxed">{event.content}</p>
+                <p className="text-sm text-[#475569] mt-1 leading-relaxed">{event.content}</p>
                 {(event.failure_reason || event.skipped_reason) && (
-                  <p className="text-xs text-slate-500 mt-2">{event.failure_reason || event.skipped_reason}</p>
+                  <p className="text-xs text-[#475569] mt-2">{event.failure_reason || event.skipped_reason}</p>
                 )}
               </div>
             ))}
@@ -318,8 +318,8 @@ function SmsAutoReplySection({
 
   return (
     <>
-      <div className="mb-4 pb-4 border-b border-slate-100">
-        <h2 className="text-sm font-semibold text-slate-900 mb-2">
+      <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
+        <h2 className="text-sm font-semibold text-[#0F172A] mb-2">
           AI auto-reply status
         </h2>
         <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -329,7 +329,7 @@ function SmsAutoReplySection({
             aiEnabled={conversation.ai_auto_reply_enabled}
           />
         </div>
-        <p className="text-xs text-slate-500 mb-3">
+        <p className="text-xs text-[#475569] mb-3">
           {smsAutomationSummary(
             Boolean(pendingReviewEvent),
             conversation.manual_takeover,
@@ -349,18 +349,18 @@ function SmsAutoReplySection({
       </div>
 
       {pendingReviewEvent && (
-        <div className="mb-4 pb-4 border-b border-slate-100">
+        <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+            <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">
               Human review needed
             </span>
             {pendingReviewEvent.ai_confidence && (
-              <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">
+              <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]">
                 {pendingReviewEvent.ai_confidence} confidence
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mb-3">
+          <p className="text-xs text-[#475569] mb-3">
             {pendingReviewEvent.auto_reply_reason || "The assistant drafted a reply and is waiting for staff approval before sending."}
           </p>
           <textarea
@@ -374,14 +374,14 @@ function SmsAutoReplySection({
             <button
               onClick={onSendSuggestedReply}
               disabled={savingAction === "send_suggested" || !reviewReplyBody.trim()}
-              className="px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] transition-colors disabled:opacity-50"
             >
               {sendButtonLabel}
             </button>
             <button
               onClick={onDiscardSuggestedReply}
               disabled={savingAction === "discard_suggested"}
-              className="px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors disabled:opacity-50"
             >
               {savingAction === "discard_suggested" ? "Discarding..." : "Discard"}
             </button>
@@ -394,37 +394,37 @@ function SmsAutoReplySection({
 
 function AiReplyStatusBadge({ pendingReview, manualTakeover, aiEnabled }: Readonly<{ pendingReview: boolean; manualTakeover: boolean; aiEnabled: boolean }>) {
   if (pendingReview) {
-    return <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">Human review needed</span>;
+    return <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-blue-50 text-blue-700 border-blue-200">Human review needed</span>;
   }
   if (manualTakeover) {
-    return <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">Manual takeover</span>;
+    return <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">Manual takeover</span>;
   }
   if (aiEnabled) {
-    return <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">AI active</span>;
+    return <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">AI active</span>;
   }
-  return <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-slate-100 text-slate-700 border-slate-200">AI off</span>;
+  return <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]">AI off</span>;
 }
 
 function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDetail["lead"]> }>) {
   return (
-    <div className="space-y-3 text-sm text-slate-600">
+    <div className="space-y-3 text-sm text-[#475569]">
       <div>
-        <p className="text-xs text-slate-500 mb-1">Reason for visit</p>
+        <p className="text-xs text-[#475569] mb-1">Reason for visit</p>
         <p>{lead.reason_for_visit || "Not provided yet — the patient may not have shared this."}</p>
       </div>
       <div>
-        <p className="text-xs text-slate-500 mb-1">Preferred time</p>
+        <p className="text-xs text-[#475569] mb-1">Preferred time</p>
         <p>{lead.preferred_datetime_text || "No preference given — staff can suggest a slot."}</p>
       </div>
       {lead.appointment_status && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Booking state</p>
+          <p className="text-xs text-[#475569] mb-1">Booking state</p>
           <p>{humanizeSnakeCase(lead.appointment_status)}</p>
         </div>
       )}
       {lead.reminder_status && lead.reminder_status !== "not_ready" && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Reminder readiness</p>
+          <p className="text-xs text-[#475569] mb-1">Reminder readiness</p>
           <p>
             {humanizeSnakeCase(lead.reminder_status)}
             {lead.reminder_scheduled_for ? ` · ${formatDateTime(lead.reminder_scheduled_for)}` : ""}
@@ -433,13 +433,13 @@ function LeadDetailPanel({ lead }: Readonly<{ lead: NonNullable<ConversationDeta
       )}
       {lead.notes && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Staff notes</p>
+          <p className="text-xs text-[#475569] mb-1">Staff notes</p>
           <p>{lead.notes}</p>
         </div>
       )}
       <Link
         href={`/dashboard/leads/${lead.id}`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800 transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#115E59] hover:text-[#115E59] transition-colors"
       >
         <MessageSquare className="w-4 h-4" />
         Open full request detail
@@ -513,12 +513,12 @@ function FrontDeskActionsSection({
 }: FrontDeskActionsSectionProps) {
   return (
     <div className="app-card p-4 sm:p-5">
-      <h2 className="text-sm font-semibold text-slate-900 mb-4">
+      <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
         Actions
       </h2>
       {lead ? null : (
         <div className="space-y-3 mb-5">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-[#475569]">
             Link this thread to a booking request so your team can track status, send reminders, and follow up from one place.
           </p>
           <label className="sr-only" htmlFor="convert-name">
@@ -530,7 +530,7 @@ function FrontDeskActionsSection({
             value={convertName}
             onChange={(event) => onConvertNameChange(event.target.value)}
             placeholder="Patient name"
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
           />
           <div className="grid grid-cols-1 gap-3">
             <label className="sr-only" htmlFor="convert-phone">
@@ -542,7 +542,7 @@ function FrontDeskActionsSection({
               value={convertPhone}
               onChange={(event) => onConvertPhoneChange(event.target.value)}
               placeholder="Phone number"
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
             />
             <label className="sr-only" htmlFor="convert-email">
               Email address
@@ -553,7 +553,7 @@ function FrontDeskActionsSection({
               value={convertEmail}
               onChange={(event) => onConvertEmailChange(event.target.value)}
               placeholder="Email address"
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
             />
           </div>
           <label className="sr-only" htmlFor="convert-reason">
@@ -565,7 +565,7 @@ function FrontDeskActionsSection({
             value={convertReason}
             onChange={(event) => onConvertReasonChange(event.target.value)}
             placeholder="Reason for visit"
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
           />
           <div className="flex flex-wrap gap-2">
             <button
@@ -578,7 +578,7 @@ function FrontDeskActionsSection({
             <button
               onClick={onCreateFollowUp}
               disabled={savingAction !== ""}
-              className="px-3 py-2 text-sm font-medium text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors disabled:opacity-50"
+              className="px-3 py-2 text-sm font-medium text-[#115E59] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] transition-colors disabled:opacity-50"
             >
               {savingAction === "follow_up" ? "Saving..." : "Create follow-up"}
             </button>
@@ -598,29 +598,29 @@ function FrontDeskActionsSection({
             <button
               onClick={() => onUpdateThreadStatus("closed")}
               disabled={savingAction !== ""}
-              className="px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="px-3 py-2 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors disabled:opacity-50"
             >
               {savingAction === "closed" ? "Saving..." : "Mark closed"}
             </button>
             <button
               onClick={onCreateFollowUp}
               disabled={savingAction !== ""}
-              className="px-3 py-2 text-sm font-medium text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors disabled:opacity-50"
+              className="px-3 py-2 text-sm font-medium text-[#115E59] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] transition-colors disabled:opacity-50"
             >
               {savingAction === "follow_up" ? "Saving..." : "Create follow-up"}
             </button>
           </div>
 
-          <div className="rounded-xl border border-slate-200 p-4">
+          <div className="rounded-xl border border-[#E2E8F0] p-4">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Book from thread</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-sm font-semibold text-[#0F172A]">Book from thread</p>
+                <p className="text-xs text-[#475569] mt-1">
                   Confirm the appointment time here and the request will become reminder-ready when applicable.
                 </p>
               </div>
               {bookingSummary && (
-                <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
                   {bookingSummary}
                 </span>
               )}
@@ -634,7 +634,7 @@ function FrontDeskActionsSection({
                 type="date"
                 value={bookingDate}
                 onChange={(event) => onBookingDateChange(event.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
               />
               <label className="sr-only" htmlFor="booking-time">
                 Appointment time
@@ -644,7 +644,7 @@ function FrontDeskActionsSection({
                 type="time"
                 value={bookingTime}
                 onChange={(event) => onBookingTimeChange(event.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
               />
             </div>
             <label className="sr-only" htmlFor="booking-reason">
@@ -656,7 +656,7 @@ function FrontDeskActionsSection({
               value={bookingReason}
               onChange={(event) => onBookingReasonChange(event.target.value)}
               placeholder="Confirm reason for visit"
-              className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              className="w-full mt-3 px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
             />
             <label className="sr-only" htmlFor="booking-note">
               Internal booking note
@@ -667,20 +667,20 @@ function FrontDeskActionsSection({
               value={bookingNote}
               onChange={(event) => onBookingNoteChange(event.target.value)}
               placeholder="Internal booking note"
-              className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+              className="w-full mt-3 px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
             />
             <button
               onClick={onBookFromThread}
               disabled={savingAction !== ""}
-              className="mt-3 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+              className="mt-3 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] transition-colors disabled:opacity-50"
             >
               {savingAction === "book_thread" ? "Booking..." : "Confirm booking"}
             </button>
           </div>
 
-          <div className="rounded-xl border border-slate-200 p-4">
-            <p className="text-sm font-semibold text-slate-900">Internal note</p>
-            <p className="text-xs text-slate-500 mt-1">
+          <div className="rounded-xl border border-[#E2E8F0] p-4">
+            <p className="text-sm font-semibold text-[#0F172A]">Internal note</p>
+            <p className="text-xs text-[#475569] mt-1">
               Save a staff-only note to this thread. Notes are visible to your team but never shown to patients.
             </p>
             <label className="sr-only" htmlFor="internal-note">
@@ -692,12 +692,12 @@ function FrontDeskActionsSection({
               value={internalNote}
               onChange={(event) => onInternalNoteChange(event.target.value)}
               placeholder="Add a short internal note"
-              className="w-full mt-3 px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+              className="w-full mt-3 px-3 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
             />
             <button
               onClick={onAddInternalNote}
               disabled={savingAction !== "" || !internalNote.trim()}
-              className="mt-3 px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="mt-3 px-4 py-2.5 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors disabled:opacity-50"
             >
               {savingAction === "internal_note" ? "Saving..." : "Save note"}
             </button>
@@ -717,7 +717,7 @@ function FrontDeskActionsSection({
       {lead ? (
         <LeadDetailPanel lead={lead} />
       ) : (
-        <p className="text-sm text-slate-500 leading-relaxed">
+        <p className="text-sm text-[#475569] leading-relaxed">
           {isEventThread
             ? "This recovery thread is not linked to a booking request yet. You can reply by SMS and convert it to a request when the patient is ready."
             : "This conversation has not created a linked request yet. If the patient stopped before sharing details, consider following up manually."}
@@ -995,7 +995,7 @@ export default function InboxThreadPage({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -1013,47 +1013,47 @@ export default function InboxThreadPage({
         <aside className="workspace-side-rail">
           <button
             onClick={() => router.push("/dashboard/inbox")}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Inbox
           </button>
 
           <div className="app-card p-4">
-            <h2 className="text-[12px] font-semibold text-slate-700 mb-3">
+            <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
               Customer
             </h2>
             <div className="space-y-2.5 text-sm min-w-0">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                  <UserRound className="w-3.5 h-3.5 text-slate-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F8FAFC]">
+                  <UserRound className="w-3.5 h-3.5 text-[#64748B]" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400">Name</p>
-                  <p className="text-[13px] font-medium text-slate-900">{conversation.customer_name}</p>
+                  <p className="text-xs text-[#64748B]">Name</p>
+                  <p className="text-sm font-medium text-[#0F172A]">{conversation.customer_name}</p>
                 </div>
               </div>
 
               {conversation.customer_phone && (
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F8FAFC]">
+                    <Phone className="w-3.5 h-3.5 text-[#64748B]" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Phone</p>
-                    <p className="text-[13px] font-medium text-slate-900">{conversation.customer_phone}</p>
+                    <p className="text-xs text-[#64748B]">Phone</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{conversation.customer_phone}</p>
                   </div>
                 </div>
               )}
 
               {conversation.customer_email && (
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F8FAFC]">
+                    <Mail className="w-3.5 h-3.5 text-[#64748B]" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Email</p>
-                    <p className="text-[13px] font-medium text-slate-900">{conversation.customer_email}</p>
+                    <p className="text-xs text-[#64748B]">Email</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{conversation.customer_email}</p>
                   </div>
                 </div>
               )}
@@ -1062,7 +1062,7 @@ export default function InboxThreadPage({
             {conversation.customer_key && (
               <Link
                 href={`/dashboard/customers/${conversation.customer_key}`}
-                className="inline-flex items-center gap-1.5 mt-4 text-[12px] font-semibold text-teal-700 hover:text-teal-800 transition-colors"
+                className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold text-[#115E59] hover:text-[#115E59] transition-colors"
               >
                 <UserRound className="w-3.5 h-3.5" />
                 Open customer profile
@@ -1072,14 +1072,14 @@ export default function InboxThreadPage({
 
           {internalNotes.length > 0 && (
             <div className="app-card p-5">
-              <h2 className="text-sm font-semibold text-slate-900 mb-4">
+              <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
                 Internal notes
               </h2>
               <div className="space-y-3">
                 {internalNotes.slice(0, 5).map((event) => (
-                  <div key={event.id} className="rounded-xl border border-slate-200 px-4 py-3">
-                    <p className="text-sm text-slate-700 leading-relaxed">{event.content || event.summary}</p>
-                    <p className="text-[11px] text-slate-400 mt-2">
+                  <div key={event.id} className="rounded-xl border border-[#E2E8F0] px-4 py-3">
+                    <p className="text-sm text-[#0F172A] leading-relaxed">{event.content || event.summary}</p>
+                    <p className="text-xs text-[#64748B] mt-2">
                       {event.occurred_at ? formatDateTime(event.occurred_at) : ""}
                     </p>
                   </div>
@@ -1091,9 +1091,9 @@ export default function InboxThreadPage({
 
         <div className="flex-1 min-w-0">
           <div className="app-card overflow-hidden">
-            <div className="border-b border-slate-100/60 px-5 py-5 sm:px-6">
+            <div className="border-b border-[#E2E8F0] px-5 py-5 sm:px-6">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className="text-xl font-bold text-slate-900">
+                <h1 className="text-2xl font-semibold text-[#0F172A]">
                   {conversation.customer_name}
                 </h1>
                 <ChannelBadge channel={conversation.channel} withIcon />
@@ -1103,32 +1103,32 @@ export default function InboxThreadPage({
                   <FrontdeskStatusBadge status={conversation.derived_status} />
                 )}
               </div>
-              <p className="text-[13px] text-slate-500">
+              <p className="text-sm text-[#475569]">
                 {isEventThread ? "Logged" : "Started"}{" "}
                 {conversation.conversation_started_at ? formatDateTime(conversation.conversation_started_at) : "recently"}
               </p>
               <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Thread state</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Thread state</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">
                     {isEventThread ? "Operational event thread" : "Live conversation thread"}
                   </p>
                 </div>
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Latest source</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900 capitalize">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Latest source</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A] capitalize">
                     {conversation.channel}
                   </p>
                 </div>
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Lead link</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Lead link</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">
                     {lead ? "Request linked" : "Still unlinked"}
                   </p>
                 </div>
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Booking state</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-900">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Booking state</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">
                     {bookingSummary || "Not booked yet"}
                   </p>
                 </div>
@@ -1149,7 +1149,7 @@ export default function InboxThreadPage({
                 </div>
               )}
               {!isEventThread && messages.length === 0 && (
-                <div className="app-card-muted border-dashed px-4 py-5 text-sm text-slate-500">
+                <div className="app-card-muted border-dashed px-4 py-5 text-sm text-[#475569]">
                   {conversation.summary || "No message transcript is stored for this conversation yet."}
                 </div>
               )}

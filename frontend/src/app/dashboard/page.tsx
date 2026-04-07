@@ -136,7 +136,7 @@ export default function DashboardPage() {
     if (clinic && systemStatus === "LIVE") {
       return (
         <EmptyState
-          icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
+          icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
           title="No activity yet"
           description="Your assistant is live and ready. Activity will appear here as patients start conversations through the chat widget or SMS."
           action={
@@ -145,7 +145,7 @@ export default function DashboardPage() {
                 href={`/chat/${clinic.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
               >
                 <MessageSquareMore className="h-3.5 w-3.5" />
                 Test assistant
@@ -158,7 +158,7 @@ export default function DashboardPage() {
     if (clinic && systemStatus === "READY") {
       return (
         <EmptyState
-          icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
+          icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
           title="Ready to go live"
           description="Setup is complete. Activate the assistant to start receiving patient conversations through your website."
         />
@@ -166,13 +166,13 @@ export default function DashboardPage() {
     }
     return (
       <EmptyState
-        icon={<MessageSquareMore className="w-5 h-5 text-slate-400" />}
+        icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
         title="Setup not complete"
         description="Complete your clinic details in settings so the assistant knows how to respond accurately."
         action={
           <button
             onClick={() => router.push(settingsHref())}
-            className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
           >
             <Settings className="h-3.5 w-3.5" />
             Open settings
@@ -212,7 +212,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
           billing && billing.plan !== "premium" ? (
             <Link
               href="/dashboard/billing"
-              className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-2 text-xs font-semibold text-teal-700 transition-colors hover:bg-teal-100"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#99f6e4] bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
             >
               <Zap className="h-3.5 w-3.5" />
               Upgrade plan
@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <p className="text-[13px] font-semibold text-emerald-900">First lead captured</p>
+              <p className="text-sm font-semibold text-emerald-900">First lead captured</p>
               <p className="mt-0.5 text-xs text-emerald-700/80">
                 Patient requests are now flowing into the workspace automatically.
               </p>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href="/dashboard/billing"
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#115E59]"
                   >
                     <Zap className="h-3 w-3" />
                     Upgrade
@@ -307,26 +307,26 @@ export default function DashboardPage() {
         {/* ── Canvas ── */}
         <div className="space-y-4">
           {/* Hero panel */}
-          <div className="rounded-xl border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white px-5 py-4 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-xl">
-                <h2 className="text-[15px] font-bold tracking-tight text-slate-900">
+                <h2 className="text-lg font-semibold tracking-tight text-[#0F172A]">
                   What happened, what needs attention, and where things stand.
                 </h2>
-                <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
+                <p className="mt-1 text-sm leading-relaxed text-[#475569]">
                   Live counts from conversations, bookings, and staff actions across the workspace.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2 lg:w-56">
-                <div className="rounded-md border border-slate-200/70 bg-slate-50/70 px-3 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Live demand</p>
-                  <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.conversations_total}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">Active conversations</p>
+                <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Live demand</p>
+                  <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{analytics.conversations_total}</p>
+                  <p className="mt-0.5 text-xs text-[#475569]">Active conversations</p>
                 </div>
-                <div className="rounded-md border border-slate-200/70 bg-slate-50/70 px-3 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Booked now</p>
-                  <p className="mt-0.5 text-lg font-bold text-slate-900">{analytics.booked_requests}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">Confirmed requests</p>
+                <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Booked now</p>
+                  <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{analytics.booked_requests}</p>
+                  <p className="mt-0.5 text-xs text-[#475569]">Confirmed requests</p>
                 </div>
               </div>
             </div>
@@ -357,11 +357,11 @@ export default function DashboardPage() {
             />
             <Link
               href="/dashboard/appointments"
-              className="flex items-start justify-between rounded-xl border border-slate-200/80 bg-white px-4 py-3.5 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+              className="flex items-start justify-between rounded-xl border border-[#E2E8F0] bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
             >
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Appointments</p>
-                <p className="mt-1.5 text-[13px] font-semibold text-slate-900">Manage bookings, reminders, and deposits</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Appointments</p>
+                <p className="mt-1.5 text-sm font-semibold text-[#0F172A]">Manage bookings, reminders, and deposits</p>
               </div>
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -376,7 +376,7 @@ export default function DashboardPage() {
             action={
               <Link
                 href="/dashboard/inbox"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
               >
                 Open inbox
                 <ArrowRight className="h-3 w-3" />
@@ -389,10 +389,10 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="mt-2.5 rounded-md border border-slate-200/60 bg-slate-50/60 px-3.5 py-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Performance note</p>
-              <p className="mt-0.5 text-[13px] text-slate-600">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+            <div className="mt-2.5 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Performance note</p>
+              <p className="mt-0.5 text-sm text-[#475569]">{analytics.estimated_value_recovered_label}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#475569]">
                 <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
                 <span>Blocked for review: {analytics.blocked_for_review_count}</span>
                 <span>AI resolution: {analytics.ai_resolution_estimate}%</span>
@@ -404,11 +404,11 @@ export default function DashboardPage() {
           <SurfaceCard
             title="Busiest contact hours"
             description="When patients reach out most, based on incoming messages."
-            action={<Clock className="h-3.5 w-3.5 text-slate-400" />}
+            action={<Clock className="h-3.5 w-3.5 text-[#64748B]" />}
           >
             {!analytics.busiest_contact_hours || analytics.busiest_contact_hours.length === 0 ? (
               <EmptyState
-                icon={<Clock className="w-5 h-5 text-slate-400" />}
+                icon={<Clock className="w-5 h-5 text-[#64748B]" />}
                 title="Not enough data yet"
                 description="Contact-hour patterns will appear after patients begin interacting with the assistant."
               />
@@ -418,8 +418,8 @@ export default function DashboardPage() {
                   const barUnits = Math.max(20, (bucket.count / busiestHourMaxCount) * 100);
                   return (
                     <div key={bucket.hour} className="flex items-center gap-3">
-                      <div className="w-20 text-xs font-medium text-slate-600">{bucket.label}</div>
-                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                      <div className="w-20 text-xs font-medium text-[#475569]">{bucket.label}</div>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#F1F5F9]">
                         <svg
                           className="block h-full w-full text-[#0F766E]"
                           viewBox="0 0 100 100"
@@ -429,7 +429,7 @@ export default function DashboardPage() {
                           <rect width={barUnits} height="100" fill="currentColor" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium text-slate-600">{bucket.count}</span>
+                      <span className="text-xs font-medium text-[#475569]">{bucket.count}</span>
                     </div>
                   );
                 })}
@@ -445,7 +445,7 @@ export default function DashboardPage() {
               action={
                 <Link
                   href="/dashboard/opportunities"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
                 >
                   View all
                   <ArrowRight className="h-3 w-3" />
@@ -454,7 +454,7 @@ export default function DashboardPage() {
             >
               {opportunities.length === 0 ? (
                 <EmptyState
-                  icon={<AlertTriangle className="w-5 h-5 text-slate-400" />}
+                  icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
                   title="No follow-up items"
                   description="Stalled or at-risk booking requests will surface here when they need attention."
                 />
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                       <Link
                         key={opportunity.id}
                         href={href}
-                        className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 transition-all hover:border-slate-200 hover:bg-slate-50/60"
+                        className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#E2E8F0] hover:bg-[#F8FAFC]"
                       >
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
@@ -484,12 +484,12 @@ export default function DashboardPage() {
                           <AlertTriangle className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-medium text-slate-900">{opportunity.title}</p>
-                          <p className="mt-0.5 truncate text-xs text-slate-500">
+                          <p className="truncate text-sm font-medium text-[#0F172A]">{opportunity.title}</p>
+                          <p className="mt-0.5 truncate text-xs text-[#475569]">
                             {opportunity.customer_name} · {opportunity.detail}
                           </p>
                         </div>
-                        <span className="shrink-0 text-xs text-slate-400">
+                        <span className="shrink-0 text-xs text-[#64748B]">
                           {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
                         </span>
                       </Link>
@@ -505,7 +505,7 @@ export default function DashboardPage() {
               action={
                 <Link
                   href="/dashboard/activity"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
                 >
                   View all
                   <ArrowRight className="h-3 w-3" />
@@ -524,7 +524,7 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={`${event.type}-${event.resource_id}-${index}`}
-                        className="flex items-center gap-3 rounded-xl border border-slate-100 px-3.5 py-3"
+                        className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3.5 py-3"
                       >
                         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
                           <Icon className={`h-3.5 w-3.5 ${config.color}`} />
@@ -533,20 +533,20 @@ export default function DashboardPage() {
                           {isLead ? (
                             <Link
                               href={`/dashboard/leads/${event.resource_id}`}
-                              className="block truncate text-sm font-medium text-slate-900 hover:text-teal-700"
+                              className="block truncate text-sm font-medium text-[#0F172A] hover:text-[#115E59]"
                             >
                               {event.title}
                             </Link>
                           ) : (
-                            <p className="truncate text-sm font-medium text-slate-900">{event.title}</p>
+                            <p className="truncate text-sm font-medium text-[#0F172A]">{event.title}</p>
                           )}
-                          <p className="mt-0.5 truncate text-xs text-slate-500">{event.detail}</p>
+                          <p className="mt-0.5 truncate text-xs text-[#475569]">{event.detail}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
-                          <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${config.bg} ${config.color}`}>
+                          <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${config.bg} ${config.color}`}>
                             {config.label}
                           </span>
-                          <span className="text-[11px] text-slate-400">{timeAgo(event.timestamp)}</span>
+                          <span className="text-xs text-[#64748B]">{timeAgo(event.timestamp)}</span>
                         </div>
                       </div>
                     );
@@ -571,13 +571,13 @@ export default function DashboardPage() {
         <div className="hidden space-y-3 xl:block">
           <RightRailCard title="Workspace state">
             <div className="space-y-2">
-              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
-                <p className="text-[11px] text-slate-500">System</p>
-                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">{systemStatus ?? "Not ready"}</p>
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-xs text-[#475569]">System</p>
+                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">{systemStatus ?? "Not ready"}</p>
               </div>
-              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
-                <p className="text-[11px] text-slate-500">Current plan</p>
-                <p className="mt-0.5 text-[13px] font-semibold text-slate-900">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-xs text-[#475569]">Current plan</p>
+                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
                   {billing ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1) : "Unavailable"}
                 </p>
               </div>
@@ -594,10 +594,10 @@ export default function DashboardPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-lg border border-slate-200/60 px-3 py-2.5 transition-all hover:border-slate-300 hover:bg-slate-50"
+                  className="block rounded-lg border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
                 >
-                  <p className="text-[13px] font-medium text-slate-900">{item.label}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">{item.detail}</p>
+                  <p className="text-sm font-medium text-[#0F172A]">{item.label}</p>
+                  <p className="mt-0.5 text-xs text-[#475569]">{item.detail}</p>
                 </Link>
               ))}
             </div>
@@ -605,21 +605,21 @@ export default function DashboardPage() {
 
           <RightRailCard title="Daily focus">
             <div className="space-y-2">
-              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
-                <p className="text-[13px] font-medium text-slate-900">Human review</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-sm font-medium text-[#0F172A]">Human review</p>
+                <p className="mt-0.5 text-xs text-[#475569]">
                   {analytics.human_review_required_count} conversations waiting for a staff decision.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
-                <p className="text-[13px] font-medium text-slate-900">Attention required</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-sm font-medium text-[#0F172A]">Attention required</p>
+                <p className="mt-0.5 text-xs text-[#475569]">
                   {attentionAppointments.length} bookings blocked by prep, reschedule, or deposit needs.
                 </p>
               </div>
-              <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 px-3 py-2.5">
-                <p className="text-[13px] font-medium text-slate-900">Opportunity pressure</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
+                <p className="text-sm font-medium text-[#0F172A]">Opportunity pressure</p>
+                <p className="mt-0.5 text-xs text-[#475569]">
                   {analytics.follow_up_needed_count} follow-ups and {analytics.unresolved_count} unresolved requests.
                 </p>
               </div>

@@ -40,7 +40,7 @@ function lastOutcomeLabel(outcome: CustomerProfileDetail["last_outcome"]): strin
 
 function lastOutcomeClass(outcome: CustomerProfileDetail["last_outcome"]): string {
   if (outcome === "booked") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (outcome === "lost") return "bg-slate-100 text-slate-700 border-slate-200";
+  if (outcome === "lost") return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
   return "bg-amber-50 text-amber-700 border-amber-200";
 }
 
@@ -48,7 +48,7 @@ function smsStatusClass(profile: CustomerProfileDetail): string {
   if (profile.latest_sms_pending_review) return "bg-blue-50 text-blue-700 border-blue-200";
   if (profile.latest_sms_manual_takeover) return "bg-amber-50 text-amber-700 border-amber-200";
   if (profile.latest_sms_ai_auto_reply_enabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
 }
 
 function smsStatusLabel(profile: CustomerProfileDetail): string {
@@ -139,10 +139,10 @@ export default function CustomerProfilePage({
   );
 
   return (
-    <div className="max-w-6xl space-y-4">
+    <div className="max-w-6xl space-y-6">
       <button
         onClick={() => router.push("/dashboard/customers")}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-1.5 text-[12px] font-semibold text-slate-500 shadow-sm transition-colors hover:text-slate-700"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Customers
@@ -166,8 +166,8 @@ export default function CustomerProfilePage({
           <div className="app-card p-4">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">{profile.name}</h1>
-                <p className="text-[13px] text-slate-500 mt-0.5">
+                <h1 className="text-xl font-bold text-[#0F172A]">{profile.name}</h1>
+                <p className="text-sm text-[#475569] mt-0.5">
                   Last interaction{" "}
                   {profile.last_interaction_at
                     ? timeAgo(profile.last_interaction_at)
@@ -175,36 +175,36 @@ export default function CustomerProfilePage({
                 </p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 text-center">
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
-                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Conversations</p>
-                  <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.conversation_count}</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Conversations</p>
+                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.conversation_count}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
-                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Requests</p>
-                  <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.lead_count}</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Requests</p>
+                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.lead_count}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
-                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Total interactions</p>
-                  <p className="text-lg font-bold text-slate-900 mt-0.5">{profile.total_interactions}</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Total interactions</p>
+                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.total_interactions}</p>
                 </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-slate-50/60 border border-slate-200/60">
-                  <p className="text-[11px] uppercase tracking-widest text-slate-400">Last outcome</p>
-                  <p className="text-lg font-bold text-slate-900 mt-0.5">{lastOutcomeLabel(profile.last_outcome)}</p>
+                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Last outcome</p>
+                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{lastOutcomeLabel(profile.last_outcome)}</p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 mt-4">
-              <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${lastOutcomeClass(profile.last_outcome)}`}>
+              <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${lastOutcomeClass(profile.last_outcome)}`}>
                 {lastOutcomeLabel(profile.last_outcome)}
               </span>
               {profile.follow_up_needed && (
-                <span className="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
                   Follow-up needed
                 </span>
               )}
               {profile.latest_sms_thread_id && (
-                <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${smsStatusClass(profile)}`}>
+                <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${smsStatusClass(profile)}`}>
                   {smsStatusLabel(profile)}
                 </span>
               )}
@@ -212,35 +212,35 @@ export default function CustomerProfilePage({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100/60 flex items-center justify-center">
-                  <UserRound className="w-3.5 h-3.5 text-slate-500" />
+                <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
+                  <UserRound className="w-3.5 h-3.5 text-[#475569]" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400">Primary identity</p>
-                  <p className="text-[13px] font-medium text-slate-900">{profile.name}</p>
+                  <p className="text-xs text-[#64748B]">Primary identity</p>
+                  <p className="text-sm font-medium text-[#0F172A]">{profile.name}</p>
                 </div>
               </div>
 
               {profile.phone && (
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100/60 flex items-center justify-center">
-                    <Phone className="w-3.5 h-3.5 text-slate-500" />
+                  <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
+                    <Phone className="w-3.5 h-3.5 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Phone</p>
-                    <p className="text-[13px] font-medium text-slate-900">{profile.phone}</p>
+                    <p className="text-xs text-[#64748B]">Phone</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{profile.phone}</p>
                   </div>
                 </div>
               )}
 
               {profile.email && (
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100/60 flex items-center justify-center">
-                    <Mail className="w-3.5 h-3.5 text-slate-500" />
+                  <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
+                    <Mail className="w-3.5 h-3.5 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400">Email</p>
-                    <p className="text-[13px] font-medium text-slate-900">{profile.email}</p>
+                    <p className="text-xs text-[#64748B]">Email</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{profile.email}</p>
                   </div>
                 </div>
               )}
@@ -248,21 +248,21 @@ export default function CustomerProfilePage({
 
             {profile.latest_note && (
               <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700">
+                <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
                   Recent note
                 </p>
-                <p className="text-[13px] text-amber-800 mt-0.5">{profile.latest_note}</p>
+                <p className="text-sm text-amber-800 mt-0.5">{profile.latest_note}</p>
               </div>
             )}
 
             {latestInboundSms && (
               <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-blue-700">
+                <p className="text-xs font-semibold uppercase tracking-widest text-blue-700">
                   Latest inbound SMS
                 </p>
-                <p className="text-[13px] text-blue-900 mt-0.5">{latestInboundSms.detail}</p>
+                <p className="text-sm text-blue-900 mt-0.5">{latestInboundSms.detail}</p>
                 {latestInboundSms.occurred_at && (
-                  <p className="text-[10px] text-blue-700/80 mt-1.5">
+                  <p className="text-xs text-blue-700/80 mt-1.5">
                     {formatDateTime(latestInboundSms.occurred_at)}
                   </p>
                 )}
@@ -283,8 +283,8 @@ export default function CustomerProfilePage({
             )}
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
+          <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
+            <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
               Recent requests
             </h2>
             <div className="space-y-2.5">
@@ -292,21 +292,21 @@ export default function CustomerProfilePage({
                 <Link
                   key={lead.id}
                   href={`/dashboard/leads/${lead.id}`}
-                  className="block rounded-lg border border-slate-100/60 px-3.5 py-2.5 hover:border-teal-200 hover:bg-slate-50 transition-colors"
+                  className="block rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-[#0F172A] truncate">
                         {lead.reason_for_visit || "Appointment request"}
                       </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                      <p className="text-xs text-[#64748B] mt-0.5">
                         {lead.preferred_datetime_text || "Preferred time not captured"}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center justify-end gap-2">
                       <LeadStatusBadge status={lead.status} />
                       {lead.deposit_status && lead.deposit_status !== "not_required" && (
-                        <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${depositBadgeClass(lead.deposit_status)}`}>
+                        <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${depositBadgeClass(lead.deposit_status)}`}>
                           {depositBadgeLabel(lead.deposit_status)}
                         </span>
                       )}
@@ -318,8 +318,8 @@ export default function CustomerProfilePage({
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
-          <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 h-fit">
+          <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
             Recent conversation history
           </h2>
           <div className="space-y-2.5">
@@ -327,20 +327,20 @@ export default function CustomerProfilePage({
               <Link
                 key={conversation.id}
                 href={`/dashboard/inbox/${conversation.id}`}
-                className="block rounded-lg border border-slate-100/60 px-3.5 py-2.5 hover:border-teal-200 hover:bg-slate-50 transition-colors"
+                className="block rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors"
               >
                 <div className="flex items-center justify-between gap-3 mb-1.5">
                   <div className="flex items-center gap-2">
                     <ChannelBadge channel={conversation.channel} withIcon />
                     <FrontdeskStatusBadge status={conversation.derived_status} />
                   </div>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-[#64748B]">
                     {conversation.last_message_at
                       ? timeAgo(conversation.last_message_at)
                       : "Recently"}
                   </span>
                 </div>
-                <p className="text-[13px] text-slate-700 leading-relaxed">
+                <p className="text-sm text-[#0F172A] leading-relaxed">
                   {conversation.last_message_preview}
                 </p>
               </Link>
@@ -348,57 +348,57 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.last_interaction_at && (
-            <p className="text-[10px] text-slate-400 mt-4">
+            <p className="text-xs text-[#64748B] mt-4">
               Most recent activity: {formatDateTime(profile.last_interaction_at)}
             </p>
           )}
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-xl p-4 h-fit">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 h-fit">
           {profile.phone && (
-            <div className="mb-4 pb-4 border-b border-slate-100">
-              <h2 className="text-[13px] font-semibold text-slate-900 mb-2.5">
+            <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
+              <h2 className="text-sm font-semibold text-[#0F172A] mb-2.5">
                 Send SMS
               </h2>
-              <p className="text-[10px] text-slate-400 mb-2.5">
+              <p className="text-xs text-[#64748B] mb-2.5">
                 Send a real outbound text to this patient. Delivery results will appear in the timeline below.
               </p>
               <textarea
                 rows={4}
                 value={smsBody}
                 onChange={(event) => setSmsBody(event.target.value)}
-                className="w-full px-2.5 py-2 text-[13px] border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                className="w-full px-2.5 py-2 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
                 placeholder="Write your message"
               />
               <button
                 onClick={sendSms}
                 disabled={sendingSms || !smsBody.trim()}
-                className="mt-2.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+                className="mt-2.5 px-3 py-1.5 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] transition-colors disabled:opacity-50"
               >
                 {sendingSms ? "Sending..." : "Send SMS"}
               </button>
             </div>
           )}
 
-          <h2 className="text-[13px] font-semibold text-slate-900 mb-3">
+          <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
             Customer timeline
           </h2>
           <div className="space-y-2.5">
             {profile.timeline.map((item) => {
               const href = timelineHref(profile, item);
               const content = (
-                <div className="rounded-lg border border-slate-100/60 px-3.5 py-2.5 hover:border-teal-200 hover:bg-slate-50 transition-colors">
+                <div className="rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors">
                   <div className="flex items-center justify-between gap-3 mb-1.5">
                     <div className="flex flex-wrap items-center gap-2">
                       {item.channel && <ChannelBadge channel={item.channel} withIcon />}
                       <TimelineItemBadge item={item} />
                     </div>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-xs text-[#64748B]">
                       {item.occurred_at ? timeAgo(item.occurred_at) : "Recently"}
                     </span>
                   </div>
-                  <p className="text-[13px] font-medium text-slate-900">{item.title}</p>
-                  <p className="text-[13px] text-slate-600 mt-0.5 leading-relaxed">{item.detail}</p>
+                  <p className="text-sm font-medium text-[#0F172A]">{item.title}</p>
+                  <p className="text-sm text-[#475569] mt-0.5 leading-relaxed">{item.detail}</p>
                 </div>
               );
 
@@ -415,13 +415,13 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 && (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3.5 text-[13px] text-slate-500">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5 text-sm text-[#475569]">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           )}
 
           {profile.timeline.length > 0 && (
-            <p className="text-[10px] text-slate-400 mt-4">
+            <p className="text-xs text-[#64748B] mt-4">
               All channels and activity types appear in this timeline.
             </p>
           )}
