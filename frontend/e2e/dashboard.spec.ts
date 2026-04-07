@@ -31,6 +31,8 @@ test.describe("Dashboard structure (seeded auth)", () => {
       { href: "/dashboard/operations", label: "Operations" },
       { href: "/dashboard/activity", label: "Activity" },
       { href: "/dashboard/training", label: /ai training/i },
+      { href: "/dashboard/settings", label: "Settings" },
+      { href: "/dashboard/billing", label: "Billing" },
     ];
 
     for (const { href, label } of navLinks) {

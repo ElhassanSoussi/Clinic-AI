@@ -42,6 +42,8 @@ const sidebarNav = [
   { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical },
   { href: "/dashboard/activity", label: "Activity", icon: Activity },
   { href: "/dashboard/training", label: "AI Training", icon: Sparkles },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
 ];
 
 function settingsHref(section?: string | null): string {
@@ -503,23 +505,15 @@ export default function DashboardLayout({
                   )}
                 </div>
 
-                {[
-                  { href: "/dashboard/account", icon: UserCog, label: "Account" },
-                  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-                  { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
-                  { href: "/dashboard/settings?section=google-sheets", icon: ShieldCheck, label: "Security & setup" },
-                ].map(({ href, icon: Icon, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
-                    role="menuitem"
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </Link>
-                ))}
+                <Link
+                  href="/dashboard/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  role="menuitem"
+                >
+                  <UserCog className="h-4 w-4" />
+                  Account
+                </Link>
 
                 <div className="my-1 border-t border-slate-100" />
 
