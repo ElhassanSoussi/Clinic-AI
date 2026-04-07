@@ -309,8 +309,8 @@ export default function DashboardLayout({
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={`group relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors ${isActive
-                    ? "bg-teal-50 text-teal-700 font-semibold"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                  ? "bg-teal-50 text-teal-700 font-semibold"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                   }`}
               >
                 {isActive && (
@@ -399,8 +399,8 @@ export default function DashboardLayout({
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`group relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium transition-all ${isActive
-                      ? "bg-teal-50 text-teal-700 font-semibold"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                    ? "bg-teal-50 text-teal-700 font-semibold"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
                     }`}
                 >
                   {isActive && (
