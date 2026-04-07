@@ -396,7 +396,7 @@ export default function LeadsPage() {
         </aside>
 
         {/* Center — list */}
-        <div className="space-y-3">
+        <div className="order-1 min-w-0 space-y-3 xl:order-none">
           {/* Mobile filters */}
           <div className="flex flex-wrap gap-2 xl:hidden">
             {STATUS_OPTIONS.map((opt) => {
@@ -405,7 +405,8 @@ export default function LeadsPage() {
                 <button
                   key={opt.value}
                   onClick={() => setStatusFilter(opt.value)}
-                  className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
+                  type="button"
+                  className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
                     }`}
                 >
                   {opt.label}
@@ -415,14 +416,14 @@ export default function LeadsPage() {
           </div>
 
           {/* Search */}
-          <div className="flex items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
+          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
             <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by name, phone, email, or visit reason..."
-              className="h-6 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+              className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
             />
             <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
           </div>
@@ -431,7 +432,7 @@ export default function LeadsPage() {
         </div>
 
         {/* Right rail — context */}
-        <aside className="hidden space-y-3 xl:block">
+        <aside className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-3 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Pipeline snapshot</p>
             <div className="mt-2 space-y-1.5">

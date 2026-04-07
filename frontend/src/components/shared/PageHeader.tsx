@@ -23,11 +23,11 @@ export function PageHeader({
             {eyebrow}
           </div>
         ) : null}
-        <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-[#0F172A]">
+        <h1 className="max-w-3xl break-words text-2xl font-semibold tracking-tight text-[#0F172A]">
           {title}
         </h1>
         {description ? (
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#475569]">
+          <p className="mt-2 max-w-2xl break-words text-sm leading-relaxed text-[#475569]">
             {description}
           </p>
         ) : null}

@@ -1314,8 +1314,8 @@ export default function SettingsPage() {
         description="Everything the assistant uses to respond to patients. Your clinic data stays under your control — nothing is assumed or pulled from outside sources."
       />
       <div className="workspace-stage">
-        <div className="workspace-side-rail">
-          <div className="workspace-rail-card sticky top-6 p-5">
+        <div className="workspace-side-rail order-2 xl:order-none">
+          <div className="workspace-rail-card relative p-5 xl:sticky xl:top-6">
             <p className="workspace-section-label">Configuration status</p>
             <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0F172A]">{completedCount}/10</p>
             <p className="mt-1 text-sm text-[#475569]">Sections configured</p>
@@ -1328,7 +1328,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1340,7 +1340,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="order-1 min-w-0 space-y-6 xl:order-none">
       {saveMessage && (
         <div
           className={`p-3 text-sm rounded-lg border ${
@@ -1537,7 +1537,7 @@ export default function SettingsPage() {
       </div>
         </div>
 
-        <div className="workspace-side-rail">
+        <div className="workspace-side-rail order-3 xl:order-none">
           <div className="workspace-rail-card p-5">
             <p className="workspace-section-label">Setup guidance</p>
             <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">

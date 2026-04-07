@@ -412,7 +412,7 @@ export default function OperationsPage() {
             </div>
           </div>
 
-          <div className="mb-3 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Configured</p>
               <p className="mt-1 text-lg font-bold text-[#0F172A]">{systemReadiness.configured_count}</p>
@@ -480,8 +480,11 @@ export default function OperationsPage() {
               )}
               <p className="mt-2.5 text-sm leading-relaxed text-[#475569]">{channel.detail}</p>
               {channel.channel === "sms" && channel.connection_status === "connected" && (
-                <p className="mt-2.5 text-xs text-[#475569]">
-                  Inbound webhook path: <span className="font-mono">/api/frontdesk/communications/twilio/inbound</span>
+                <p className="mt-2.5 break-words text-xs text-[#475569]">
+                  Inbound webhook path:{" "}
+                  <span className="break-all font-mono text-[0.7rem] sm:text-xs">
+                    /api/frontdesk/communications/twilio/inbound
+                  </span>
                 </p>
               )}
               {channel.notes && (
@@ -524,7 +527,7 @@ export default function OperationsPage() {
       </div>
 
       {/* Outbound activity metrics */}
-      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Outbound SMS</p>
           <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.outbound_sms_total ?? 0}</p>
@@ -1454,7 +1457,7 @@ export default function OperationsPage() {
               <Wallet className="h-4 w-4 text-[#0F766E]" />
               <h2 className="text-sm font-semibold text-[#0F172A]">Deposit tracking</h2>
             </div>
-            <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
                 <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Required</p>
                 <p className="mt-1 text-lg font-bold text-[#0F172A]">{operations.deposit_summary.required_count}</p>

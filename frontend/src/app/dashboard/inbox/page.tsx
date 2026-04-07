@@ -193,16 +193,16 @@ export default function InboxPage() {
         </aside>
 
         {/* Center — thread list */}
-        <div className="space-y-3">
+        <div className="order-1 min-w-0 space-y-3 xl:order-none">
           {/* Search bar */}
-          <div className="flex items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
+          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
             <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by patient, phone, email, or text..."
-              className="h-6 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+              className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
             />
             <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
           </div>
@@ -215,7 +215,8 @@ export default function InboxPage() {
                 <button
                   key={filter.value}
                   onClick={() => setStatusFilter(filter.value)}
-                  className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${active ? "bg-[#CCFBF1] text-[#0F766E]" : "text-[#64748B] hover:bg-[#F8FAFC]"
+                  type="button"
+                  className={`min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${active ? "bg-[#CCFBF1] text-[#0F766E]" : "text-[#64748B] hover:bg-[#F8FAFC]"
                     }`}
                 >
                   {filter.label} <span className="text-xs opacity-60">{counts[filter.value]}</span>
@@ -289,7 +290,7 @@ export default function InboxPage() {
         </div>
 
         {/* Right rail — context */}
-        <aside className="hidden space-y-3 xl:block">
+        <aside className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <div className="flex items-center gap-2">
               <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">

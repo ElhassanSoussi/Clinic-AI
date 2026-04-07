@@ -110,7 +110,7 @@ export default function AccountPage() {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_1fr_240px]">
         {/* Left rail */}
-        <aside className="hidden xl:block">
+        <aside className="order-2 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Account overview</p>
             <div className="mt-3 space-y-2.5">
@@ -127,7 +127,7 @@ export default function AccountPage() {
         </aside>
 
         {/* Main content */}
-        <div className="space-y-2">
+        <div className="order-1 min-w-0 space-y-2 xl:order-none">
         {/* Profile Section */}
         <section className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
           <button
@@ -184,9 +184,10 @@ export default function AccountPage() {
                 </div>
                 <div className="pt-2">
                   <button
+                    type="button"
                     onClick={handleSaveProfile}
                     disabled={savingProfile || !fullName.trim()}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex min-h-10 w-full items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {savingProfile ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -260,9 +261,10 @@ export default function AccountPage() {
                 </div>
                 <div className="pt-2">
                   <button
+                    type="button"
                     onClick={handleChangePassword}
                     disabled={savingPassword}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex min-h-10 w-full items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {savingPassword ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -278,7 +280,7 @@ export default function AccountPage() {
         </div>
 
         {/* Right rail */}
-        <aside className="hidden xl:block">
+        <aside className="order-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Security note</p>
             <div className="mt-3 space-y-2 text-sm leading-relaxed text-[#475569]">

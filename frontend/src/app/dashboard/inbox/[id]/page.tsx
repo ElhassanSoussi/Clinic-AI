@@ -1010,10 +1010,10 @@ export default function InboxThreadPage({
       <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
       <div className="workspace-column-layout">
-        <aside className="workspace-side-rail">
+        <aside className="workspace-side-rail order-3 xl:order-none">
           <button
             onClick={() => router.push("/dashboard/inbox")}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Inbox
@@ -1089,11 +1089,11 @@ export default function InboxThreadPage({
           )}
         </aside>
 
-        <div className="flex-1 min-w-0">
+        <div className="order-1 min-w-0 flex-1 xl:order-none">
           <div className="app-card overflow-hidden">
             <div className="border-b border-[#E2E8F0] px-5 py-5 sm:px-6">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className="text-2xl font-semibold text-[#0F172A]">
+                <h1 className="break-words text-2xl font-semibold text-[#0F172A]">
                   {conversation.customer_name}
                 </h1>
                 <ChannelBadge channel={conversation.channel} withIcon />
@@ -1107,7 +1107,7 @@ export default function InboxThreadPage({
                 {isEventThread ? "Logged" : "Started"}{" "}
                 {conversation.conversation_started_at ? formatDateTime(conversation.conversation_started_at) : "recently"}
               </p>
-              <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="app-card-muted px-3.5 py-2.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Thread state</p>
                   <p className="mt-1 text-sm font-semibold text-[#0F172A]">
@@ -1160,7 +1160,7 @@ export default function InboxThreadPage({
           </div>
         </div>
 
-        <aside className="workspace-side-rail">
+        <aside className="workspace-side-rail order-2 xl:order-none">
           <RightRailActions
             detail={detail}
             isEventThread={isEventThread}

@@ -162,7 +162,7 @@ export default function OpportunitiesPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
-        <div className="space-y-4">
+        <div className="order-1 min-w-0 space-y-4 xl:order-none">
           {/* Follow-up queue */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-4">
@@ -317,7 +317,7 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* Right rail */}
-        <div className="hidden space-y-3 xl:block">
+        <div className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Automation</p>
             <div className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">

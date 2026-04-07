@@ -347,7 +347,7 @@ export default function TrainingPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_240px]">
-        <div className="space-y-6">
+        <div className="order-1 min-w-0 space-y-6 xl:order-none">
           {/* Knowledge readiness */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -650,7 +650,8 @@ export default function TrainingPage() {
                 <button
                   onClick={sendPreview}
                   disabled={previewSending || previewDisabled || !previewInput.trim()}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  type="button"
+                  className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
                 >
                   {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   <span>Send test</span>
@@ -661,7 +662,7 @@ export default function TrainingPage() {
         </div>
 
         {/* Right rail */}
-        <div className="hidden space-y-3 xl:block">
+        <div className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Training state</p>
             <div className="mt-2 space-y-1.5">

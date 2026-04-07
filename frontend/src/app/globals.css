@@ -80,6 +80,7 @@ a {
 .workspace-stage {
   display: grid;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 @media (min-width: 1280px) {
@@ -171,6 +172,7 @@ a {
 .workspace-column-layout {
   display: grid;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 @media (min-width: 1280px) {
@@ -195,6 +197,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .workspace-rail-title {

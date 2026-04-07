@@ -68,17 +68,17 @@ export default function CustomersPage() {
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
-        <div className="space-y-4">
+        <div className="order-1 min-w-0 space-y-4 xl:order-none">
           {/* Search + summary */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative max-w-md flex-1">
+            <div className="relative max-w-md min-w-0 flex-1">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
               <input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by patient, phone, or email..."
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="min-h-10 w-full rounded-lg border border-[#E2E8F0] bg-white py-2 pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
               />
             </div>
             <span className="rounded-md bg-[#CCFBF1]/90 px-2 py-0.5 text-xs font-semibold text-[#115E59]">
@@ -117,7 +117,7 @@ export default function CustomersPage() {
                     <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#64748B]" />
                   </div>
 
-                  <div className="mt-2 grid grid-cols-4 gap-1.5">
+                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-1.5">
                     {[
                       { label: "Conversations", val: customer.conversation_count },
                       { label: "Requests", val: customer.lead_count },
@@ -139,7 +139,7 @@ export default function CustomersPage() {
                         : "not recorded"}
                     </span>
                     {customer.latest_note ? (
-                      <span className="max-w-40 truncate">{customer.latest_note}</span>
+                      <span className="min-w-0 max-w-full break-words text-right">{customer.latest_note}</span>
                     ) : null}
                   </div>
                 </Link>
@@ -149,7 +149,7 @@ export default function CustomersPage() {
         </div>
 
         {/* Right rail */}
-        <div className="hidden space-y-3 xl:block">
+        <div className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Overview</p>
             <div className="mt-2.5 space-y-2">

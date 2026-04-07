@@ -69,7 +69,8 @@ function SystemStatusCTA({
     return (
       <button
         onClick={onGoLive}
-        className="flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+        type="button"
+        className="flex min-h-10 items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
       >
         <Rocket className="w-3.5 h-3.5" />
         Go Live
@@ -88,11 +89,12 @@ function SystemStatusCTA({
 
   return (
     <button
+      type="button"
       onClick={() => {
         const first = systemStatus.items.find((item) => item.completed === false);
         openSettingsPage(first?.drawerSection ?? null);
       }}
-      className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
+      className={`flex min-h-10 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
     >
       <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${statusCfg.dot} animate-pulse`} />
       <span>Complete setup</span>
@@ -270,7 +272,7 @@ export default function DashboardLayout({
      RENDER — Premium SaaS workspace shell
      ═══════════════════════════════════════════════ */
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+    <div className="flex h-screen overflow-hidden bg-[#F8FAFC] max-md:overflow-x-hidden">
       {/* ─── LEFT SIDEBAR (desktop) ─── */}
       <aside className="hidden w-56 flex-col border-r border-[#E2E8F0] bg-white lg:flex">
         {/* Logo */}
@@ -415,13 +417,13 @@ export default function DashboardLayout({
       </div>
 
       {/* ─── MAIN AREA ─── */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         {/* ─── TOPBAR ─── */}
-        <header className="flex h-13 shrink-0 items-center gap-3 border-b border-[#E2E8F0] bg-white px-4 lg:px-5">
+        <header className="flex min-h-12 shrink-0 flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-white px-3 py-2 sm:flex-nowrap sm:gap-3 sm:px-4 lg:px-5">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-1.5 text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] lg:hidden"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] lg:hidden"
             aria-label="Open navigation"
           >
             <Menu className="h-5 w-5" />
@@ -433,13 +435,14 @@ export default function DashboardLayout({
           </div>
 
           {/* Quick nav to inbox */}
-          <div className="flex flex-1 justify-center">
+          <div className="flex min-w-0 flex-1 justify-center">
             <Link
               href="/dashboard/inbox"
-              className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#475569] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
+              className="inline-flex min-h-10 shrink items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#475569] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
             >
-              <Inbox className="h-4 w-4 text-[#64748B]" />
-              Open inbox
+              <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
+              <span className="hidden sm:inline">Open inbox</span>
+              <span className="sm:hidden">Inbox</span>
             </Link>
           </div>
 
@@ -456,7 +459,7 @@ export default function DashboardLayout({
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex items-center gap-2.5 rounded-lg p-1.5 transition-colors hover:bg-[#F8FAFC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
+                className="flex min-h-10 items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 transition-colors hover:bg-[#F8FAFC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
                 aria-haspopup="true"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0F766E] text-xs font-bold text-white">
@@ -538,8 +541,8 @@ export default function DashboardLayout({
         </div>
 
         {/* ─── MAIN CANVAS ─── */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-5 lg:px-6">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="mx-auto min-w-0 max-w-[1280px] px-4 py-6 pb-8 sm:px-5 lg:px-6">
             {children}
           </div>
         </main>

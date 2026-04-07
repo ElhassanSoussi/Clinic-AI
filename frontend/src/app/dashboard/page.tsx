@@ -265,15 +265,15 @@ export default function DashboardPage() {
             billing.monthly_leads_used >= billing.monthly_lead_limit &&
             billing.plan !== "trial" && (
               <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
-                <div className="flex items-start gap-3">
+                <div className="flex flex-wrap items-start gap-3">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
                     <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
                   </div>
                   <Link
                     href="/dashboard/billing"
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#115E59]"
+                    className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
                   >
                     <Zap className="h-3 w-3" />
                     Upgrade
@@ -284,15 +284,15 @@ export default function DashboardPage() {
 
           {billing.subscription_status === "past_due" && (
             <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
-              <div className="flex items-start gap-3">
+              <div className="flex flex-wrap items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-rose-900">Payment failed</p>
                   <p className="mt-0.5 text-xs text-rose-700">Update your payment method to keep your subscription active.</p>
                 </div>
                 <Link
                   href="/dashboard/billing"
-                  className="inline-flex shrink-0 items-center rounded-xl border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                  className="inline-flex min-h-10 shrink-0 items-center rounded-xl border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
                 >
                   Fix payment
                 </Link>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
       {/* ── Main layout: canvas + right rail ── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
-        <div className="space-y-4">
+        <div className="order-1 min-w-0 space-y-4 xl:order-none">
           {/* Hero panel */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white px-5 py-4 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -333,7 +333,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((card) => (
               <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
             ))}
@@ -383,7 +383,7 @@ export default function DashboardPage() {
               </Link>
             }
           >
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {performanceCards.map((card) => (
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
@@ -568,7 +568,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Right rail ── */}
-        <div className="hidden space-y-3 xl:block">
+        <div className="order-2 space-y-3 xl:order-none">
           <RightRailCard title="Workspace state">
             <div className="space-y-2">
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">

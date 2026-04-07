@@ -182,39 +182,39 @@ function AppointmentDetailRail({
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2.5">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F8FAFC]">
+        <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
               <Phone className="w-3 h-3 text-[#64748B]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-[#64748B]">Phone</p>
-              <p className="text-sm font-semibold text-[#0F172A]">{appointment.patient_phone || "No phone"}</p>
+              <p className="break-words text-sm font-semibold text-[#0F172A]">{appointment.patient_phone || "No phone"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F8FAFC]">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
               <UserRound className="w-3 h-3 text-[#64748B]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-[#64748B]">Email</p>
-              <p className="text-sm font-semibold text-[#0F172A]">{appointment.patient_email || "No email"}</p>
+              <p className="break-words text-sm font-semibold text-[#0F172A]">{appointment.patient_email || "No email"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F8FAFC]">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
               <Clock3 className="w-3 h-3 text-[#64748B]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-[#64748B]">Reminder</p>
               <p className="text-sm font-semibold text-[#0F172A]">{humanizeStatus(appointment.reminder_status)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F8FAFC]">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
               <Wallet className="w-3 h-3 text-[#64748B]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-[#64748B]">Deposit</p>
               <p className="text-sm font-semibold text-[#0F172A]">{depositStatusLabel(appointment.deposit_status)}</p>
             </div>
@@ -720,7 +720,7 @@ export default function AppointmentsPage() {
                       }`}
                   >
                     <span>{view.label}</span>
-                    {active && <span className="text-xs text-teal-500">Active</span>}
+                    {active && <span className="text-xs text-[#0F766E]">Active</span>}
                   </button>
                 );
               })}
@@ -749,8 +749,9 @@ export default function AppointmentsPage() {
           {APPOINTMENT_VIEWS.map((view) => (
             <button
               key={view.value}
+              type="button"
               onClick={() => setActiveView(view.value)}
-              className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeView === view.value
+              className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${activeView === view.value
                   ? "bg-[#CCFBF1]/90 text-[#115E59]"
                   : "text-[#475569] hover:bg-[#F8FAFC]"
                 }`}
@@ -761,7 +762,7 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Center — appointment list */}
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-3">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <p className="text-sm font-semibold text-[#0F172A]">Appointments</p>
             <p className="mt-0.5 text-xs text-[#475569]">Timing, reminders, deposit state, and linked patient context.</p>
