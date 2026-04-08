@@ -181,12 +181,12 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC]">
+    <div className="public-marketing-root">
       <PublicNav />
 
       {/* Hero */}
-      <section className="border-b border-[#E2E8F0] bg-[#FFFFFF] px-5 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+        <div className="marketing-container">
           <div className="mx-auto max-w-3xl text-center">
             <div className="marketing-kicker mx-auto mb-6">
               <Sparkles className="h-3 w-3" />
@@ -202,11 +202,11 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <main className="px-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
+      <main>
+        <div className="marketing-container">
 
           {/* Plan cards */}
-          <section className="marketing-section border-b border-[#E2E8F0]">
+          <section className="marketing-section marketing-surface-elevated border-b border-slate-200/80">
             {checkoutError ? (
               <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-[#DC2626]">
                 {checkoutError}
@@ -217,11 +217,10 @@ export default function PricingPage() {
               {plans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col overflow-hidden rounded-2xl border p-8 ${
-                    plan.highlighted
+                  className={`relative flex flex-col overflow-hidden rounded-2xl border p-8 ${plan.highlighted
                       ? "border-[#0F766E] bg-[#FFFFFF] shadow-xl shadow-teal-900/6"
                       : "border-[#E2E8F0] bg-[#FFFFFF] shadow-sm"
-                  }`}
+                    }`}
                 >
                   {plan.badge ? (
                     <div className="mb-5 inline-flex rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1 text-xs font-semibold text-[#115E59]">
@@ -266,11 +265,10 @@ export default function PricingPage() {
                         type="button"
                         onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
                         disabled={checkoutLoading === plan.id}
-                        className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 ${
-                          plan.highlighted
+                        className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 ${plan.highlighted
                             ? "bg-[#0F766E] text-white hover:bg-[#115E59]"
                             : "border border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] hover:bg-[#F8FAFC]"
-                        }`}
+                          }`}
                       >
                         {checkoutLoading === plan.id ? "Loading..." : plan.cta}
                         <ArrowRight className="h-4 w-4" />
@@ -291,7 +289,7 @@ export default function PricingPage() {
           </section>
 
           {/* Feature comparison */}
-          <section className="marketing-section border-b border-[#E2E8F0]">
+          <section className="marketing-section marketing-surface-white border-b border-slate-200/80">
             <div className="mb-10 max-w-2xl">
               <div className="marketing-kicker mb-5">
                 <Check className="h-3 w-3" />
@@ -337,7 +335,7 @@ export default function PricingPage() {
           </section>
 
           {/* Pricing FAQ */}
-          <section className="marketing-section border-b border-[#E2E8F0]">
+          <section className="marketing-section marketing-surface-slate border-b border-slate-300/50">
             <div className="mb-10 max-w-2xl">
               <div className="marketing-kicker mb-5">
                 <ShieldCheck className="h-3 w-3" />
@@ -347,41 +345,44 @@ export default function PricingPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {pricingFaqs.map((item) => (
-                <div key={item.question} className="marketing-card p-6">
-                  <h3 className="text-sm font-semibold text-[#0F172A]">{item.question}</h3>
-                  <p className="mt-2.5 text-sm leading-6 text-[#475569]">{item.answer}</p>
+                <div key={item.question} className="rounded-2xl border border-white/80 bg-white p-7 shadow-sm">
+                  <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                  <p className="marketing-body mt-3">{item.answer}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* CTA */}
-          <section className="pb-16 sm:pb-24">
-            <div className="overflow-hidden rounded-2xl bg-[#0F766E] px-8 py-12 sm:px-12 sm:py-16">
-              <div className="grid gap-8 xl:grid-cols-[1fr_auto] xl:items-center">
+        </div>
+
+        {/* CTA */}
+        <section className="marketing-final-act">
+          <div className="marketing-container">
+            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
+              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-700/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.06em] text-teal-100">
-                    <Sparkles className="h-3 w-3" />
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                    <Sparkles className="h-3.5 w-3.5" />
                     No credit card needed
                   </div>
-                  <h2 className="mt-5 text-3xl font-bold tracking-tight text-white">
+                  <h2 className="mt-6 text-[clamp(1.875rem,2vw+1rem,2.75rem)] font-bold tracking-tight text-white">
                     Start with the free trial.
                   </h2>
-                  <p className="mt-3 max-w-xl text-base leading-7 text-teal-100">
+                  <p className="mt-4 max-w-xl text-[1.125rem] leading-relaxed text-teal-100">
                     14 days, full platform, your real clinic information. No commitment until you are ready.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-start">
+                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3.5 text-sm font-semibold text-[#0F766E] shadow-sm transition-colors hover:bg-[#F0FDF9]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/chat/demo"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-400/40 bg-teal-700/30 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700/50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-teal-300/50 bg-teal-800/40 px-8 py-4 text-[1rem] font-semibold text-white transition-colors hover:bg-teal-800/60"
                   >
                     <MessageSquareMore className="h-4 w-4" />
                     Try the live demo
@@ -389,9 +390,8 @@ export default function PricingPage() {
                 </div>
               </div>
             </div>
-          </section>
-
-        </div>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

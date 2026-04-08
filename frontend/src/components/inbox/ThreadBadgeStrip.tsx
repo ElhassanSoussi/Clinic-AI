@@ -35,17 +35,18 @@ function smsAiStateLabel(
   return "AI off";
 }
 
-export function ThreadBadgeStrip({ lead, conversation, isEventThread, pendingReviewEvent }: Readonly<{
+export function ThreadBadgeStrip({ lead, conversation, pendingReviewEvent }: Readonly<{
   lead: ConversationDetail["lead"] | null;
   conversation: ConversationDetail["conversation"];
-  isEventThread: boolean;
+  /** Kept for call-site consistency; SMS/AI badges use `conversation.channel`. */
+  isEventThread?: boolean;
   pendingReviewEvent: CommunicationEvent | null;
 }>) {
   return (
     <div className="flex flex-wrap items-center gap-2 mt-4">
       <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${lead
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-          : "bg-amber-50 text-amber-700 border-amber-200"
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+        : "bg-amber-50 text-amber-700 border-amber-200"
         }`}>
         {lead ? "Linked request" : "Unlinked thread"}
       </span>
@@ -70,7 +71,7 @@ export function ThreadBadgeStrip({ lead, conversation, isEventThread, pendingRev
           Follow-up needed
         </span>
       )}
-      {isEventThread && conversation.channel === "sms" && (
+      {conversation.channel === "sms" && (
         <span className={`inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full border ${smsAiStateClass(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}`}>
           {smsAiStateLabel(Boolean(pendingReviewEvent), conversation.manual_takeover, conversation.ai_auto_reply_enabled)}
         </span>

@@ -92,12 +92,12 @@ const principles = [
 
 export default function TrustPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC]">
+    <div className="public-marketing-root">
       <PublicNav />
 
       {/* Hero */}
-      <section className="border-b border-[#E2E8F0] bg-[#FFFFFF] px-5 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+        <div className="marketing-container">
           <div className="max-w-3xl">
             <div className="marketing-kicker mb-6">
               <ShieldCheck className="h-3 w-3" />
@@ -116,8 +116,8 @@ export default function TrustPage() {
       </section>
 
       {/* Trust principles overview strip */}
-      <section className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-section-tight marketing-surface-slate">
+        <div className="marketing-container">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {[
               { icon: ShieldCheck, label: "Human oversight built in" },
@@ -129,20 +129,20 @@ export default function TrustPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] px-5 py-4 shadow-sm"
+                className="flex items-center gap-3 rounded-xl border border-white/80 bg-white px-5 py-4 shadow-sm"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
                   <item.icon className="h-4 w-4" />
                 </div>
-                <span className="text-sm font-medium text-[#0F172A]">{item.label}</span>
+                <span className="text-[0.9375rem] font-medium text-[#0F172A]">{item.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <main className="px-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
+      <main>
+        <div className="marketing-container">
 
           {/* Principles */}
           <div className="divide-y divide-[#E2E8F0]">
@@ -162,7 +162,7 @@ export default function TrustPage() {
                     </p>
                     <ul className="mt-5 space-y-3">
                       {p.points.map((point) => (
-                        <li key={point} className="flex items-start gap-3 text-sm text-[#475569]">
+                        <li key={point} className="marketing-body flex items-start gap-3">
                           <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
                             <Check className="h-3.5 w-3.5" />
                           </div>
@@ -184,10 +184,10 @@ export default function TrustPage() {
                   <Eye className="h-3 w-3" />
                   Data handling
                 </div>
-                <h2 className="text-2xl font-bold text-[#0F172A]">
+                <h2 className="marketing-h2 text-[clamp(1.5rem,1.5vw+1rem,2rem)]">
                   How your clinic&apos;s data is handled.
                 </h2>
-                <div className="mt-6 space-y-4 text-sm leading-7 text-[#475569]">
+                <div className="mt-6 space-y-4 marketing-body">
                   <p>
                     Your clinic configuration data — services, FAQs, business hours, internal notes — is stored securely and used exclusively to train and operate your clinic&apos;s assistant. It is not shared with other clinics, and it is not used to train any shared model.
                   </p>
@@ -221,33 +221,36 @@ export default function TrustPage() {
             </div>
           </section>
 
-          {/* CTA */}
-          <section className="pb-16 sm:pb-24">
-            <div className="overflow-hidden rounded-2xl bg-[#0F766E] px-8 py-12 sm:px-12 sm:py-16">
-              <div className="grid gap-8 xl:grid-cols-[1fr_auto] xl:items-center">
+        </div>
+
+        {/* CTA */}
+        <section className="marketing-final-act">
+          <div className="marketing-container">
+            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
+              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-700/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.06em] text-teal-100">
-                    <Sparkles className="h-3 w-3" />
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                    <Sparkles className="h-3.5 w-3.5" />
                     Start with confidence
                   </div>
-                  <h2 className="mt-5 text-3xl font-bold tracking-tight text-white">
+                  <h2 className="mt-6 text-[clamp(1.875rem,2vw+1rem,2.75rem)] font-bold tracking-tight text-white">
                     Designed to earn your trust, not just ask for it.
                   </h2>
-                  <p className="mt-3 max-w-xl text-base leading-7 text-teal-100">
+                  <p className="mt-4 max-w-xl text-[1.125rem] leading-relaxed text-teal-100">
                     Try the full platform free for 14 days. No credit card required. Your staff is in control from day one.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-start">
+                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3.5 text-sm font-semibold text-[#0F766E] shadow-sm transition-colors hover:bg-[#F0FDF9]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/chat/demo"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-400/40 bg-teal-700/30 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700/50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-teal-300/50 bg-teal-800/40 px-8 py-4 text-[1rem] font-semibold text-white transition-colors hover:bg-teal-800/60"
                   >
                     <MessageSquareMore className="h-4 w-4" />
                     Try the live demo
@@ -255,9 +258,8 @@ export default function TrustPage() {
                 </div>
               </div>
             </div>
-          </section>
-
-        </div>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

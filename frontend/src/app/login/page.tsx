@@ -151,7 +151,7 @@ export default function LoginPage() {
       {/* Back link */}
       <Link
         href="/"
-        className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-2 text-sm font-medium text-[#64748B] shadow-sm transition-colors hover:text-[#0F172A]"
+        className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-4 py-2.5 text-[0.9375rem] font-medium text-slate-600 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-300 hover:text-[#0F172A]"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
@@ -161,58 +161,58 @@ export default function LoginPage() {
         <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
 
           {/* Left panel — marketing */}
-          <div className="hidden flex-col justify-between rounded-l-[0.75rem] border-r border-[#E2E8F0] bg-[#F8FAFC] p-8 lg:flex xl:p-10">
+          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-xl border-r border-slate-700/80 p-8 lg:flex xl:p-12">
             <div>
-              <Link href="/" className="inline-flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+              <Link href="/" className="inline-flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/30">
                   <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold leading-none text-[#0F172A]">Clinic AI</p>
-                  <p className="mt-0.5 text-[11px] leading-none text-[#64748B]">AI front-desk OS</p>
+                  <p className="text-base font-semibold leading-none text-white">Clinic AI</p>
+                  <p className="auth-panel-footnote mt-1 leading-none">AI front-desk OS</p>
                 </div>
               </Link>
 
-              <div className="mt-10">
-                <div className="marketing-kicker mb-5">
-                  <ShieldCheck className="h-3 w-3" />
+              <div className="mt-12">
+                <div className="marketing-kicker mb-6">
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   Your workspace is ready
                 </div>
-                <h1 className="text-2xl font-bold leading-snug tracking-tight text-[#0F172A]">
+                <h1 className="text-[clamp(1.75rem,1.2vw+1.25rem,2.35rem)] font-bold leading-snug tracking-tight">
                   Welcome back. Your front desk is waiting.
                 </h1>
-                <p className="mt-4 text-sm leading-7 text-[#475569]">
+                <p className="auth-panel-lead mt-5">
                   Pick up where you left off — conversations, appointment requests, follow-up items, and your AI training workspace are all in one place.
                 </p>
               </div>
 
-              <div className="mt-8 space-y-3">
+              <div className="mt-10 space-y-3">
                 {trustPoints.map((item) => (
                   <div
                     key={item.text}
-                    className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3 shadow-sm"
+                    className="auth-panel-card flex items-center gap-3.5 px-4 py-3.5"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-500/15 text-teal-200">
                       <item.icon className="h-4 w-4" />
                     </div>
-                    <span className="text-sm font-medium text-[#0F172A]">{item.text}</span>
+                    <span className="text-[0.9375rem] font-medium text-slate-100">{item.text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="mt-8 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+            <div className="auth-panel-card mt-10 p-6 xl:mt-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
                 What stays true
               </p>
-              <div className="mt-4 space-y-2.5 text-sm leading-6 text-[#475569]">
+              <div className="mt-4 space-y-3 text-[0.9375rem] leading-relaxed text-slate-300">
                 <p>The assistant only uses information you configure.</p>
                 <p>Staff can review or take over any conversation at any time.</p>
                 <p>Inbox, appointments, and follow-up stay connected in one workspace.</p>
               </div>
               <Link
                 href="/trust"
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0F766E] hover:text-[#115E59]"
+                className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-300 hover:text-teal-200"
               >
                 Read our trust approach
               </Link>
@@ -220,20 +220,20 @@ export default function LoginPage() {
           </div>
 
           {/* Right panel — form */}
-          <div className="flex items-center justify-center p-8 xl:p-12">
+          <div className="flex items-center justify-center bg-white p-8 xl:p-12">
             <div className="w-full max-w-md">
-              <div className="mb-8 text-center">
+              <div className="mb-10 text-center">
                 {/* Mobile logo */}
                 <Link href="/" className="mb-6 inline-flex items-center gap-2.5 lg:hidden">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
                     <Bot className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
+                  <span className="text-base font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
                   Sign in to your workspace
                 </h2>
-                <p className="mt-2 text-sm text-[#64748B]">
+                <p className="marketing-body mx-auto mt-3 max-w-sm text-center text-slate-600">
                   Continue to your inbox, appointments, and AI training panel.
                 </p>
               </div>
@@ -262,7 +262,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Email
                     </label>
@@ -280,7 +280,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="password"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Password
                     </label>
@@ -298,7 +298,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading || !!supabaseConfigError}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-3.5 text-base font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -316,7 +316,7 @@ export default function LoginPage() {
                   nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
                 />
 
-                <p className="mt-5 text-center text-sm text-[#64748B]">
+                <p className="mt-6 text-center text-[0.9375rem] text-slate-600">
                   Don&apos;t have an account?{" "}
                   <Link
                     href={selectedPlan ? `/register?plan=${selectedPlan}` : "/register"}

@@ -22,6 +22,7 @@ import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
 import type { Lead, LeadStatus, Clinic } from "@/types";
+import { leadNextStepHint } from "@/lib/operational-hints";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All" },
@@ -32,21 +33,6 @@ const STATUS_OPTIONS = [
 ];
 
 const INLINE_STATUSES: LeadStatus[] = ["new", "contacted", "booked", "closed"];
-
-function nextStepHint(status: LeadStatus): string {
-  switch (status) {
-    case "new":
-      return "Next: contact the patient or capture missing details.";
-    case "contacted":
-      return "Next: confirm scheduling and move to booked when the visit is set.";
-    case "booked":
-      return "Next: complete prep in Appointments — reminders, deposits, changes.";
-    case "closed":
-      return "Closed — no further pipeline work unless they reach out again.";
-    default:
-      return "";
-  }
-}
 
 type EmptyStateConfig = {
   title: string;
@@ -251,7 +237,7 @@ function renderLeadsContent({
                   <span>Received {timeAgo(lead.created_at)}</span>
                 </div>
                 <p className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-medium text-[#115E59]">
-                  {nextStepHint(lead.status)}
+                  {leadNextStepHint(lead.status)}
                 </p>
               </div>
             </div>

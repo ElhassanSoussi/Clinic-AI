@@ -2,8 +2,7 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Mail, Phone, UserRound } from "lucide-react";
+import { Mail, Phone, UserRound } from "lucide-react";
 
 import { api } from "@/lib/api";
 import { formatDateTime, timeAgo } from "@/lib/utils";
@@ -15,6 +14,11 @@ import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { CommunicationEvent, CustomerProfileDetail } from "@/types";
 import { depositStatusClass as depositBadgeClass, depositStatusLabel as depositBadgeLabel } from "@/lib/format-helpers";
 import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
+import { DetailSection } from "@/components/shared/detail/DetailSection";
+import { OperationalCallout } from "@/components/shared/detail/OperationalCallout";
+import { DetailBackLink } from "@/components/shared/detail/DetailBackLink";
+import { customerOperationalHint } from "@/lib/operational-hints";
 
 function timelineHref(profile: CustomerProfileDetail, item: CustomerProfileDetail["timeline"][number]): string | null {
   if (item.thread_id) {
@@ -84,7 +88,6 @@ export default function CustomerProfilePage({
   params: Promise<{ id: string }>;
 }>) {
   const { id } = use(params);
-  const router = useRouter();
   const [profile, setProfile] = useState<CustomerProfileDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -138,15 +141,17 @@ export default function CustomerProfilePage({
     (item) => item.item_type === "communication_event" && item.title === "Inbound SMS"
   );
 
+  const op = customerOperationalHint(profile);
+  const calloutTone =
+    profile.latest_sms_pending_review || profile.follow_up_needed
+      ? "attention"
+      : profile.last_outcome === "booked"
+        ? "information"
+        : "neutral";
+
   return (
-    <div className="max-w-6xl space-y-6">
-      <button
-        onClick={() => router.push("/dashboard/customers")}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Customers
-      </button>
+    <div className="workspace-page min-w-0">
+      <DetailBackLink href="/dashboard/customers">Back to Customers</DetailBackLink>
 
       <PageHeader
         eyebrow={
@@ -156,249 +161,242 @@ export default function CustomerProfilePage({
           </>
         }
         title={profile.name}
-        description="Thread state, booking outcome, SMS handling, and timeline for this contact."
+        description={
+          profile.last_interaction_at
+            ? `Last interaction ${timeAgo(profile.last_interaction_at)} · ${formatDateTime(profile.last_interaction_at)}`
+            : "No recent interaction timestamp on file."
+        }
+        showDivider
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${lastOutcomeClass(profile.last_outcome)}`}>
+              {lastOutcomeLabel(profile.last_outcome)}
+            </span>
+            {profile.follow_up_needed ? (
+              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                Follow-up
+              </span>
+            ) : null}
+          </div>
+        }
       />
 
       <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4">
-          <div className="app-card p-4">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+      <WorkspaceBand>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,17.5rem)] lg:items-stretch">
+          <OperationalCallout title="Operational focus" headline={op.title} tone={calloutTone}>
+            {op.body}
+          </OperationalCallout>
+          <div className="flex flex-col justify-center rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-3.5 sm:px-5">
+            <p className="workspace-rail-title mb-3">Activity</p>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <h1 className="text-xl font-bold text-[#0F172A]">{profile.name}</h1>
-                <p className="text-sm text-[#475569] mt-0.5">
-                  Last interaction{" "}
-                  {profile.last_interaction_at
-                    ? timeAgo(profile.last_interaction_at)
-                    : "not recorded"}
-                </p>
+                <dt className="text-xs text-[#64748B]">Conversations</dt>
+                <dd className="text-lg font-semibold text-[#0F172A]">{profile.conversation_count}</dd>
               </div>
-              <div className="grid grid-cols-1 gap-2.5 text-center sm:grid-cols-2 lg:grid-cols-4">
-                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Conversations</p>
-                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.conversation_count}</p>
-                </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Requests</p>
-                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.lead_count}</p>
-                </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Total interactions</p>
-                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{profile.total_interactions}</p>
-                </div>
-                <div className="px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                  <p className="text-xs uppercase tracking-widest text-[#64748B]">Last outcome</p>
-                  <p className="text-lg font-bold text-[#0F172A] mt-0.5">{lastOutcomeLabel(profile.last_outcome)}</p>
-                </div>
+              <div>
+                <dt className="text-xs text-[#64748B]">Requests</dt>
+                <dd className="text-lg font-semibold text-[#0F172A]">{profile.lead_count}</dd>
               </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 mt-4">
-              <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${lastOutcomeClass(profile.last_outcome)}`}>
-                {lastOutcomeLabel(profile.last_outcome)}
-              </span>
-              {profile.follow_up_needed && (
-                <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                  Follow-up needed
-                </span>
-              )}
-              {profile.latest_sms_thread_id && (
-                <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${smsStatusClass(profile)}`}>
-                  {smsStatusLabel(profile)}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
-                  <UserRound className="w-3.5 h-3.5 text-[#475569]" />
-                </div>
-                <div>
-                  <p className="text-xs text-[#64748B]">Primary identity</p>
-                  <p className="text-sm font-medium text-[#0F172A]">{profile.name}</p>
-                </div>
+              <div>
+                <dt className="text-xs text-[#64748B]">Interactions</dt>
+                <dd className="text-lg font-semibold text-[#0F172A]">{profile.total_interactions}</dd>
               </div>
-
-              {profile.phone && (
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
-                    <Phone className="w-3.5 h-3.5 text-[#475569]" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#64748B]">Phone</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{profile.phone}</p>
-                  </div>
-                </div>
-              )}
-
-              {profile.email && (
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
-                    <Mail className="w-3.5 h-3.5 text-[#475569]" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#64748B]">Email</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{profile.email}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {profile.latest_note && (
-              <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
-                  Recent note
-                </p>
-                <p className="text-sm text-amber-800 mt-0.5">{profile.latest_note}</p>
+              <div>
+                <dt className="text-xs text-[#64748B]">SMS</dt>
+                <dd className="text-xs font-semibold leading-snug text-[#0F172A]">
+                  {profile.latest_sms_thread_id ? smsStatusLabel(profile) : "No active thread"}
+                </dd>
               </div>
-            )}
-
-            {latestInboundSms && (
-              <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                <p className="text-xs font-semibold uppercase tracking-widest text-blue-700">
-                  Latest inbound SMS
-                </p>
-                <p className="text-sm text-blue-900 mt-0.5">{latestInboundSms.detail}</p>
-                {latestInboundSms.occurred_at && (
-                  <p className="text-xs text-blue-700/80 mt-1.5">
-                    {formatDateTime(latestInboundSms.occurred_at)}
-                  </p>
-                )}
-                {profile.latest_sms_thread_id && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/dashboard/inbox/${profile.latest_sms_thread_id}`}
-                      className="inline-flex items-center gap-2 text-xs font-medium text-blue-700 hover:text-blue-800 transition-colors"
-                    >
-                      Open SMS thread
-                    </Link>
-                    <span className="text-xs text-blue-700/80">
-                      {smsStatusDescription(profile)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
-            <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
-              Recent requests
-            </h2>
-            <div className="space-y-2.5">
-              {profile.recent_requests.map((lead) => (
-                <Link
-                  key={lead.id}
-                  href={`/dashboard/leads/${lead.id}`}
-                  className="block rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-[#0F172A] truncate">
-                        {lead.reason_for_visit || "Appointment request"}
-                      </p>
-                      <p className="text-xs text-[#64748B] mt-0.5">
-                        {lead.preferred_datetime_text || "Preferred time not captured"}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      <LeadStatusBadge status={lead.status} />
-                      {lead.deposit_status && lead.deposit_status !== "not_required" && (
-                        <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border ${depositBadgeClass(lead.deposit_status)}`}>
-                          {depositBadgeLabel(lead.deposit_status)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            </dl>
           </div>
         </div>
+      </WorkspaceBand>
 
-        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 h-fit">
-          <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
-            Recent conversation history
-          </h2>
-          <div className="space-y-2.5">
-            {profile.recent_conversations.map((conversation) => (
-              <Link
-                key={conversation.id}
-                href={`/dashboard/inbox/${conversation.id}`}
-                className="block rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors"
-              >
-                <div className="flex items-center justify-between gap-3 mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <ChannelBadge channel={conversation.channel} withIcon />
-                    <FrontdeskStatusBadge status={conversation.derived_status} />
-                  </div>
-                  <span className="text-xs text-[#64748B]">
-                    {conversation.last_message_at
-                      ? timeAgo(conversation.last_message_at)
-                      : "Recently"}
+      <div className="workspace-split">
+        <div className="min-w-0 space-y-6">
+          <div className="app-card p-5 sm:p-6">
+            <DetailSection
+              label="Identity & reachability"
+              description="Primary contact points your team already has on file."
+            >
+              <div className="flex flex-wrap gap-2">
+                <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${lastOutcomeClass(profile.last_outcome)}`}>
+                  Outcome: {lastOutcomeLabel(profile.last_outcome)}
+                </span>
+                {profile.latest_sms_thread_id ? (
+                  <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${smsStatusClass(profile)}`}>
+                    {smsStatusLabel(profile)}
                   </span>
+                ) : null}
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
+                    <UserRound className="h-4 w-4 text-[#475569]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748B]">Name</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{profile.name}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-[#0F172A] leading-relaxed">
-                  {conversation.last_message_preview}
-                </p>
-              </Link>
-            ))}
+                {profile.phone ? (
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
+                      <Phone className="h-4 w-4 text-[#475569]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#64748B]">Phone</p>
+                      <p className="text-sm font-medium text-[#0F172A]">{profile.phone}</p>
+                    </div>
+                  </div>
+                ) : null}
+                {profile.email ? (
+                  <div className="flex items-center gap-2.5 sm:col-span-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
+                      <Mail className="h-4 w-4 text-[#475569]" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#64748B]">Email</p>
+                      <p className="text-sm font-medium text-[#0F172A]">{profile.email}</p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {profile.latest_note ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">Latest staff note</p>
+                  <p className="mt-1 text-sm text-amber-950">{profile.latest_note}</p>
+                </div>
+              ) : null}
+
+              {latestInboundSms ? (
+                <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-800">Latest inbound SMS</p>
+                  <p className="mt-1 text-sm text-blue-950">{latestInboundSms.detail}</p>
+                  {latestInboundSms.occurred_at ? (
+                    <p className="mt-1 text-xs text-blue-800/90">{formatDateTime(latestInboundSms.occurred_at)}</p>
+                  ) : null}
+                  {profile.latest_sms_thread_id ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/dashboard/inbox/${profile.latest_sms_thread_id}`}
+                        className="text-sm font-semibold text-blue-800 hover:text-blue-900"
+                      >
+                        Open SMS thread
+                      </Link>
+                      <span className="text-xs text-blue-800/85">{smsStatusDescription(profile)}</span>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </DetailSection>
           </div>
 
-          {profile.last_interaction_at && (
-            <p className="text-xs text-[#64748B] mt-4">
-              Most recent activity: {formatDateTime(profile.last_interaction_at)}
-            </p>
-          )}
+          <div className="app-card p-5 sm:p-6">
+            <DetailSection label="Recent requests" description="Booking requests tied to this contact, newest first in the list.">
+              <div className="space-y-2">
+                {profile.recent_requests.map((lead) => (
+                  <Link
+                    key={lead.id}
+                    href={`/dashboard/leads/${lead.id}`}
+                    className="block rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-[#0F172A]">{lead.reason_for_visit || "Appointment request"}</p>
+                        <p className="mt-0.5 text-xs text-[#64748B]">{lead.preferred_datetime_text || "Preferred time not captured"}</p>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                        <LeadStatusBadge status={lead.status} />
+                        {lead.deposit_status && lead.deposit_status !== "not_required" ? (
+                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${depositBadgeClass(lead.deposit_status)}`}>
+                            {depositBadgeLabel(lead.deposit_status)}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </DetailSection>
+          </div>
         </div>
 
-        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 h-fit">
-          {profile.phone && (
-            <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
-              <h2 className="text-sm font-semibold text-[#0F172A] mb-2.5">
-                Send SMS
-              </h2>
-              <p className="text-xs text-[#64748B] mb-2.5">
-                Send a real outbound text to this patient. Delivery results will appear in the timeline below.
-              </p>
-              <textarea
-                rows={4}
-                value={smsBody}
-                onChange={(event) => setSmsBody(event.target.value)}
-                className="w-full px-2.5 py-2 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
-                placeholder="Write your message"
-              />
-              <button
-                onClick={sendSms}
-                disabled={sendingSms || !smsBody.trim()}
-                className="mt-2.5 px-3 py-1.5 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] transition-colors disabled:opacity-50"
-              >
-                {sendingSms ? "Sending..." : "Send SMS"}
-              </button>
-            </div>
-          )}
+        <aside className="flex min-w-0 flex-col gap-6">
+          <div className="app-card p-5 sm:p-6">
+            <DetailSection label="Recent conversations" description="Latest threads across channels.">
+              <div className="space-y-2">
+                {profile.recent_conversations.map((conversation) => (
+                  <Link
+                    key={conversation.id}
+                    href={`/dashboard/inbox/${conversation.id}`}
+                    className="block rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]"
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ChannelBadge channel={conversation.channel} withIcon />
+                        <FrontdeskStatusBadge status={conversation.derived_status} />
+                      </div>
+                      <span className="text-xs text-[#64748B]">
+                        {conversation.last_message_at ? timeAgo(conversation.last_message_at) : "—"}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-[#0F172A]">{conversation.last_message_preview}</p>
+                  </Link>
+                ))}
+              </div>
+            </DetailSection>
+          </div>
 
-          <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
-            Customer timeline
-          </h2>
-          <div className="space-y-2.5">
+          {profile.phone ? (
+            <div className="app-card p-5 sm:p-6">
+              <DetailSection
+                label="Send SMS"
+                description="Outbound text logged to this customer — delivery appears in the timeline."
+              >
+                <textarea
+                  rows={4}
+                  value={smsBody}
+                  onChange={(event) => setSmsBody(event.target.value)}
+                  className="app-input min-h-28 w-full resize-none"
+                  placeholder="Write your message"
+                />
+                <button
+                  type="button"
+                  onClick={sendSms}
+                  disabled={sendingSms || !smsBody.trim()}
+                  className="mt-3 rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                >
+                  {sendingSms ? "Sending…" : "Send SMS"}
+                </button>
+              </DetailSection>
+            </div>
+          ) : null}
+        </aside>
+      </div>
+
+      <div className="app-card p-5 sm:p-6">
+        <DetailSection
+          label="Full timeline"
+          description="Cross-channel activity: conversations, requests, SMS events, and operational touchpoints."
+        >
+          <div className="space-y-2">
             {profile.timeline.map((item) => {
               const href = timelineHref(profile, item);
               const content = (
-                <div className="rounded-lg border border-[#E2E8F0] px-3.5 py-2.5 hover:border-[#99f6e4] hover:bg-[#F8FAFC] transition-colors">
-                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                <div className="rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]">
+                  <div className="mb-1.5 flex items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      {item.channel && <ChannelBadge channel={item.channel} withIcon />}
+                      {item.channel ? <ChannelBadge channel={item.channel} withIcon /> : null}
                       <TimelineItemBadge item={item} />
                     </div>
-                    <span className="text-xs text-[#64748B]">
-                      {item.occurred_at ? timeAgo(item.occurred_at) : "Recently"}
-                    </span>
+                    <span className="text-xs text-[#64748B]">{item.occurred_at ? timeAgo(item.occurred_at) : "—"}</span>
                   </div>
                   <p className="text-sm font-medium text-[#0F172A]">{item.title}</p>
-                  <p className="text-sm text-[#475569] mt-0.5 leading-relaxed">{item.detail}</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{item.detail}</p>
                 </div>
               );
 
@@ -414,18 +412,16 @@ export default function CustomerProfilePage({
             })}
           </div>
 
-          {profile.timeline.length === 0 && (
+          {profile.timeline.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5 text-sm text-[#475569]">
               No cross-channel activity has been recorded for this customer yet.
             </div>
-          )}
+          ) : null}
 
-          {profile.timeline.length > 0 && (
-            <p className="text-xs text-[#64748B] mt-4">
-              All channels and activity types appear in this timeline.
-            </p>
-          )}
-        </div>
+          {profile.last_interaction_at ? (
+            <p className="mt-4 text-xs text-[#64748B]">Most recent activity: {formatDateTime(profile.last_interaction_at)}</p>
+          ) : null}
+        </DetailSection>
       </div>
     </div>
   );

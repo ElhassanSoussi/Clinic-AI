@@ -174,12 +174,12 @@ const categories: FaqCategory[] = [
 
 export default function FaqPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC]">
+    <div className="public-marketing-root">
       <PublicNav />
 
       {/* Hero */}
-      <section className="border-b border-[#E2E8F0] bg-[#FFFFFF] px-5 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+        <div className="marketing-container">
           <div className="max-w-3xl">
             <div className="marketing-kicker mb-6">
               <ShieldCheck className="h-3 w-3" />
@@ -196,14 +196,14 @@ export default function FaqPage() {
       </section>
 
       {/* Category jump nav */}
-      <section className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-5 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-section-tight marketing-surface-slate">
+        <div className="marketing-container">
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <a
                 key={cat.label}
                 href={`#${cat.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-2 text-sm font-medium text-[#475569] transition-colors hover:border-[#CBD5E1] hover:text-[#0F172A]"
+                className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-white px-4 py-2.5 text-[0.9375rem] font-medium text-[#475569] shadow-sm transition-colors hover:border-slate-300 hover:text-[#0F172A]"
               >
                 <cat.icon className="h-3.5 w-3.5 text-[#0F766E]" />
                 {cat.label}
@@ -213,8 +213,8 @@ export default function FaqPage() {
         </div>
       </section>
 
-      <main className="px-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
+      <main>
+        <div className="marketing-container">
 
           <div className="divide-y divide-[#E2E8F0]">
             {categories.map((cat) => (
@@ -223,17 +223,20 @@ export default function FaqPage() {
                 id={cat.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
                 className="marketing-section"
               >
-                <div className="mb-8 flex items-center gap-3">
-                  <div className="marketing-icon-wrap h-10 w-10">
-                    <cat.icon className="h-4.5 w-4.5" />
+                <div className="mb-10 flex items-center gap-4">
+                  <div className="marketing-icon-wrap h-12 w-12">
+                    <cat.icon className="h-6 w-6" />
                   </div>
-                  <h2 className="text-xl font-bold text-[#0F172A]">{cat.label}</h2>
+                  <h2 className="marketing-h3 text-2xl font-bold sm:text-[1.75rem]">{cat.label}</h2>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-5 sm:grid-cols-2">
                   {cat.items.map((item) => (
-                    <div key={item.question} className="marketing-card p-6">
-                      <h3 className="text-sm font-semibold text-[#0F172A]">{item.question}</h3>
-                      <p className="mt-2.5 text-sm leading-6 text-[#475569]">{item.answer}</p>
+                    <div
+                      key={item.question}
+                      className="rounded-2xl border border-slate-200/90 bg-white p-7 shadow-sm sm:p-8"
+                    >
+                      <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                      <p className="marketing-body mt-3">{item.answer}</p>
                     </div>
                   ))}
                 </div>
@@ -243,28 +246,22 @@ export default function FaqPage() {
 
           {/* Still have questions */}
           <section className="pb-16 sm:pb-24">
-            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-8 py-12 sm:px-12 shadow-sm">
-              <div className="grid gap-8 xl:grid-cols-[1fr_auto] xl:items-center">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 px-8 py-12 shadow-md sm:px-12 sm:py-14 lg:px-14">
+              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#0F172A]">
+                  <h2 className="marketing-h2 text-[clamp(1.5rem,1.5vw+1rem,2.25rem)]">
                     Still have a question?
                   </h2>
-                  <p className="mt-3 max-w-xl text-sm leading-7 text-[#475569]">
+                  <p className="marketing-lead mt-4 max-w-xl !text-lg">
                     If you didn&apos;t find what you were looking for, book a short demo and we&apos;ll walk you through how Clinic AI works for your specific clinic type.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-start">
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
-                  >
+                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
+                  <Link href="/contact" className="marketing-cta-primary !justify-center">
                     Book a demo
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] px-6 py-3.5 text-sm font-semibold text-[#0F172A] transition-colors hover:bg-[#F8FAFC]"
-                  >
+                  <Link href="/register" className="marketing-cta-secondary !justify-center">
                     <Sparkles className="h-4 w-4 text-[#0F766E]" />
                     Start free trial
                   </Link>

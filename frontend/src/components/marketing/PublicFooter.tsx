@@ -5,30 +5,26 @@ export function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[#E2E8F0] bg-[#FFFFFF]">
-      <div className="mx-auto max-w-[1280px] px-5 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
-          {/* Brand */}
+    <footer className="border-t border-slate-800 bg-[#0f172a] text-slate-300">
+      <div className="marketing-container py-14 sm:py-16">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-lg shadow-teal-950/40">
                 <Bot className="h-5 w-5 text-white" />
               </div>
-              <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
+              <span className="text-[0.9375rem] font-semibold text-white">Clinic AI</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-[#64748B]">
-              AI front-desk operating system for clinics and private practices. Visible, controllable, and built for real patient care.
+            <p className="mt-5 max-w-sm text-[1rem] leading-relaxed text-slate-400">
+              AI front-desk operating system for clinics and private practices. Visible, controllable, and built for real patient communication.
             </p>
           </div>
 
-          {/* Product */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
-              Product
-            </p>
-            <ul className="mt-4 space-y-3">
+            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">Product</p>
+            <ul className="mt-5 space-y-3.5">
               {[
-                { href: "/product", label: "How it works" },
+                { href: "/product", label: "Product overview" },
                 { href: "/pricing", label: "Pricing" },
                 { href: "/faq", label: "FAQ" },
                 { href: "/chat/demo", label: "Live demo" },
@@ -36,7 +32,7 @@ export function PublicFooter() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]"
+                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -45,21 +41,20 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Trust & Safety */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">
               Trust &amp; Safety
             </p>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-5 space-y-3.5">
               {[
-                { href: "/trust", label: "Our approach to trust" },
+                { href: "/trust", label: "Trust approach" },
                 { href: "/privacy", label: "Privacy policy" },
                 { href: "/terms", label: "Terms of service" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]"
+                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -68,21 +63,18 @@ export function PublicFooter() {
             </ul>
           </div>
 
-          {/* Get started */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
-              Get started
-            </p>
-            <ul className="mt-4 space-y-3">
+            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">Get started</p>
+            <ul className="mt-5 space-y-3.5">
               {[
                 { href: "/login", label: "Sign in" },
                 { href: "/register", label: "Start free trial" },
-                { href: "/contact", label: "Book a demo" },
+                { href: "/contact", label: "Contact" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-[#64748B] transition-colors hover:text-[#0F172A]"
+                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -92,22 +84,13 @@ export function PublicFooter() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 flex flex-col gap-3 border-t border-[#E2E8F0] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#94A3B8]">
-            &copy; {year} Clinic AI. All rights reserved.
-          </p>
-          <div className="flex gap-5">
-            <Link
-              href="/privacy"
-              className="text-xs text-[#94A3B8] transition-colors hover:text-[#64748B]"
-            >
+        <div className="mt-12 flex flex-col gap-4 border-t border-slate-800 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[0.875rem] text-slate-500">&copy; {year} Clinic AI. All rights reserved.</p>
+          <div className="flex gap-8">
+            <Link href="/privacy" className="text-[0.875rem] text-slate-500 transition-colors hover:text-slate-300">
               Privacy
             </Link>
-            <Link
-              href="/terms"
-              className="text-xs text-[#94A3B8] transition-colors hover:text-[#64748B]"
-            >
+            <Link href="/terms" className="text-[0.875rem] text-slate-500 transition-colors hover:text-slate-300">
               Terms
             </Link>
           </div>

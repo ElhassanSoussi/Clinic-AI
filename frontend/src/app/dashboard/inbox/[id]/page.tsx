@@ -2,9 +2,7 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Mail,
   MessageSquare,
   Phone,
@@ -16,7 +14,7 @@ import { formatDateTime } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
+import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { CommunicationEvent, ConversationDetail } from "@/types";
 import {
@@ -30,6 +28,11 @@ import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
 import { EventTimeline, DeliveryStateCard } from "@/components/inbox/EventTimeline";
 import { MessageList } from "@/components/inbox/MessageList";
 import { ThreadBadgeStrip } from "@/components/inbox/ThreadBadgeStrip";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
+import { DetailSection } from "@/components/shared/detail/DetailSection";
+import { OperationalCallout } from "@/components/shared/detail/OperationalCallout";
+import { DetailBackLink } from "@/components/shared/detail/DetailBackLink";
+import { inboxNextStepHint } from "@/lib/operational-hints";
 
 function smsEventTitle(senderKind: string, eventType: string): string {
   if (eventType === "reminder") return "Appointment reminder";
@@ -733,7 +736,6 @@ export default function InboxThreadPage({
   params: Promise<{ id: string }>;
 }>) {
   const { id } = use(params);
-  const router = useRouter();
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -823,6 +825,25 @@ export default function InboxThreadPage({
     eventChannel,
     conversation.derived_status
   );
+
+  const nextStep = inboxNextStepHint({
+    isEventThread,
+    eventChannel,
+    channel: conversation.channel ?? "manual",
+    pendingReview: Boolean(pendingReviewEvent),
+    manualTakeover: conversation.manual_takeover,
+    aiAutoReplyEnabled: conversation.ai_auto_reply_enabled,
+    aiAutoReplyReady: conversation.ai_auto_reply_ready,
+    hasLead: Boolean(lead),
+    derivedStatus: conversation.derived_status,
+  });
+
+  const calloutTone =
+    pendingReviewEvent || conversation.derived_status === "needs_follow_up"
+      ? "attention"
+      : conversation.derived_status === "booked"
+        ? "information"
+        : "neutral";
 
   const createFollowUp = async () => {
     setSavingAction("follow_up");
@@ -994,35 +1015,95 @@ export default function InboxThreadPage({
     }
   };
 
+  const channelLabel = getChannelConfig(conversation.channel ?? "manual").label;
+
   return (
-    <div className="space-y-6">
+    <div className="workspace-page min-w-0">
       <PageHeader
         eyebrow={
           <>
             <MessageSquare className="h-3.5 w-3.5" />
-            Thread detail
+            Inbox
           </>
         }
         title={conversation.customer_name}
-        description="Full conversation history and actions for this patient thread."
+        description={`${channelLabel} · Last activity ${conversation.last_message_at ? formatDateTime(conversation.last_message_at) : "not recorded"}`}
+        showDivider
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {lead ? (
+              <Link
+                href={`/dashboard/leads/${lead.id}`}
+                className="inline-flex min-h-10 items-center rounded-lg border border-[#99f6e4] bg-[#F0FDFA] px-3 py-2 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+              >
+                Open request
+              </Link>
+            ) : null}
+            {conversation.customer_key ? (
+              <Link
+                href={`/dashboard/customers/${conversation.customer_key}`}
+                className="inline-flex min-h-10 items-center rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#475569] transition-colors hover:text-[#0F172A]"
+              >
+                Customer profile
+              </Link>
+            ) : null}
+          </div>
+        }
       />
 
       <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
+      <WorkspaceBand>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,17.5rem)] lg:items-stretch">
+          <OperationalCallout title="Operational focus" headline={nextStep.title} tone={calloutTone}>
+            {nextStep.body}
+          </OperationalCallout>
+          <div className="flex flex-col justify-center rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-3.5 sm:px-5">
+            <p className="workspace-rail-title mb-2">At a glance</p>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#64748B]">Channel</dt>
+                <dd className="font-medium text-[#0F172A] text-right">{channelLabel}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#64748B]">Inbox status</dt>
+                <dd className="text-right">
+                  {isEventThread ? (
+                    <CommunicationEventStatusBadge status={communicationEvent?.status ?? "new"} />
+                  ) : (
+                    <FrontdeskStatusBadge status={conversation.derived_status} />
+                  )}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#64748B]">Request</dt>
+                <dd className="font-medium text-[#0F172A] text-right">{lead ? "Linked" : "Not linked"}</dd>
+              </div>
+              {conversation.channel === "sms" ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#64748B]">SMS control</dt>
+                  <dd className="text-right text-xs font-medium text-[#0F172A]">
+                    {pendingReviewEvent
+                      ? "Review before send"
+                      : conversation.manual_takeover
+                        ? "Staff takeover"
+                        : conversation.ai_auto_reply_enabled
+                          ? "AI can reply"
+                          : "AI off"}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </div>
+        </div>
+      </WorkspaceBand>
+
       <div className="workspace-column-layout">
         <aside className="workspace-side-rail order-3 xl:order-none">
-          <button
-            onClick={() => router.push("/dashboard/inbox")}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Inbox
-          </button>
+          <DetailBackLink href="/dashboard/inbox">Back to Inbox</DetailBackLink>
 
-          <div className="app-card p-4">
-            <h2 className="text-sm font-semibold text-[#0F172A] mb-3">
-              Customer
-            </h2>
+          <div className="app-card p-4 sm:p-5">
+            <h2 className="workspace-rail-title mb-3">Participant</h2>
             <div className="space-y-2.5 text-sm min-w-0">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F8FAFC]">
@@ -1072,9 +1153,7 @@ export default function InboxThreadPage({
 
           {internalNotes.length > 0 && (
             <div className="app-card p-5">
-              <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
-                Internal notes
-              </h2>
+              <h2 className="workspace-rail-title mb-4">Internal notes</h2>
               <div className="space-y-3">
                 {internalNotes.slice(0, 5).map((event) => (
                   <div key={event.id} className="rounded-xl border border-[#E2E8F0] px-4 py-3">
@@ -1092,44 +1171,36 @@ export default function InboxThreadPage({
         <div className="order-1 min-w-0 flex-1 xl:order-none">
           <div className="app-card overflow-hidden">
             <div className="border-b border-[#E2E8F0] px-5 py-5 sm:px-6">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className="break-words text-2xl font-semibold text-[#0F172A]">
-                  {conversation.customer_name}
-                </h1>
-                <ChannelBadge channel={conversation.channel} withIcon />
+              <p className="workspace-rail-title mb-2">Conversation workspace</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-lg font-semibold text-[#0F172A]">Thread overview</span>
+                <ChannelBadge channel={conversation.channel ?? "manual"} withIcon />
                 {isEventThread ? (
                   <CommunicationEventStatusBadge status={communicationEvent?.status ?? "new"} />
                 ) : (
                   <FrontdeskStatusBadge status={conversation.derived_status} />
                 )}
               </div>
-              <p className="text-sm text-[#475569]">
+              <p className="mt-1 text-sm text-[#475569]">
                 {isEventThread ? "Logged" : "Started"}{" "}
                 {conversation.conversation_started_at ? formatDateTime(conversation.conversation_started_at) : "recently"}
+                {conversation.summary ? ` · ${conversation.summary}` : ""}
               </p>
-              <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-4 detail-hero-meta">
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Thread state</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Thread type</p>
                   <p className="mt-1 text-sm font-semibold text-[#0F172A]">
-                    {isEventThread ? "Operational event thread" : "Live conversation thread"}
+                    {isEventThread ? "Operational event" : "Live conversation"}
                   </p>
                 </div>
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Latest source</p>
-                  <p className="mt-1 text-sm font-semibold text-[#0F172A] capitalize">
-                    {conversation.channel}
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Channel</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">{channelLabel}</p>
                 </div>
                 <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Lead link</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Booking snapshot</p>
                   <p className="mt-1 text-sm font-semibold text-[#0F172A]">
-                    {lead ? "Request linked" : "Still unlinked"}
-                  </p>
-                </div>
-                <div className="app-card-muted px-3.5 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Booking state</p>
-                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">
-                    {bookingSummary || "Not booked yet"}
+                    {bookingSummary || "Not booked on this thread"}
                   </p>
                 </div>
               </div>
@@ -1141,26 +1212,41 @@ export default function InboxThreadPage({
               />
             </div>
 
-            <div className="space-y-4 px-5 py-5 sm:px-6">
+            <div className="space-y-6 px-5 py-5 sm:px-6">
               {isEventThread && (
-                <div className="space-y-4">
-                  <EventTimeline relatedEvents={relatedEvents} communicationEvent={communicationEvent} />
-                  <DeliveryStateCard communicationEvent={communicationEvent} />
-                </div>
+                <DetailSection
+                  label="Event trace"
+                  description="Delivery, hand-offs, and related SMS activity for this operational thread."
+                >
+                  <div className="space-y-4">
+                    <EventTimeline relatedEvents={relatedEvents} communicationEvent={communicationEvent} />
+                    <DeliveryStateCard communicationEvent={communicationEvent} />
+                  </div>
+                </DetailSection>
               )}
               {!isEventThread && messages.length === 0 && (
-                <div className="app-card-muted border-dashed px-4 py-5 text-sm text-[#475569]">
-                  {conversation.summary || "No message transcript is stored for this conversation yet."}
-                </div>
+                <DetailSection label="Transcript" description="No stored messages yet — summary from the session if available.">
+                  <div className="detail-transcript-frame border-dashed text-sm text-[#475569]">
+                    {conversation.summary || "No message transcript is stored for this conversation yet."}
+                  </div>
+                </DetailSection>
               )}
               {!isEventThread && messages.length > 0 && (
-                <MessageList messages={messages} />
+                <DetailSection
+                  label="Transcript"
+                  description="Chronological messages for this conversation. Actions and SMS tooling stay in the right column."
+                >
+                  <div className="detail-transcript-frame space-y-3">
+                    <MessageList messages={messages} />
+                  </div>
+                </DetailSection>
               )}
             </div>
           </div>
         </div>
 
         <aside className="workspace-side-rail order-2 xl:order-none">
+          <p className="workspace-rail-title">Respond &amp; pipeline</p>
           <RightRailActions
             detail={detail}
             isEventThread={isEventThread}

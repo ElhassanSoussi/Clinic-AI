@@ -126,7 +126,7 @@ export default function RegisterPage() {
       if (!res.access_token) {
         setError(
           res.message ||
-            "Account created. Check your email to confirm your address before signing in."
+          "Account created. Check your email to confirm your address before signing in."
         );
         return;
       }
@@ -150,40 +150,40 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="app-shell-bg min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
         <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
 
           {/* Left panel — marketing */}
-          <div className="hidden flex-col justify-between rounded-l-xl border-r border-[#E2E8F0] bg-[#F8FAFC] p-8 lg:flex xl:p-10">
+          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-xl border-r border-slate-700/80 p-8 lg:flex xl:p-12">
             <div>
-              <Link href="/" className="inline-flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
+              <Link href="/" className="inline-flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/30">
                   <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold leading-none text-[#0F172A]">Clinic AI</p>
-                  <p className="mt-0.5 text-[11px] leading-none text-[#64748B]">AI front-desk OS</p>
+                  <p className="text-base font-semibold leading-none text-white">Clinic AI</p>
+                  <p className="auth-panel-footnote mt-1 leading-none">AI front-desk OS</p>
                 </div>
               </Link>
 
-              <div className="mt-10">
-                <div className="marketing-kicker mb-5">
-                  <ShieldCheck className="h-3 w-3" />
+              <div className="mt-12">
+                <div className="marketing-kicker mb-6">
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   14-day free trial
                 </div>
-                <h1 className="text-2xl font-bold leading-snug tracking-tight text-[#0F172A]">
+                <h1 className="text-[clamp(1.75rem,1.2vw+1.25rem,2.35rem)] font-bold leading-snug tracking-tight">
                   Set up your clinic&apos;s AI front desk in minutes.
                 </h1>
-                <p className="mt-4 text-sm leading-7 text-[#475569]">
+                <p className="auth-panel-lead mt-5">
                   Add your clinic details, configure the assistant with your real information, and give your team a single workspace from first inquiry to confirmed booking.
                 </p>
               </div>
 
-              <ul className="mt-8 space-y-3">
+              <ul className="mt-10 space-y-3.5">
                 {setupSteps.map((step) => (
-                  <li key={step} className="flex items-start gap-3 text-sm text-[#475569]">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                  <li key={step} className="flex items-start gap-3.5 text-[0.9375rem] text-slate-300">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-200">
                       <Check className="h-3.5 w-3.5" />
                     </div>
                     {step}
@@ -191,27 +191,26 @@ export default function RegisterPage() {
                 ))}
               </ul>
 
-              <div className="mt-8 space-y-3">
+              <div className="mt-10 space-y-3">
                 {highlights.map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] p-4 shadow-sm"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                  <div key={item.title} className="auth-panel-card p-4 sm:p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-500/15 text-teal-200">
                         <item.icon className="h-4 w-4" />
                       </div>
-                      <p className="text-sm font-semibold text-[#0F172A]">{item.title}</p>
+                      <p className="auth-panel-card-title">{item.title}</p>
                     </div>
-                    <p className="mt-2 text-xs leading-5 text-[#64748B]">{item.body}</p>
+                    <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-slate-400">
+                      {item.body}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <p className="mt-6 text-xs text-[#94A3B8]">
+            <p className="auth-panel-footnote mt-8 border-t border-slate-700/80 pt-6">
               No credit card required. Cancel anytime.{" "}
-              <Link href="/trust" className="font-medium text-[#64748B] hover:text-[#0F172A]">
+              <Link href="/trust" className="font-semibold text-slate-300 hover:text-white">
                 How we handle trust
               </Link>
               .
@@ -219,20 +218,20 @@ export default function RegisterPage() {
           </div>
 
           {/* Right panel — form */}
-          <div className="flex items-center justify-center p-8 xl:p-12">
+          <div className="flex items-center justify-center bg-white p-8 xl:p-12">
             <div className="w-full max-w-md">
-              <div className="mb-8 text-center">
+              <div className="mb-10 text-center">
                 {/* Mobile logo */}
                 <Link href="/" className="mb-6 inline-flex items-center gap-2.5 lg:hidden">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm">
                     <Bot className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
+                  <span className="text-base font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h2 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
                   Create your clinic workspace
                 </h2>
-                <p className="mt-2 text-sm text-[#64748B]">
+                <p className="marketing-body mx-auto mt-3 max-w-sm text-center text-slate-600">
                   Free for 14 days. Set up and into guided onboarding in minutes.
                 </p>
               </div>
@@ -261,7 +260,7 @@ export default function RegisterPage() {
                   <div>
                     <label
                       htmlFor="full_name"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Full name
                     </label>
@@ -279,7 +278,7 @@ export default function RegisterPage() {
                   <div>
                     <label
                       htmlFor="clinic_name"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Clinic name
                     </label>
@@ -297,7 +296,7 @@ export default function RegisterPage() {
                   <div>
                     <label
                       htmlFor="reg_email"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Email
                     </label>
@@ -315,7 +314,7 @@ export default function RegisterPage() {
                   <div>
                     <label
                       htmlFor="reg_password"
-                      className="mb-1.5 block text-sm font-medium text-[#0F172A]"
+                      className="mb-2 block text-[0.9375rem] font-medium text-[#0F172A]"
                     >
                       Password
                     </label>
@@ -334,7 +333,7 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading || !!supabaseConfigError}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-3.5 text-base font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -352,7 +351,7 @@ export default function RegisterPage() {
                   nextPath={selectedPlan ? `/auth/complete?plan=${selectedPlan}` : undefined}
                 />
 
-                <p className="mt-5 text-center text-sm text-[#64748B]">
+                <p className="mt-6 text-center text-[0.9375rem] text-slate-600">
                   Already have an account?{" "}
                   <Link
                     href={selectedPlan ? `/login?plan=${selectedPlan}` : "/login"}

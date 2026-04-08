@@ -242,12 +242,12 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC]">
+    <div className="public-marketing-root">
       <PublicNav />
 
       {/* ── HERO ── */}
-      <section className="border-b border-[#E2E8F0] bg-[#FFFFFF] px-5 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-[1280px]">
+      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+        <div className="marketing-container">
           <div className="landing-hero-grid">
             {/* Copy */}
             <div className="min-w-0">
@@ -258,43 +258,34 @@ export default function LandingPage() {
               <h1 className="marketing-h1">
                 Your clinic&apos;s AI front desk.
               </h1>
-              <p className="marketing-lead mt-6 max-w-2xl">
+              <p className="marketing-lead mt-7 max-w-2xl">
                 Clinic AI answers inbound patient questions, captures appointment requests,
                 and gives your team a single operating view — with human review and
                 takeover built in at every step.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
-                >
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link href="/register" className="marketing-cta-primary">
                   Start free — 14 days
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link
-                  href="/chat/demo"
-                  className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] px-6 py-3.5 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
-                >
+                <Link href="/chat/demo" className="marketing-cta-secondary">
                   <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
                   Try live demo
                 </Link>
               </div>
-              <p className="mt-4 text-xs text-[#94A3B8]">
+              <p className="mt-5 text-[0.9375rem] font-medium text-slate-500">
                 No credit card required &middot; Set up in under 15 minutes &middot; Your staff stays in control
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-2">
+              <div className="mt-10 flex flex-wrap gap-2.5">
                 {[
                   "Responds 24/7",
                   "Staff review & takeover",
                   "Grounded in your clinic info",
                   "One inbox for all channels",
                 ].map((feat) => (
-                  <span
-                    key={feat}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475569]"
-                  >
-                    <Check className="h-3.5 w-3.5 text-[#0F766E]" />
+                  <span key={feat} className="marketing-trust-chip">
+                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
                     {feat}
                   </span>
                 ))}
@@ -303,7 +294,7 @@ export default function LandingPage() {
 
             {/* Workspace preview */}
             <div className="relative hidden xl:block">
-              <div className="landing-shell relative overflow-hidden p-4 sm:p-5">
+              <div className="marketing-hero-preview relative overflow-hidden p-5 sm:p-6 lg:p-7">
                 <div className="grid gap-3 xl:grid-cols-[11rem_1fr_13rem]">
                   {/* Sidebar */}
                   <aside className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
@@ -321,16 +312,14 @@ export default function LandingPage() {
                         (item, i) => (
                           <div
                             key={item}
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
-                              i === 1
+                            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${i === 1
                                 ? "border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] shadow-sm"
                                 : "text-[#475569]"
-                            }`}
+                              }`}
                           >
                             <div
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                i === 1 ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
-                              }`}
+                              className={`h-1.5 w-1.5 rounded-full ${i === 1 ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
+                                }`}
                             />
                             {item}
                           </div>
@@ -358,9 +347,8 @@ export default function LandingPage() {
                       ].map((item, i) => (
                         <div
                           key={item.name}
-                          className={`app-list-row flex items-center gap-3 px-3 py-2.5 ${
-                            i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
-                          }`}
+                          className={`app-list-row flex items-center gap-3 px-3 py-2.5 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
+                            }`}
                         >
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                             <Users className="h-3.5 w-3.5" />
@@ -415,12 +403,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <main className="px-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1280px]">
-
-          {/* ── HOW IT WORKS ── */}
-          <section className="marketing-section border-b border-[#E2E8F0]">
-            <div className="mb-12 max-w-2xl">
+      <main>
+        {/* ── HOW IT WORKS ── */}
+        <section className="marketing-section marketing-surface-slate">
+          <div className="marketing-container">
+            <div className="mb-14 max-w-3xl">
               <div className="marketing-kicker mb-5">
                 <Workflow className="h-3 w-3" />
                 How it works
@@ -433,21 +420,23 @@ export default function LandingPage() {
                 capturing requests, surfacing follow-up — so nothing slips between the cracks.
               </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {howItWorks.map((step) => (
-                <div key={step.step} className="marketing-card p-6">
-                  <span className="text-3xl font-bold text-[#E2E8F0]">{step.step}</span>
-                  <h3 className="mt-4 text-base font-semibold text-[#0F172A]">{step.title}</h3>
-                  <p className="mt-2.5 text-sm leading-6 text-[#475569]">{step.description}</p>
+                <div key={step.step} className="rounded-2xl border border-white/70 bg-white p-7 shadow-sm sm:p-8">
+                  <span className="text-4xl font-bold tabular-nums text-slate-200">{step.step}</span>
+                  <h3 className="marketing-h3 mt-5">{step.title}</h3>
+                  <p className="marketing-body mt-3">{step.description}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ── WHAT YOU GET ── */}
-          <section id="product" className="marketing-section border-b border-[#E2E8F0]">
-            <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="max-w-2xl">
+        {/* ── WHAT YOU GET ── */}
+        <section id="product" className="marketing-section marketing-surface-white border-y border-slate-200/80">
+          <div className="marketing-container">
+            <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
                 <div className="marketing-kicker mb-5">
                   <LayoutGrid className="h-3 w-3" />
                   What you get
@@ -462,7 +451,7 @@ export default function LandingPage() {
               </div>
               <Link
                 href="/product"
-                className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0F766E] hover:text-[#115E59]"
+                className="shrink-0 inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-[#0F766E] hover:text-[#115E59]"
               >
                 See full product overview
                 <ArrowRight className="h-4 w-4" />
@@ -471,60 +460,62 @@ export default function LandingPage() {
 
             <div className="marketing-feature-grid">
               {featureCards.map((card) => (
-                <div key={card.title} className="marketing-card p-6">
-                  <div className="marketing-icon-wrap">
-                    <card.icon className="h-5 w-5" />
+                <div key={card.title} className="rounded-2xl border border-slate-200/90 bg-slate-50/80 p-7 shadow-sm transition-shadow hover:shadow-md sm:p-8">
+                  <div className="marketing-icon-wrap h-12 w-12">
+                    <card.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-5 text-base font-semibold text-[#0F172A]">{card.title}</h3>
-                  <p className="mt-2.5 text-sm leading-6 text-[#475569]">{card.description}</p>
+                  <h3 className="marketing-h3 mt-6">{card.title}</h3>
+                  <p className="marketing-body mt-3">{card.description}</p>
                 </div>
               ))}
             </div>
 
             {/* Platform modules */}
-            <div className="mt-8 grid gap-5 xl:grid-cols-[1fr_1fr]">
-              <div className="landing-shell p-6 sm:p-8">
+            <div className="mt-12 grid gap-6 xl:grid-cols-[1.12fr_0.88fr] xl:gap-8">
+              <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
                 <div className="app-page-kicker mb-5">
                   <Bot className="h-3.5 w-3.5" />
                   Platform modules
                 </div>
-                <h3 className="text-base font-semibold text-[#0F172A]">
+                <h3 className="marketing-h3 max-w-lg">
                   One product system from inquiry to booked appointment.
                 </h3>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="mt-8 grid gap-4 sm:grid-cols-2">
                   {[
                     { icon: Inbox, name: "Operator inbox", desc: "Every patient thread, AI-handled and staff-reviewed, in one place." },
                     { icon: CalendarDays, name: "Appointments workspace", desc: "Track bookings, reminders, reschedules, and deposit status." },
                     { icon: BrainCircuit, name: "AI training", desc: "Keep your assistant accurate with services, FAQs, and internal notes." },
                     { icon: TriangleAlert, name: "Follow-up visibility", desc: "Stalled requests and booking gaps surface before they fall through." },
                   ].map((mod) => (
-                    <div key={mod.name} className="app-card-muted p-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#CCFBF1] text-[#115E59]">
-                        <mod.icon className="h-4 w-4" />
+                    <div key={mod.name} className="rounded-xl border border-slate-100 bg-slate-50/90 p-5">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#CCFBF1] text-[#115E59]">
+                        <mod.icon className="h-5 w-5" />
                       </div>
-                      <h4 className="mt-3 text-sm font-semibold text-[#0F172A]">{mod.name}</h4>
-                      <p className="mt-1.5 text-sm leading-5 text-[#475569]">{mod.desc}</p>
+                      <h4 className="mt-4 text-[1.0625rem] font-semibold text-[#0F172A]">{mod.name}</h4>
+                      <p className="marketing-body mt-2">{mod.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                 {clinicTypes.map((item) => (
-                  <div key={item.type} className="app-card p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">Who it&apos;s for</p>
-                    <h3 className="mt-3 text-base font-semibold text-[#0F172A]">{item.type}</h3>
-                    <p className="mt-2 text-sm leading-6 text-[#475569]">{item.description}</p>
+                  <div key={item.type} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                    <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">Who it&apos;s for</p>
+                    <h3 className="marketing-h3 mt-3">{item.type}</h3>
+                    <p className="marketing-body mt-2">{item.description}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ── TRUST ── */}
-          <section id="trust" className="marketing-section border-b border-[#E2E8F0]">
-            <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="max-w-2xl">
+        {/* ── TRUST ── */}
+        <section id="trust" className="marketing-section marketing-surface-mist">
+          <div className="marketing-container">
+            <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
                 <div className="marketing-kicker mb-5">
                   <ShieldCheck className="h-3 w-3" />
                   Trust &amp; oversight
@@ -540,7 +531,7 @@ export default function LandingPage() {
               </div>
               <Link
                 href="/trust"
-                className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0F766E] hover:text-[#115E59]"
+                className="shrink-0 inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-[#0F766E] hover:text-[#115E59]"
               >
                 Read our trust approach
                 <ArrowRight className="h-4 w-4" />
@@ -549,28 +540,30 @@ export default function LandingPage() {
 
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {trustCards.map((item) => (
-                <div key={item.title} className="marketing-card p-6">
-                  <div className="marketing-icon-wrap">
-                    <item.icon className="h-5 w-5" />
+                <div key={item.title} className="rounded-2xl border border-white/80 bg-white/90 p-7 shadow-sm sm:p-8">
+                  <div className="marketing-icon-wrap h-12 w-12">
+                    <item.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-5 text-base font-semibold text-[#0F172A]">{item.title}</h3>
-                  <p className="mt-2.5 text-sm leading-6 text-[#475569]">{item.description}</p>
+                  <h3 className="marketing-h3 mt-6">{item.title}</h3>
+                  <p className="marketing-body mt-3">{item.description}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ── PRICING ── */}
-          <section id="pricing" className="marketing-section border-b border-[#E2E8F0]">
-            <div className="mb-12 text-center">
+        {/* ── PRICING ── */}
+        <section id="pricing" className="marketing-section marketing-surface-slate">
+          <div className="marketing-container">
+            <div className="mb-14 text-center">
               <div className="marketing-kicker mx-auto mb-5">
                 <Sparkles className="h-3 w-3" />
                 Pricing
               </div>
-              <h2 className="marketing-h2">
+              <h2 className="marketing-h2 mx-auto max-w-4xl">
                 Honest pricing. No per-message fees.
               </h2>
-              <p className="marketing-lead mt-4 mx-auto max-w-xl">
+              <p className="marketing-lead mx-auto mt-5 max-w-2xl">
                 Pick the plan that matches your patient volume. Start free, upgrade when ready, cancel anytime.
               </p>
             </div>
@@ -581,43 +574,39 @@ export default function LandingPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-5 lg:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-3">
               {plans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`relative overflow-hidden rounded-2xl border p-7 ${
-                    plan.highlighted
-                      ? "border-[#0F766E] bg-[#FFFFFF] shadow-lg shadow-teal-900/5"
-                      : "border-[#E2E8F0] bg-[#FFFFFF] shadow-sm"
-                  }`}
+                  className={`relative flex flex-col overflow-hidden rounded-2xl border bg-white p-8 sm:p-9 ${plan.highlighted
+                      ? "border-[#0F766E] shadow-xl shadow-teal-900/10 ring-1 ring-[#0F766E]/20"
+                      : "border-white/80 shadow-md shadow-slate-900/5"
+                    }`}
                 >
                   {plan.badge ? (
-                    <div className="mb-5 inline-flex rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1 text-xs font-semibold text-[#115E59]">
+                    <div className="mb-5 inline-flex rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1 text-[0.8125rem] font-semibold text-[#115E59]">
                       {plan.badge}
                     </div>
                   ) : null}
-                  <h3 className="text-sm font-semibold text-[#0F172A]">{plan.name}</h3>
-                  <div className="mt-4 flex items-end gap-2">
-                    <span className="text-3xl font-bold text-[#0F172A]">{plan.price}</span>
-                    <span className="pb-1 text-sm font-medium text-[#64748B]">{plan.period}</span>
+                  <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{plan.name}</h3>
+                  <div className="mt-5 flex items-end gap-2">
+                    <span className="text-4xl font-bold tabular-nums text-[#0F172A]">{plan.price}</span>
+                    <span className="pb-1.5 text-[0.9375rem] font-medium text-[#64748B]">{plan.period}</span>
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-[#475569]">{plan.description}</p>
-                  <div className="mt-6 space-y-3">
+                  <p className="marketing-body mt-5">{plan.description}</p>
+                  <div className="mt-7 flex-1 space-y-3">
                     {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-3 text-sm text-[#475569]">
-                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                      <div key={feature} className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
                           <Check className="h-3.5 w-3.5" />
                         </div>
-                        <span>{feature}</span>
+                        <span className="marketing-body">{feature}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-8">
+                  <div className="mt-10">
                     {plan.id === "trial" ? (
-                      <Link
-                        href="/register"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
-                      >
+                      <Link href="/register" className="marketing-cta-primary !w-full">
                         {plan.cta}
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -626,11 +615,10 @@ export default function LandingPage() {
                         type="button"
                         onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
                         disabled={checkoutLoading === plan.id}
-                        className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 ${
-                          plan.highlighted
-                            ? "bg-[#0F766E] text-white hover:bg-[#115E59]"
-                            : "border border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] hover:bg-[#F8FAFC]"
-                        }`}
+                        className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[0.9375rem] font-semibold transition-colors disabled:opacity-60 ${plan.highlighted
+                            ? "marketing-cta-primary !w-full shadow-lg"
+                            : "border border-slate-300 bg-white text-[#0F172A] hover:bg-slate-50"
+                          }`}
                       >
                         {checkoutLoading === plan.id ? "Loading..." : plan.cta}
                         <ArrowRight className="h-4 w-4" />
@@ -641,7 +629,7 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <p className="mt-6 text-center text-sm text-[#64748B]">
+            <p className="mt-10 text-center text-[0.9375rem] text-slate-600">
               Questions about plans?{" "}
               <Link href="/pricing" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
                 See full pricing details
@@ -652,12 +640,14 @@ export default function LandingPage() {
               </Link>
               .
             </p>
-          </section>
+          </div>
+        </section>
 
-          {/* ── FAQ TEASER ── */}
-          <section id="faq" className="marketing-section border-b border-[#E2E8F0]">
-            <div className="grid gap-8 xl:grid-cols-[1fr_1.4fr]">
-              <div>
+        {/* ── FAQ TEASER ── */}
+        <section id="faq" className="marketing-section marketing-surface-white border-y border-slate-200/80">
+          <div className="marketing-container">
+            <div className="grid gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] xl:gap-16">
+              <div className="max-w-xl">
                 <div className="marketing-kicker mb-5">
                   <ShieldCheck className="h-3 w-3" />
                   Common questions
@@ -665,12 +655,12 @@ export default function LandingPage() {
                 <h2 className="marketing-h2">
                   Straightforward answers.
                 </h2>
-                <p className="marketing-lead mt-4">
+                <p className="marketing-lead mt-5">
                   Clinic AI is not a replacement for clinical judgment. It is a reliable operating layer for patient communication, booking, and front-desk follow-up.
                 </p>
                 <Link
                   href="/faq"
-                  className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#0F766E] hover:text-[#115E59]"
+                  className="mt-8 inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-[#0F766E] hover:text-[#115E59]"
                 >
                   See all questions
                   <ArrowRight className="h-4 w-4" />
@@ -678,51 +668,55 @@ export default function LandingPage() {
               </div>
               <div className="space-y-4">
                 {faqs.map((item) => (
-                  <div key={item.question} className="marketing-card p-6">
-                    <h3 className="text-sm font-semibold text-[#0F172A]">{item.question}</h3>
-                    <p className="mt-2.5 text-sm leading-6 text-[#475569]">{item.answer}</p>
+                  <div
+                    key={item.question}
+                    className="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-7 sm:p-8"
+                  >
+                    <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                    <p className="marketing-body mt-3">{item.answer}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ── FINAL CTA ── */}
-          <section className="marketing-section">
-            <div className="overflow-hidden rounded-2xl bg-[#0F766E] px-8 py-12 sm:px-12 sm:py-16">
-              <div className="grid gap-8 xl:grid-cols-[1fr_auto] xl:items-center">
+        {/* ── FINAL CTA ── */}
+        <section className="marketing-final-act">
+          <div className="marketing-container">
+            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-700/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.06em] text-teal-100">
-                    <Sparkles className="h-3 w-3" />
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                    <Sparkles className="h-3.5 w-3.5" />
                     Get started today
                   </div>
-                  <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  <h2 className="mt-6 text-[clamp(1.875rem,2vw+1rem,2.75rem)] font-bold tracking-tight text-white">
                     See the difference in your first week.
                   </h2>
-                  <p className="mt-4 max-w-xl text-base leading-7 text-teal-100">
+                  <p className="mt-5 max-w-xl text-[1.125rem] leading-relaxed text-teal-100">
                     Configure the assistant with your real clinic information, let your team work from one workspace, and see what a complete front-desk operating system feels like.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-start">
+                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3.5 text-sm font-semibold text-[#0F766E] shadow-sm transition-colors hover:bg-[#F0FDF9]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/chat/demo"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-400/40 bg-teal-700/30 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700/50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-teal-300/50 bg-teal-800/40 px-8 py-4 text-[1rem] font-semibold text-white transition-colors hover:bg-teal-800/60"
                   >
                     Try the live demo
                   </Link>
                 </div>
               </div>
             </div>
-          </section>
-
-        </div>
+          </div>
+        </section>
       </main>
 
       <PublicFooter />

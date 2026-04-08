@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, use } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Phone,
   Mail,
   Calendar,
@@ -12,10 +11,10 @@ import {
   Loader2,
   User,
   Users,
-  MessageSquare,
   CheckCircle2,
   PhoneCall,
   XCircle,
+  Inbox,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
@@ -23,7 +22,18 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
+import { DetailSection } from "@/components/shared/detail/DetailSection";
+import { OperationalCallout } from "@/components/shared/detail/OperationalCallout";
+import { DetailBackLink } from "@/components/shared/detail/DetailBackLink";
 import { formatDateTime } from "@/lib/utils";
+import { leadNextStepHint } from "@/lib/operational-hints";
+import {
+  humanizeSnakeCase,
+  appointmentStatusClass,
+  depositStatusClass,
+  depositStatusLabel,
+} from "@/lib/format-helpers";
 import type { Lead, LeadStatus, ConversationMessage } from "@/types";
 
 const STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
@@ -158,239 +168,293 @@ export default function LeadDetailPage({
       <ErrorState title="Not Found" message="This request could not be found." />
     );
 
+  const appointmentSummary =
+    lead.appointment_status === "confirmed" && lead.appointment_starts_at
+      ? formatDateTime(lead.appointment_starts_at)
+      : null;
+
+  const reminderLine =
+    lead.reminder_status && lead.reminder_status !== "not_ready"
+      ? `${humanizeSnakeCase(lead.reminder_status)}${lead.reminder_scheduled_for ? ` · ${formatDateTime(lead.reminder_scheduled_for)}` : ""}`
+      : null;
+
+  const calloutTone =
+    lead.status === "closed" ? "neutral" : lead.status === "booked" ? "information" : "attention";
+
   return (
-    <div className="max-w-4xl space-y-6">
-      <Link
-        href="/dashboard/leads"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-1.5 text-sm font-semibold text-[#475569] shadow-sm transition-colors hover:text-[#0F172A]"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Leads
-      </Link>
+    <div className="workspace-page min-w-0">
+      <DetailBackLink href="/dashboard/leads">Back to Leads</DetailBackLink>
 
       <PageHeader
         eyebrow={
           <>
             <Users className="h-3.5 w-3.5" />
-            Request detail
+            Booking request
           </>
         }
         title={lead.patient_name}
-        description={`Submitted ${formatDateTime(lead.created_at)}`}
+        description={`Opened ${formatDateTime(lead.created_at)} · Last updated ${formatDateTime(lead.updated_at)}`}
+        showDivider
         actions={<LeadStatusBadge status={lead.status as LeadStatus} />}
       />
 
       <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
-      <div className="flex flex-wrap gap-2">
-        {QUICK_ACTIONS.filter((a) => a.target !== lead.status).map((action) => (
-          <button
-            key={action.target}
-            onClick={() => handleQuickAction(action.target)}
-            disabled={quickSaving !== null}
-            className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg border border-transparent transition-colors ${action.bg} ${action.hover} ${action.text} disabled:opacity-50`}
-          >
-            {quickSaving === action.target ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <action.icon className="w-4 h-4" />
-            )}
-            {action.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
-          Contact information
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
-              <User className="w-4 h-4 text-[#475569]" />
-            </div>
-            <div>
-              <p className="text-xs text-[#475569]">Name</p>
-              <p className="text-sm font-medium text-[#0F172A]">
-                {lead.patient_name}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
-              <Phone className="w-4 h-4 text-[#475569]" />
-            </div>
-            <div>
-              <p className="text-xs text-[#475569]">Phone</p>
-              <p className="text-sm font-medium text-[#0F172A]">
-                {lead.patient_phone || "—"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
-              <Mail className="w-4 h-4 text-[#475569]" />
-            </div>
-            <div>
-              <p className="text-xs text-[#475569]">Email</p>
-              <p className="text-sm font-medium text-[#0F172A]">
-                {lead.patient_email || "—"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-[#475569]" />
-            </div>
-            <div>
-              <p className="text-xs text-[#475569]">Source</p>
-              <p className="text-sm font-medium text-[#0F172A]">
-                {sourceLabel(lead.source, lead.slot_source)}
-              </p>
-            </div>
+      <WorkspaceBand>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] lg:items-stretch">
+          <OperationalCallout title="Operational focus" tone={calloutTone}>
+            {leadNextStepHint(lead.status as LeadStatus)}
+          </OperationalCallout>
+          <div className="flex flex-col justify-center rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-3.5 sm:px-5">
+            <p className="workspace-rail-title mb-2">Request snapshot</p>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#64748B]">Source</dt>
+                <dd className="text-right font-medium text-[#0F172A]">{sourceLabel(lead.source, lead.slot_source)}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#64748B]">Preferred time</dt>
+                <dd className="max-w-[14rem] text-right font-medium text-[#0F172A]">
+                  {lead.preferred_datetime_text || "—"}
+                </dd>
+              </div>
+              {appointmentSummary ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#64748B]">Confirmed time</dt>
+                  <dd className="text-right font-medium text-[#0F172A]">{appointmentSummary}</dd>
+                </div>
+              ) : null}
+              {lead.appointment_status ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#64748B]">Booking state</dt>
+                  <dd className="text-right">
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${appointmentStatusClass(lead.appointment_status)}`}
+                    >
+                      {lead.appointment_status === "confirmed" ? "Confirmed" : humanizeSnakeCase(lead.appointment_status)}
+                    </span>
+                  </dd>
+                </div>
+              ) : null}
+              {reminderLine ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#64748B]">Reminder</dt>
+                  <dd className="max-w-[14rem] text-right text-xs font-medium text-[#0F172A]">{reminderLine}</dd>
+                </div>
+              ) : null}
+              {lead.deposit_status && lead.deposit_status !== "not_required" ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#64748B]">Deposit</dt>
+                  <dd className="text-right">
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${depositStatusClass(lead.deposit_status)}`}
+                    >
+                      {depositStatusLabel(lead.deposit_status)}
+                    </span>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
           </div>
         </div>
-      </div>
+      </WorkspaceBand>
 
-      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
-          Visit details
-        </h2>
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs text-[#475569] mb-1">Reason for Visit</p>
-            <p className="text-sm text-[#0F172A]">
-              {lead.reason_for_visit || "Not specified"}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#64748B]" />
-            <div>
-              <p className="text-xs text-[#475569]">Preferred Date/Time</p>
-              <p className="text-sm text-[#0F172A]">
-                {lead.preferred_datetime_text || "Not specified"}
-              </p>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                {lead.slot_source === "availability" || lead.slot_row_index
-                  ? "Source: Availability slot"
-                  : "Source: Manual preferred time"}
-              </p>
-            </div>
-          </div>
-          {lead.slot_row_index && (
-            <div className="mt-4 p-3 bg-[#CCFBF1] border border-[#99f6e4] rounded-lg flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#CCFBF1] flex items-center justify-center shrink-0">
-                <Calendar className="w-4 h-4 text-[#0F766E]" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-[#115E59] uppercase tracking-wider">
-                  Confirmed slot
-                </p>
-                <p className="text-xs text-[#115E59]">
-                  This appointment is linked to row{" "}
-                  <strong>{lead.slot_row_index}</strong> in your Availability
-                  sheet.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {chatMessages.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-[#0F172A] flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-[#475569]" />
-              Chat conversation
-            </h2>
-            {conversationId && (
-              <span className="text-xs text-[#64748B]">
-                {chatMessages.length} message{chatMessages.length !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>
-          <div className="space-y-3">
-            {chatMessages.slice(-6).map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${msg.role === "user"
-                    ? "bg-[#0F766E] text-white rounded-br-sm"
-                    : "bg-[#F1F5F9] text-[#0F172A] rounded-bl-sm"
-                    }`}
-                >
-                  {msg.content}
+      <div className="workspace-split">
+        <div className="min-w-0 space-y-6">
+          <div className="app-card p-5 sm:p-6">
+            <DetailSection
+              label="Contact"
+              description="Verified contact paths on this request."
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
+                    <User className="h-4 w-4 text-[#475569]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748B]">Name</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
+                    <Phone className="h-4 w-4 text-[#475569]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748B]">Phone</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_phone || "—"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
+                    <Mail className="h-4 w-4 text-[#475569]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748B]">Email</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_email || "—"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
+                    <Calendar className="h-4 w-4 text-[#475569]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#64748B]">Inbound source</p>
+                    <p className="text-sm font-medium text-[#0F172A]">{sourceLabel(lead.source, lead.slot_source)}</p>
+                  </div>
                 </div>
               </div>
-            ))}
+            </DetailSection>
           </div>
+
+          <div className="app-card p-5 sm:p-6">
+            <DetailSection
+              label="Visit & scheduling"
+              description="Patient intent and preferences. Confirmed visits remain tied to this lead — use the calendar you already rely on for real slot management."
+            >
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs font-medium text-[#64748B]">Reason for visit</p>
+                  <p className="mt-1 text-sm text-[#0F172A]">{lead.reason_for_visit || "Not specified"}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#64748B]" />
+                  <div>
+                    <p className="text-xs font-medium text-[#64748B]">Preferred date / time</p>
+                    <p className="mt-1 text-sm text-[#0F172A]">{lead.preferred_datetime_text || "Not specified"}</p>
+                    <p className="mt-1 text-xs text-[#64748B]">
+                      {lead.slot_source === "availability" || lead.slot_row_index
+                        ? "Captured from an availability slot when the patient chose one."
+                        : "Free-text preference from the patient or staff."}
+                    </p>
+                  </div>
+                </div>
+                {lead.slot_row_index ? (
+                  <div className="rounded-xl border border-[#99f6e4] bg-[#ECFDFB] px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#115E59]">Availability row</p>
+                    <p className="mt-1 text-xs text-[#115E59]">
+                      Linked to row <strong>{lead.slot_row_index}</strong> in your Availability sheet — not a separate scheduling product.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </DetailSection>
+          </div>
+
+          {chatMessages.length > 0 ? (
+            <div className="app-card p-5 sm:p-6">
+              <DetailSection
+                label="Related conversation"
+                description="Latest lines from the AI chat tied to this request when one exists."
+              >
+                <div className="detail-transcript-frame space-y-3">
+                  {chatMessages.slice(-8).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm ${msg.role === "user"
+                          ? "bg-[#0F766E] text-white"
+                          : "bg-white text-[#0F172A] ring-1 ring-[#E2E8F0]"
+                          }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {conversationId ? (
+                  <Link
+                    href={`/dashboard/inbox/${conversationId}`}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#115E59] hover:text-[#0F766E]"
+                  >
+                    <Inbox className="h-4 w-4" />
+                    Open full thread in inbox
+                  </Link>
+                ) : null}
+              </DetailSection>
+            </div>
+          ) : null}
         </div>
-      )}
 
-      <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-[#0F172A] mb-4">
-          Update request
-        </h2>
-
-        <div className="space-y-4">
+        <aside className="flex min-w-0 flex-col gap-4">
           <div>
-            <label
-              htmlFor="lead-status"
-              className="block text-sm font-medium text-[#0F172A] mb-1.5"
-            >
-              Status
-            </label>
-            <select
-              id="lead-status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as LeadStatus)}
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+            <p className="workspace-rail-title mb-2">Pipeline actions</p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_ACTIONS.filter((a) => a.target !== lead.status).map((action) => (
+                <button
+                  key={action.target}
+                  type="button"
+                  onClick={() => handleQuickAction(action.target)}
+                  disabled={quickSaving !== null}
+                  className={`flex items-center gap-2 rounded-lg border border-transparent px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${action.bg} ${action.hover} ${action.text}`}
+                >
+                  {quickSaving === action.target ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <action.icon className="h-4 w-4" />
+                  )}
+                  {action.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="lead-notes"
-              className="block text-sm font-medium text-[#0F172A] mb-1.5"
-            >
-              Internal Notes
-            </label>
-            <textarea
-              id="lead-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] placeholder:text-[#64748B] resize-none"
-              placeholder="Add internal notes about this request..."
-            />
+          <div className="app-card p-4 sm:p-5">
+            <DetailSection label="Record & notes">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="lead-status" className="block text-sm font-medium text-[#0F172A]">
+                    Status
+                  </label>
+                  <select
+                    id="lead-status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as LeadStatus)}
+                    className="mt-1.5 w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                  >
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="lead-notes" className="block text-sm font-medium text-[#0F172A]">
+                    Internal notes
+                  </label>
+                  <textarea
+                    id="lead-notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={5}
+                    className="mt-1.5 w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Operational context for your team only…"
+                  />
+                </div>
+
+                {successMessage ? <p className="text-sm text-emerald-600">{successMessage}</p> : null}
+
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Save changes
+                </button>
+              </div>
+            </DetailSection>
           </div>
-
-          {successMessage && (
-            <p className="text-sm text-emerald-600">{successMessage}</p>
-          )}
-
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            Save changes
-          </button>
-        </div>
+        </aside>
       </div>
     </div>
   );
