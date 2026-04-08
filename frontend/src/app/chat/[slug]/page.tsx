@@ -260,11 +260,11 @@ export default function ChatPage({
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm text-center">
             <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
               <Building2 className="w-4 h-4 text-teal-600 shrink-0" aria-hidden />
-              Demo clinic — Bright Smile Dental
+              Sample clinic — Bright Smile Dental
             </div>
             <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-              Same assistant your patients see on your site: booking intake, hours, and common questions —
-              not a generic chatbot shell.
+              Uses Clinic AI&apos;s seeded demo workspace — same chat flow your patients get after you configure settings
+              and go live with your own clinic slug, not your private dashboard data.
             </p>
           </div>
         </div>
@@ -379,8 +379,8 @@ export default function ChatPage({
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`max-w-[88%] text-[14px] leading-relaxed ${msg.role === "user"
-                    ? "brand-user-message rounded-2xl rounded-br-md px-4 py-2.5 text-white shadow-sm"
-                    : "rounded-2xl rounded-bl-md px-4 py-3 bg-slate-50 text-slate-800 border border-slate-100/80 shadow-sm"
+                  ? "brand-user-message rounded-2xl rounded-br-md px-4 py-2.5 text-white shadow-sm"
+                  : "rounded-2xl rounded-bl-md px-4 py-3 bg-slate-50 text-slate-800 border border-slate-100/80 shadow-sm"
                   }`}
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>

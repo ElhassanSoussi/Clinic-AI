@@ -33,11 +33,14 @@ import {
   Code,
   Sparkles,
   Settings,
+  Rocket,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { GoLiveModals } from "@/components/shared/GoLiveModals";
+import { computeSystemStatus, STATUS_CONFIG } from "@/lib/system-status";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
 import { isSafeExternalUrl } from "@/lib/utils";
 
@@ -70,6 +73,7 @@ type SettingsStatusInput = {
   availabilityEnabled: boolean;
   assistantName: string;
   primaryColor: string;
+  isLive: boolean;
 };
 
 const SETTINGS_STATUS_RESOLVERS: Record<string, (state: SettingsStatusInput) => SectionStatus> = {
@@ -85,7 +89,7 @@ const SETTINGS_STATUS_RESOLVERS: Record<string, (state: SettingsStatusInput) => 
   },
   scheduling: (state) => (state.availabilityEnabled ? "completed" : "not-configured"),
   branding: (state) => (state.assistantName || state.primaryColor !== "#0d9488" ? "completed" : "not-configured"),
-  embed: () => "completed",
+  embed: (state) => (state.isLive ? "completed" : "incomplete"),
 };
 
 function partialCompletionStatus(values: Array<string | boolean>): SectionStatus {
@@ -178,7 +182,10 @@ function ClinicInformationSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">These details are shown to patients in the chat widget and assistant responses. Keep them accurate so the assistant gives correct information.</p>
+      <p className="text-xs text-[#475569] mb-4">
+        Shown on the public chat page (contact strip) and used when the assistant references your clinic. Accurate phone
+        and hours reduce wrong answers and unnecessary callbacks.
+      </p>
       <div className="space-y-4">
         <div>
           <label htmlFor="clinic-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
@@ -251,14 +258,16 @@ function AssistantMessagesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">Control exactly how the assistant introduces itself and what it says when it cannot answer a question.</p>
+      <p className="text-xs text-[#475569] mb-4">
+        These messages are injected by the assistant when patients send a simple greeting (including the first hidden handshake) and when the assistant has no confident answer. They are not a substitute for clinical advice.
+      </p>
       <div className="space-y-4">
         <div>
           <label htmlFor="greeting" className="block text-sm font-medium text-[#0F172A] mb-1.5">
             Greeting Message
           </label>
           <p className="text-xs text-[#475569] mb-1.5">
-            The first message patients see when they open the chat.
+            Used for short greetings. If empty, the assistant uses a sensible default with your clinic name.
           </p>
           <textarea
             id="greeting"
@@ -273,7 +282,7 @@ function AssistantMessagesSectionContent({
             Fallback Message
           </label>
           <p className="text-xs text-[#475569] mb-1.5">
-            Shown when the assistant cannot find a relevant answer. Patients see this instead of a guess.
+            Shown when the assistant cannot answer from your FAQs, services, hours, and configured knowledge — instead of guessing.
           </p>
           <textarea
             id="fallback"
@@ -525,9 +534,8 @@ function GoogleSheetsSectionContent({
           </button>
           {googleConnectMessage ? (
             <p
-              className={`mt-3 text-sm ${
-                googleConnectTone === "error" ? "text-red-700" : "text-emerald-800"
-              }`}
+              className={`mt-3 text-sm ${googleConnectTone === "error" ? "text-red-700" : "text-emerald-800"
+                }`}
             >
               {googleConnectMessage}
             </p>
@@ -570,9 +578,8 @@ function GoogleSheetsSectionContent({
           </button>
           {excelConnectMessage ? (
             <p
-              className={`mt-3 text-sm ${
-                excelConnectTone === "error" ? "text-red-700" : "text-[#0F172A]"
-              }`}
+              className={`mt-3 text-sm ${excelConnectTone === "error" ? "text-red-700" : "text-[#0F172A]"
+                }`}
             >
               {excelConnectMessage}
             </p>
@@ -661,11 +668,10 @@ function GoogleSheetsSectionContent({
               )}
               {sheetsValidation && (
                 <div
-                  className={`p-4 rounded-lg border ${
-                    sheetsValidation.connected
+                  className={`p-4 rounded-lg border ${sheetsValidation.connected
                       ? "bg-emerald-50 border-emerald-200"
                       : "bg-red-50 border-red-200"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start gap-2">
                     {sheetsValidation.connected ? (
@@ -758,7 +764,7 @@ function EmailNotificationsSectionContent({
               <button
                 onClick={handleTestEmail}
                 disabled={testingEmail}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-50 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F766E] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] disabled:opacity-50 transition-colors"
               >
                 {testingEmail ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -793,7 +799,9 @@ function SchedulingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">Allow patients to select available appointment slots directly in the chat, based on the availability you configure.</p>
+      <p className="text-xs text-[#475569] mb-4">
+        When enabled, the assistant can offer slots from an <span className="font-medium text-[#0F172A]">Availability</span> tab in the same spreadsheet you connected (Google Sheets or the workbook from Microsoft Excel quick connect).
+      </p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -806,13 +814,13 @@ function SchedulingSectionContent({
             <div className={`block w-10 h-6 rounded-full transition-colors ${availabilityEnabled ? "bg-[#0F766E]" : "bg-[#E2E8F0]"}`}></div>
             <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""}`}></div>
           </div>
-          <span className="text-sm font-medium text-[#0F172A]">Enable guided scheduling from Google Sheets</span>
+          <span className="text-sm font-medium text-[#0F172A]">Enable guided scheduling from spreadsheet availability</span>
         </label>
         {availabilityEnabled && (
           <div className="pt-2 space-y-4">
             <div>
               <label htmlFor="availability-tab" className="block text-sm font-medium text-[#0F172A] mb-1.5">
-                Availability Tab Name
+                Availability tab name
               </label>
               <input
                 id="availability-tab"
@@ -823,7 +831,7 @@ function SchedulingSectionContent({
                 placeholder="e.g., Availability"
               />
               <p className="text-xs text-[#64748B] mt-1.5">
-                Default is &ldquo;Availability&rdquo;. Ensure this tab exists in your Google Sheet.
+                Default is <span className="font-medium">Availability</span>. Use &ldquo;Test connection&rdquo; under Spreadsheets to verify headers when using Google Sheets.
               </p>
             </div>
             <div className="p-4 bg-[#CCFBF1] rounded-lg border border-[#99f6e4]">
@@ -840,7 +848,9 @@ function SchedulingSectionContent({
               </div>
               <div className="mt-1 flex items-start gap-2">
                 <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-1.5 shrink-0" />
-                <p className="text-xs text-[#0F766E]">The AI will automatically handle the reservation flow.</p>
+                <p className="text-xs text-[#0F766E]">
+                  The assistant walks patients through the booking steps; your team confirms details in the dashboard.
+                </p>
               </div>
             </div>
           </div>
@@ -863,7 +873,9 @@ function BrandingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">Customize how the chat widget looks on your website. Your branding stays consistent with your clinic identity.</p>
+      <p className="text-xs text-[#475569] mb-4">
+        Applies to the public patient page and embed widget header (<span className="font-medium text-[#0F172A]">/chat/your-clinic-slug</span>). Your clinic name still appears in context when it differs from the assistant name.
+      </p>
       <div className="space-y-4 max-w-lg">
         <div>
           <label htmlFor="assistant-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
@@ -878,7 +890,7 @@ function BrandingSectionContent({
             placeholder='e.g., "Sarah from Smile Dental"'
           />
           <p className="mt-1 text-xs text-[#64748B]">
-            Displayed in the chat widget header. Leave blank for default.
+            Shown as the title in the chat header. Leave blank to use a short default label.
           </p>
         </div>
         <div>
@@ -912,16 +924,25 @@ function EmbedSectionContent({
   clinic,
   embedCode,
   setSaveMessage,
+  isLive,
 }: Readonly<{
   clinic: Clinic;
   embedCode: string;
   setSaveMessage: Dispatch<SetStateAction<string>>;
+  isLive: boolean;
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
       <p className="text-xs text-[#475569] mb-4">
-        Add this snippet to your website HTML to enable the chat widget. The assistant will only respond using your configured clinic data.
+        Add this snippet to your site to load the same patient experience as{" "}
+        <span className="font-medium text-[#0F172A]">/chat/{clinic.slug}</span>. The assistant only uses data you save
+        here. Until you go live, patients still see a clear &ldquo;not live&rdquo; state on the public page.
       </p>
+      {!isLive ? (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
+          Your clinic is not live yet — embed this anytime for staging, but expect the public chat to show a not-live notice until you go live from Settings or the dashboard header.
+        </div>
+      ) : null}
       <div className="relative group">
         <pre className="bg-[#F8FAFC] p-4 rounded-lg text-xs text-[#0F172A] overflow-x-auto border border-[#E2E8F0] whitespace-pre-wrap">
           {embedCode}
@@ -947,7 +968,7 @@ function EmbedSectionContent({
           className="inline-flex items-center gap-2 text-sm font-medium text-[#0F766E] hover:text-[#115E59] transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
-          Preview chat widget
+          Open public patient chat (new tab)
         </a>
       </div>
     </div>
@@ -995,6 +1016,9 @@ export default function SettingsPage() {
   const [excelConnectTone, setExcelConnectTone] = useState<"success" | "error" | "">("");
   const [showManualSetup, setShowManualSetup] = useState(false);
   const [queryParams, setQueryParams] = useState<URLSearchParams | null>(null);
+  const [goLiveModalOpen, setGoLiveModalOpen] = useState(false);
+  const [goLiveLoading, setGoLiveLoading] = useState(false);
+  const [goLiveSuccess, setGoLiveSuccess] = useState(false);
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
@@ -1293,7 +1317,19 @@ export default function SettingsPage() {
     availabilityEnabled,
     assistantName,
     primaryColor,
+    isLive: !!clinic?.is_live,
   };
+  const systemStatus = clinic ? computeSystemStatus(clinic) : null;
+  const systemStatusCfg = systemStatus ? STATUS_CONFIG[systemStatus.status] : null;
+
+  const jumpToFirstSetupGap = () => {
+    if (!systemStatus) return;
+    const first = systemStatus.items.find((item) => !item.completed);
+    if (first) {
+      setOpenSections((prev) => new Set(prev).add(first.drawerSection));
+    }
+  };
+
   const completedCount = [
     "clinic-info", "assistant-messages", "services", "hours", "faq",
     "google-sheets", "email-notifications", "scheduling", "branding", "embed"
@@ -1311,8 +1347,91 @@ export default function SettingsPage() {
           </>
         }
         title="Clinic settings"
-        description="Everything the assistant uses to respond to patients. Your clinic data stays under your control — nothing is assumed or pulled from outside sources."
+        description="What you save here is what the public assistant can use: identity, hours, services, FAQs, fallback wording, spreadsheet data, and branding. Going live is a separate step so you can finish setup before patients see an &ldquo;active&rdquo; chat."
       />
+      {clinic ? (
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="workspace-section-label">Assistant visibility</p>
+              <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
+              <p className="mt-1.5 text-sm leading-6 text-[#475569]">
+                Public page{" "}
+                <span className="font-mono text-xs text-[#0F172A]">/chat/{clinic.slug}</span>
+                {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
+                surface after you click &ldquo;Save settings.&rdquo;
+                {systemStatus?.status === "READY" && !clinic.is_live
+                  ? " Your dashboard checklist is complete — go live when you want the assistant to show as active for patients."
+                  : null}
+              </p>
+              {!clinic.is_live && systemStatus && systemStatus.status !== "READY" && systemStatus.status !== "LIVE" ? (
+                <p className="mt-2 text-xs text-[#64748B]">
+                  The dashboard status chip and the checklist below share the same rules.{" "}
+                  <button
+                    type="button"
+                    onClick={jumpToFirstSetupGap}
+                    className="font-semibold text-[#0F766E] hover:underline"
+                  >
+                    Open the first incomplete section
+                  </button>
+                  .
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-3 shrink-0 sm:flex-row sm:items-center lg:flex-col lg:items-stretch">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${clinic.is_live
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-amber-200 bg-amber-50 text-amber-900"
+                    }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${clinic.is_live ? "bg-emerald-500" : "bg-amber-500"}`}
+                    aria-hidden
+                  />
+                  {clinic.is_live ? "Live" : "Not live"}
+                </span>
+                {systemStatus && systemStatus.status !== "LIVE" && systemStatusCfg ? (
+                  <span className={`text-xs font-medium ${systemStatusCfg.color}`}>
+                    Dashboard: {systemStatusCfg.label}
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`/chat/${clinic.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+                >
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  Preview patient chat
+                </a>
+                {systemStatus?.status === "READY" && !clinic.is_live ? (
+                  <button
+                    type="button"
+                    onClick={() => setGoLiveModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+                  >
+                    <Rocket className="h-4 w-4 shrink-0" />
+                    Go live
+                  </button>
+                ) : null}
+                {!clinic.is_live && systemStatus && systemStatus.status !== "READY" ? (
+                  <button
+                    type="button"
+                    onClick={jumpToFirstSetupGap}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+                  >
+                    Next setup section
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="workspace-stage">
         <div className="workspace-side-rail order-2 xl:order-none">
           <div className="workspace-rail-card relative p-5 xl:sticky xl:top-6">
@@ -1323,7 +1442,8 @@ export default function SettingsPage() {
               <div className="settings-progress h-full rounded-full bg-[#0F766E] transition-all" />
             </div>
             <p className="mt-4 text-sm leading-6 text-[#475569]">
-              Save changes when you’re ready to update the live workspace, assistant behavior, and operator-facing setup.
+              Save to update assistant behavior and the dashboard. The embed section stays &ldquo;incomplete&rdquo; until you
+              go live so this meter matches what patients see as active vs staging.
             </p>
             <button
               onClick={handleSave}
@@ -1341,208 +1461,214 @@ export default function SettingsPage() {
         </div>
 
         <div className="order-1 min-w-0 space-y-6 xl:order-none">
-      {saveMessage && (
-        <div
-          className={`p-3 text-sm rounded-lg border ${
-            saveMessage.includes("success") || saveMessage.includes("copied")
-              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-              : "bg-red-50 text-red-700 border-red-100"
-          }`}
-        >
-          {saveMessage}
-        </div>
-      )}
+          {saveMessage && (
+            <div
+              className={`p-3 text-sm rounded-lg border ${saveMessage.includes("success") || saveMessage.includes("copied")
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : "bg-red-50 text-red-700 border-red-100"
+                }`}
+            >
+              {saveMessage}
+            </div>
+          )}
 
-      <div className="space-y-2">
-        <SettingsSection
-          sectionKey="clinic-info"
-          label="Clinic Information"
-          icon={Building2}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <ClinicInformationSectionContent
-            name={name}
-            setName={setName}
-            phone={phone}
-            setPhone={setPhone}
-            email={email}
-            setEmail={setEmail}
-            address={address}
-            setAddress={setAddress}
-          />
-        </SettingsSection>
+          <div className="space-y-2">
+            <SettingsSection
+              sectionKey="clinic-info"
+              label="Clinic Information"
+              icon={Building2}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <ClinicInformationSectionContent
+                name={name}
+                setName={setName}
+                phone={phone}
+                setPhone={setPhone}
+                email={email}
+                setEmail={setEmail}
+                address={address}
+                setAddress={setAddress}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="assistant-messages"
-          label="Assistant Messages"
-          icon={MessageCircle}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <AssistantMessagesSectionContent
-            greeting={greeting}
-            setGreeting={setGreeting}
-            fallback={fallback}
-            setFallback={setFallback}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="assistant-messages"
+              label="Assistant Messages"
+              icon={MessageCircle}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <AssistantMessagesSectionContent
+                greeting={greeting}
+                setGreeting={setGreeting}
+                fallback={fallback}
+                setFallback={setFallback}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="services"
-          label="Services"
-          icon={Stethoscope}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <ServicesSectionContent
-            services={services}
-            newService={newService}
-            setNewService={setNewService}
-            addService={addService}
-            removeService={removeService}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="services"
+              label="Services"
+              icon={Stethoscope}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <ServicesSectionContent
+                services={services}
+                newService={newService}
+                setNewService={setNewService}
+                addService={addService}
+                removeService={removeService}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="hours"
-          label="Business Hours"
-          icon={Clock}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <BusinessHoursSectionContent hours={hours} setHours={setHours} />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="hours"
+              label="Business Hours"
+              icon={Clock}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <BusinessHoursSectionContent hours={hours} setHours={setHours} />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="faq"
-          label="FAQ"
-          icon={HelpCircle}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <FaqSectionContent
-            faq={faq}
-            addFaq={addFaq}
-            updateFaq={updateFaq}
-            removeFaq={removeFaq}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="faq"
+              label="FAQ"
+              icon={HelpCircle}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <FaqSectionContent
+                faq={faq}
+                addFaq={addFaq}
+                updateFaq={updateFaq}
+                removeFaq={removeFaq}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="google-sheets"
-          label="Spreadsheets"
-          icon={Sheet}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <GoogleSheetsSectionContent
-            googleSheetId={googleSheetId}
-            setGoogleSheetId={setGoogleSheetId}
-            googleSheetTab={googleSheetTab}
-            setGoogleSheetTab={setGoogleSheetTab}
-            handleValidateSheets={handleValidateSheets}
-            validatingSheets={validatingSheets}
-            sheetsValidation={sheetsValidation}
-            availabilityEnabled={availabilityEnabled}
-            availabilitySheetTab={availabilitySheetTab}
-            connectingGoogle={connectingGoogle}
-            startGoogleConnect={startGoogleConnect}
-            googleConnectMessage={googleConnectMessage}
-            googleConnectTone={googleConnectTone}
-            excelWorkbookId={excelWorkbookId}
-            excelWorkbookUrl={excelWorkbookUrl}
-            connectingExcel={connectingExcel}
-            startMicrosoftConnect={startMicrosoftConnect}
-            excelConnectMessage={excelConnectMessage}
-            excelConnectTone={excelConnectTone}
-            showManualSetup={showManualSetup}
-            setShowManualSetup={setShowManualSetup}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="google-sheets"
+              label="Spreadsheets"
+              icon={Sheet}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <GoogleSheetsSectionContent
+                googleSheetId={googleSheetId}
+                setGoogleSheetId={setGoogleSheetId}
+                googleSheetTab={googleSheetTab}
+                setGoogleSheetTab={setGoogleSheetTab}
+                handleValidateSheets={handleValidateSheets}
+                validatingSheets={validatingSheets}
+                sheetsValidation={sheetsValidation}
+                availabilityEnabled={availabilityEnabled}
+                availabilitySheetTab={availabilitySheetTab}
+                connectingGoogle={connectingGoogle}
+                startGoogleConnect={startGoogleConnect}
+                googleConnectMessage={googleConnectMessage}
+                googleConnectTone={googleConnectTone}
+                excelWorkbookId={excelWorkbookId}
+                excelWorkbookUrl={excelWorkbookUrl}
+                connectingExcel={connectingExcel}
+                startMicrosoftConnect={startMicrosoftConnect}
+                excelConnectMessage={excelConnectMessage}
+                excelConnectTone={excelConnectTone}
+                showManualSetup={showManualSetup}
+                setShowManualSetup={setShowManualSetup}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="email-notifications"
-          label="Email Notifications"
-          icon={Send}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <EmailNotificationsSectionContent
-            notificationsEnabled={notificationsEnabled}
-            setNotificationsEnabled={setNotificationsEnabled}
-            notificationEmail={notificationEmail}
-            setNotificationEmail={setNotificationEmail}
-            handleTestEmail={handleTestEmail}
-            testingEmail={testingEmail}
-            testEmailResult={testEmailResult}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="email-notifications"
+              label="Email Notifications"
+              icon={Send}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <EmailNotificationsSectionContent
+                notificationsEnabled={notificationsEnabled}
+                setNotificationsEnabled={setNotificationsEnabled}
+                notificationEmail={notificationEmail}
+                setNotificationEmail={setNotificationEmail}
+                handleTestEmail={handleTestEmail}
+                testingEmail={testingEmail}
+                testEmailResult={testEmailResult}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="scheduling"
-          label="Availability & Scheduling"
-          icon={Calendar}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <SchedulingSectionContent
-            availabilityEnabled={availabilityEnabled}
-            setAvailabilityEnabled={setAvailabilityEnabled}
-            availabilitySheetTab={availabilitySheetTab}
-            setAvailabilitySheetTab={setAvailabilitySheetTab}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="scheduling"
+              label="Availability & Scheduling"
+              icon={Calendar}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <SchedulingSectionContent
+                availabilityEnabled={availabilityEnabled}
+                setAvailabilityEnabled={setAvailabilityEnabled}
+                availabilitySheetTab={availabilitySheetTab}
+                setAvailabilitySheetTab={setAvailabilitySheetTab}
+              />
+            </SettingsSection>
 
-        <SettingsSection
-          sectionKey="branding"
-          label="Branding"
-          icon={Palette}
-          openSections={openSections}
-          toggleSection={toggleSection}
-          statusState={statusState}
-        >
-          <BrandingSectionContent
-            assistantName={assistantName}
-            setAssistantName={setAssistantName}
-            primaryColor={primaryColor}
-            setPrimaryColor={setPrimaryColor}
-          />
-        </SettingsSection>
+            <SettingsSection
+              sectionKey="branding"
+              label="Branding"
+              icon={Palette}
+              openSections={openSections}
+              toggleSection={toggleSection}
+              statusState={statusState}
+            >
+              <BrandingSectionContent
+                assistantName={assistantName}
+                setAssistantName={setAssistantName}
+                primaryColor={primaryColor}
+                setPrimaryColor={setPrimaryColor}
+              />
+            </SettingsSection>
 
-        {clinic && (
-          <SettingsSection
-            sectionKey="embed"
-            label="Embed on Website"
-            icon={Code}
-            openSections={openSections}
-            toggleSection={toggleSection}
-            statusState={statusState}
-          >
-            <EmbedSectionContent
-              clinic={clinic}
-              embedCode={embedCode}
-              setSaveMessage={setSaveMessage}
-            />
-          </SettingsSection>
-        )}
-      </div>
+            {clinic && (
+              <SettingsSection
+                sectionKey="embed"
+                label="Embed on Website"
+                icon={Code}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <EmbedSectionContent
+                  clinic={clinic}
+                  embedCode={embedCode}
+                  setSaveMessage={setSaveMessage}
+                  isLive={!!clinic.is_live}
+                />
+              </SettingsSection>
+            )}
+          </div>
         </div>
 
         <div className="workspace-side-rail order-3 xl:order-none">
           <div className="workspace-rail-card p-5">
             <p className="workspace-section-label">Setup guidance</p>
             <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">
-              <p>These sections determine what patients see, how the assistant responds, and what your team manages in the workspace.</p>
-              <p>Features that depend on unconfigured sections will clearly indicate what is missing.</p>
+              <p>
+                Work top to bottom once, then revisit as your clinic changes. Phone, hours, and FAQs flow through to the
+                public chat; the spreadsheet powers leads and optional scheduling.
+              </p>
+              <p>
+                The dashboard status chip uses the same spreadsheet checklist as here (Google or Microsoft). Email alerts
+                are optional but recommended so new requests do not sit unnoticed.
+              </p>
             </div>
           </div>
         </div>
@@ -1557,6 +1683,29 @@ export default function SettingsPage() {
           background-color: ${primaryColor};
         }
       `}</style>
+
+      <GoLiveModals
+        confirmOpen={goLiveModalOpen && !goLiveSuccess}
+        successOpen={goLiveSuccess}
+        loading={goLiveLoading}
+        onCancel={() => setGoLiveModalOpen(false)}
+        onConfirm={() => {
+          void (async () => {
+            setGoLiveLoading(true);
+            try {
+              const res = await api.clinics.goLive();
+              setClinic((prev) => (prev ? { ...prev, is_live: res.is_live } : null));
+              setGoLiveModalOpen(false);
+              setGoLiveSuccess(true);
+              globalThis.setTimeout(() => setGoLiveSuccess(false), 4000);
+            } catch {
+              /* keep modal open */
+            }
+            setGoLiveLoading(false);
+          })();
+        }}
+        onDismissSuccess={() => setGoLiveSuccess(false)}
+      />
     </div>
   );
 }

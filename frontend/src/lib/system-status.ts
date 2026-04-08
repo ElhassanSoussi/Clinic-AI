@@ -41,16 +41,16 @@ const SECTION_CHECKS: {
     },
     {
       key: "integrations",
-      label: "Integrations",
+      label: "Spreadsheet",
       drawerSection: "google-sheets",
       check: (c) => {
-        const hasSheets = !!c.google_sheet_id;
-        const hasNotifications = !!c.notifications_enabled && !!c.notification_email;
-        const completed = hasSheets || hasNotifications;
-        const missing: string[] = [];
-        if (!hasSheets) missing.push("Google Sheets connection");
-        if (!hasNotifications) missing.push("Email notifications");
-        return { completed, missing };
+        const hasSpreadsheet = !!(c.google_sheet_id?.trim() || c.excel_workbook_id?.trim());
+        return {
+          completed: hasSpreadsheet,
+          missing: hasSpreadsheet
+            ? []
+            : ["Connect Google Sheets or Microsoft Excel for leads and scheduling data"],
+        };
       },
     },
     {
