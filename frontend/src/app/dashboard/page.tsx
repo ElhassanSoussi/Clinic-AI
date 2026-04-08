@@ -14,6 +14,7 @@ import {
   Inbox,
   LayoutGrid,
   MessageSquareMore,
+  Rocket,
   Settings,
   TrendingUp,
   Users,
@@ -28,8 +29,10 @@ import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
+import { ActivationSetupBand } from "@/components/shared/ActivationSetupBand";
 import { RightRailCard } from "@/components/ui";
-import { timeAgo } from "@/lib/utils";
+import { clampPercentInt, safeCount, timeAgo } from "@/lib/utils";
+import { normalizeLeadUsage } from "@/lib/billing-usage";
 import { computeSystemStatus } from "@/lib/system-status";
 import { EVENT_CONFIG } from "@/lib/activity-config";
 import { formatMoney } from "@/lib/format-helpers";
@@ -65,6 +68,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showFirstLeadSuccess, setShowFirstLeadSuccess] = useState(false);
+  const [showWelcomeFromOnboarding, setShowWelcomeFromOnboarding] = useState(false);
   const [analyticsDegraded, setAnalyticsDegraded] = useState(false);
 
   const loadDashboard = useCallback(async () => {
@@ -122,6 +126,18 @@ export default function DashboardPage() {
   }, [loadDashboard]);
 
   useEffect(() => {
+    if (globalThis.window === undefined) return;
+    const params = new URLSearchParams(globalThis.location.search);
+    if (params.get("welcome") === "true") {
+      setShowWelcomeFromOnboarding(true);
+      params.delete("welcome");
+      const qs = params.toString();
+      const nextUrl = qs ? `${globalThis.location.pathname}?${qs}` : globalThis.location.pathname;
+      globalThis.history.replaceState(null, "", nextUrl);
+    }
+  }, []);
+
+  useEffect(() => {
     if (firstLead && !loading) {
       setShowFirstLeadSuccess(true);
     }
@@ -132,6 +148,7 @@ export default function DashboardPage() {
   if (!analytics) return <LoadingState message="Loading dashboard..." />;
 
   const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
+  const leadUsage = billing ? normalizeLeadUsage(billing) : null;
 
   function buildEmptyActivityState() {
     if (clinic && systemStatus === "LIVE") {
@@ -159,9 +176,31 @@ export default function DashboardPage() {
     if (clinic && systemStatus === "READY") {
       return (
         <EmptyState
-          icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
+          icon={<MessageSquareMore className="h-5 w-5 text-[#64748B]" />}
           title="Ready to go live"
-          description="Setup is complete. Activate the assistant to start receiving patient conversations through your website."
+          description="Setup is complete. Use Go live in the top bar when you want patients to see an active assistant on your public chat page."
+          action={
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Link
+                href={settingsHref()}
+                className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+              >
+                <Settings className="h-4 w-4" />
+                Review settings
+              </Link>
+              {clinic.slug ? (
+                <a
+                  href={`/chat/${clinic.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+                >
+                  <MessageSquareMore className="h-4 w-4" />
+                  Preview patient chat
+                </a>
+              ) : null}
+            </div>
+          }
         />
       );
     }
@@ -186,10 +225,10 @@ export default function DashboardPage() {
   const emptyActivityState = buildEmptyActivityState();
 
   const statCards = [
-    { label: "Conversations", value: analytics.conversations_total, icon: Inbox, tone: "slate" as const },
-    { label: "Booked requests", value: analytics.booked_requests, icon: CheckCircle2, tone: "emerald" as const },
-    { label: "Potential lost patients", value: analytics.potential_lost_patients, icon: Clock, tone: "amber" as const },
-    { label: "Recovered opportunities", value: analytics.recovered_opportunities, icon: Users, tone: "blue" as const },
+    { label: "Conversations", value: safeCount(analytics.conversations_total), icon: Inbox, tone: "slate" as const },
+    { label: "Booked requests", value: safeCount(analytics.booked_requests), icon: CheckCircle2, tone: "emerald" as const },
+    { label: "Potential lost patients", value: safeCount(analytics.potential_lost_patients), icon: Clock, tone: "amber" as const },
+    { label: "Recovered opportunities", value: safeCount(analytics.recovered_opportunities), icon: Users, tone: "blue" as const },
   ];
 
   const performanceCards = [
@@ -199,17 +238,19 @@ export default function DashboardPage() {
       icon: TrendingUp,
       tone: "teal" as const,
     },
-    { label: "AI auto-handled", value: analytics.ai_auto_handled_count, icon: BrainCircuit, tone: "violet" as const },
-    { label: "Human review required", value: analytics.human_review_required_count, icon: AlertTriangle, tone: "amber" as const },
-    { label: "Suggested replies sent", value: analytics.suggested_replies_sent_count, icon: MessageSquareMore, tone: "blue" as const },
-    { label: "Deposits requested", value: analytics.deposits_requested_count, icon: ArrowRightLeft, tone: "amber" as const },
-    { label: "Deposits paid", value: analytics.deposits_paid_count, icon: CheckCircle2, tone: "emerald" as const },
-    { label: "Waiting on deposit", value: analytics.appointments_waiting_on_deposit_count, icon: AlertTriangle, tone: "rose" as const },
+    { label: "AI auto-handled", value: safeCount(analytics.ai_auto_handled_count), icon: BrainCircuit, tone: "violet" as const },
+    { label: "Human review required", value: safeCount(analytics.human_review_required_count), icon: AlertTriangle, tone: "amber" as const },
+    { label: "Suggested replies sent", value: safeCount(analytics.suggested_replies_sent_count), icon: MessageSquareMore, tone: "blue" as const },
+    { label: "Deposits requested", value: safeCount(analytics.deposits_requested_count), icon: ArrowRightLeft, tone: "amber" as const },
+    { label: "Deposits paid", value: safeCount(analytics.deposits_paid_count), icon: CheckCircle2, tone: "emerald" as const },
+    { label: "Waiting on deposit", value: safeCount(analytics.appointments_waiting_on_deposit_count), icon: AlertTriangle, tone: "rose" as const },
   ];
 
   const busiestHourMaxCount = Math.max(
-    ...(analytics.busiest_contact_hours?.map((item) => item.count) ?? [0]),
     1,
+    ...(analytics.busiest_contact_hours?.map((item) =>
+      typeof item.count === "number" && Number.isFinite(item.count) ? item.count : 0,
+    ) ?? [0]),
   );
 
   const quickRoutes = [
@@ -244,6 +285,10 @@ export default function DashboardPage() {
         }
       />
 
+      {clinic ? (
+        <ActivationSetupBand clinic={clinic} conversationsTotal={analytics.conversations_total} />
+      ) : null}
+
       {/* ── First lead success banner ── */}
       {analyticsDegraded ? (
         <div className="flex flex-wrap items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3">
@@ -263,6 +308,61 @@ export default function DashboardPage() {
           </button>
         </div>
       ) : null}
+
+      {showWelcomeFromOnboarding && (
+        <div className="rounded-xl border border-[#99f6e4] bg-[#CCFBF1]/50 px-4 py-4">
+          <div className="flex flex-wrap items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+              <Rocket className="h-5 w-5 text-[#0F766E]" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-[#115E59]">Setup complete — you&apos;re on the dashboard</p>
+              <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                Onboarding saved your clinic profile. <span className="font-semibold text-[#0F172A]">Next:</span> confirm
+                details in Settings, open <span className="font-semibold text-[#0F172A]">Patient Chat</span> from the
+                sidebar to preview your assistant, then use <span className="font-semibold text-[#0F172A]">Go live</span>{" "}
+                in the header when you are ready. First patient threads appear in Inbox; captured requests surface in
+                Leads.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowWelcomeFromOnboarding(false)}
+              className="shrink-0 rounded-lg p-1 text-[#64748B] transition-colors hover:bg-white/80 hover:text-[#0F172A]"
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#99f6e4]/60 pt-4">
+            <Link
+              href={settingsHref()}
+              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              <Settings className="h-4 w-4" />
+              Open settings
+            </Link>
+            <Link
+              href="/dashboard/inbox"
+              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              <Inbox className="h-4 w-4" />
+              Inbox
+            </Link>
+            {clinic?.slug ? (
+              <a
+                href={`/chat/${clinic.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+              >
+                <MessageSquareMore className="h-4 w-4" />
+                Preview chat
+              </a>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {showFirstLeadSuccess && (
         <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
@@ -289,26 +389,24 @@ export default function DashboardPage() {
       {/* ── Billing alerts ── */}
       {billing && (
         <div className="space-y-3">
-          {billing.monthly_lead_limit !== -1 &&
-            billing.monthly_leads_used >= billing.monthly_lead_limit &&
-            billing.plan !== "trial" && (
-              <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
-                <div className="flex flex-wrap items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
-                    <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
-                  </div>
-                  <Link
-                    href="/dashboard/billing"
-                    className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
-                  >
-                    <Zap className="h-3 w-3" />
-                    Upgrade
-                  </Link>
+          {leadUsage?.isAtLimit && billing.plan !== "trial" && (
+            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
+              <div className="flex flex-wrap items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
+                  <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
                 </div>
+                <Link
+                  href="/dashboard/billing"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
+                >
+                  <Zap className="h-3 w-3" />
+                  Upgrade
+                </Link>
               </div>
-            )}
+            </div>
+          )}
 
           {billing.subscription_status === "past_due" && (
             <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
@@ -346,15 +444,15 @@ export default function DashboardPage() {
                 <div className="grid w-full grid-cols-3 gap-3 sm:max-w-md">
                   <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Unresolved</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.unresolved_count}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.unresolved_count)}</p>
                   </div>
                   <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Follow-ups</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.follow_up_needed_count}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.follow_up_needed_count)}</p>
                   </div>
                   <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Review</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.human_review_required_count}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.human_review_required_count)}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -438,9 +536,9 @@ export default function DashboardPage() {
               <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Performance note</p>
               <p className="mt-0.5 text-sm text-[#475569]">{analytics.estimated_value_recovered_label}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#475569]">
-                <span>Manual takeovers: {analytics.manual_takeover_threads}</span>
-                <span>Blocked for review: {analytics.blocked_for_review_count}</span>
-                <span>AI resolution: {analytics.ai_resolution_estimate}%</span>
+                <span>Manual takeovers: {safeCount(analytics.manual_takeover_threads)}</span>
+                <span>Blocked for review: {safeCount(analytics.blocked_for_review_count)}</span>
+                <span>AI resolution: {clampPercentInt(analytics.ai_resolution_estimate)}%</span>
               </div>
             </div>
           </SurfaceCard>
@@ -460,7 +558,9 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {analytics.busiest_contact_hours.map((bucket) => {
-                  const barUnits = Math.max(20, (bucket.count / busiestHourMaxCount) * 100);
+                  const count = typeof bucket.count === "number" && Number.isFinite(bucket.count) ? bucket.count : 0;
+                  const ratio = busiestHourMaxCount > 0 ? count / busiestHourMaxCount : 0;
+                  const barUnits = Number.isFinite(ratio) ? Math.max(20, Math.min(100, ratio * 100)) : 20;
                   return (
                     <div key={bucket.hour} className="flex items-center gap-3">
                       <div className="w-20 text-xs font-medium text-[#475569]">{bucket.label}</div>
@@ -474,7 +574,7 @@ export default function DashboardPage() {
                           <rect width={barUnits} height="100" fill="currentColor" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium text-[#475569]">{bucket.count}</span>
+                      <span className="text-xs font-medium text-[#475569]">{count}</span>
                     </div>
                   );
                 })}
@@ -602,9 +702,9 @@ export default function DashboardPage() {
           </div>
 
           {/* All caught up */}
-          {analytics.conversations_total > 0 &&
-            analytics.follow_up_needed_count === 0 &&
-            analytics.unresolved_count === 0 && (
+          {safeCount(analytics.conversations_total) > 0 &&
+            safeCount(analytics.follow_up_needed_count) === 0 &&
+            safeCount(analytics.unresolved_count) === 0 && (
               <div className="flex items-center justify-center gap-2 py-3 text-xs font-semibold text-emerald-600">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 All caught up — no unresolved requests need attention.
@@ -623,7 +723,9 @@ export default function DashboardPage() {
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
                 <p className="text-xs text-[#475569]">Current plan</p>
                 <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
-                  {billing ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1) : "Unavailable"}
+                  {billing?.plan
+                    ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1)
+                    : "Unavailable"}
                 </p>
               </div>
             </div>
@@ -653,7 +755,7 @@ export default function DashboardPage() {
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
                 <p className="text-sm font-medium text-[#0F172A]">Human review</p>
                 <p className="mt-0.5 text-xs text-[#475569]">
-                  {analytics.human_review_required_count} conversations waiting for a staff decision.
+                  {safeCount(analytics.human_review_required_count)} conversations waiting for a staff decision.
                 </p>
               </div>
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
@@ -665,7 +767,8 @@ export default function DashboardPage() {
               <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
                 <p className="text-sm font-medium text-[#0F172A]">Opportunity pressure</p>
                 <p className="mt-0.5 text-xs text-[#475569]">
-                  {analytics.follow_up_needed_count} follow-ups and {analytics.unresolved_count} unresolved requests.
+                  {safeCount(analytics.follow_up_needed_count)} follow-ups and {safeCount(analytics.unresolved_count)}{" "}
+                  unresolved requests.
                 </p>
               </div>
             </div>

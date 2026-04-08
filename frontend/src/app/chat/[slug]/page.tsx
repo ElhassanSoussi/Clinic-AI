@@ -127,6 +127,11 @@ export default function ChatPage({
 
   useEffect(() => {
     const bootstrap = async () => {
+      if (!slug?.trim()) {
+        setBootstrapError("This chat link is missing a clinic identifier.");
+        setSending(false);
+        return;
+      }
       if (bootstrapped) return;
       setSending(true);
       setBootstrapError(null);

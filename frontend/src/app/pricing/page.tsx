@@ -202,6 +202,61 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* Trial path — conversion confidence */}
+      <section className="border-b border-slate-200 bg-[#F8FAFC]">
+        <div className="marketing-container py-10 sm:py-12">
+          <h2 className="text-center text-[clamp(1.25rem,1.5vw+1rem,1.75rem)] font-bold tracking-tight text-[#0F172A]">
+            What happens when you start the trial?
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-[0.9375rem] leading-relaxed text-slate-600">
+            You get the same signed-in product paying teams use: real dashboard routes, not a disposable demo site. Below is the typical path clinics follow in the first few sessions.
+          </p>
+          <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                step: "1",
+                title: "Workspace & onboarding",
+                body: "Create an account (no card). Guided steps walk you through clinic profile and where to configure the assistant.",
+              },
+              {
+                step: "2",
+                title: "Configure in Settings / Training",
+                body: "Services, hours, FAQs, and optional spreadsheet links — everything the AI is allowed to reference.",
+              },
+              {
+                step: "3",
+                title: "Preview chat & embed",
+                body: "Test your public chat URL and widget before go-live. Patients see an explicit not-live state until you choose.",
+              },
+              {
+                step: "4",
+                title: "Operate from the dashboard",
+                body: "Inbox, Leads, Appointments, and Activity are live routes for staff review, takeover, and follow-through.",
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm"
+              >
+                <span className="text-xs font-bold tabular-nums text-[#0F766E]">{item.step}</span>
+                <h3 className="mt-2 text-[1.0625rem] font-semibold text-[#0F172A]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 text-center text-sm text-slate-600">
+            Questions on setup?{" "}
+            <Link href="/faq" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+              Read the FAQ
+            </Link>
+            {" · "}
+            <Link href="/#after-signup" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+              First-week detail on the home page
+            </Link>
+          </p>
+        </div>
+      </section>
+
       <main>
         <div className="marketing-container">
 
@@ -218,8 +273,8 @@ export default function PricingPage() {
                 <div
                   key={plan.id}
                   className={`relative flex flex-col overflow-hidden rounded-2xl border p-8 ${plan.highlighted
-                      ? "border-[#0F766E] bg-[#FFFFFF] shadow-xl shadow-teal-900/6"
-                      : "border-[#E2E8F0] bg-[#FFFFFF] shadow-sm"
+                    ? "border-[#0F766E] bg-[#FFFFFF] shadow-xl shadow-teal-900/6"
+                    : "border-[#E2E8F0] bg-[#FFFFFF] shadow-sm"
                     }`}
                 >
                   {plan.badge ? (
@@ -266,8 +321,8 @@ export default function PricingPage() {
                         onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
                         disabled={checkoutLoading === plan.id}
                         className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 ${plan.highlighted
-                            ? "bg-[#0F766E] text-white hover:bg-[#115E59]"
-                            : "border border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] hover:bg-[#F8FAFC]"
+                          ? "bg-[#0F766E] text-white hover:bg-[#115E59]"
+                          : "border border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] hover:bg-[#F8FAFC]"
                           }`}
                       >
                         {checkoutLoading === plan.id ? "Loading..." : plan.cta}

@@ -23,6 +23,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { setupProgressPercent } from "@/lib/utils";
 import type { Clinic } from "@/types";
 
 // ── Step definitions ──────────────────────────────────────────────
@@ -282,11 +283,10 @@ function OnboardingFlowNavigation({
       <button
         onClick={onNext}
         disabled={saving}
-        className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${
-          saved
+        className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${saved
             ? "bg-emerald-600 hover:bg-emerald-700"
             : "bg-teal-600 hover:bg-teal-700"
-        } disabled:opacity-50`}
+          } disabled:opacity-50`}
       >
         {nextButtonIcon}
         {nextLabel}
@@ -485,7 +485,7 @@ export function OnboardingFlow({
   const summaryItems = createSummaryItems(clinic);
 
   const completedSummary = summaryItems.filter((i) => i.done).length;
-  const progressWidth = `${((step - 1) / 5) * 100}%`;
+  const progressWidth = `${setupProgressPercent(Math.max(0, step - 1), 5)}%`;
   const nextLabel = nextButtonLabel(step, saving, saved);
   const showNextChevron = saving === false && saved === false;
   let nextButtonIcon: React.ReactNode = null;
@@ -722,15 +722,13 @@ export function OnboardingFlow({
               </p>
               <div className="max-w-md space-y-5">
                 {/* Email notifications — recommended, shown first */}
-                <div className={`p-4 rounded-xl border transition-colors ${
-                  notificationsEnabled
+                <div className={`p-4 rounded-xl border transition-colors ${notificationsEnabled
                     ? "border-teal-200 bg-teal-50/30"
                     : "border-slate-200"
-                }`}>
+                  }`}>
                   <div className="flex items-start gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                      notificationsEnabled ? "bg-teal-100" : "bg-slate-100"
-                    }`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${notificationsEnabled ? "bg-teal-100" : "bg-slate-100"
+                      }`}>
                       <Mail className={`w-5 h-5 ${notificationsEnabled ? "text-teal-600" : "text-slate-400"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -757,16 +755,14 @@ export function OnboardingFlow({
                         }
                       />
                       <div
-                        className={`block w-10 h-6 rounded-full transition-colors ${
-                          notificationsEnabled
+                        className={`block w-10 h-6 rounded-full transition-colors ${notificationsEnabled
                             ? "bg-teal-600"
                             : "bg-slate-200"
-                        }`}
+                          }`}
                       />
                       <div
-                        className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${
-                          notificationsEnabled ? "translate-x-4" : ""
-                        }`}
+                        className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${notificationsEnabled ? "translate-x-4" : ""
+                          }`}
                       />
                     </label>
                   </div>
@@ -868,16 +864,14 @@ export function OnboardingFlow({
                   {chatMessages.map((msg) => (
                     <div
                       key={msg.id}
-                      className={`flex ${
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                        }`}
                     >
                       <div
-                        className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${
-                          msg.role === "user"
+                        className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${msg.role === "user"
                             ? "bg-teal-600 text-white rounded-br-md"
                             : "bg-white text-slate-700 border border-slate-200 rounded-bl-md shadow-sm leading-relaxed"
-                        }`}
+                          }`}
                       >
                         {msg.content}
                       </div>
@@ -954,11 +948,10 @@ export function OnboardingFlow({
                     )}
                     <div>
                       <span
-                        className={`text-sm ${
-                          item.done
+                        className={`text-sm ${item.done
                             ? "text-slate-900 font-medium"
                             : "text-slate-400"
-                        }`}
+                          }`}
                       >
                         {item.label}
                       </span>
@@ -1084,11 +1077,10 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${
-          error
+        className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${error
             ? "border-red-300 focus:border-red-500 focus:ring-red-500"
             : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
-        }`}
+          }`}
         placeholder={placeholder}
       />
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}

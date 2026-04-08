@@ -27,12 +27,14 @@ export function MetricCard({
   tone = "slate",
   detail,
 }: Readonly<MetricCardProps>) {
+  const displayValue =
+    typeof value === "number" ? (Number.isFinite(value) ? value : "—") : value;
   return (
     <div className="ds-card px-4 py-4 sm:px-5 sm:py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[0.9375rem] font-medium text-[var(--color-app-text-muted)]">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight text-[var(--color-app-text)]">{value}</p>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-[var(--color-app-text)]">{displayValue}</p>
           {detail ? (
             <p className="ds-muted-text mt-1.5 max-w-[16rem]">{detail}</p>
           ) : null}

@@ -236,6 +236,16 @@ export default function LoginPage() {
                 <p className="marketing-body mx-auto mt-3 max-w-sm text-center text-slate-600">
                   Continue to your inbox, appointments, and AI training panel.
                 </p>
+                <p className="marketing-body mx-auto mt-4 max-w-sm text-center text-sm text-slate-600">
+                  New to Clinic AI?{" "}
+                  <Link href="/register" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                    Create a workspace
+                  </Link>
+                  {" · "}
+                  <Link href="/product" className="font-semibold text-slate-800 hover:text-[#0F172A]">
+                    Product map
+                  </Link>
+                </p>
               </div>
 
               <div className="landing-shell p-8">

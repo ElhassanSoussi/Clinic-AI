@@ -28,7 +28,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
-import { isSafeExternalUrl } from "@/lib/utils";
+import { isSafeExternalUrl, setupProgressPercent } from "@/lib/utils";
 
 const STEPS = [
   { id: 1, title: "Clinic Info", icon: Building2 },
@@ -732,8 +732,9 @@ function EmbedWidgetStepContent({
       <div className="mb-6 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 text-sm text-teal-900">
         <p className="font-semibold">You’re almost done</p>
         <p className="mt-1 text-teal-800/90 leading-relaxed">
-          When you finish, you’ll mark setup complete and can open the dashboard to review leads, turn the assistant live,
-          and tune services or FAQs anytime in Settings.
+          When you finish, you&apos;ll open the dashboard with a short next-steps guide. From there: confirm anything in
+          Settings, watch the Inbox as traffic arrives, and use <span className="font-semibold">Go live</span> in the top
+          bar when you want patients to see an active assistant on your public chat page.
         </p>
       </div>
 
@@ -927,7 +928,7 @@ function OnboardingPageProgress({
   step: number;
   onSelectStep: (step: number) => void;
 }>) {
-  const pct = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
+  const pct = setupProgressPercent(Math.max(0, step - 1), STEPS.length - 1);
   const currentMeta = STEPS.find((s) => s.id === step);
   const guidance = STEP_GUIDANCE[step] ?? "";
 
@@ -936,7 +937,12 @@ function OnboardingPageProgress({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-4">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-widest text-teal-800/80">Assistant setup</p>
-          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 mt-1 tracking-tight">
+          <p className="mt-1 text-xs leading-relaxed text-slate-600 max-w-2xl">
+            One guided pass per workspace. When you finish, we open the dashboard: preview Patient Chat from the sidebar,
+            adjust anything in Settings, then use <span className="font-semibold text-slate-800">Go live</span> in the
+            header so Inbox and Leads start filling with real traffic.
+          </p>
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 mt-3 tracking-tight">
             Step {step} of {STEPS.length}: {currentMeta?.title}
           </h1>
           {guidance ? <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">{guidance}</p> : null}
@@ -1413,7 +1419,7 @@ export default function OnboardingPage() {
     ? `<script src="${origin}/widget.js" data-clinic="${clinic.slug}"></script>`
     : "";
   const directChatLink = clinic ? `${origin}/chat/${clinic.slug}` : "";
-  const stepProgressWidth = `${((step - 1) / (STEPS.length - 1)) * 100}%`;
+  const stepProgressWidth = `${setupProgressPercent(Math.max(0, step - 1), STEPS.length - 1)}%`;
 
   const copyEmbed = () => {
     navigator.clipboard.writeText(embedCode);

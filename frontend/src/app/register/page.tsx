@@ -231,8 +231,8 @@ export default function RegisterPage() {
                 <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
                   Create your clinic workspace
                 </h2>
-                <p className="marketing-body mx-auto mt-3 max-w-sm text-center text-slate-600">
-                  Free for 14 days. Set up and into guided onboarding in minutes.
+                <p className="marketing-body mx-auto mt-3 max-w-md text-center text-slate-600">
+                  Free for 14 days, no card. After you submit this form you&apos;ll sign in and land in guided onboarding — then configure clinic facts, preview chat, and use the real Inbox, Leads, and Appointments routes in the same app trial and paid teams share.
                 </p>
               </div>
 
@@ -345,6 +345,11 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </form>
+
+                <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
+                  After sign-in, you&apos;ll finish guided onboarding first (or land on the dashboard if you already
+                  did), then use Patient Chat, Settings, and Go live in one continuous flow.
+                </p>
 
                 <OAuthButtons
                   disabled={loading || !!supabaseConfigError || !queryReady}

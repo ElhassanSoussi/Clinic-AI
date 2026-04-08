@@ -24,7 +24,8 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { ChannelBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
-import type { AppointmentRecord } from "@/types";
+import type { AppointmentRecord, Clinic } from "@/types";
+import { computeSystemStatus } from "@/lib/system-status";
 import {
   toDateInputValue,
   toTimeInputValue,
@@ -460,6 +461,7 @@ function AppointmentDetailRail({
 }
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
+  const [clinic, setClinic] = useState<Clinic | null>(null);
   const [viewCounts, setViewCounts] = useState<Partial<Record<AppointmentView, number>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -516,6 +518,13 @@ export default function AppointmentsPage() {
   useEffect(() => {
     loadAppointments(activeView);
   }, [activeView, loadAppointments]);
+
+  useEffect(() => {
+    void api.clinics
+      .getMyClinic()
+      .then((c) => setClinic(c))
+      .catch(() => setClinic(null));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -814,14 +823,28 @@ export default function AppointmentsPage() {
             <EmptyState
               icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
               title={`No ${APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "matching"} appointments`}
-              description='Switch views to see other stages, or mark a request as booked in Leads once a time is confirmed — it appears here after the board refreshes.'
+              description={
+                clinic && computeSystemStatus(clinic).status !== "LIVE"
+                  ? "Switch views or confirm bookings from Leads once times are set. Before go-live, an empty board is normal — finish setup, publish the assistant, then move requests from Leads into confirmed appointments."
+                  : "Switch views to see other stages, or mark a request as booked in Leads once a time is confirmed — it appears here after the board refreshes."
+              }
               action={
-                <Link
-                  href="/dashboard/leads"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                >
-                  Open booking pipeline
-                </Link>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Link
+                    href="/dashboard/leads"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                  >
+                    Open booking pipeline
+                  </Link>
+                  {clinic && computeSystemStatus(clinic).status !== "LIVE" ? (
+                    <Link
+                      href="/dashboard/settings"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                    >
+                      Settings &amp; go-live
+                    </Link>
+                  ) : null}
+                </div>
               }
             />
           ) : (

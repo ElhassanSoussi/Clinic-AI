@@ -16,6 +16,27 @@ import {
 } from "lucide-react";
 import { PublicNav } from "@/components/marketing/PublicNav";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { MarketingProductWindow } from "@/components/marketing/MarketingProductWindow";
+
+/** Maps each marketing module to the primary in-app route (see dashboard sidebar). */
+function modulePreviewPath(moduleName: string): string {
+  switch (moduleName) {
+    case "Operator inbox":
+      return "/dashboard/inbox";
+    case "Appointments workspace":
+      return "/dashboard/appointments";
+    case "AI training":
+      return "/dashboard/training";
+    case "Follow-up visibility":
+      return "/dashboard/opportunities";
+    case "Staff review & takeover":
+      return "/dashboard/inbox";
+    case "Operational visibility":
+      return "/dashboard";
+    default:
+      return "/dashboard";
+  }
+}
 
 export const metadata: Metadata = {
   title: "Product — Clinic AI",
@@ -130,7 +151,7 @@ export default function ProductPage() {
               Clinic AI is not a chatbot you point at your website and forget.
               It is an operating system for your clinic&apos;s front desk — with a
               structured inbox, appointment tracking, staff review controls, AI training,
-              and full operational visibility built in from the start.
+              and full operational visibility built in from the start. Every module below exists in the product you access after signup — not a separate pitch deck or vaporware roadmap.
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Link href="/register" className="marketing-cta-primary">
@@ -142,6 +163,14 @@ export default function ProductPage() {
                 Try live demo
               </Link>
             </div>
+            <p className="mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
+              <span className="font-semibold text-slate-800">Right after signup:</span> you sign in to the real workspace — guided onboarding, then{" "}
+              <span className="font-mono text-[0.8125rem] text-slate-600">/dashboard</span> with Inbox, Leads, Appointments, AI Training, and Settings.{" "}
+              <Link href="/#after-signup" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                See the first-week path on the home page
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>
@@ -202,24 +231,30 @@ export default function ProductPage() {
                     </ul>
                   </div>
 
-                  <div className={`landing-shell p-7 ${i % 2 === 1 ? "xl:col-start-1 xl:row-start-1" : ""}`}>
-                    <div className="marketing-icon-wrap mb-5 h-12 w-12">
-                      <mod.icon className="h-6 w-6" />
+                  <MarketingProductWindow
+                    pathLabel={modulePreviewPath(mod.name)}
+                    caption="Illustrative summary of this module — the live UI is at the route above once you are signed in (same build as trial and paid)."
+                    className={i % 2 === 1 ? "xl:col-start-1 xl:row-start-1" : undefined}
+                  >
+                    <div className="landing-shell border-0 p-7 shadow-none">
+                      <div className="marketing-icon-wrap mb-5 h-12 w-12">
+                        <mod.icon className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-[#0F172A]">{mod.name}</h3>
+                      <p className="mt-2 text-sm text-[#64748B]">{mod.tagline}</p>
+                      <div className="mt-6 space-y-2.5">
+                        {mod.details.slice(0, 3).map((detail) => (
+                          <div
+                            key={detail}
+                            className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0F172A]"
+                          >
+                            <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                            {detail}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#0F172A]">{mod.name}</h3>
-                    <p className="mt-2 text-sm text-[#64748B]">{mod.tagline}</p>
-                    <div className="mt-6 space-y-2.5">
-                      {mod.details.slice(0, 3).map((detail) => (
-                        <div
-                          key={detail}
-                          className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0F172A]"
-                        >
-                          <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
-                          {detail}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  </MarketingProductWindow>
                 </div>
               </section>
             ))}

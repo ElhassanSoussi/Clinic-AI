@@ -42,7 +42,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { GoLiveModals } from "@/components/shared/GoLiveModals";
 import { computeSystemStatus, STATUS_CONFIG } from "@/lib/system-status";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
-import { isSafeExternalUrl } from "@/lib/utils";
+import { isSafeExternalUrl, setupProgressPercent } from "@/lib/utils";
 
 const DAYS = [
   "monday",
@@ -1332,11 +1332,12 @@ export default function SettingsPage() {
     }
   };
 
-  const completedCount = [
+  const setupSectionKeys = [
     "clinic-info", "assistant-messages", "services", "hours", "faq",
-    "google-sheets", "email-notifications", "scheduling", "branding", "embed"
-  ].filter((key) => getSectionStatus(key, statusState) === "completed").length;
-  const progressWidth = `${Math.round((completedCount / 10) * 100)}%`;
+    "google-sheets", "email-notifications", "scheduling", "branding", "embed",
+  ] as const;
+  const completedCount = setupSectionKeys.filter((key) => getSectionStatus(key, statusState) === "completed").length;
+  const progressWidth = `${setupProgressPercent(completedCount, setupSectionKeys.length)}%`;
   const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
@@ -1360,7 +1361,9 @@ export default function SettingsPage() {
               <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
               <p className="mt-1.5 text-sm leading-6 text-[#475569]">
                 Public page{" "}
-                <span className="font-mono text-sm text-[#0F172A]">/chat/{clinic.slug}</span>
+                <span className="font-mono text-sm text-[#0F172A]">
+                  /chat/{clinic.slug?.trim() ? clinic.slug : "your-clinic-slug"}
+                </span>
                 {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
                 surface after you click &ldquo;Save settings.&rdquo;
                 {systemStatus?.status === "READY" && !clinic.is_live

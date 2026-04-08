@@ -25,6 +25,7 @@ import {
 import { Drawer } from "@/components/shared/Drawer";
 import { api } from "@/lib/api";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
+import { setupProgressPercent } from "@/lib/utils";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -656,7 +657,7 @@ export function SettingsDrawer({ open, onClose, initialSection }: Readonly<Setti
     primaryColor,
   };
   const completedCount = sectionKeys.filter((key) => getStatus(key, statusState) === "completed").length;
-  const progressWidth = `${Math.round((completedCount / 10) * 100)}%`;
+  const progressWidth = `${setupProgressPercent(completedCount, sectionKeys.length)}%`;
   const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
   const availabilityStatus = sheetsValidation ? availabilityTabStatus(sheetsValidation) : null;
   const validationMessage = sheetsValidation

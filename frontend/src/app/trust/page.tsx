@@ -111,6 +111,19 @@ export default function TrustPage() {
               This page explains exactly how Clinic AI approaches oversight, data handling,
               and responsible behavior — so you can make an informed choice.
             </p>
+            <p className="mt-5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
+              These commitments show up as real controls after you sign in: conversation review in{" "}
+              <span className="font-mono text-[0.8125rem] text-slate-700">/dashboard/inbox</span>, clinic facts and go-live in Settings and AI Training, and a full activity trail you can audit from the workspace — not policy text detached from the product.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link href="/register" className="marketing-cta-primary">
+                Start free trial
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/product" className="marketing-cta-secondary">
+                How the product works
+              </Link>
+            </div>
           </div>
         </div>
       </section>

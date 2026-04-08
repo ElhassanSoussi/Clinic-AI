@@ -23,6 +23,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
 import type { ChannelType, Clinic, InboxConversation } from "@/types";
 import Link from "next/link";
+import { computeSystemStatus } from "@/lib/system-status";
 
 const STATUS_FILTERS: {
   value: "all" | "open" | "needs_follow_up" | "booked" | "handled";
@@ -253,6 +254,8 @@ export default function InboxPage() {
           </div>
 
           {filtered.length === 0 ? (() => {
+            const activationStatus = clinic ? computeSystemStatus(clinic).status : null;
+            let emptyTitle = threads.length === 0 ? "No conversations yet" : "No conversations match these filters";
             let emptyDescription =
               "Web chat creates threads as soon as patients message your public assistant. SMS and other channels appear when they are configured in your environment.";
             let emptyAction: ReactNode | undefined;
@@ -260,6 +263,50 @@ export default function InboxPage() {
               emptyDescription = channelFilter === "all"
                 ? "Try clearing search or widening the status filter."
                 : `No threads for ${getChannelConfig(channelFilter).label}. Other channels may still have volume — choose &ldquo;All&rdquo; to compare.`;
+            } else if (activationStatus && activationStatus !== "LIVE") {
+              if (activationStatus === "READY") {
+                emptyTitle = "No threads yet — assistant not published";
+                emptyDescription =
+                  "Setup checklist is complete, but patient traffic only creates threads after you use Go live in the top bar. Preview your chat page first, then publish when you are ready.";
+              } else {
+                emptyTitle = "Inbox fills after go-live";
+                emptyDescription =
+                  "Finish the remaining items in Settings (clinic info, services, spreadsheet, scheduling), then use Go live. Until then an empty inbox is expected — focus on configuration and preview.";
+              }
+              const firstGap = clinic ? computeSystemStatus(clinic).items.find((i) => !i.completed) : null;
+              emptyAction = (
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Link
+                    href={
+                      firstGap
+                        ? `/dashboard/settings?section=${encodeURIComponent(firstGap.drawerSection)}`
+                        : "/dashboard/settings"
+                    }
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Continue setup
+                  </Link>
+                  {clinic?.slug ? (
+                    <a
+                      href={`/chat/${clinic.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Preview chat
+                    </a>
+                  ) : null}
+                  <Link
+                    href="/dashboard/leads"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                  >
+                    Booking pipeline
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              );
             } else {
               emptyAction = (
                 <div className="flex flex-wrap justify-center gap-2">
@@ -295,7 +342,7 @@ export default function InboxPage() {
               <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
                 <EmptyState
                   icon={<Inbox className="w-5 h-5 text-[#64748B]" />}
-                  title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
+                  title={emptyTitle}
                   description={emptyDescription}
                   action={emptyAction}
                 />

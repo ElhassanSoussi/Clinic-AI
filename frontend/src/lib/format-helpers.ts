@@ -107,7 +107,8 @@ export function depositStatusClass(status: DepositStatus | string): string {
 }
 
 export function formatMoney(cents?: number | null): string {
-  if (!cents) return "$0";
+  if (cents == null || !Number.isFinite(cents)) return "$0";
+  if (cents <= 0) return "$0";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

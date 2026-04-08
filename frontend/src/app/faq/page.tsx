@@ -29,6 +29,11 @@ const categories: FaqCategory[] = [
     label: "Setup & onboarding",
     items: [
       {
+        question: "What happens right after I create an account?",
+        answer:
+          "You sign in to the real dashboard — the same routes trial and paid workspaces use. Guided onboarding starts immediately: clinic profile, services, hours, and FAQs. You can open Inbox, Leads, Appointments, AI Training, and Settings right away; lists and previews fill in as you save configuration. Nothing is a separate “marketing demo” build.",
+      },
+      {
         question: "How long does setup take?",
         answer:
           "Most clinics finish initial setup in under 15 minutes. You enter your clinic details, add your services and business hours, write a few common FAQs, and test the assistant with a live preview — all before going live. The guided onboarding flow walks you through each step.",

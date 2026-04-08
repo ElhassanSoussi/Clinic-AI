@@ -13,6 +13,7 @@ import {
   Crown,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { normalizeLeadUsage } from "@/lib/billing-usage";
 import { isSafeExternalUrl } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -34,13 +35,16 @@ const PLAN_ICONS: Record<string, React.ReactNode> = {
 };
 
 function formatPrice(cents: number): string {
+  if (!Number.isFinite(cents)) return "—";
   if (cents === 0) return "Free";
   return `$${(cents / 100).toFixed(0)}/mo`;
 }
 
 function formatDate(iso: string | undefined): string {
-  if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-US", {
+  if (!iso?.trim()) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -130,26 +134,36 @@ export default function BillingPage() {
 
   if (loading) return <LoadingState message="Loading billing..." detail="Plan and usage" />;
   if (error) return <ErrorState variant="calm" message={error} onRetry={loadBilling} />;
-  if (!billing) return null;
+  if (!billing) {
+    return (
+      <ErrorState
+        variant="calm"
+        message="Billing information could not be loaded."
+        onRetry={loadBilling}
+      />
+    );
+  }
 
   const statusInfo = STATUS_LABELS[billing.subscription_status] || STATUS_LABELS.inactive;
-  const usagePercent =
-    billing.monthly_lead_limit === -1
-      ? 0
-      : Math.min(100, Math.round((billing.monthly_leads_used / billing.monthly_lead_limit) * 100));
-  const isAtLimit =
-    billing.monthly_lead_limit !== -1 && billing.monthly_leads_used >= billing.monthly_lead_limit;
+  const usage = normalizeLeadUsage(billing);
+  const {
+    leadsUsed,
+    leadLimit,
+    isUnlimited,
+    hasFiniteCap,
+    isAtLimit,
+    usageTone,
+    usageMeterMax,
+    usageMeterValue,
+  } = usage;
   const isTrial = billing.plan === "trial";
   const trialEndsStr = billing.trial_ends_at ? formatDate(billing.trial_ends_at) : "";
+  const trialEndDate = billing.trial_ends_at ? new Date(billing.trial_ends_at) : null;
   const isTrialExpired =
-    isTrial && billing.trial_ends_at && new Date(billing.trial_ends_at) < new Date();
-  const usageTone: "ok" | "warn" | "critical" = isAtLimit
-    ? "critical"
-    : usagePercent > 80
-      ? "warn"
-      : "ok";
-  const usageMeterMax = Math.max(1, billing.monthly_lead_limit);
-  const usageMeterValue = Math.min(billing.monthly_leads_used, usageMeterMax);
+    isTrial &&
+    trialEndDate !== null &&
+    !Number.isNaN(trialEndDate.getTime()) &&
+    trialEndDate < new Date();
 
   return (
     <div className="workspace-page">
@@ -227,22 +241,26 @@ export default function BillingPage() {
                   Patient requests
                 </span>
                 <span className="text-sm font-semibold tabular-nums text-[#0F172A]">
-                  {billing.monthly_leads_used}
-                  {billing.monthly_lead_limit === -1 ? "" : ` / ${billing.monthly_lead_limit}`}
+                  {leadsUsed}
+                  {isUnlimited ? "" : ` / ${leadLimit}`}
                 </span>
               </div>
-              {billing.monthly_lead_limit !== -1 && (
+              {hasFiniteCap ? (
                 <progress
                   className="billing-usage-meter"
                   data-usage-tone={usageTone}
                   max={usageMeterMax}
                   value={usageMeterValue}
-                  aria-label={`Patient requests used: ${billing.monthly_leads_used} of ${billing.monthly_lead_limit}`}
+                  aria-label={`Patient requests used: ${leadsUsed} of ${leadLimit}`}
                 />
-              )}
-              {billing.monthly_lead_limit === -1 && (
+              ) : null}
+              {isUnlimited ? (
                 <p className="text-xs text-[#64748B] mt-1">Unlimited requests on your current plan</p>
-              )}
+              ) : !hasFiniteCap && !isUnlimited ? (
+                <p className="mt-1 text-xs text-[#64748B]">
+                  Usage limits will appear when your plan includes a monthly request cap.
+                </p>
+              ) : null}
               {isAtLimit && (
                 <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />

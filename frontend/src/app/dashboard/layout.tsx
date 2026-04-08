@@ -24,6 +24,7 @@ import {
   X,
   ShieldCheck,
   UserCog,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -262,6 +263,7 @@ export default function DashboardLayout({
   const userInitial = (user?.full_name?.[0] || user?.email?.[0] || "?").toUpperCase();
   const systemStatus = clinic ? computeSystemStatus(clinic) : null;
   const statusCfg = systemStatus ? STATUS_CONFIG[systemStatus.status] : null;
+  const firstSetupGap = systemStatus?.items.find((item) => !item.completed) ?? null;
 
   const activeNavItem =
     sidebarNav.find(
@@ -302,6 +304,23 @@ export default function DashboardLayout({
                 {statusCfg.label}
               </span>
             )}
+            {systemStatus?.status === "READY" && (
+              <p className="mt-2 text-[0.6875rem] leading-snug text-[#64748B]">
+                Use <span className="font-semibold text-[#0F172A]">Go live</span> in the header when patients should see an active assistant.
+              </p>
+            )}
+            {systemStatus &&
+              systemStatus.status !== "LIVE" &&
+              systemStatus.status !== "READY" &&
+              firstSetupGap && (
+                <Link
+                  href={settingsHref(firstSetupGap.drawerSection)}
+                  className="mt-2 inline-flex max-w-full items-center gap-1 text-[0.6875rem] font-semibold text-[#0F766E] hover:underline"
+                >
+                  <span className="truncate">Next: {firstSetupGap.label}</span>
+                  <ArrowRight className="h-3 w-3 shrink-0" aria-hidden />
+                </Link>
+              )}
           </div>
         )}
 

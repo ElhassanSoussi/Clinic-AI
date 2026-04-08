@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { clampPercentInt } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -52,7 +53,8 @@ function generatePreviewSessionId(): string {
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
+  if (!Number.isFinite(bytes) || bytes < 0) return "—";
+  if (bytes < 1024) return `${Math.round(bytes)} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
@@ -368,7 +370,7 @@ export default function TrainingPage() {
                   <Sparkles className="w-3.5 h-3.5 text-[#0F766E]" />
                   <span className="workspace-section-label text-[#115E59]">Readiness</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-[#0F172A]">{training.knowledge_score}%</p>
+                <p className="text-2xl font-bold tracking-tight text-[#0F172A]">{clampPercentInt(training.knowledge_score)}%</p>
                 <p className="mt-1 text-sm text-[#475569]">
                   {training.assistant_name} draws on clinic settings, custom notes, and uploaded documents—this score summarizes coverage before you ship answers.
                 </p>
@@ -471,6 +473,20 @@ export default function TrainingPage() {
                   <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
                     <p>Documents are optional. Your settings (services, FAQ, hours) already power answers.</p>
                     <p className="mt-2">Upload PDF or TXT when you want policies or long-form detail in retrieval — processing may take a minute.</p>
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                      <Link
+                        href={settingsHref("services")}
+                        className="inline-flex items-center rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                      >
+                        Services &amp; FAQ in Settings
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
+                        className="inline-flex items-center rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                      >
+                        Full setup checklist
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -547,7 +563,14 @@ export default function TrainingPage() {
                 <div className="mt-3 space-y-2">
                   {training.custom_sources.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
-                      No custom notes yet. Use the form above to add clinic-specific details the assistant should know.
+                      <p>No custom notes yet. Use the form above for exceptions and nuance the assistant should know.</p>
+                      <p className="mt-2">
+                        Baseline facts (hours, services) still come from{" "}
+                        <Link href={settingsHref("clinic-info")} className="font-semibold text-[#115E59] hover:underline">
+                          Settings
+                        </Link>
+                        .
+                      </p>
                     </div>
                   ) : (
                     training.custom_sources.map((source) => (
@@ -685,7 +708,7 @@ export default function TrainingPage() {
             <div className="mt-2 space-y-1.5">
               <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
                 <p className="text-xs text-[#475569]">Readiness</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{training.knowledge_score}%</p>
+                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{clampPercentInt(training.knowledge_score)}%</p>
               </div>
               <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
                 <p className="text-xs text-[#475569]">Gaps</p>

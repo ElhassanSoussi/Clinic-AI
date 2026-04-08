@@ -52,7 +52,7 @@ export function PublicNav() {
             Sign in
           </Link>
           <Link href="/register" className="marketing-cta-primary !py-2.5 !px-4 !text-[0.9375rem]">
-            Start free
+            Start free trial
             <ArrowRight className="h-4 w-4" />
           </Link>
           <button

@@ -103,6 +103,17 @@ export default function ContactPage() {
                 <p className="marketing-lead mx-auto mt-4 max-w-xl text-balance sm:mx-0">
                   We&apos;ll show you how Clinic AI fits your front desk — setup, inbox, and go-live — without pressure.
                 </p>
+                <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mx-0">
+                  Want to poke around the product first?{" "}
+                  <Link href="/register" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                    Start the free trial
+                  </Link>
+                  {" · "}
+                  <Link href="/product" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                    Module map &amp; routes
+                  </Link>
+                  .
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="ds-card space-y-5 p-6 sm:p-8">

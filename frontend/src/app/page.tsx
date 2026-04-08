@@ -25,6 +25,7 @@ import {
 import { startCheckoutForPlan, type PaidPlanId } from "@/lib/billing-checkout";
 import { PublicNav } from "@/components/marketing/PublicNav";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { MarketingProductWindow } from "@/components/marketing/MarketingProductWindow";
 
 type LandingPlan = {
   id: "trial" | PaidPlanId;
@@ -143,6 +144,54 @@ const trustCards = [
     title: "Full visibility — nothing is hidden",
     description:
       "Every conversation, request, appointment, and follow-up action is traceable. You always know what was said and why.",
+  },
+];
+
+/** Sidebar order and labels match `dashboard/layout.tsx` (truncated list would undersell real nav). */
+const DASHBOARD_NAV_PREVIEW = [
+  "Dashboard",
+  "Inbox",
+  "Leads",
+  "Appointments",
+  "Customers",
+  "Opportunities",
+  "Operations",
+  "Activity",
+  "AI Training",
+  "Billing",
+  "Settings",
+] as const;
+
+const afterSignupJourney = [
+  {
+    step: "01",
+    title: "Account & workspace",
+    description:
+      "You create an owner account and enter guided onboarding immediately — same workspace trial and paid teams use.",
+  },
+  {
+    step: "02",
+    title: "Configure what patients see",
+    description:
+      "Clinic profile, services, hours, FAQs, and optional spreadsheet links — everything the assistant is allowed to talk about.",
+  },
+  {
+    step: "03",
+    title: "Test before the public sees it",
+    description:
+      "Use the built-in chat test and your /chat/{slug} preview. Embed the widget when you are ready; patients still see a clear not-live state until you go live.",
+  },
+  {
+    step: "04",
+    title: "Staff work from Inbox → Leads → Appointments",
+    description:
+      "Threads, captured requests, and booking state stay linked. Human review, takeover, and notes all happen in those real modules.",
+  },
+  {
+    step: "05",
+    title: "Go live when you decide",
+    description:
+      "Flip Go live in the dashboard header when you want the assistant to show as active. Return to Settings any time to tune training or hours.",
   },
 ];
 
@@ -273,6 +322,14 @@ export default function LandingPage() {
                   Try live demo
                 </Link>
               </div>
+              <p className="mt-4">
+                <Link
+                  href="/product"
+                  className="text-[0.9375rem] font-semibold text-[#0F766E] transition-colors hover:text-[#115E59]"
+                >
+                  See every module and route →
+                </Link>
+              </p>
               <p className="mt-6 text-[1.0625rem] font-medium text-slate-600">
                 No credit card required &middot; Set up in under 15 minutes &middot; Your staff stays in control
               </p>
@@ -294,110 +351,113 @@ export default function LandingPage() {
 
             {/* Workspace preview */}
             <div className="relative hidden lg:block">
-              <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
-                <div className="grid gap-4 lg:grid-cols-[12.5rem_1fr_14rem] xl:grid-cols-[13rem_1fr_14.5rem]">
-                  {/* Sidebar */}
-                  <aside className="rounded-xl border border-slate-200/90 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F766E] shadow-sm">
-                        <Bot className="h-4 w-4" />
+              <MarketingProductWindow
+                pathLabel="/dashboard/inbox"
+                caption="Composite preview — sidebar labels match real dashboard routes; after setup, lists and search reflect your clinic’s conversations and patients."
+              >
+                <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
+                  <div className="grid gap-4 lg:grid-cols-[12.5rem_1fr_14rem] xl:grid-cols-[13rem_1fr_14.5rem]">
+                    {/* Sidebar */}
+                    <aside className="rounded-xl border border-slate-200/90 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F766E] shadow-sm">
+                          <Bot className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Clinic AI</p>
+                          <p className="text-[0.6875rem] font-medium text-[#64748B]">Signed-in workspace</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Clinic AI</p>
-                        <p className="text-[0.6875rem] font-medium text-[#64748B]">Workspace</p>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      {["Dashboard", "Conversations", "Appointments", "Patients", "AI Training"].map(
-                        (item, i) => (
+                      <div className="max-h-[13.5rem] space-y-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        {DASHBOARD_NAV_PREVIEW.map((item) => (
                           <div
                             key={item}
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[0.8125rem] font-medium ${i === 1
+                            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-[0.75rem] font-medium sm:py-2 sm:text-[0.8125rem] ${item === "Inbox"
                               ? "border border-slate-200 bg-white text-[#0F172A] shadow-sm"
                               : "text-[#475569]"
                               }`}
                           >
                             <div
-                              className={`h-2 w-2 rounded-full ${i === 1 ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
+                              className={`h-2 w-2 shrink-0 rounded-full ${item === "Inbox" ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
                                 }`}
                             />
                             {item}
                           </div>
-                        )
-                      )}
-                    </div>
-                  </aside>
+                        ))}
+                      </div>
+                    </aside>
 
-                  {/* Main panel */}
-                  <div className="app-card p-5">
-                    <div className="workspace-toolbar border-b border-[#E2E8F0] pb-3">
-                      <div className="workspace-search min-h-[2.5rem] min-w-0 flex-1 text-[0.8125rem]">
-                        <Search className="h-4 w-4" />
-                        <span className="truncate">Search conversations or patients</span>
-                      </div>
-                      <div className="app-pill border-[#99f6e4] bg-[#CCFBF1] text-[#115E59] text-[0.8125rem]">
-                        Appointments
-                      </div>
-                    </div>
-                    <div className="mt-4 space-y-2.5">
-                      {[
-                        { name: "Marta B.", note: "Follow-up on earliest slot", state: "Confirmed", tone: "bg-emerald-50 text-emerald-700" },
-                        { name: "New cleaning", note: "Pending staff confirmation", state: "Needs review", tone: "bg-blue-50 text-blue-700" },
-                        { name: "Missed callback", note: "Recovery queue item", state: "Queued", tone: "bg-amber-50 text-amber-700" },
-                      ].map((item, i) => (
-                        <div
-                          key={item.name}
-                          className={`app-list-row flex items-center gap-3 px-3 py-3 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
-                            }`}
-                        >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                            <Users className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="truncate text-[0.8125rem] font-semibold text-slate-900">{item.name}</p>
-                              <span className={`rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${item.tone}`}>
-                                {item.state}
-                              </span>
-                            </div>
-                            <p className="truncate text-[0.75rem] text-slate-600">{item.note}</p>
-                          </div>
+                    {/* Main panel */}
+                    <div className="app-card p-5">
+                      <div className="workspace-toolbar border-b border-[#E2E8F0] pb-3">
+                        <div className="workspace-search min-h-[2.5rem] min-w-0 flex-1 text-[0.8125rem]">
+                          <Search className="h-4 w-4" />
+                          <span className="truncate">Search conversations or patients</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Rail */}
-                  <div className="space-y-3">
-                    <div className="workspace-rail-card p-4 shadow-sm">
-                      <p className="workspace-section-label">Today</p>
-                      <h3 className="mt-3 text-[0.9375rem] font-semibold text-slate-900">Marta is booked</h3>
-                      <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">From inquiry to confirmed appointment.</p>
-                      <div className="mt-3 space-y-2">
-                        {["Earliest slot confirmed", "Reminder set", "Deposit visible"].map((item) => (
-                          <div key={item} className="flex items-center gap-2 text-[0.8125rem] text-slate-600">
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
-                            {item}
+                        <div className="app-pill border-[#99f6e4] bg-[#CCFBF1] text-[#115E59] text-[0.8125rem]">
+                          Appointments
+                        </div>
+                      </div>
+                      <div className="mt-4 space-y-2.5">
+                        {[
+                          { name: "Marta B.", note: "Follow-up on earliest slot", state: "Confirmed", tone: "bg-emerald-50 text-emerald-700" },
+                          { name: "New cleaning", note: "Pending staff confirmation", state: "Needs review", tone: "bg-blue-50 text-blue-700" },
+                          { name: "Missed callback", note: "Recovery queue item", state: "Queued", tone: "bg-amber-50 text-amber-700" },
+                        ].map((item, i) => (
+                          <div
+                            key={item.name}
+                            className={`app-list-row flex items-center gap-3 px-3 py-3 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
+                              }`}
+                          >
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                              <Users className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="truncate text-[0.8125rem] font-semibold text-slate-900">{item.name}</p>
+                                <span className={`rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${item.tone}`}>
+                                  {item.state}
+                                </span>
+                              </div>
+                              <p className="truncate text-[0.75rem] text-slate-600">{item.note}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="workspace-rail-card p-4 shadow-sm">
-                      <p className="workspace-section-label">Operator view</p>
-                      <div className="mt-3 space-y-2">
-                        <div className="app-card-muted px-3 py-2.5">
-                          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">Staff takeover</p>
-                          <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Available anytime</p>
+
+                    {/* Rail */}
+                    <div className="space-y-3">
+                      <div className="workspace-rail-card p-4 shadow-sm">
+                        <p className="workspace-section-label">Today</p>
+                        <h3 className="mt-3 text-[0.9375rem] font-semibold text-slate-900">Marta is booked</h3>
+                        <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">From inquiry to confirmed appointment.</p>
+                        <div className="mt-3 space-y-2">
+                          {["Earliest slot confirmed", "Reminder set", "Deposit visible"].map((item) => (
+                            <div key={item} className="flex items-center gap-2 text-[0.8125rem] text-slate-600">
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
+                              {item}
+                            </div>
+                          ))}
                         </div>
-                        <div className="app-card-muted px-3 py-2.5">
-                          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">AI training</p>
-                          <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Grounded in clinic data</p>
+                      </div>
+                      <div className="workspace-rail-card p-4 shadow-sm">
+                        <p className="workspace-section-label">Operator view</p>
+                        <div className="mt-3 space-y-2">
+                          <div className="app-card-muted px-3 py-2.5">
+                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">Staff takeover</p>
+                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Available anytime</p>
+                          </div>
+                          <div className="app-card-muted px-3 py-2.5">
+                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">AI training</p>
+                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Grounded in clinic data</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </MarketingProductWindow>
             </div>
           </div>
         </div>
@@ -432,6 +492,100 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── PRODUCT PROOF (honest, no fabricated metrics) ── */}
+        <section className="marketing-section-tight marketing-surface-elevated border-y border-slate-200/90">
+          <div className="marketing-container">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="marketing-kicker mx-auto mb-5">
+                <ShieldCheck className="h-3 w-3" />
+                Same app from trial through paid plans
+              </div>
+              <h2 className="marketing-h2 mx-auto max-w-2xl">
+                Built as operational software, not a landing-page demo
+              </h2>
+              <p className="marketing-lead mx-auto mt-4 max-w-2xl">
+                Clinic AI is a coherent workspace: patient chat, operator inbox, configuration, and billing hooks are
+                shipping surfaces — not mocked screenshots or a separate &ldquo;enterprise&rdquo; codebase.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  title: "Live routes on day one",
+                  body: "Dashboard, inbox, leads, appointments, settings, and patient chat URLs are real Next.js routes in your account — the trial uses the same navigation paying teams see.",
+                },
+                {
+                  title: "Grounded in what you configure",
+                  body: "Services, hours, FAQs, and optional spreadsheet links come from your setup. The assistant does not invent clinic facts or learn from other customers.",
+                },
+                {
+                  title: "You control go-live",
+                  body: "Until you go live, the public chat shows an explicit not-live state. Embed code and preview links help you stage before patients see an active assistant.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-slate-200/90 bg-white p-8 text-left shadow-sm sm:p-9"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#CCFBF1] text-[#0F766E]">
+                    <Check className="h-5 w-5" aria-hidden />
+                  </div>
+                  <h3 className="marketing-h3 mt-5">{item.title}</h3>
+                  <p className="marketing-body mt-3">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── AFTER SIGNUP (conversion confidence) ── */}
+        <section
+          id="after-signup"
+          className="marketing-section marketing-surface-white border-b border-slate-200/90"
+          aria-labelledby="after-signup-heading"
+        >
+          <div className="marketing-container">
+            <div className="mb-12 max-w-3xl">
+              <div className="marketing-kicker mb-5">
+                <Workflow className="h-3 w-3" />
+                After you start the trial
+              </div>
+              <h2 id="after-signup-heading" className="marketing-h2">
+                What happens in your first week — no guesswork.
+              </h2>
+              <p className="marketing-lead mt-4">
+                Same product surface from day one: real routes like{" "}
+                <span className="font-mono text-[0.875em] text-slate-700">/dashboard/inbox</span>,{" "}
+                <span className="font-mono text-[0.875em] text-slate-700">/dashboard/settings</span>, and{" "}
+                <span className="font-mono text-[0.875em] text-slate-700">/dashboard/training</span>.
+                The steps below are the path most clinics follow; nothing here requires a separate &ldquo;enterprise&rdquo; app.
+              </p>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {afterSignupJourney.map((step) => (
+                <div
+                  key={step.step}
+                  className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/80 p-7 shadow-sm sm:p-8"
+                >
+                  <span className="text-xs font-bold tabular-nums tracking-widest text-[#0F766E]">{step.step}</span>
+                  <h3 className="marketing-h3 mt-3 text-[1.125rem]">{step.title}</h3>
+                  <p className="marketing-body mt-2 text-[0.9375rem]">{step.description}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-10 text-center text-[0.9375rem] text-slate-600">
+              Want the module-by-module map first?{" "}
+              <Link href="/product" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                Read the product overview
+              </Link>
+              {" · "}
+              <Link href="/faq" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                FAQ &amp; setup
+              </Link>
+            </p>
           </div>
         </section>
 

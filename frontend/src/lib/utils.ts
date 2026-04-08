@@ -1,5 +1,7 @@
 export function formatDateTime(dateStr: string): string {
+  if (!dateStr?.trim()) return "—";
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -10,9 +12,12 @@ export function formatDateTime(dateStr: string): string {
 }
 
 export function timeAgo(dateStr: string): string {
+  if (!dateStr?.trim()) return "—";
   const now = new Date();
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return "—";
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (!Number.isFinite(seconds)) return "—";
 
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
@@ -21,11 +26,29 @@ export function timeAgo(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+}
+
+/** Non-negative integer for counts in cards and lists — avoids NaN from odd API payloads. */
+export function safeCount(n: unknown): number {
+  if (typeof n === "number" && Number.isFinite(n)) return Math.max(0, Math.floor(n));
+  return 0;
+}
+
+/** Integer percent 0–100 for progress labels and readouts. */
+export function clampPercentInt(n: unknown): number {
+  if (typeof n !== "number" || !Number.isFinite(n)) return 0;
+  return Math.min(100, Math.max(0, Math.round(n)));
+}
+
+/** Setup checklist progress bar: completed / total sections → 0–100. */
+export function setupProgressPercent(completed: number, total: number): number {
+  if (!Number.isFinite(completed) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((completed / total) * 100)));
 }
 
 /** Returns true when `url` is an absolute HTTP(S) URL pointing at the current origin. */
