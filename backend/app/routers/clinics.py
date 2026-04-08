@@ -2,7 +2,7 @@ from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 from app.dependencies import get_current_user, get_supabase
 from fastapi.responses import RedirectResponse
@@ -38,21 +38,33 @@ class ClinicBrandingResponse(BaseModel):
     assistant_name: Optional[str] = None
     primary_color: Optional[str] = "#0d9488"
     is_live: Optional[bool] = False
+    phone: Optional[str] = ""
+    business_hours: Optional[Any] = None
 
 
 @router.get("/{slug}/branding", response_model=ClinicBrandingResponse, responses={404: {"description": "Clinic not found"}})
 async def get_clinic_branding(slug: str):
     """Public endpoint to get clinic branding for the chat widget."""
     db = get_supabase()
-    result = db.table("clinics").select("name, assistant_name, primary_color, is_live").eq("slug", slug).execute()
+    result = (
+        db.table("clinics")
+        .select("name, assistant_name, primary_color, is_live, phone, business_hours")
+        .eq("slug", slug)
+        .execute()
+    )
     if not result.data:
         raise HTTPException(status_code=404, detail=CLINIC_NOT_FOUND)
     row = result.data[0]
+    hours = row.get("business_hours")
+    if hours is not None and not isinstance(hours, dict):
+        hours = None
     return ClinicBrandingResponse(
         name=row.get("name", ""),
         assistant_name=row.get("assistant_name"),
         primary_color=row.get("primary_color") or "#0d9488",
         is_live=row.get("is_live", False),
+        phone=row.get("phone") or "",
+        business_hours=hours,
     )
 
 

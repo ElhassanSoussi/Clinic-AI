@@ -12,7 +12,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { api } from "@/lib/api";
+import { api, createEmptyOperationsOverview } from "@/lib/api";
 import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -96,6 +96,7 @@ export default function OperationsPage() {
   const [operations, setOperations] = useState<OperationsOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [operationsLoadNotice, setOperationsLoadNotice] = useState("");
   const [savingLeadId, setSavingLeadId] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingWaitlistId, setSavingWaitlistId] = useState("");
@@ -151,26 +152,42 @@ export default function OperationsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
+    setOperationsLoadNotice("");
     try {
-      const [clinicData, operationsData] = await Promise.all([
-        api.clinics.getMyClinic(),
-        api.frontdesk.getOperations(),
-      ]);
+      const clinicData = await api.clinics.getMyClinic();
       setClinic(clinicData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load clinic");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const operationsData = await api.frontdesk.getOperations();
       setOperations(operationsData);
       setReminderEnabled(operationsData.reminder_enabled);
       setReminderLeadHours(String(operationsData.reminder_lead_hours));
       setFollowUpAutomationEnabled(operationsData.follow_up_automation_enabled);
       setFollowUpDelayMinutes(String(operationsData.follow_up_delay_minutes));
       syncLeadDrafts(operationsData);
-
+      setOperationsLoadNotice("");
       try {
         setReminderPreview(await api.frontdesk.getReminderPreview());
       } catch {
         setReminderPreview([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load operations");
+      const fallback = createEmptyOperationsOverview();
+      setOperations(fallback);
+      setReminderEnabled(fallback.reminder_enabled);
+      setReminderLeadHours(String(fallback.reminder_lead_hours));
+      setFollowUpAutomationEnabled(fallback.follow_up_automation_enabled);
+      setFollowUpDelayMinutes(String(fallback.follow_up_delay_minutes));
+      syncLeadDrafts(fallback);
+      setReminderPreview([]);
+      setOperationsLoadNotice(
+        err instanceof Error ? err.message : "Operations data could not be refreshed. Showing an empty board — retry when your connection is stable."
+      );
     } finally {
       setLoading(false);
     }
@@ -379,22 +396,40 @@ export default function OperationsPage() {
   };
 
   if (loading) return <LoadingState message="Loading operations..." />;
-  if (error && !operations) return <ErrorState message={error} onRetry={loadData} />;
+  if (error && !clinic) {
+    return <ErrorState message={error} onRetry={loadData} />;
+  }
   if (!operations || !clinic) {
-    return <ErrorState title="Operations unavailable" message="The operations workspace could not be loaded." onRetry={loadData} />;
+    return <ErrorState title="Operations unavailable" message="Clinic workspace could not be loaded." onRetry={loadData} />;
   }
 
   return (
     <div className="space-y-6">
+      {operationsLoadNotice ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
+          <p className="font-semibold">Live operations data did not load</p>
+          <p className="mt-1 text-amber-800/90">{operationsLoadNotice}</p>
+          <p className="mt-2 text-xs text-amber-800/80">
+            You can still adjust reminders and channel settings below. Retry to refresh queues, SMS review, and outbound metrics.
+          </p>
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#115E59]"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
       <PageHeader
         eyebrow={
           <>
             <ShieldCheck className="h-3.5 w-3.5" />
-            Operations board
+            Operations
           </>
         }
-        title="Operational visibility"
-        description="Reminders, recovery queues, SMS review, waitlist items, and action-required bookings. See what is blocked and what is moving."
+        title="Operations command center"
+        description="Channel readiness, reminder prep, deposits, waitlist, and bookings that need staff action — in one operational surface."
       />
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />

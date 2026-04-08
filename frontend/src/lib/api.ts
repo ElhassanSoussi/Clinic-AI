@@ -49,44 +49,48 @@ function normalizeDepositSummary(source: Partial<OperationsOverview>): Operation
   return source.deposit_summary && typeof source.deposit_summary === "object"
     ? source.deposit_summary
     : {
-        required_count: 0,
-        requested_count: 0,
-        paid_count: 0,
-        waiting_count: 0,
-        configured_count: 0,
-        note: "",
-      };
+      required_count: 0,
+      requested_count: 0,
+      paid_count: 0,
+      waiting_count: 0,
+      configured_count: 0,
+      note: "",
+    };
 }
 
 function normalizeSystemReadiness(source: Partial<OperationsOverview>): OperationsOverview["system_readiness"] {
   return source.system_readiness && typeof source.system_readiness === "object"
     ? source.system_readiness
     : {
-        overall_status: "attention",
-        configured_count: 0,
-        partial_count: 0,
-        missing_count: 0,
-        blocked_count: 0,
-        items: [],
-      };
+      overall_status: "attention",
+      configured_count: 0,
+      partial_count: 0,
+      missing_count: 0,
+      blocked_count: 0,
+      items: [],
+    };
 }
 
 function normalizeOutboundActivity(source: Partial<OperationsOverview>): OperationsOverview["outbound_activity"] {
   return source.outbound_activity && typeof source.outbound_activity === "object"
     ? source.outbound_activity
     : {
-        outbound_sms_total: 0,
-        reminders_sent: 0,
-        missed_call_texts_sent: 0,
-        ai_replies_sent: 0,
-        ai_reply_failures: 0,
-        failed_sends: 0,
-        skipped_sends: 0,
-        human_review_required: 0,
-        suggested_replies_sent: 0,
-        blocked_for_review: 0,
-        manual_takeover_threads: 0,
-      };
+      outbound_sms_total: 0,
+      reminders_sent: 0,
+      missed_call_texts_sent: 0,
+      ai_replies_sent: 0,
+      ai_reply_failures: 0,
+      failed_sends: 0,
+      skipped_sends: 0,
+      human_review_required: 0,
+      suggested_replies_sent: 0,
+      blocked_for_review: 0,
+      manual_takeover_threads: 0,
+    };
+}
+
+export function createEmptyOperationsOverview(): OperationsOverview {
+  return normalizeOperationsOverviewResponse({});
 }
 
 function normalizeOperationsOverviewResponse(data: unknown): OperationsOverview {
@@ -486,7 +490,14 @@ export const api = {
       return request("/clinics/me/test-notification", { method: "POST" });
     },
 
-    getBranding(slug: string): Promise<{ name: string; assistant_name?: string; primary_color?: string; is_live?: boolean }> {
+    getBranding(slug: string): Promise<{
+      name: string;
+      assistant_name?: string;
+      primary_color?: string;
+      is_live?: boolean;
+      phone?: string;
+      business_hours?: Record<string, unknown> | null;
+    }> {
       return request(`/clinics/${encodeURIComponent(slug)}/branding`);
     },
 

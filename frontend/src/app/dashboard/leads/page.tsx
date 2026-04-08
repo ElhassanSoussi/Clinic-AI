@@ -35,6 +35,21 @@ const STATUS_OPTIONS = [
 
 const INLINE_STATUSES: LeadStatus[] = ["new", "contacted", "booked", "closed"];
 
+function nextStepHint(status: LeadStatus): string {
+  switch (status) {
+    case "new":
+      return "Next: contact the patient or capture missing details.";
+    case "contacted":
+      return "Next: confirm scheduling and move to booked when the visit is set.";
+    case "booked":
+      return "Next: complete prep in Appointments — reminders, deposits, changes.";
+    case "closed":
+      return "Closed — no further pipeline work unless they reach out again.";
+    default:
+      return "";
+  }
+}
+
 type EmptyStateConfig = {
   title: string;
   description: string;
@@ -230,6 +245,9 @@ function renderLeadsContent({
                   <span>{lead.preferred_datetime_text || "No time preference"}</span>
                   <span>Received {timeAgo(lead.created_at)}</span>
                 </div>
+                <p className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-medium text-[#115E59]">
+                  {nextStepHint(lead.status)}
+                </p>
               </div>
             </div>
           </button>
@@ -351,6 +369,20 @@ export default function LeadsPage() {
         description="Every patient request captured by the assistant, from first inquiry to booked appointment. Update status, track progress, and act on open items."
       />
 
+      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 px-4 py-3 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Pipeline stages</p>
+        <p className="mt-1 text-sm text-[#475569]">
+          <span className="font-semibold text-[#0F172A]">New</span>
+          <span className="mx-1.5 text-[#94A3B8]">→</span>
+          <span className="font-semibold text-[#0F172A]">Contacted</span>
+          <span className="mx-1.5 text-[#94A3B8]">→</span>
+          <span className="font-semibold text-[#0F172A]">Booked</span>
+          <span className="mx-1.5 text-[#94A3B8]">→</span>
+          <span className="font-semibold text-[#0F172A]">Closed</span>
+          <span className="ml-2 text-[#64748B]">— use the status control on each card as work advances.</span>
+        </p>
+      </div>
+
       {usageWarningBanner}
 
       {updateError && (
@@ -435,6 +467,9 @@ export default function LeadsPage() {
         <aside className="order-2 space-y-3 xl:order-none">
           <div className="rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-3 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Pipeline snapshot</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+              Open work is everything before a booking is confirmed or explicitly closed.
+            </p>
             <div className="mt-2 space-y-1.5">
               <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
                 <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Open work</p>

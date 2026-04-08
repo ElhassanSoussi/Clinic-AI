@@ -153,7 +153,7 @@ export default function BillingPage() {
   const usageBarColor = usageBarClass(isAtLimit, usagePercent);
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         eyebrow={
           <>
@@ -162,7 +162,7 @@ export default function BillingPage() {
           </>
         }
         title="Plan & usage"
-        description="Current plan, monthly usage, and upgrade options. Payments are handled securely through Stripe."
+        description="Your workspace subscription, captured patient requests this cycle, and a clear path to upgrade when you are ready. Card payments run through Stripe."
       />
 
       {/* Stripe return feedback */}
@@ -177,171 +177,176 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Current Plan Card */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-[#CCFBF1] flex items-center justify-center text-[#0F766E]">
-                {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
+      {/* Current plan + usage */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        {/* Current Plan Card */}
+        <div className="rounded-xl border border-[#99f6e4] bg-[#CCFBF1]/40 p-5 shadow-sm lg:col-span-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#115E59]">Current plan</p>
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-xl bg-[#CCFBF1] flex items-center justify-center text-[#0F766E]">
+                  {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight text-[#0F172A]">{billing.plan_name}</h2>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${statusInfo.bg} ${statusInfo.color}`}>
+                    {statusInfo.label}
+                  </span>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-[#0F172A]">{billing.plan_name}</h2>
-                <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${statusInfo.bg} ${statusInfo.color}`}>
-                  {statusInfo.label}
-                </span>
-              </div>
+              {isTrial && trialEndsStr && (
+                <p className={`text-sm mt-2 ${isTrialExpired ? "text-red-600 font-medium" : "text-[#475569]"}`}>
+                  {isTrialExpired ? "Trial expired on " : "Trial ends "}
+                  {trialEndsStr}
+                </p>
+              )}
+              {billing.subscription_status === "past_due" && (
+                <div className="flex items-center gap-2 mt-2 text-sm text-red-600">
+                  <AlertTriangle className="w-4 h-4" />
+                  Payment failed. Please update your payment method to continue service.
+                </div>
+              )}
+              {billing.subscription_status === "canceled" && (
+                <p className="text-sm text-amber-600 mt-2">
+                  Your subscription is canceled but remains active until the end of the billing period.
+                </p>
+              )}
             </div>
-            {isTrial && trialEndsStr && (
-              <p className={`text-sm mt-2 ${isTrialExpired ? "text-red-600 font-medium" : "text-[#475569]"}`}>
-                {isTrialExpired ? "Trial expired on " : "Trial ends "}
-                {trialEndsStr}
-              </p>
-            )}
-            {billing.subscription_status === "past_due" && (
-              <div className="flex items-center gap-2 mt-2 text-sm text-red-600">
-                <AlertTriangle className="w-4 h-4" />
-                Payment failed. Please update your payment method to continue service.
-              </div>
-            )}
-            {billing.subscription_status === "canceled" && (
-              <p className="text-sm text-amber-600 mt-2">
-                Your subscription is canceled but remains active until the end of the billing period.
-              </p>
+            {billing.has_stripe_subscription && (
+              <button
+                onClick={handleManageBilling}
+                disabled={portalLoading}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg bg-white hover:bg-[#F8FAFC] transition-colors"
+              >
+                {portalLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="w-4 h-4" />
+                )}
+                Manage billing
+              </button>
             )}
           </div>
-          {billing.has_stripe_subscription && (
-            <button
-              onClick={handleManageBilling}
-              disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] border border-[#E2E8F0] rounded-lg hover:bg-[#F8FAFC] transition-colors"
-            >
-              {portalLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ExternalLink className="w-4 h-4" />
-              )}
-              Manage billing
-            </button>
+        </div>
+
+        {/* Usage Card */}
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm lg:col-span-2">
+          <h3 className="text-sm font-semibold text-[#0F172A] mb-1">Usage this month</h3>
+          <p className="mb-4 text-xs text-[#64748B]">Each captured patient request counts toward your plan limit.</p>
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-sm text-[#475569]">
+              Patient requests
+            </span>
+            <span className="text-sm font-semibold tabular-nums text-[#0F172A]">
+              {billing.monthly_leads_used}
+              {billing.monthly_lead_limit === -1 ? "" : ` / ${billing.monthly_lead_limit}`}
+            </span>
+          </div>
+          {billing.monthly_lead_limit !== -1 && (
+            <div className="w-full h-2.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${usageBarColor}`}
+                style={{ width: usageWidth }} // NOSONAR — dynamic percentage requires inline style
+              />
+            </div>
+          )}
+          {billing.monthly_lead_limit === -1 && (
+            <p className="text-xs text-[#64748B] mt-1">Unlimited requests on your current plan</p>
+          )}
+          {isAtLimit && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Request limit reached</p>
+                <p className="text-red-600">
+                  New patient conversations are paused until the next billing cycle. Upgrade your plan to continue.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Usage Card */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-[#0F172A] mb-4">Usage this month</h3>
-        <div className="flex items-end justify-between mb-2">
-          <span className="text-sm text-[#475569]">
-            Patient requests captured
-          </span>
-          <span className="text-sm font-medium text-[#0F172A]">
-            {billing.monthly_leads_used}
-            {billing.monthly_lead_limit === -1 ? "" : ` / ${billing.monthly_lead_limit}`}
-          </span>
-        </div>
-        {billing.monthly_lead_limit !== -1 && (
-          <div className="w-full h-2.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${usageBarColor}`}
-              style={{ width: usageWidth }} // NOSONAR — dynamic percentage requires inline style
-            />
-          </div>
-        )}
-        {billing.monthly_lead_limit === -1 && (
-          <p className="text-xs text-[#64748B] mt-1">Unlimited requests on your current plan</p>
-        )}
-        {isAtLimit && (
-          <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium">Request limit reached</p>
-              <p className="text-red-600">
-                New patient conversations are paused until the next billing cycle. Upgrade your plan to continue.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Plans Comparison */}
       <div>
-        <h3 className="text-sm font-semibold text-[#0F172A] mb-3">Compare plans</h3>
+        <h3 className="text-sm font-semibold text-[#0F172A] mb-1">Compare plans</h3>
+        <p className="mb-3 text-xs text-[#64748B]">Upgrade when you need higher volume or Professional features like Sheets sync.</p>
         {plans.length === 0 ? (
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 text-sm text-[#475569] shadow-sm">
             Plan details are temporarily unavailable. Your current billing status is still accurate above.
           </div>
         ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {plans.map((plan) => {
-            const isCurrent = plan.id === billing.plan;
-            const isDowngrade =
-              (billing.plan === "premium" && plan.id !== "premium") ||
-              (billing.plan === "professional" && plan.id === "trial");
-            const canUpgrade = !isCurrent && !isDowngrade && plan.id !== "trial";
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {plans.map((plan) => {
+              const isCurrent = plan.id === billing.plan;
+              const isDowngrade =
+                (billing.plan === "premium" && plan.id !== "premium") ||
+                (billing.plan === "professional" && plan.id === "trial");
+              const canUpgrade = !isCurrent && !isDowngrade && plan.id !== "trial";
 
-            return (
-              <div
-                key={plan.id}
-                className={`rounded-xl border p-5 flex flex-col ${
-                  isCurrent
-                    ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
-                    : "border-[#E2E8F0] bg-white shadow-sm"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-[#CCFBF1] text-[#0F766E]" : "bg-[#F1F5F9] text-[#475569]"}`}>
-                    {PLAN_ICONS[plan.id] || PLAN_ICONS.trial}
+              return (
+                <div
+                  key={plan.id}
+                  className={`rounded-xl border p-5 flex flex-col ${isCurrent
+                      ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
+                      : "border-[#E2E8F0] bg-white shadow-sm"
+                    }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-[#CCFBF1] text-[#0F766E]" : "bg-[#F1F5F9] text-[#475569]"}`}>
+                      {PLAN_ICONS[plan.id] || PLAN_ICONS.trial}
+                    </div>
+                    <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
                   </div>
-                  <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
-                </div>
-                <p className="text-sm text-[#475569] mb-3">{plan.description}</p>
-                <p className="text-2xl font-bold text-[#0F172A] mb-4">
-                  {formatPrice(plan.monthly_price_cents)}
-                </p>
-                <ul className="space-y-2 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-[#475569]">
-                      <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                  <p className="text-sm text-[#475569] mb-3">{plan.description}</p>
+                  <p className="text-2xl font-bold text-[#0F172A] mb-4">
+                    {formatPrice(plan.monthly_price_cents)}
+                  </p>
+                  <ul className="space-y-2 mb-6 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-[#475569]">
+                        <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
 
-                {(() => {
-                  if (isCurrent) {
+                  {(() => {
+                    if (isCurrent) {
+                      return (
+                        <div className="w-full py-2.5 text-center text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
+                          Current plan
+                        </div>
+                      );
+                    }
+                    if (canUpgrade) {
+                      return (
+                        <button
+                          onClick={() => handleUpgrade(plan.id)}
+                          disabled={checkoutLoading === plan.id}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 transition-colors"
+                        >
+                          {checkoutLoading === plan.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              Upgrade <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      );
+                    }
                     return (
-                      <div className="w-full py-2.5 text-center text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
-                        Current plan
+                      <div className="w-full py-2.5 text-center text-sm font-medium text-[#64748B] bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                        {isDowngrade ? "Current or lower tier" : "Free"}
                       </div>
                     );
-                  }
-                  if (canUpgrade) {
-                    return (
-                      <button
-                        onClick={() => handleUpgrade(plan.id)}
-                        disabled={checkoutLoading === plan.id}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 transition-colors"
-                      >
-                        {checkoutLoading === plan.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            Upgrade <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    );
-                  }
-                  return (
-                    <div className="w-full py-2.5 text-center text-sm font-medium text-[#64748B] bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                      {isDowngrade ? "Current or lower tier" : "Free"}
-                    </div>
-                  );
-                })()}
-              </div>
+                  })()}
+                </div>
               );
-          })}
-        </div>
+            })}
+          </div>
         )}
       </div>
 

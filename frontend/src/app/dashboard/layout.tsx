@@ -268,6 +268,12 @@ export default function DashboardLayout({
       (item) => pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
     ) ?? null;
 
+  const topBarPageLabel = (() => {
+    if (pathname.startsWith("/dashboard/account")) return "Account";
+    if (pathname.startsWith("/dashboard/billing")) return "Billing";
+    return activeNavItem?.label ?? "Dashboard";
+  })();
+
   /* ═══════════════════════════════════════════════
      RENDER — Premium SaaS workspace shell
      ═══════════════════════════════════════════════ */
@@ -431,7 +437,7 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-lg font-semibold text-[#0F172A]">{activeNavItem?.label ?? "Dashboard"}</p>
+            <p className="text-lg font-semibold text-[#0F172A]">{topBarPageLabel}</p>
           </div>
 
           {/* Quick nav to inbox */}

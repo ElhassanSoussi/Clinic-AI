@@ -12,6 +12,14 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MetricCard } from "@/components/shared/MetricCard";
 import type { CustomerProfileSummary } from "@/types";
+import { formatCustomerNotePreview } from "@/lib/format-helpers";
+
+function displayInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<CustomerProfileSummary[]>([]);
@@ -64,7 +72,7 @@ export default function CustomersPage() {
           </>
         }
         title="Patient directory"
-        description="Contact details, conversation history, and booking outcomes for every patient who interacted with the assistant."
+        description="A single place to see who has spoken with your assistant, how often they engaged, and whether a booking is in motion."
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
@@ -105,19 +113,28 @@ export default function CustomersPage() {
                 <Link
                   key={customer.key}
                   href={`/dashboard/customers/${customer.key}`}
-                  className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition-all hover:border-[#99f6e4]"
+                  className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition-all hover:border-[#99f6e4] hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#0F172A]">{customer.name}</p>
-                      <p className="mt-0.5 text-xs text-[#475569]">
-                        {customer.phone || customer.email || "No contact saved"}
-                      </p>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-xs font-bold text-[#115E59]">
+                        {displayInitials(customer.name)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[#0F172A]">{customer.name}</p>
+                        <p className="mt-0.5 text-xs text-[#475569]">
+                          {customer.phone || customer.email || "No contact on file"}
+                        </p>
+                        <p className="mt-1 text-xs text-[#64748B]">
+                          Last touch{" "}
+                          {customer.last_interaction_at ? timeAgo(customer.last_interaction_at) : "—"}
+                        </p>
+                      </div>
                     </div>
                     <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#64748B]" />
                   </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-1.5">
+                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#F1F5F9] pt-3 sm:grid-cols-4">
                     {[
                       { label: "Conversations", val: customer.conversation_count },
                       { label: "Requests", val: customer.lead_count },
@@ -125,23 +142,17 @@ export default function CustomersPage() {
                       { label: "Open", val: customer.open_request_count },
                     ].map((stat) => (
                       <div key={stat.label}>
-                        <p className="text-xs uppercase tracking-widest text-[#64748B]">{stat.label}</p>
-                        <p className="mt-0.5 text-sm font-bold text-[#0F172A]">{stat.val}</p>
+                        <p className="text-[11px] font-medium capitalize tracking-wide text-[#64748B]">{stat.label}</p>
+                        <p className="mt-0.5 text-base font-semibold tabular-nums text-[#0F172A]">{stat.val}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-2.5 flex items-center justify-between gap-3 text-xs text-[#475569]">
-                    <span>
-                      Last{" "}
-                      {customer.last_interaction_at
-                        ? timeAgo(customer.last_interaction_at)
-                        : "not recorded"}
-                    </span>
-                    {customer.latest_note ? (
-                      <span className="min-w-0 max-w-full break-words text-right">{customer.latest_note}</span>
-                    ) : null}
-                  </div>
+                  {customer.latest_note ? (
+                    <p className="mt-3 line-clamp-2 border-t border-[#F1F5F9] pt-3 text-xs italic leading-relaxed text-[#64748B]">
+                      {formatCustomerNotePreview(customer.latest_note)}
+                    </p>
+                  ) : null}
                 </Link>
               ))}
             </div>

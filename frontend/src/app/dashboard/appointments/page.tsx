@@ -459,6 +459,7 @@ function AppointmentDetailRail({
 }
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
+  const [viewCounts, setViewCounts] = useState<Partial<Record<AppointmentView, number>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeView, setActiveView] = useState<AppointmentView>("upcoming");
@@ -491,6 +492,7 @@ export default function AppointmentsPage() {
     try {
       const data = await api.frontdesk.listAppointments(view);
       setAppointments(data);
+      setViewCounts((prev) => (prev ? { ...prev, [view]: data.length } : prev));
       setDrafts((current) => {
         const next = { ...current };
         for (const item of data) {
@@ -513,6 +515,28 @@ export default function AppointmentsPage() {
   useEffect(() => {
     loadAppointments(activeView);
   }, [activeView, loadAppointments]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const results = await Promise.all(
+          APPOINTMENT_VIEWS.map((v) => api.frontdesk.listAppointments(v.value))
+        );
+        if (cancelled) return;
+        const next: Partial<Record<AppointmentView, number>> = {};
+        APPOINTMENT_VIEWS.forEach((v, i) => {
+          next[v.value] = results[i].length;
+        });
+        setViewCounts(next);
+      } catch {
+        if (!cancelled) setViewCounts(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const selectedAppointment = useMemo(
     () => appointments.find((item) => item.lead_id === selectedLeadId) ?? null,
@@ -702,6 +726,36 @@ export default function AppointmentsPage() {
         description="Timing, deposits, reminders, and appointment lifecycle in one view. Track every booking from confirmation to completion."
       />
 
+      {viewCounts ? (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {APPOINTMENT_VIEWS.map((view) => {
+            const n = viewCounts[view.value] ?? 0;
+            const active = activeView === view.value;
+            return (
+              <button
+                key={view.value}
+                type="button"
+                onClick={() => setActiveView(view.value)}
+                className={`rounded-xl border px-3 py-2.5 text-left shadow-sm transition-all ${active
+                  ? "border-[#99f6e4] bg-[#CCFBF1]/90"
+                  : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                  }`}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">{view.label}</p>
+                <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{n}</p>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 px-4 py-3 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Workspace</p>
+        <p className="mt-1 text-sm text-[#475569]">
+          Bookings are tied to patient requests from the pipeline. Confirm times here, manage reminders and deposits on the right, and jump to the inbox thread when you need the full conversation.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">
         {/* Left rail — views */}
         <div className="hidden space-y-2.5 xl:block">
@@ -715,8 +769,8 @@ export default function AppointmentsPage() {
                     key={view.value}
                     onClick={() => setActiveView(view.value)}
                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
-                        ? "bg-[#CCFBF1]/90 text-[#115E59]"
-                        : "text-[#475569] hover:bg-[#F8FAFC]"
+                      ? "bg-[#CCFBF1]/90 text-[#115E59]"
+                      : "text-[#475569] hover:bg-[#F8FAFC]"
                       }`}
                   >
                     <span>{view.label}</span>
@@ -744,23 +798,6 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
-        {/* Mobile view selector */}
-        <div className="flex flex-wrap gap-2 xl:hidden">
-          {APPOINTMENT_VIEWS.map((view) => (
-            <button
-              key={view.value}
-              type="button"
-              onClick={() => setActiveView(view.value)}
-              className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${activeView === view.value
-                  ? "bg-[#CCFBF1]/90 text-[#115E59]"
-                  : "text-[#475569] hover:bg-[#F8FAFC]"
-                }`}
-            >
-              {view.label}
-            </button>
-          ))}
-        </div>
-
         {/* Center — appointment list */}
         <div className="min-w-0 space-y-3">
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
@@ -771,7 +808,15 @@ export default function AppointmentsPage() {
             <EmptyState
               icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
               title={`No ${activeView === "upcoming" ? "upcoming" : activeView === "attention" ? "attention-needed" : activeView === "past" ? "completed" : "cancelled"} appointments`}
-              description="Try switching to another view, or appointments will appear here once staff confirms a booking from the pipeline."
+              description="Try another view above, or confirm a booking from the pipeline so scheduled visits appear here."
+              action={
+                <Link
+                  href="/dashboard/leads"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                >
+                  Open booking pipeline
+                </Link>
+              }
             />
           ) : (
             <div className="space-y-2">
@@ -782,8 +827,8 @@ export default function AppointmentsPage() {
                     key={appointment.lead_id}
                     onClick={() => setSelectedLeadId(appointment.lead_id)}
                     className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${active
-                        ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
-                        : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
+                      ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
+                      : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
                       }`}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

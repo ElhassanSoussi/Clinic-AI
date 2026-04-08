@@ -305,7 +305,14 @@ export default function DashboardPage() {
       {/* ── Main layout: canvas + right rail ── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-4 xl:order-none">
+        <div className="order-1 min-w-0 space-y-5 xl:order-none">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Command overview</p>
+            <p className="mt-1 text-sm text-[#475569]">
+              Live front-desk demand, bookings, and the next places staff should look.
+            </p>
+          </div>
+
           {/* Hero panel */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white px-5 py-4 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -372,7 +379,7 @@ export default function DashboardPage() {
           {/* Performance snapshot */}
           <SurfaceCard
             title="Performance snapshot"
-            description="Real metrics from conversations, bookings, and review activity."
+            description="Throughput, deposits, and review load from the last period of activity."
             action={
               <Link
                 href="/dashboard/inbox"

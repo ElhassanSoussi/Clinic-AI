@@ -10,7 +10,7 @@ test.describe("Auth pages render", () => {
 
   test("login page has link to register", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("link", { name: /create one/i })).toHaveAttribute("href", /\/register/);
+    await expect(page.getByRole("link", { name: /start free trial/i })).toHaveAttribute("href", /\/register/);
   });
 
   test("login page has back link to home", async ({ page }) => {

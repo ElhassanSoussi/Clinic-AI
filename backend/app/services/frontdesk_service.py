@@ -3425,6 +3425,8 @@ def build_reminder_previews(clinic_id: str) -> list[dict[str, Any]]:
     previews: list[dict[str, Any]] = []
     sms_ready, sms_blocked_reason = _sms_can_send(clinic_id)
     for lead in leads:
+        if not lead.get("id"):
+            continue
         payload = _operation_lead_payload(
             settings["name"],
             settings["reminder_enabled"],
@@ -3442,7 +3444,7 @@ def build_reminder_previews(clinic_id: str) -> list[dict[str, Any]]:
             blocked_reason = "A patient phone number is required before an SMS reminder can be sent."
         previews.append(
             {
-                "lead_id": lead["id"],
+                "lead_id": str(lead["id"]),
                 "patient_name": payload["patient_name"],
                 "patient_phone": payload["patient_phone"],
                 "appointment_starts_at": payload["appointment_starts_at"],
@@ -4922,7 +4924,7 @@ def _operation_lead_payload(
         reminder_scheduled_for = appointment_starts_at - timedelta(hours=reminder_lead_hours)
 
     return {
-        "lead_id": lead["id"],
+        "lead_id": str(lead.get("id") or ""),
         "patient_name": lead.get("patient_name") or _UNKNOWN_PATIENT,
         "patient_phone": lead.get("patient_phone") or "",
         "patient_email": lead.get("patient_email") or "",
@@ -5511,6 +5513,8 @@ def _build_operations_request_lists(
     reminder_candidates: list[dict[str, Any]] = []
     action_required_requests: list[dict[str, Any]] = []
     for lead in leads:
+        if not lead.get("id"):
+            continue
         payload = _operation_lead_payload(
             clinic["name"],
             clinic["reminder_enabled"],

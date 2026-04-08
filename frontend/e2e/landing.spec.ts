@@ -45,8 +45,12 @@ test.describe("Landing page", () => {
     await expect(footer).toBeVisible();
     await expect(footer.getByRole("link", { name: "Sign in" })).toBeVisible();
     await expect(footer.getByRole("link", { name: /start free/i })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Privacy" })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Terms" })).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "Privacy", exact: true }),
+    ).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "Terms", exact: true }),
+    ).toBeVisible();
   });
 
   test("page has no console errors", async ({ page }) => {

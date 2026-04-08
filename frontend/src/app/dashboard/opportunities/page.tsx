@@ -38,6 +38,11 @@ function taskStatusClass(status: FollowUpTask["status"]): string {
   return "bg-[#CCFBF1] text-[#115E59] border-[#99f6e4]";
 }
 
+function recoveryCardClass(isHigh: boolean): string {
+  if (isHigh) return "border border-rose-200 bg-rose-50/30 shadow-sm ring-1 ring-rose-100";
+  return "border border-[#E2E8F0] bg-white shadow-sm";
+}
+
 export default function OpportunitiesPage() {
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -153,8 +158,8 @@ export default function OpportunitiesPage() {
             Follow-ups
           </>
         }
-        title="Follow-up queue"
-        description="Stalled requests and missed-call recovery threads that need your attention. Triage, queue, and resolve from one place."
+        title="Follow-up & recovery"
+        description="Triage stalled requests and recovery threads before they go cold. Queue work for the team, snooze what can wait, or mark done when handled."
       />
 
       {error && (
@@ -167,8 +172,8 @@ export default function OpportunitiesPage() {
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-[#0F172A]">Active queue</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">Tasks you can complete now, automate later.</p>
+                <p className="text-sm font-semibold text-[#0F172A]">Active recovery queue</p>
+                <p className="mt-0.5 text-xs text-[#64748B]">Committed follow-ups with clear due dates and actions.</p>
               </div>
               <span className="rounded-md bg-[#CCFBF1]/90 px-2 py-0.5 text-xs font-semibold text-[#115E59]">{followUps.length} active</span>
             </div>
@@ -185,7 +190,7 @@ export default function OpportunitiesPage() {
                   const href = followUpHref(task);
                   const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
                   return (
-                    <div key={task.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div key={task.id} className={`rounded-lg p-3 ${recoveryCardClass(task.priority === "high")}`}>
                       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -267,7 +272,7 @@ export default function OpportunitiesPage() {
                   const href = opportunityHref(opportunity);
                   const busy = savingId === opportunity.id;
                   return (
-                    <div key={opportunity.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(opportunity.priority === "high")}`}>
                       <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-1 flex flex-wrap items-center gap-1.5">

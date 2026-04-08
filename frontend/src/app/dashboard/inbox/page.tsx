@@ -102,6 +102,13 @@ export default function InboxPage() {
     return channels;
   }, [threads]);
 
+  function threadAccentClass(status: InboxConversation["derived_status"]): string {
+    if (status === "needs_follow_up") return "border-l-4 border-l-amber-400";
+    if (status === "open") return "border-l-4 border-l-sky-400";
+    if (status === "booked") return "border-l-4 border-l-emerald-400";
+    return "border-l-4 border-l-transparent";
+  }
+
   if (loading) return <LoadingState message="Loading conversations..." />;
   if (error) return <ErrorState message={error} onRetry={loadInbox} />;
 
@@ -121,10 +128,14 @@ export default function InboxPage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_1fr_240px]">
         {/* Left rail — filters */}
         <aside className="hidden space-y-3 xl:block">
-          {/* Metrics */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Conversation mix</p>
-            <div className="mt-2.5 space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Inbox filters</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+              Scan volume, then narrow by status or channel — counts stay in sync.
+            </p>
+
+            <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">Volume</p>
+            <div className="mt-2 space-y-1.5">
               {[
                 { label: "All", value: counts.all, tone: "slate" as const },
                 { label: "Open", value: counts.open, tone: "blue" as const },
@@ -134,29 +145,28 @@ export default function InboxPage() {
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={MessageSquareMore} tone={card.tone} />
               ))}
             </div>
-          </div>
 
-          {/* Status filters */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Status</p>
-            <div className="mt-2.5 space-y-1">
-              {STATUS_FILTERS.map((filter) => {
-                const count = counts[filter.value];
-                const active = statusFilter === filter.value;
-                return (
-                  <button
-                    key={filter.value}
-                    onClick={() => setStatusFilter(filter.value)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
+            <div className="mt-4 border-t border-[#E2E8F0] pt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">Status</p>
+              <div className="mt-2 space-y-1">
+                {STATUS_FILTERS.map((filter) => {
+                  const count = counts[filter.value];
+                  const active = statusFilter === filter.value;
+                  return (
+                    <button
+                      key={filter.value}
+                      onClick={() => setStatusFilter(filter.value)}
+                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
                         ? "bg-[#CCFBF1]/90 text-[#115E59]"
                         : "text-[#475569] hover:bg-[#F8FAFC]"
-                      }`}
-                  >
-                    <span>{filter.label}</span>
-                    <span className={`text-xs ${active ? "text-[#0F766E]" : "text-[#64748B]"}`}>{count}</span>
-                  </button>
-                );
-              })}
+                        }`}
+                    >
+                      <span>{filter.label}</span>
+                      <span className={`text-xs ${active ? "text-[#0F766E]" : "text-[#64748B]"}`}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -167,8 +177,8 @@ export default function InboxPage() {
               <button
                 onClick={() => setChannelFilter("all")}
                 className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${channelFilter === "all"
-                    ? "bg-[#0F172A] text-white"
-                    : "border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]"
+                  ? "bg-[#0F172A] text-white"
+                  : "border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]"
                   }`}
               >
                 All <span className="ml-1 text-xs opacity-70">{channelCounts.all}</span>
@@ -247,7 +257,7 @@ export default function InboxPage() {
                 <button
                   key={thread.id}
                   onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                  className="app-row-hover w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-left shadow-sm transition-all hover:border-[#E2E8F0] hover:shadow-md"
+                  className={`app-row-hover w-full rounded-lg border border-[#E2E8F0] bg-white pl-3 pr-3.5 py-2.5 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md ${threadAccentClass(thread.derived_status)}`}
                 >
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
                     <div className="min-w-0 flex-1">

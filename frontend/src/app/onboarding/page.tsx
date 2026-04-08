@@ -40,6 +40,17 @@ const STEPS = [
   { id: 7, title: "Embed Widget", icon: Code2 },
 ];
 
+/** Shown under the stepper so owners know why each step exists. */
+const STEP_GUIDANCE: Record<number, string> = {
+  1: "Use the name and phone patients already know. This builds trust in chat and in follow-up.",
+  2: "List what you actually book. The assistant uses this to answer “do you offer…” without guessing.",
+  3: "Set weekly hours in plain language. Patients ask about open/closing times constantly.",
+  4: "Optional: short Q&A the assistant can quote. Skip now and add later in settings if you prefer.",
+  5: "Keep leads in Sheets or Excel, and get notified when someone requests an appointment. Quick connect is the fastest path.",
+  6: "Run through booking and FAQs using the same API your website widget will use.",
+  7: "Paste one snippet on your site. Patients chat here; your team works from the dashboard.",
+};
+
 const DAYS = [
   "monday",
   "tuesday",
@@ -123,11 +134,11 @@ function FaqStepContent({
   return (
     <div className="p-6 sm:p-8">
       <h2 className="text-xl font-bold text-slate-900 mb-1">
-        Frequently Asked Questions
+        Frequently asked questions
       </h2>
-      <p className="text-sm text-slate-500 mb-6">
-        Add questions patients commonly ask. The AI will use these to
-        provide accurate answers. You can skip this and add them later.
+      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+        Short Q&amp;A pairs the assistant can quote when patients ask about parking, insurance, cancellation, or pricing.
+        Optional — you can skip and add these later under Settings → FAQ.
       </p>
       <div className="max-w-lg">
         {faq.length === 0 ? (
@@ -302,9 +313,8 @@ function GoogleSheetsStepContent({
           </button>
           {googleConnectMessage ? (
             <p
-              className={`mt-3 text-sm ${
-                googleConnectTone === "error" ? "text-red-700" : "text-emerald-800"
-              }`}
+              className={`mt-3 text-sm ${googleConnectTone === "error" ? "text-red-700" : "text-emerald-800"
+                }`}
             >
               {googleConnectMessage}
             </p>
@@ -347,9 +357,8 @@ function GoogleSheetsStepContent({
           </button>
           {excelConnectMessage ? (
             <p
-              className={`mt-3 text-sm ${
-                excelConnectTone === "error" ? "text-red-700" : "text-slate-700"
-              }`}
+              className={`mt-3 text-sm ${excelConnectTone === "error" ? "text-red-700" : "text-slate-700"
+                }`}
             >
               {excelConnectMessage}
             </p>
@@ -447,14 +456,12 @@ function GoogleSheetsStepContent({
                     }
                   />
                   <div
-                    className={`block w-10 h-6 rounded-full transition-colors ${
-                      availabilityEnabled ? "bg-teal-500" : "bg-slate-200"
-                    }`}
+                    className={`block w-10 h-6 rounded-full transition-colors ${availabilityEnabled ? "bg-teal-500" : "bg-slate-200"
+                      }`}
                   />
                   <div
-                    className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                      availabilityEnabled ? "translate-x-4" : ""
-                    }`}
+                    className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""
+                      }`}
                   />
                 </div>
                 <span className="text-sm font-medium text-slate-700">
@@ -500,16 +507,14 @@ function GoogleSheetsStepContent({
                       }
                     />
                     <div
-                      className={`block w-10 h-6 rounded-full transition-colors ${
-                        notificationsEnabled
-                          ? "bg-indigo-500"
-                          : "bg-slate-200"
-                      }`}
+                      className={`block w-10 h-6 rounded-full transition-colors ${notificationsEnabled
+                        ? "bg-indigo-500"
+                        : "bg-slate-200"
+                        }`}
                     />
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                        notificationsEnabled ? "translate-x-4" : ""
-                      }`}
+                      className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? "translate-x-4" : ""
+                        }`}
                     />
                   </div>
                   <span className="text-sm font-medium text-slate-700">
@@ -546,11 +551,10 @@ function GoogleSheetsStepContent({
 
               {sheetsValidation && (
                 <div
-                  className={`p-4 rounded-lg border ${
-                    sheetsValidation.connected
-                      ? "bg-emerald-50 border-emerald-200"
-                      : "bg-red-50 border-red-200"
-                  }`}
+                  className={`p-4 rounded-lg border ${sheetsValidation.connected
+                    ? "bg-emerald-50 border-emerald-200"
+                    : "bg-red-50 border-red-200"
+                    }`}
                 >
                   <div className="flex items-start gap-2">
                     {sheetsValidation.connected ? (
@@ -619,41 +623,46 @@ function TestChatStepContent({
   return (
     <div className="p-6 sm:p-8">
       <h2 className="text-xl font-bold text-slate-900 mb-1">
-        Test your AI assistant
+        Test the patient experience
       </h2>
-      <p className="text-sm text-slate-500 mb-6">
-        Try a conversation to see how patients will experience your
-        assistant. Try saying &quot;I want to book an appointment.&quot;
+      <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-2xl">
+        This preview uses your saved clinic slug and the same chat API as the live widget — not a canned demo transcript.
+        Try “I&apos;d like to book an appointment” or ask about a service you added in step 2.
       </p>
-      <div className="max-w-lg mx-auto border border-slate-200 rounded-xl overflow-hidden">
+      <div className="max-w-lg mx-auto border border-slate-200 rounded-2xl overflow-hidden shadow-md shadow-slate-200/40">
         <div
-          className="onboarding-chat-header px-4 py-3 text-white flex items-center gap-2"
+          className="onboarding-chat-header px-4 py-3.5 text-white flex items-center gap-2"
         >
-          <Bot className="w-5 h-5" />
-          <span className="text-sm font-medium">
-            {assistantName || name || "AI Assistant"}
-          </span>
+          <Bot className="w-5 h-5 shrink-0 opacity-90" aria-hidden />
+          <div className="min-w-0">
+            <span className="text-sm font-semibold block truncate">
+              {assistantName || name || "Assistant"}
+            </span>
+            <span className="text-[11px] text-white/75">Preview — same path as your embed</span>
+          </div>
         </div>
 
-        <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50">
+        <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50/90">
           {chatMessages.length === 0 && (
-            <div className="text-center py-12 text-sm text-slate-400">
-              Send a message to start testing
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed border-slate-200 bg-white">
+              <MessageSquare className="w-8 h-8 text-slate-300 mb-3" aria-hidden />
+              <p className="text-sm font-medium text-slate-700">Send a first message</p>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-xs">
+                Confirm greetings, hours, and booking prompts feel right before you paste the widget on your site.
+              </p>
             </div>
           )}
           {chatMessages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
             >
               <div
-                className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${
-                  msg.role === "user"
-                    ? "bg-teal-600 text-white rounded-br-md"
-                    : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
-                }`}
+                className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${msg.role === "user"
+                  ? "bg-teal-600 text-white rounded-br-md"
+                  : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
+                  }`}
               >
                 {msg.content}
               </div>
@@ -680,14 +689,14 @@ function TestChatStepContent({
                 sendChatMessage();
               }
             }}
-            className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-            placeholder="Type a message..."
+            className="flex-1 min-w-0 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            placeholder="Try: “What services do you offer?”"
           />
           <button
             onClick={sendChatMessage}
             disabled={chatSending || !chatInput.trim()}
             aria-label="Send chat message"
-            className="px-3 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+            className="px-3 py-2 text-white bg-teal-600 rounded-xl hover:bg-teal-700 disabled:opacity-50 shadow-sm shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -713,12 +722,20 @@ function EmbedWidgetStepContent({
   return (
     <div className="p-6 sm:p-8">
       <h2 className="text-xl font-bold text-slate-900 mb-1">
-        Add the chat widget to your website
+        Put the assistant on your website
       </h2>
-      <p className="text-sm text-slate-500 mb-6">
-        Copy the code below and paste it into your website to start
-        receiving real patient leads.
+      <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-2xl">
+        One script tag loads the widget; conversations and leads land in your Clinic AI inbox. After you go live from the
+        dashboard, the same assistant answers here and on your site.
       </p>
+
+      <div className="mb-6 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 text-sm text-teal-900">
+        <p className="font-semibold">You’re almost done</p>
+        <p className="mt-1 text-teal-800/90 leading-relaxed">
+          When you finish, you’ll mark setup complete and can open the dashboard to review leads, turn the assistant live,
+          and tune services or FAQs anytime in Settings.
+        </p>
+      </div>
 
       <div className="max-w-lg space-y-6">
         <div>
@@ -910,9 +927,27 @@ function OnboardingPageProgress({
   step: number;
   onSelectStep: (step: number) => void;
 }>) {
+  const pct = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
+  const currentMeta = STEPS.find((s) => s.id === step);
+  const guidance = STEP_GUIDANCE[step] ?? "";
+
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-4">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-widest text-teal-800/80">Assistant setup</p>
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 mt-1 tracking-tight">
+            Step {step} of {STEPS.length}: {currentMeta?.title}
+          </h1>
+          {guidance ? <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">{guidance}</p> : null}
+        </div>
+        <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-center sm:text-right shadow-sm">
+          <p className="text-xs font-medium text-slate-500">Progress</p>
+          <p className="text-lg font-semibold tabular-nums text-teal-700">{pct}%</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-3 gap-1">
         {STEPS.map((s) => {
           const StepIcon = s.icon;
           const isDone = step > s.id;
@@ -936,7 +971,7 @@ function OnboardingPageProgress({
                 )}
               </div>
               <span
-                className={`text-[10px] sm:text-xs font-medium hidden sm:block ${onboardingStepLabelClass(isCurrent)}`}
+                className={`text-[10px] sm:text-xs font-medium text-center max-w-[4.5rem] leading-tight hidden sm:block ${onboardingStepLabelClass(isCurrent)}`}
               >
                 {s.title}
               </span>
@@ -1378,7 +1413,7 @@ export default function OnboardingPage() {
     ? `<script src="${origin}/widget.js" data-clinic="${clinic.slug}"></script>`
     : "";
   const directChatLink = clinic ? `${origin}/chat/${clinic.slug}` : "";
-  const stepProgressWidth = `${((step - 1) / 6) * 100}%`;
+  const stepProgressWidth = `${((step - 1) / (STEPS.length - 1)) * 100}%`;
 
   const copyEmbed = () => {
     navigator.clipboard.writeText(embedCode);
@@ -1398,33 +1433,36 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-[4.25rem] flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shadow-sm">
             <Bot className="w-5 h-5 text-white" />
           </div>
-          <span className="font-semibold text-slate-900">Clinic AI Setup</span>
-          <span className="ml-auto text-sm text-slate-500">
-            Step {step} of 7
+          <div className="min-w-0">
+            <span className="font-semibold text-slate-900 block leading-tight">Clinic AI</span>
+            <span className="text-xs text-slate-500">Front desk assistant setup</span>
+          </div>
+          <span className="ml-auto text-xs font-medium text-slate-500 tabular-nums shrink-0 hidden sm:block">
+            Step {step}/{STEPS.length}
           </span>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-16">
         <OnboardingPageProgress step={step} onSelectStep={setStep} />
 
         {/* Step content */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-md shadow-slate-200/50">
           {/* ==================== STEP 1: Clinic Info ==================== */}
           {step === 1 && (
             <div className="p-6 sm:p-8">
               <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Tell us about your clinic
+                Clinic identity & contact
               </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                This information will be used by your AI assistant when
-                interacting with patients.
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                Patients see this context in chat and in notifications. Use the same name and phone
+                you list on Google, your site, or your front desk — inconsistency creates doubt.
               </p>
-              <div className="space-y-4 max-w-lg">
+              <div className="space-y-5 max-w-lg">
                 <div>
                   <label htmlFor="ob-clinic-name" className="block text-sm font-medium text-slate-700 mb-1.5">
                     Clinic Name *
@@ -1434,11 +1472,10 @@ export default function OnboardingPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${
-                      errors.name
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
-                    }`}
+                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.name
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                      }`}
                     placeholder="Sunrise Medical Clinic"
                   />
                   {errors.name && (
@@ -1455,11 +1492,10 @@ export default function OnboardingPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${
-                        errors.phone
-                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                          : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
-                      }`}
+                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.phone
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                        : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                        }`}
                       placeholder="(555) 123-4567"
                     />
                     {errors.phone && (
@@ -1477,11 +1513,10 @@ export default function OnboardingPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${
-                        errors.email
-                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                          : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
-                      }`}
+                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.email
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                        : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
+                        }`}
                       placeholder="contact@clinic.com"
                     />
                     {errors.email && (
@@ -1560,11 +1595,11 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="p-6 sm:p-8">
               <h2 className="text-xl font-bold text-slate-900 mb-1">
-                What services does your clinic offer?
+                Services you book
               </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                The AI assistant will use these when helping patients describe
-                their reason for visit.
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                The assistant won’t invent offerings. Add every service you want mentioned in chat — from hygiene to
+                urgent visits — using patient-friendly wording.
               </p>
               <div className="max-w-lg">
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -1661,10 +1696,11 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="p-6 sm:p-8">
               <h2 className="text-xl font-bold text-slate-900 mb-1">
-                Set your business hours
+                Public business hours
               </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                The AI assistant will share these hours with patients who ask.
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                Free-text per day is fine (e.g. “9–5” or “Closed”). These values can surface in patient chat when
+                someone asks if you’re open — keep them aligned with how you answer the phone.
               </p>
               <div className="max-w-lg space-y-3">
                 {DAYS.map((day) => (

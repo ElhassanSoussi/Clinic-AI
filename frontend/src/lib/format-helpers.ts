@@ -1,5 +1,16 @@
 import type { AppointmentStatus, DepositStatus } from "@/types";
 
+/** Shorten directory card footers: hide raw JSON blobs, keep human system messages readable. */
+export function formatCustomerNotePreview(note: string, maxLen = 120): string {
+  const t = note.trim();
+  if (!t) return "";
+  if (t.startsWith("{") && t.includes('"datetime"')) {
+    return "Booking details on file — open profile for full context.";
+  }
+  if (t.length <= maxLen) return t;
+  return `${t.slice(0, maxLen).trimEnd()}…`;
+}
+
 export function toDateInputValue(value?: string | null): string {
   if (!value) return "";
   const date = new Date(value);
