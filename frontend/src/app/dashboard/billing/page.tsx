@@ -134,8 +134,8 @@ export default function BillingPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading billing..." />;
-  if (error) return <ErrorState message={error} onRetry={loadBilling} />;
+  if (loading) return <LoadingState message="Loading billing..." detail="Plan and usage" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadBilling} />;
   if (!billing) return null;
 
   const statusInfo = STATUS_LABELS[billing.subscription_status] || STATUS_LABELS.inactive;
@@ -289,8 +289,8 @@ export default function BillingPage() {
                 <div
                   key={plan.id}
                   className={`rounded-xl border p-5 flex flex-col ${isCurrent
-                      ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
-                      : "border-[#E2E8F0] bg-white shadow-sm"
+                    ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
+                    : "border-[#E2E8F0] bg-white shadow-sm"
                     }`}
                 >
                   <div className="flex items-center gap-2 mb-1">

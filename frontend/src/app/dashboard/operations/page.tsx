@@ -395,12 +395,19 @@ export default function OperationsPage() {
     contacted: waitlistEntries.filter((entry) => entry.status === "contacted").length,
   };
 
-  if (loading) return <LoadingState message="Loading operations..." />;
+  if (loading) return <LoadingState message="Loading operations..." detail="Board and readiness data" />;
   if (error && !clinic) {
-    return <ErrorState message={error} onRetry={loadData} />;
+    return <ErrorState variant="calm" message={error} onRetry={loadData} />;
   }
   if (!operations || !clinic) {
-    return <ErrorState title="Operations unavailable" message="Clinic workspace could not be loaded." onRetry={loadData} />;
+    return (
+      <ErrorState
+        variant="calm"
+        title="Operations unavailable"
+        message="Clinic workspace could not be loaded."
+        onRetry={loadData}
+      />
+    );
   }
 
   return (

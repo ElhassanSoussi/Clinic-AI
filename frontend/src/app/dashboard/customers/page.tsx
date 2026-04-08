@@ -56,8 +56,8 @@ export default function CustomersPage() {
     });
   }, [customers, search]);
 
-  if (loading) return <LoadingState message="Loading customer profiles..." />;
-  if (error) return <ErrorState message={error} onRetry={loadCustomers} />;
+  if (loading) return <LoadingState message="Loading customer profiles..." detail="Profiles are built from assistant conversations" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadCustomers} />;
 
   const customersWithBookings = customers.filter((customer) => customer.booked_count > 0).length;
   const customersNeedingAttention = customers.filter((customer) => customer.open_request_count > 0).length;
@@ -99,11 +99,30 @@ export default function CustomersPage() {
             <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
               <EmptyState
                 icon={<UserRound className="w-5 h-5 text-[#64748B]" />}
-                title={customers.length === 0 ? "No patients yet" : "No patients match your search"}
+                title={customers.length === 0 ? "No patient profiles yet" : "No patients match your search"}
                 description={
                   customers.length === 0
-                    ? "Patient profiles are created automatically when the assistant captures contact details from a conversation."
+                    ? "A profile appears after someone shares contact details in chat or completes part of your booking flow. Web chat is usually the first source."
                     : "Try a different name, phone number, or email address."
+                }
+                action={
+                  customers.length === 0 ? (
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Link
+                        href="/dashboard/inbox"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                      >
+                        Open inbox
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
+                        className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                      >
+                        Check assistant settings
+                      </Link>
+                    </div>
+                  ) : undefined
                 }
               />
             </div>

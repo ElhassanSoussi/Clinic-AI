@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Inbox,
@@ -11,6 +11,8 @@ import {
   Bot,
   TriangleAlert,
   CalendarDays,
+  Settings,
+  ExternalLink,
 } from "lucide-react";
 
 import { api } from "@/lib/api";
@@ -21,7 +23,8 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
-import type { ChannelType, InboxConversation } from "@/types";
+import type { ChannelType, Clinic, InboxConversation } from "@/types";
+import Link from "next/link";
 
 const STATUS_FILTERS: {
   value: "all" | "open" | "needs_follow_up" | "booked" | "handled";
@@ -42,6 +45,7 @@ export default function InboxPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
   const [channelFilter, setChannelFilter] = useState<"all" | ChannelType>("all");
+  const [clinic, setClinic] = useState<Clinic | null>(null);
 
   const loadInbox = useCallback(async () => {
     setLoading(true);
@@ -59,6 +63,13 @@ export default function InboxPage() {
   useEffect(() => {
     loadInbox();
   }, [loadInbox]);
+
+  useEffect(() => {
+    void api.clinics
+      .getMyClinic()
+      .then(setClinic)
+      .catch(() => setClinic(null));
+  }, []);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -109,8 +120,8 @@ export default function InboxPage() {
     return "border-l-4 border-l-transparent";
   }
 
-  if (loading) return <LoadingState message="Loading conversations..." />;
-  if (error) return <ErrorState message={error} onRetry={loadInbox} />;
+  if (loading) return <LoadingState message="Loading conversations..." detail="Syncing threads from web chat and linked channels" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadInbox} />;
 
   return (
     <div className="space-y-6">
@@ -236,11 +247,43 @@ export default function InboxPage() {
           </div>
 
           {filtered.length === 0 ? (() => {
-            let emptyDescription = "Conversations will appear here once patients start chatting via web chat or connected channels.";
+            let emptyDescription =
+              "Web chat creates threads as soon as patients message your public assistant. SMS and other channels appear when they are configured in your environment.";
+            let emptyAction: ReactNode | undefined;
             if (threads.length > 0) {
               emptyDescription = channelFilter === "all"
-                ? "Try adjusting the search or status filter."
-                : `No ${getChannelConfig(channelFilter).label.toLowerCase()} threads match.`;
+                ? "Try clearing search or widening the status filter."
+                : `No threads for ${getChannelConfig(channelFilter).label}. Other channels may still have volume — choose &ldquo;All&rdquo; to compare.`;
+            } else {
+              emptyAction = (
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Link
+                    href="/dashboard/settings"
+                    className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Settings &amp; embed
+                  </Link>
+                  {clinic?.slug ? (
+                    <a
+                      href={`/chat/${clinic.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open patient chat
+                    </a>
+                  ) : null}
+                  <Link
+                    href="/dashboard/leads"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                  >
+                    Booking pipeline
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              );
             }
             return (
               <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
@@ -248,6 +291,7 @@ export default function InboxPage() {
                   icon={<Inbox className="w-5 h-5 text-[#64748B]" />}
                   title={threads.length === 0 ? "No conversations yet" : "No conversations match these filters"}
                   description={emptyDescription}
+                  action={emptyAction}
                 />
               </div>
             );

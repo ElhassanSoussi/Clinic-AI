@@ -126,13 +126,19 @@ function buildEmptyStateConfig(
     };
   }
 
-  const isLive = clinic ? computeSystemStatus(clinic).status === "LIVE" : true;
+  const isLive = clinic ? computeSystemStatus(clinic).status === "LIVE" : false;
   if (isLive === false) {
+    const status = clinic ? computeSystemStatus(clinic).status : null;
+    const desc =
+      status === "READY"
+        ? "Setup checklist is done, but the assistant is not published yet. Go live from Settings or the dashboard header to start capturing real patient requests here."
+        : "Finish clinic setup and connect a spreadsheet (Settings), then go live. Until then, new booking requests will not appear in this list.";
     return {
-      title: "System not live yet",
-      description: "Complete your clinic setup so the assistant can start capturing patient requests automatically.",
+      title: "Assistant not live for patients yet",
+      description: desc,
       action: (
         <button
+          type="button"
           onClick={() => router.push(settingsHref())}
           className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
         >
@@ -145,7 +151,8 @@ function buildEmptyStateConfig(
   if (clinic?.slug) {
     return {
       title: "No requests yet",
-      description: "The assistant is live and ready. Patient requests will appear here automatically as conversations happen.",
+      description:
+        "With the assistant live, new appointment and intake requests land here after patients complete a booking flow in chat. Test below or share your embed when you are ready for real traffic.",
       action: (
         <div className="flex flex-wrap justify-center gap-2">
           <a
@@ -196,11 +203,11 @@ function renderLeadsContent({
   handleInlineStatus,
 }: LeadsContentProps): React.ReactNode {
   if (loading) {
-    return <LoadingState message="Loading requests..." />;
+    return <LoadingState message="Loading requests..." detail="Pipeline and status" />;
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={loadLeads} />;
+    return <ErrorState variant="calm" message={error} onRetry={loadLeads} />;
   }
 
   if (filtered.length === 0) {

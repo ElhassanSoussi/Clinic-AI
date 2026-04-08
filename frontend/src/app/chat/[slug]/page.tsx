@@ -357,13 +357,13 @@ export default function ChatPage({
           aria-labelledby="chat-assistant-title"
         >
           {bootstrapError && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 text-sm text-rose-900">
-              <p className="font-medium">Couldn’t start the conversation</p>
-              <p className="mt-1 text-rose-800/90 text-xs leading-relaxed">{bootstrapError}</p>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
+              <p className="font-medium">Assistant did not respond yet</p>
+              <p className="mt-1 text-amber-900/90 text-xs leading-relaxed">{bootstrapError}</p>
               <button
                 type="button"
                 onClick={retryBootstrap}
-                className="mt-3 inline-flex items-center gap-1.5 min-h-9 rounded-lg bg-white border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-50"
+                className="mt-3 inline-flex items-center gap-1.5 min-h-9 rounded-lg bg-white border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden />
                 Try again

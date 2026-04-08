@@ -669,8 +669,8 @@ function GoogleSheetsSectionContent({
               {sheetsValidation && (
                 <div
                   className={`p-4 rounded-lg border ${sheetsValidation.connected
-                      ? "bg-emerald-50 border-emerald-200"
-                      : "bg-red-50 border-red-200"
+                    ? "bg-emerald-50 border-emerald-200"
+                    : "bg-red-50 border-red-200"
                     }`}
                 >
                   <div className="flex items-start gap-2">
@@ -1298,8 +1298,8 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading settings..." />;
-  if (error) return <ErrorState message={error} onRetry={loadClinic} />;
+  if (loading) return <LoadingState message="Loading settings..." detail="Clinic configuration" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadClinic} />;
   const statusState: SettingsStatusInput = {
     name,
     phone,
@@ -1382,8 +1382,8 @@ export default function SettingsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${clinic.is_live
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-amber-200 bg-amber-50 text-amber-900"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-amber-200 bg-amber-50 text-amber-900"
                     }`}
                 >
                   <span
@@ -1464,8 +1464,8 @@ export default function SettingsPage() {
           {saveMessage && (
             <div
               className={`p-3 text-sm rounded-lg border ${saveMessage.includes("success") || saveMessage.includes("copied")
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                  : "bg-red-50 text-red-700 border-red-100"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                : "bg-red-50 text-red-700 border-red-100"
                 }`}
             >
               {saveMessage}

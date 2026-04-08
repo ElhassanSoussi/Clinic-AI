@@ -152,7 +152,7 @@ export default function LeadDetailPage({
   };
 
   if (loading) return <LoadingState message="Loading request details..." />;
-  if (error) return <ErrorState message={error} onRetry={loadLead} />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadLead} />;
   if (!lead)
     return (
       <ErrorState title="Not Found" message="This request could not be found." />
@@ -318,8 +318,8 @@ export default function LeadDetailPage({
               >
                 <div
                   className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${msg.role === "user"
-                      ? "bg-[#0F766E] text-white rounded-br-sm"
-                      : "bg-[#F1F5F9] text-[#0F172A] rounded-bl-sm"
+                    ? "bg-[#0F766E] text-white rounded-br-sm"
+                    : "bg-[#F1F5F9] text-[#0F172A] rounded-bl-sm"
                     }`}
                 >
                   {msg.content}

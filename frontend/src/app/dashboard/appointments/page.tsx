@@ -710,8 +710,9 @@ export default function AppointmentsPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading appointments..." />;
-  if (error) return <ErrorState message={error} onRetry={() => loadAppointments(activeView)} />;
+  if (loading) return <LoadingState message="Loading appointments..." detail="Synchronizing booking board" />;
+  if (error)
+    return <ErrorState variant="calm" message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
     <div className="space-y-6">
@@ -807,8 +808,8 @@ export default function AppointmentsPage() {
           {appointments.length === 0 ? (
             <EmptyState
               icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
-              title={`No ${activeView === "upcoming" ? "upcoming" : activeView === "attention" ? "attention-needed" : activeView === "past" ? "completed" : "cancelled"} appointments`}
-              description="Try another view above, or confirm a booking from the pipeline so scheduled visits appear here."
+              title={`No ${APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "matching"} appointments`}
+              description='Switch views to see other stages, or mark a request as booked in Leads once a time is confirmed — it appears here after the board refreshes.'
               action={
                 <Link
                   href="/dashboard/leads"

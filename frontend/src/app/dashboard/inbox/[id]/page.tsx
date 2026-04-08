@@ -803,7 +803,7 @@ export default function InboxThreadPage({
   }, [detail]);
 
   if (loading) return <LoadingState message="Loading conversation..." />;
-  if (loadError) return <ErrorState message={loadError} onRetry={loadConversation} />;
+  if (loadError) return <ErrorState variant="calm" message={loadError} onRetry={loadConversation} />;
   if (!detail) {
     return <ErrorState title="Not found" message="This conversation could not be found." />;
   }

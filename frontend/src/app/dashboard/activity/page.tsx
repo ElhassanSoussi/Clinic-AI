@@ -46,7 +46,7 @@ export default function ActivityPage() {
     loadActivity();
   }, [loadActivity]);
 
-  if (loading) return <LoadingState message="Loading activity..." />;
+  if (loading) return <LoadingState message="Loading activity..." detail="Recent workspace events" />;
 
   return (
     <div className="space-y-6">
@@ -78,8 +78,10 @@ export default function ActivityPage() {
 
       {fetchNotice ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
-          <p className="font-semibold">Activity feed did not load</p>
-          <p className="mt-1 text-amber-800/90">{fetchNotice}</p>
+          <p className="font-semibold">Timeline unavailable right now</p>
+          <p className="mt-1 text-amber-800/90 leading-relaxed">
+            {fetchNotice} This page will stay empty until the feed loads — your workspace data is unchanged.
+          </p>
           <button
             type="button"
             onClick={() => void loadActivity()}
@@ -97,7 +99,7 @@ export default function ActivityPage() {
               <EmptyState
                 icon={<Activity className="w-5 h-5 text-[#64748B]" />}
                 title="No activity yet"
-                description="Events will appear here once patients begin interacting with the assistant."
+                description="Events log as patients chat, leads move, and staff act. Right after setup, an empty timeline is normal until the first conversation arrives."
               />
             </div>
           ) : null}

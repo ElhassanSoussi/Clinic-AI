@@ -129,7 +129,7 @@ export default function CustomerProfilePage({
   };
 
   if (loading) return <LoadingState message="Loading customer profile..." />;
-  if (loadError) return <ErrorState message={loadError} onRetry={loadProfile} />;
+  if (loadError) return <ErrorState variant="calm" message={loadError} onRetry={loadProfile} />;
   if (!profile) {
     return <ErrorState title="Not found" message="This customer profile could not be found." />;
   }

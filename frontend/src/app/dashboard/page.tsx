@@ -32,6 +32,7 @@ import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
 import { EVENT_CONFIG } from "@/lib/activity-config";
 import { formatMoney } from "@/lib/format-helpers";
+import { DEGRADED_FRONTDESK_ANALYTICS } from "@/lib/degraded-analytics";
 import type {
   ActivityEvent,
   AppointmentRecord,
@@ -63,10 +64,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showFirstLeadSuccess, setShowFirstLeadSuccess] = useState(false);
+  const [analyticsDegraded, setAnalyticsDegraded] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     setError("");
+    setAnalyticsDegraded(false);
     try {
       const optional = async <T,>(loader: Promise<T>, fallback: T): Promise<T> => {
         try {
@@ -95,7 +98,12 @@ export default function DashboardPage() {
       ]);
 
       setClinic(clinicData);
-      setAnalytics(analyticsData);
+      const safeAnalytics =
+        analyticsData && typeof analyticsData.conversations_total === "number"
+          ? analyticsData
+          : null;
+      setAnalyticsDegraded(!safeAnalytics);
+      setAnalytics(safeAnalytics ?? DEGRADED_FRONTDESK_ANALYTICS);
       setBilling(billingData);
       setActivity(activityData);
       setOpportunities(opportunitiesData);
@@ -118,17 +126,9 @@ export default function DashboardPage() {
     }
   }, [firstLead, loading]);
 
-  if (loading) return <LoadingState message="Loading dashboard..." />;
-  if (error) return <ErrorState message={error} onRetry={loadDashboard} />;
-  if (!analytics || typeof analytics.conversations_total !== "number") {
-    return (
-      <ErrorState
-        title="Analytics unavailable"
-        message="The dashboard could not load the latest front desk metrics."
-        onRetry={loadDashboard}
-      />
-    );
-  }
+  if (loading) return <LoadingState message="Loading dashboard..." detail="Gathering clinic and workspace summaries" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={loadDashboard} />;
+  if (!analytics) return <LoadingState message="Loading dashboard..." />;
 
   const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
 
@@ -138,7 +138,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
           title="No activity yet"
-          description="Your assistant is live and ready. Activity will appear here as patients start conversations through the chat widget or SMS."
+          description="Your assistant is live. Activity appears as patients use web chat (and SMS when configured). No volume yet is normal right after go-live."
           action={
             clinic.slug ? (
               <a
@@ -236,6 +236,25 @@ export default function DashboardPage() {
       />
 
       {/* ── First lead success banner ── */}
+      {analyticsDegraded ? (
+        <div className="flex flex-wrap items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-amber-900">Front-desk metrics did not load</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-amber-800/90">
+              The rest of the dashboard is still available. Counts below may show zero until the metrics service responds — use &ldquo;Try again&rdquo; or refresh shortly.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void loadDashboard()}
+            className="shrink-0 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+          >
+            Retry metrics
+          </button>
+        </div>
+      ) : null}
+
       {showFirstLeadSuccess && (
         <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
           <div className="flex items-center gap-3">

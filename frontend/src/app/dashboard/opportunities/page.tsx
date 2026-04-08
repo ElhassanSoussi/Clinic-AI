@@ -144,9 +144,9 @@ export default function OpportunitiesPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading opportunities..." />;
+  if (loading) return <LoadingState message="Loading follow-ups..." detail="Loading triage and queue" />;
   if (error && opportunities.length === 0 && followUps.length === 0) {
-    return <ErrorState message={error} onRetry={loadData} />;
+    return <ErrorState variant="calm" message={error} onRetry={loadData} />;
   }
 
   return (
@@ -163,7 +163,17 @@ export default function OpportunitiesPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
+          <p className="font-semibold">Partial update issue</p>
+          <p className="mt-0.5 text-amber-800/95">{error}</p>
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="mt-2 text-xs font-semibold text-[#0F766E] hover:underline"
+          >
+            Refresh data
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
@@ -181,8 +191,8 @@ export default function OpportunitiesPage() {
             {followUps.length === 0 ? (
               <EmptyState
                 icon={<CheckCircle2 className="w-5 h-5 text-[#64748B]" />}
-                title="No queued follow-ups"
-                description="Move items from the triage list below into the active queue to start tracking them."
+                title="Queue is clear"
+                description="When you queue an item from triage below, it lands here with due context. An empty queue either means nothing is committed yet or the team has cleared recent work."
               />
             ) : (
               <div className="space-y-2.5">
@@ -263,8 +273,8 @@ export default function OpportunitiesPage() {
             {triageItems.length === 0 ? (
               <EmptyState
                 icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
-                title="No unqueued items"
-                description="All follow-up items are either resolved or already in the active queue above."
+                title="Nothing waiting in triage"
+                description="New recovery items appear when conversations stall or requests age. If inbox and leads are quiet, this staying empty is expected."
               />
             ) : (
               <div className="space-y-2.5">

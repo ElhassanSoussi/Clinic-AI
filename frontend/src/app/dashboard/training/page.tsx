@@ -319,10 +319,17 @@ export default function TrainingPage() {
     ];
   }, [clinic]);
 
-  if (loading) return <LoadingState message="Loading AI training..." />;
-  if (error && !training) return <ErrorState message={error} onRetry={loadTraining} />;
+  if (loading) return <LoadingState message="Loading training workspace..." detail="Knowledge score and uploads" />;
+  if (error && !training) return <ErrorState variant="calm" message={error} onRetry={loadTraining} />;
   if (!training || !clinic) {
-    return <ErrorState title="Missing training data" message="Training data could not be loaded." />;
+    return (
+      <ErrorState
+        variant="calm"
+        title="Training data not available"
+        message="We could not load the knowledge workspace. Refresh or try again in a moment."
+        onRetry={loadTraining}
+      />
+    );
   }
 
   const documents = training.documents || [];
@@ -343,7 +350,10 @@ export default function TrainingPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">{error}</div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-2.5 text-sm text-amber-900">
+          <span className="font-semibold">Update issue: </span>
+          {error}
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_240px]">
@@ -456,8 +466,9 @@ export default function TrainingPage() {
                 </p>
 
                 {documents.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
-                    No documents uploaded yet. Upload a PDF or TXT file to get started.
+                  <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
+                    <p>Documents are optional. Your settings (services, FAQ, hours) already power answers.</p>
+                    <p className="mt-2">Upload PDF or TXT when you want policies or long-form detail in retrieval — processing may take a minute.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
