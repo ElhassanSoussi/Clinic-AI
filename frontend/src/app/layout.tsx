@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { getSiteMetadataBaseUrl } from "@/lib/env";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
@@ -9,11 +10,13 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
+const siteUrl = getSiteMetadataBaseUrl();
+
 export const metadata: Metadata = {
   title: "Clinic AI Front Desk",
   description:
     "AI-powered front desk assistant for clinics. Reduce missed calls, capture appointment requests, and manage patient inquiries.",
-  metadataBase: new URL("https://clinicaireply.com"),
+  metadataBase: new URL(siteUrl),
   alternates: {
     canonical: "/",
   },
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
     title: "Clinic AI Front Desk",
     description:
       "AI-powered front desk assistant for clinics. Reduce missed calls, capture appointment requests, and manage patient inquiries.",
-    url: "https://clinicaireply.com",
+    url: siteUrl,
     siteName: "Clinic AI",
     type: "website",
   },

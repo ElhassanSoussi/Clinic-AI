@@ -14,7 +14,7 @@ Clinic AI is a SaaS front desk assistant for clinics. The product includes:
 - Backend: Render
 - Database/Auth/Storage: Supabase
 
-For full production setup, use [DEPLOYMENT.md](DEPLOYMENT.md).
+For full production setup, use [DEPLOYMENT.md](DEPLOYMENT.md). Frontend-only release steps: [frontend/RELEASE.md](frontend/RELEASE.md).
 
 ## Repo Structure
 
@@ -70,10 +70,17 @@ Required:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_API_URL`
 
+Strongly recommended (production):
+
+- `NEXT_PUBLIC_SITE_URL` — canonical `https://` origin for metadata and Open Graph (see `frontend/src/lib/env.ts`)
+
 Optional:
 
-- `API_INTERNAL_URL`
-- `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH`
+- `API_INTERNAL_URL` — server-side API base override
+- `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH`, `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH`
+- Sentry: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`; build-time `SENTRY_AUTH_TOKEN` / org / project for source maps
+
+Details: [frontend/.env.example](frontend/.env.example), [frontend/RELEASE.md](frontend/RELEASE.md).
 
 ### Backend Environment
 

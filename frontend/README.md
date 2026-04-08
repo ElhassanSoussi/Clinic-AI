@@ -16,4 +16,13 @@ npm run dev -- -p 1201
 - Root directory: `frontend`
 - Build command: `npm run build`
 
-See the root [README.md](../README.md) and [DEPLOYMENT.md](../DEPLOYMENT.md) for the full project and deployment instructions.
+**Release checklist (env, domains, smoke):** [RELEASE.md](RELEASE.md).  
+Full stack: [../README.md](../README.md), [../DEPLOYMENT.md](../DEPLOYMENT.md).
+
+### Verify before shipping
+
+```bash
+npm run lint
+npm run build
+npm run e2e
+```

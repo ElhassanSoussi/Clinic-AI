@@ -62,19 +62,31 @@ Feature-specific backend env vars:
 
 1. Create a new Vercel project from this repo.
 2. Set the root directory to `frontend`.
-3. Add the frontend env vars:
+3. Add the **required** frontend env vars (see `frontend/.env.example`):
    - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
-   - `API_INTERNAL_URL=https://api.clinicaireply.com/api`
    - `NEXT_PUBLIC_SUPABASE_URL=...`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
+4. Add **production**-recommended vars:
+   - `NEXT_PUBLIC_SITE_URL=https://clinicaireply.com` — canonical URL for metadata/Open Graph (omit on preview if you are OK with `*.vercel.app` URLs in link previews; required for correct production sharing cards).
+   - `API_INTERNAL_URL=https://api.clinicaireply.com/api` — optional; same as public API if server and browser use the same backend.
+5. OAuth UI flags (align with Supabase providers):
    - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
    - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Microsoft auth is configured in Supabase
-4. Attach the custom domain:
+6. **Sentry (optional):**
+   - `NEXT_PUBLIC_SENTRY_DSN` — error reporting (client + server init via `frontend/src/instrumentation*.ts`)
+   - `SENTRY_DSN` — optional server-only override
+   - For readable stack traces in Sentry: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` in CI or Vercel build env (see Sentry Next.js docs)
+   - `NEXT_PUBLIC_VERCEL_ENV` — optional; set to `preview` or `production` if you want the **browser** SDK environment tag to match deployments (`VERCEL_ENV` is not exposed to the client by default)
+7. Attach the custom domain:
    - `clinicaireply.com`
-5. Verify the site loads and can reach the backend API.
-6. Keep `clinicaireply.com` as the canonical frontend host. If `www.clinicaireply.com` is attached, it should redirect to the apex domain.
+8. Verify the site loads and can reach the backend API.
+9. Keep `clinicaireply.com` as the canonical frontend host. If `www.clinicaireply.com` is attached, it should redirect to the apex domain.
+
+**Preview deployments:** Vercel sets `VERCEL_URL` automatically. Point `NEXT_PUBLIC_API_URL` at a non-production API unless you intentionally want previews to hit production data.
 
 If Vercel shows `No fastapi entrypoint found`, the project is building the repo root instead of `frontend`. Update the Vercel project `Root Directory` to `frontend` and redeploy.
+
+Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md).
 
 ## Supabase
 
@@ -143,10 +155,11 @@ If Vercel shows `No fastapi entrypoint found`, the project is building the repo 
 ## Pre-Deploy Checks
 
 - `python3 -m py_compile backend/app/main.py backend/app/routers/*.py backend/app/services/*.py backend/app/schemas/*.py backend/create_test_user.py backend/scripts/launch_readiness_smoke.py`
-- `cd frontend && npm run build`
+- `cd frontend && npm run lint && npm run build && npm run e2e` (e2e needs a normal local environment for the dev server)
 - `GET /api/health` returns `{"status":"ok"}`
 - required env vars are present
 - `NEXT_PUBLIC_API_URL` points to `https://api.clinicaireply.com/api`
+- Production Vercel env includes `NEXT_PUBLIC_SITE_URL=https://clinicaireply.com` (or your live domain)
 - Render backend uses Python `3.11.15`
 
 ## Smoke Check

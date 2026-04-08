@@ -89,3 +89,26 @@ export function getPublicApiEnv(): string {
 export function getInternalApiEnv(): string {
   return readServerEnv(process.env.API_INTERNAL_URL) ?? getPublicApiEnv();
 }
+
+/**
+ * Public canonical origin for metadata, Open Graph, and relative URL resolution in `layout.tsx`.
+ *
+ * Precedence:
+ * 1. `NEXT_PUBLIC_SITE_URL` — set in Vercel **Production** to the public marketing domain.
+ * 2. `VERCEL_URL` — set by Vercel per deployment (previews use `*.vercel.app`; good for test shares).
+ * 3. Hardcoded default — `https://clinicaireply.com` (local dev without Vercel).
+ *
+ * See `frontend/RELEASE.md` for deployment notes.
+ */
+export function getSiteMetadataBaseUrl(): string {
+  const explicit = normalizeEnvValue(process.env.NEXT_PUBLIC_SITE_URL);
+  if (explicit) {
+    return explicit.replace(/\/$/, "");
+  }
+  const vercel = normalizeEnvValue(process.env.VERCEL_URL);
+  if (vercel) {
+    const host = vercel.replace(/^https?:\/\//, "");
+    return `https://${host}`;
+  }
+  return "https://clinicaireply.com";
+}

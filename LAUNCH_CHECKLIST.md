@@ -7,11 +7,14 @@
   - `ENVIRONMENT=production`
   - `CORS_ORIGINS=https://clinicaireply.com`
   - `PYTHON_VERSION=3.11.15`
-- [ ] **Frontend env vars** — Set in Vercel/hosting:
+- [ ] **Frontend env vars** — Set in Vercel/hosting (see `frontend/.env.example`, `frontend/RELEASE.md`):
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
+  - `NEXT_PUBLIC_SITE_URL=https://clinicaireply.com` (production canonical URL for OG/metadata)
+  - Optional: `API_INTERNAL_URL` if server-side fetches need a different API base
   - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
   - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Azure auth is configured in Supabase
+  - Optional observability: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, and CI vars for Sentry source maps (`SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`)
 - [ ] **Stripe env vars** if billing or deposits are live:
   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
   - `STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_PREMIUM`
