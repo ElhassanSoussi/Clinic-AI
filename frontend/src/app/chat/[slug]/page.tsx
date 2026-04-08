@@ -266,7 +266,7 @@ export default function ChatPage({
 
   return (
     <div
-      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "min-h-screen bg-slate-100/90 flex flex-col items-center justify-center p-3 sm:p-4"}`}
+      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-200/95 via-slate-100 to-teal-50/40 p-3 sm:p-5"}`}
     >
       {isDemo && !isEmbedded && (
         <div className="w-full max-w-md mb-3 sm:mb-4">
@@ -289,7 +289,7 @@ export default function ChatPage({
       )}
 
       <div
-        className={`w-full flex flex-col bg-white overflow-hidden ${isEmbedded ? "h-full min-h-0" : "max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-2xl border border-slate-200/80 shadow-lg shadow-slate-900/5"}`}
+        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.25rem] border border-slate-200/90 shadow-[0_28px_56px_-16px_rgb(15_23_42/0.18),0_12px_24px_-12px_rgb(15_118_110/0.12),inset_0_1px_0_rgb(255_255_255/0.85)]"}`}
       >
         <div className="brand-header px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
           <div

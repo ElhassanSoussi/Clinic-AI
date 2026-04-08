@@ -248,7 +248,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="landing-shell p-8">
+              <div className="auth-shell p-8">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}

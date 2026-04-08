@@ -441,7 +441,7 @@ export default function DashboardLayout({
       {/* ─── MAIN AREA ─── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         {/* ─── TOPBAR ─── */}
-        <header className="dashboard-topbar flex min-h-[3.25rem] shrink-0 flex-wrap items-center gap-2 px-3 py-2 sm:flex-nowrap sm:gap-4 sm:px-5 lg:px-6">
+        <header className="dashboard-topbar relative z-[2] flex min-h-[3.25rem] shrink-0 flex-wrap items-center gap-2 px-3 py-2 sm:flex-nowrap sm:gap-4 sm:px-4 lg:px-5">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -453,7 +453,7 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-xl font-bold tracking-tight text-[#0F172A]">{topBarPageLabel}</p>
+            <p className="text-[1.1875rem] font-bold tracking-[-0.03em] text-[var(--color-app-text)]">{topBarPageLabel}</p>
           </div>
 
           {/* Quick nav to inbox */}
@@ -562,9 +562,9 @@ export default function DashboardLayout({
           />
         </div>
 
-        {/* ─── MAIN CANVAS ─── */}
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="dashboard-content-well min-w-0">
+        {/* ─── MAIN CANVAS (unified with sidebar — inset plane + tighter well) ─── */}
+        <main className="ds-workspace-main-area relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="dashboard-content-well relative z-[1] min-w-0">
             {children}
           </div>
         </main>

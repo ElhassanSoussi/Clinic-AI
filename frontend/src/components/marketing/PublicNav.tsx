@@ -17,7 +17,7 @@ export function PublicNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-300/80 bg-white/85 shadow-[0_1px_0_rgb(15_23_42/0.04)] backdrop-blur-lg backdrop-saturate-150">
+    <nav className="sticky top-0 z-40 border-b border-slate-200/90 bg-[rgb(255_255_255/0.88)] shadow-[0_1px_0_rgb(15_23_42/0.04),0_8px_32px_-16px_rgb(12_18_32/0.12)] backdrop-blur-xl backdrop-saturate-150">
       <div className="marketing-container flex h-[4.25rem] items-center justify-between sm:h-[4.5rem]">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/15">

@@ -141,15 +141,17 @@ function SettingsSection({
   const status = getSectionStatus(sectionKey, statusState);
 
   return (
-    <section className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm overflow-hidden">
+    <section className="ds-card overflow-hidden">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#F8FAFC] transition-colors"
+        className="ds-card-header flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-[var(--color-app-canvas)] sm:px-6"
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <Icon className="w-4 h-4 text-[#64748B] shrink-0" />
-          <span className="text-sm font-medium text-[#0F172A]">{label}</span>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--color-app-border)] bg-[var(--color-app-surface)] text-[var(--color-app-primary-hover)] shadow-sm">
+            <Icon className="h-4 w-4" />
+          </span>
+          <span className="ds-section-title text-[1rem]">{label}</span>
           <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${sectionStatusClass(status)}`}>
             {sectionStatusLabel(status)}
           </span>
@@ -1354,8 +1356,8 @@ export default function SettingsPage() {
         description="A configuration console: identity, channels, knowledge sources, embed readiness, and go-live—grouped into modules so setup feels sequential, not like one endless form."
       />
       {clinic ? (
-        <div className="workspace-main-frame p-5 sm:p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="ds-control-hero-panel relative p-5 sm:p-6">
+          <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
               <p className="workspace-section-label">Assistant visibility</p>
               <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
@@ -1440,7 +1442,7 @@ export default function SettingsPage() {
       ) : null}
       <div className="workspace-stage">
         <div className="workspace-side-rail order-2 xl:order-none">
-          <div className="workspace-rail-card relative p-5 xl:sticky xl:top-6">
+          <div className="ds-rail-panel relative p-5 xl:sticky xl:top-6">
             <p className="workspace-section-label">Configuration status</p>
             <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0F172A]">{completedCount}/10</p>
             <p className="mt-1 text-sm text-[#475569]">Sections configured</p>

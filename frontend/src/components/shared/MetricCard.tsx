@@ -33,14 +33,18 @@ export function MetricCard({
     <div className="ds-card px-4 py-4 sm:px-5 sm:py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[0.9375rem] font-medium text-[var(--color-app-text-muted)]">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight text-[var(--color-app-text)]">{displayValue}</p>
+          <p className="text-[0.9375rem] font-semibold text-[var(--color-app-text-secondary)]">{label}</p>
+          <p className="mt-1.5 text-[1.625rem] font-bold tracking-[-0.04em] text-[var(--color-app-text)] sm:text-[1.75rem]">
+            {displayValue}
+          </p>
           {detail ? (
             <p className="ds-muted-text mt-1.5 max-w-[16rem]">{detail}</p>
           ) : null}
         </div>
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${TONE_STYLES[tone]}`}>
-          <Icon className="h-4 w-4" />
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/50 shadow-sm ${TONE_STYLES[tone]}`}
+        >
+          <Icon className="h-[1.125rem] w-[1.125rem]" />
         </div>
       </div>
     </div>
