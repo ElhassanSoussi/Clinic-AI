@@ -21,8 +21,8 @@ interface StatusBadgeProps {
 export function StatusBadge({ label, tone = "slate", pulse = false }: StatusBadgeProps) {
   const t = TONE_MAP[tone];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${t.bg} ${t.text} ${t.border}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${t.dot} ${pulse ? "animate-pulse" : ""}`} />
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8125rem] font-semibold ${t.bg} ${t.text} ${t.border}`}>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${t.dot} ${pulse ? "animate-pulse" : ""}`} />
       {label}
     </span>
   );

@@ -23,9 +23,9 @@ const VARIANT_MAP = {
 };
 
 const SIZE_MAP = {
-  sm: "px-3 py-1.5 text-xs gap-1.5",
-  md: "px-4 py-2.5 text-sm gap-2",
-  lg: "px-5 py-3 text-sm gap-2",
+  sm: "px-3 py-2 text-[0.8125rem] gap-1.5",
+  md: "px-4 py-2.5 text-[0.9375rem] gap-2",
+  lg: "px-5 py-3 text-[0.9375rem] gap-2",
 };
 
 export function ActionButton({

@@ -28,13 +28,13 @@ export function OperationalCallout({
 }: OperationalCalloutProps) {
   return (
     <div
-      className={`rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 min-w-0 ${toneClass[tone]} ${className}`.trim()}
+      className={`min-w-0 rounded-xl border px-4 py-4 sm:px-5 sm:py-5 ${toneClass[tone]} ${className}`.trim()}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#64748B]">{title}</p>
+      <p className="workspace-section-label">{title}</p>
       {headline ? (
-        <p className="mt-1.5 text-base font-semibold leading-snug text-[#0F172A]">{headline}</p>
+        <p className="mt-2 text-base font-semibold leading-snug text-[var(--color-app-text)]">{headline}</p>
       ) : null}
-      <div className="mt-1.5 text-sm leading-relaxed text-[#475569]">{children}</div>
+      <div className="ds-help-text mt-2">{children}</div>
     </div>
   );
 }

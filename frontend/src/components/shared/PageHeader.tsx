@@ -13,6 +13,10 @@ type PageHeaderProps = {
   showDivider?: boolean;
 };
 
+/**
+ * Standard page chrome for authenticated (and similar) routes.
+ * Uses app-page-* tokens from globals.css for platform-wide hierarchy.
+ */
 export function PageHeader({
   eyebrow,
   title,
@@ -23,24 +27,20 @@ export function PageHeader({
 }: Readonly<PageHeaderProps>) {
   return (
     <header
-      className={`mb-6 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between ${showDivider ? "border-b border-[#E2E8F0] pb-6" : ""} ${className}`.trim()}
+      className={`app-page-header ${showDivider ? "border-b border-[var(--color-app-border)] pb-6" : ""} ${className}`.trim()}
     >
-      <div className="min-w-0">
-        {eyebrow ? (
-          <div className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B]">
-            {eyebrow}
-          </div>
-        ) : null}
-        <h1 className="max-w-3xl break-words text-2xl font-semibold tracking-tight text-[#0F172A]">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-2 max-w-2xl break-words text-sm leading-relaxed text-[#475569]">
-            {description}
-          </p>
-        ) : null}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          {eyebrow ? (
+            <div className="ds-eyebrow mb-1 inline-flex flex-wrap items-center gap-1.5">{eyebrow}</div>
+          ) : null}
+          <h1 className="app-page-title max-w-4xl break-words">{title}</h1>
+          {description ? (
+            <p className="app-page-description mt-3 break-words">{description}</p>
+          ) : null}
+        </div>
+        {actions ? <div className="flex flex-wrap items-center gap-3 lg:shrink-0">{actions}</div> : null}
       </div>
-      {actions ? <div className="mt-4 flex flex-wrap items-center gap-3 lg:mt-0">{actions}</div> : null}
     </header>
   );
 }

@@ -152,7 +152,7 @@ export default function BillingPage() {
   const usageMeterValue = Math.min(billing.monthly_leads_used, usageMeterMax);
 
   return (
-    <div className="mx-auto max-w-6xl workspace-page">
+    <div className="workspace-page">
       <PageHeader
         showDivider
         eyebrow={

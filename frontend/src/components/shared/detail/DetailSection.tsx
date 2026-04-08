@@ -9,7 +9,7 @@ type DetailSectionProps = {
   readonly className?: string;
 };
 
-/** Grouped block with dashboard-consistent section label (no extra card by default). */
+/** Grouped block with platform section label and readable support copy. */
 export function DetailSection({
   label,
   description,
@@ -18,10 +18,8 @@ export function DetailSection({
 }: DetailSectionProps) {
   return (
     <section className={`min-w-0 ${className}`.trim()}>
-      <h2 className="workspace-rail-title mb-2">{label}</h2>
-      {description ? (
-        <p className="mb-3 text-xs leading-relaxed text-[#64748B]">{description}</p>
-      ) : null}
+      <h2 className="workspace-section-label mb-2">{label}</h2>
+      {description ? <p className="ds-help-text mb-3 max-w-2xl">{description}</p> : null}
       {children}
     </section>
   );

@@ -21,28 +21,28 @@ export function ErrorState({
     title ?? (calm ? "Couldn’t load this view" : "Something went wrong");
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
       <div
-        className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg border ${calm ? "border-amber-100 bg-amber-50" : "border-red-100 bg-red-50"
+        className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl border ${calm ? "border-amber-100 bg-amber-50" : "border-red-100 bg-red-50"
           }`}
       >
         {calm ? (
-          <AlertCircle className="h-4 w-4 text-amber-700" />
+          <AlertCircle className="h-5 w-5 text-amber-700" />
         ) : (
-          <AlertTriangle className="h-4 w-4 text-[#DC2626]" />
+          <AlertTriangle className="h-5 w-5 text-[#DC2626]" />
         )}
       </div>
-      <h3 className="text-sm font-semibold text-[#0F172A]">{resolvedTitle}</h3>
-      <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#64748B]">{message}</p>
-      {onRetry && (
+      <h3 className="text-base font-semibold text-[var(--color-app-text)]">{resolvedTitle}</h3>
+      <p className="ds-help-text mt-3 max-w-md">{message}</p>
+      {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-4 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+          className="mt-6 rounded-xl bg-[#0F766E] px-5 py-2.5 text-[0.9375rem] font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[#115E59]"
         >
           Try again
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -10,6 +10,10 @@ type SurfaceCardProps = {
   className?: string;
 };
 
+/**
+ * Primary grouped panel for dashboard/settings-style content.
+ * Matches app-card radius, border, and shadow from the design system.
+ */
 export function SurfaceCard({
   title,
   description,
@@ -18,21 +22,21 @@ export function SurfaceCard({
   className = "",
 }: Readonly<SurfaceCardProps>) {
   return (
-    <section className={`overflow-hidden rounded-lg border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgb(15_23_42/0.05)] ${className}`.trim()}>
+    <section className={`ds-card overflow-hidden ${className}`.trim()}>
       {(title || description || action) && (
-        <div className="flex flex-col gap-1 border-b border-[#E2E8F0] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 border-b border-[var(--color-app-border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
             {title ? (
-              <h2 className="text-[0.9375rem] font-semibold tracking-tight text-[#0F172A]">{title}</h2>
+              <h2 className="text-base font-semibold tracking-tight text-[var(--color-app-text)]">{title}</h2>
             ) : null}
             {description ? (
-              <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{description}</p>
+              <p className="ds-help-text mt-1 max-w-2xl">{description}</p>
             ) : null}
           </div>
           {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
         </div>
       )}
-      <div className="px-4 py-4">{children}</div>
+      <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
     </section>
   );
 }

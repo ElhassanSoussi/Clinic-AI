@@ -10,12 +10,12 @@ interface LoadingStateProps {
 
 export function LoadingState({ message = "Loading...", detail }: LoadingStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-14 text-center">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-[#CCFBF1]">
-        <Loader2 className="h-4 w-4 animate-spin text-[#0F766E]" />
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#CCFBF1]">
+        <Loader2 className="h-5 w-5 animate-spin text-[#0F766E]" />
       </div>
-      <p className="text-sm font-medium text-[#0F172A]">{message}</p>
-      {detail ? <p className="mt-1 text-xs text-[#64748B]">{detail}</p> : null}
+      <p className="text-[0.9375rem] font-semibold text-[var(--color-app-text)]">{message}</p>
+      {detail ? <p className="ds-muted-text mt-2 max-w-sm">{detail}</p> : null}
     </div>
   );
 }

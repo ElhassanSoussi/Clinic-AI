@@ -82,9 +82,11 @@ a {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--color-app-border);
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   background: var(--color-app-surface);
-  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 6px 20px -6px rgb(15 23 42 / 0.08);
 }
 
 .workspace-stage {
@@ -106,10 +108,12 @@ a {
 }
 
 .workspace-rail-card {
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   border: 1px solid var(--color-app-border);
   background: var(--color-app-surface);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 4px 14px -4px rgb(15 23 42 / 0.06);
 }
 
 .workspace-section-label {
@@ -278,9 +282,9 @@ a {
 }
 
 .workspace-rail-title {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--color-app-text-muted);
 }
@@ -290,14 +294,62 @@ a {
   display: flex;
   flex-direction: column;
   gap: clamp(1.75rem, 3vw, 2.5rem);
+  min-width: 0;
+}
+
+/*
+ * Design system — platform-wide surface + type helpers.
+ * Prefer components (PageHeader, SurfaceCard) that encode these rules.
+ */
+.ds-card {
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 4px 16px -4px rgb(15 23 42 / 0.07);
+}
+
+.ds-card-muted {
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-canvas);
+}
+
+.ds-eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-app-text-muted);
+}
+
+.ds-field-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-app-text);
+}
+
+.ds-help-text {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-app-text-secondary);
+}
+
+.ds-muted-text {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-app-text-muted);
 }
 
 /* Detail routes: transcript / timeline framing (flat, scannable) */
 .detail-transcript-frame {
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   border: 1px solid var(--color-app-border);
-  background: #f8fafc;
-  padding: 1rem 1.125rem;
+  background: var(--color-app-canvas);
+  padding: 1.125rem 1.25rem;
   min-width: 0;
 }
 
@@ -380,18 +432,18 @@ a {
 }
 
 .app-card-muted {
-  background: var(--color-app-bg);
+  background: var(--color-app-canvas);
   border: 1px solid var(--color-app-border);
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
 }
 
 .app-input {
   width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--color-app-border);
   background: var(--color-app-surface);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.9375rem;
   color: var(--color-app-text);
 }
 
@@ -458,18 +510,18 @@ a {
 }
 
 .app-page-title {
-  font-size: clamp(1.5rem, 0.6vw + 1.25rem, 2rem);
+  font-size: clamp(1.625rem, 0.85vw + 1.2rem, 2.125rem);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
   color: var(--color-app-text);
 }
 
 .app-page-description {
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  font-size: 1.09375rem;
+  line-height: 1.62;
   color: var(--color-app-text-secondary);
-  max-width: 42rem;
+  max-width: 46rem;
 }
 
 .app-page-kicker {
@@ -477,19 +529,19 @@ a {
   align-items: center;
   gap: 0.375rem;
   align-self: flex-start;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  background: var(--color-app-bg);
+  padding: 0.3125rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--color-app-canvas);
   border: 1px solid var(--color-app-border);
-  color: var(--color-app-primary);
-  font-size: 0.75rem;
+  color: var(--color-app-primary-hover);
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .app-list-row {
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   border: 1px solid transparent;
   background: var(--color-app-surface);
   transition: border-color 0.15s ease, background-color 0.15s ease;
