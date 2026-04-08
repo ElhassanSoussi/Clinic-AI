@@ -5,24 +5,24 @@ export function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-800 bg-[#0f172a] text-slate-300">
-      <div className="marketing-container py-14 sm:py-16">
+    <footer className="border-t border-teal-950/30 bg-gradient-to-b from-[#0c1220] to-[#0f172a] text-slate-300">
+      <div className="marketing-container py-16 sm:py-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-lg shadow-teal-950/40">
                 <Bot className="h-5 w-5 text-white" />
               </div>
-              <span className="text-[0.9375rem] font-semibold text-white">Clinic AI</span>
+              <span className="text-[1.0625rem] font-semibold text-white">Clinic AI</span>
             </Link>
-            <p className="mt-5 max-w-sm text-[1rem] leading-relaxed text-slate-400">
+            <p className="mt-6 max-w-md text-[1.0625rem] leading-relaxed text-slate-400">
               AI front-desk operating system for clinics and private practices. Visible, controllable, and built for real patient communication.
             </p>
           </div>
 
           <div>
-            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">Product</p>
-            <ul className="mt-5 space-y-3.5">
+            <p className="text-[0.84375rem] font-semibold uppercase tracking-[0.11em] text-slate-500">Product</p>
+            <ul className="mt-6 space-y-4">
               {[
                 { href: "/product", label: "Product overview" },
                 { href: "/pricing", label: "Pricing" },
@@ -32,7 +32,7 @@ export function PublicFooter() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
+                    className="text-[1rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -42,10 +42,10 @@ export function PublicFooter() {
           </div>
 
           <div>
-            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">
+            <p className="text-[0.84375rem] font-semibold uppercase tracking-[0.11em] text-slate-500">
               Trust &amp; Safety
             </p>
-            <ul className="mt-5 space-y-3.5">
+            <ul className="mt-6 space-y-4">
               {[
                 { href: "/trust", label: "Trust approach" },
                 { href: "/privacy", label: "Privacy policy" },
@@ -54,7 +54,7 @@ export function PublicFooter() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
+                    className="text-[1rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -64,8 +64,8 @@ export function PublicFooter() {
           </div>
 
           <div>
-            <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-slate-500">Get started</p>
-            <ul className="mt-5 space-y-3.5">
+            <p className="text-[0.84375rem] font-semibold uppercase tracking-[0.11em] text-slate-500">Get started</p>
+            <ul className="mt-6 space-y-4">
               {[
                 { href: "/login", label: "Sign in" },
                 { href: "/register", label: "Start free trial" },
@@ -74,7 +74,7 @@ export function PublicFooter() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[0.9375rem] text-slate-400 transition-colors hover:text-white"
+                    className="text-[1rem] text-slate-400 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>

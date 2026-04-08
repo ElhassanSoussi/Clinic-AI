@@ -70,7 +70,7 @@ function SystemStatusCTA({
       <button
         onClick={onGoLive}
         type="button"
-        className="flex min-h-10 items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+        className="flex min-h-10 items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-teal-900/20 transition-colors hover:bg-[#115E59]"
       >
         <Rocket className="w-3.5 h-3.5" />
         Go Live
@@ -80,7 +80,7 @@ function SystemStatusCTA({
 
   if (systemStatus.status === "LIVE") {
     return (
-      <span className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800">
+      <span className="flex items-center gap-2 rounded-lg bg-green-50 px-3.5 py-2 text-sm font-semibold text-green-800">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#16A34A] animate-pulse" />
         <span>Live</span>
       </span>
@@ -94,7 +94,7 @@ function SystemStatusCTA({
         const first = systemStatus.items.find((item) => item.completed === false);
         openSettingsPage(first?.drawerSection ?? null);
       }}
-      className={`flex min-h-10 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
+      className={`flex min-h-10 items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors ${statusCfg.bg} ${statusCfg.border} ${statusCfg.color} hover:opacity-80 cursor-pointer`}
     >
       <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${statusCfg.dot} animate-pulse`} />
       <span>Complete setup</span>
@@ -247,8 +247,8 @@ export default function DashboardLayout({
   /* ─── Loading / auth guard ─── */
   if (isLoading || showSetupFlow) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
-        <div className="h-7 w-7 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+      <div className="dashboard-shell flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
       </div>
     );
   }
@@ -278,26 +278,26 @@ export default function DashboardLayout({
      RENDER — Premium SaaS workspace shell
      ═══════════════════════════════════════════════ */
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC] max-md:overflow-x-hidden">
+    <div className="dashboard-shell flex h-screen max-md:overflow-x-hidden">
       {/* ─── LEFT SIDEBAR (desktop) ─── */}
-      <aside className="hidden w-56 flex-col border-r border-[#E2E8F0] bg-white lg:flex">
+      <aside className="dashboard-sidebar hidden flex-col lg:flex">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0F766E] shadow-sm">
-            <Bot className="h-3.5 w-3.5 text-white" />
+        <div className="flex items-center gap-3 px-4 pb-4 pt-5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/20">
+            <Bot className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="block text-sm font-semibold tracking-tight text-[#0F172A]">Clinic AI</span>
-            <span className="text-xs text-[#64748B]">Front Desk OS</span>
+            <span className="block text-[0.9375rem] font-semibold tracking-tight text-[#0F172A]">Clinic AI</span>
+            <span className="text-[0.8125rem] font-medium text-[#64748B]">Front Desk OS</span>
           </div>
         </div>
 
         {/* Clinic status card */}
         {clinic && (
-          <div className="mx-3 mb-1.5 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-            <p className="truncate text-xs font-semibold text-[#0F172A]">{clinic.name}</p>
+          <div className="dashboard-side-card mx-3 mb-2 px-3 py-2.5">
+            <p className="truncate text-[0.8125rem] font-semibold text-[#0F172A]">{clinic.name}</p>
             {statusCfg && systemStatus?.status !== "LIVE" && (
-              <span className={`mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium ${statusCfg.color}`}>
+              <span className={`mt-1 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium ${statusCfg.color}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                 {statusCfg.label}
               </span>
@@ -306,8 +306,8 @@ export default function DashboardLayout({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2">
-          <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-[#64748B]">Workspace</p>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+          <p className="workspace-section-label mb-2 px-2">Workspace</p>
           {sidebarNav.map((item) => {
             const isActive =
               pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -316,16 +316,15 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-2.5 rounded-md border-l-2 py-2 pl-2 pr-2.5 text-sm font-medium transition-colors ${isActive
-                  ? "border-[#0F766E] bg-[#CCFBF1] font-semibold text-[#0F766E]"
-                  : "border-transparent text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                  }`}
+                className="dashboard-nav-link group"
+                data-active={isActive ? "true" : "false"}
               >
-                <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B] group-hover:text-[#475569]"
-                  }`} />
+                <item.icon
+                  className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B] group-hover:text-[#475569]"}`}
+                />
                 {item.label}
                 {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                  <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
                     {newLeadCount}
                   </span>
                 )}
@@ -335,15 +334,15 @@ export default function DashboardLayout({
         </nav>
 
         {/* Channels section */}
-        <div className="border-t border-[#E2E8F0] px-2.5 py-2.5">
-          <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-[#64748B]">Channels</p>
+        <div className="border-t border-[#E2E8F0] px-3 py-3">
+          <p className="workspace-section-label mb-2 px-2">Channels</p>
           {user?.clinic_slug && (
             <Link
               href={`/chat/${user.clinic_slug}`}
               target="_blank"
-              className="group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-[#475569] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-[0.9375rem] font-medium text-[#475569] transition-colors hover:bg-[#f4f6f9] hover:text-[#0F172A]"
             >
-              <MessageSquareMore className="h-4 w-4 text-[#64748B] group-hover:text-[#475569]" />
+              <MessageSquareMore className="h-[1.125rem] w-[1.125rem] text-[#64748B] group-hover:text-[#475569]" />
               Patient Chat
               <ExternalLink className="ml-auto h-3.5 w-3.5 text-[#64748B]" />
             </Link>
@@ -351,12 +350,12 @@ export default function DashboardLayout({
         </div>
 
         {/* Operator control card */}
-        <div className="mx-2.5 mb-2.5 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2.5">
-          <div className="flex items-start gap-2">
-            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0F766E]" />
+        <div className="dashboard-side-card mx-3 mb-3 px-3 py-3">
+          <div className="flex items-start gap-2.5">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
             <div>
-              <p className="text-xs font-semibold text-[#0F172A]">Operator control</p>
-              <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+              <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Operator control</p>
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-[#64748B]">
                 Review, takeover, and visibility stay with your team.
               </p>
             </div>
@@ -376,15 +375,15 @@ export default function DashboardLayout({
           aria-label="Close navigation"
         />
         <aside
-          className={`relative flex h-full w-72 max-w-[85vw] flex-col border-r border-[#E2E8F0] bg-white shadow-xl transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`dashboard-sidebar relative flex h-full w-[min(20rem,88vw)] max-w-[85vw] flex-col shadow-2xl transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
             }`}
         >
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0F766E]">
-                <Bot className="h-3.5 w-3.5 text-white" />
+          <div className="flex items-center justify-between px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F766E] shadow-md">
+                <Bot className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-semibold text-[#0F172A]">Clinic AI</span>
+              <span className="text-[0.9375rem] font-semibold text-[#0F172A]">Clinic AI</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -394,7 +393,7 @@ export default function DashboardLayout({
               <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
+          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
             {sidebarNav.map((item) => {
               const isActive =
                 pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -403,15 +402,13 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center gap-2.5 rounded-md border-l-2 py-2 pl-2 pr-2.5 text-sm font-medium transition-colors ${isActive
-                    ? "border-[#0F766E] bg-[#CCFBF1] font-semibold text-[#0F766E]"
-                    : "border-transparent text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                    }`}
+                  className="dashboard-nav-link"
+                  data-active={isActive ? "true" : "false"}
                 >
-                  <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
+                  <item.icon className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
                   {item.label}
                   {item.label === "Leads" && newLeadCount > 0 && (
-                    <span className="ml-auto min-w-[18px] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                    <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
                       {newLeadCount}
                     </span>
                   )}
@@ -425,7 +422,7 @@ export default function DashboardLayout({
       {/* ─── MAIN AREA ─── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         {/* ─── TOPBAR ─── */}
-        <header className="flex min-h-12 shrink-0 flex-wrap items-center gap-2 border-b border-[#E2E8F0] bg-white px-3 py-2 sm:flex-nowrap sm:gap-3 sm:px-4 lg:px-5">
+        <header className="dashboard-topbar flex min-h-[3.25rem] shrink-0 flex-wrap items-center gap-2 px-3 py-2 sm:flex-nowrap sm:gap-4 sm:px-5 lg:px-6">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -437,14 +434,14 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-lg font-semibold text-[#0F172A]">{topBarPageLabel}</p>
+            <p className="text-xl font-bold tracking-tight text-[#0F172A]">{topBarPageLabel}</p>
           </div>
 
           {/* Quick nav to inbox */}
           <div className="flex min-w-0 flex-1 justify-center">
             <Link
               href="/dashboard/inbox"
-              className="inline-flex min-h-10 shrink items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#475569] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
+              className="inline-flex min-h-10 shrink items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-2 text-[0.9375rem] font-medium text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white"
             >
               <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
               <span className="hidden sm:inline">Open inbox</span>
@@ -548,7 +545,7 @@ export default function DashboardLayout({
 
         {/* ─── MAIN CANVAS ─── */}
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto min-w-0 max-w-[1280px] px-4 py-6 pb-8 sm:px-5 lg:px-6">
+          <div className="dashboard-content-well min-w-0">
             {children}
           </div>
         </main>

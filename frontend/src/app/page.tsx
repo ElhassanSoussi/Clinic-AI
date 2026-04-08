@@ -246,7 +246,7 @@ export default function LandingPage() {
       <PublicNav />
 
       {/* ── HERO ── */}
-      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+      <section className="marketing-hero marketing-surface-white border-b border-slate-300/80">
         <div className="marketing-container">
           <div className="landing-hero-grid">
             {/* Copy */}
@@ -273,7 +273,7 @@ export default function LandingPage() {
                   Try live demo
                 </Link>
               </div>
-              <p className="mt-5 text-[0.9375rem] font-medium text-slate-500">
+              <p className="mt-6 text-[1.0625rem] font-medium text-slate-600">
                 No credit card required &middot; Set up in under 15 minutes &middot; Your staff stays in control
               </p>
 
@@ -293,32 +293,32 @@ export default function LandingPage() {
             </div>
 
             {/* Workspace preview */}
-            <div className="relative hidden xl:block">
-              <div className="marketing-hero-preview relative overflow-hidden p-5 sm:p-6 lg:p-7">
-                <div className="grid gap-3 xl:grid-cols-[11rem_1fr_13rem]">
+            <div className="relative hidden lg:block">
+              <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
+                <div className="grid gap-4 lg:grid-cols-[12.5rem_1fr_14rem] xl:grid-cols-[13rem_1fr_14.5rem]">
                   {/* Sidebar */}
-                  <aside className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-                    <div className="mb-4 flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F766E] shadow-sm">
+                  <aside className="rounded-xl border border-slate-200/90 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F766E] shadow-sm">
                         <Bot className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-[#0F172A]">Clinic AI</p>
-                        <p className="text-[10px] text-[#64748B]">Workspace</p>
+                        <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Clinic AI</p>
+                        <p className="text-[0.6875rem] font-medium text-[#64748B]">Workspace</p>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       {["Dashboard", "Conversations", "Appointments", "Patients", "AI Training"].map(
                         (item, i) => (
                           <div
                             key={item}
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${i === 1
-                                ? "border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] shadow-sm"
-                                : "text-[#475569]"
+                            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[0.8125rem] font-medium ${i === 1
+                              ? "border border-slate-200 bg-white text-[#0F172A] shadow-sm"
+                              : "text-[#475569]"
                               }`}
                           >
                             <div
-                              className={`h-1.5 w-1.5 rounded-full ${i === 1 ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
+                              className={`h-2 w-2 rounded-full ${i === 1 ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
                                 }`}
                             />
                             {item}
@@ -329,13 +329,13 @@ export default function LandingPage() {
                   </aside>
 
                   {/* Main panel */}
-                  <div className="app-card p-4">
+                  <div className="app-card p-5">
                     <div className="workspace-toolbar border-b border-[#E2E8F0] pb-3">
-                      <div className="workspace-search min-w-0 flex-1 text-xs">
-                        <Search className="h-3.5 w-3.5" />
+                      <div className="workspace-search min-h-[2.5rem] min-w-0 flex-1 text-[0.8125rem]">
+                        <Search className="h-4 w-4" />
                         <span className="truncate">Search conversations or patients</span>
                       </div>
-                      <div className="app-pill border-[#99f6e4] bg-[#CCFBF1] text-[#115E59]">
+                      <div className="app-pill border-[#99f6e4] bg-[#CCFBF1] text-[#115E59] text-[0.8125rem]">
                         Appointments
                       </div>
                     </div>
@@ -347,20 +347,20 @@ export default function LandingPage() {
                       ].map((item, i) => (
                         <div
                           key={item.name}
-                          className={`app-list-row flex items-center gap-3 px-3 py-2.5 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
+                          className={`app-list-row flex items-center gap-3 px-3 py-3 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
                             }`}
                         >
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                            <Users className="h-3.5 w-3.5" />
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                            <Users className="h-4 w-4" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="truncate text-xs font-semibold text-slate-900">{item.name}</p>
-                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.tone}`}>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="truncate text-[0.8125rem] font-semibold text-slate-900">{item.name}</p>
+                              <span className={`rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${item.tone}`}>
                                 {item.state}
                               </span>
                             </div>
-                            <p className="truncate text-[11px] text-slate-500">{item.note}</p>
+                            <p className="truncate text-[0.75rem] text-slate-600">{item.note}</p>
                           </div>
                         </div>
                       ))}
@@ -369,29 +369,29 @@ export default function LandingPage() {
 
                   {/* Rail */}
                   <div className="space-y-3">
-                    <div className="workspace-rail-card p-4">
+                    <div className="workspace-rail-card p-4 shadow-sm">
                       <p className="workspace-section-label">Today</p>
-                      <h3 className="mt-2.5 text-sm font-semibold text-slate-900">Marta is booked</h3>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">From inquiry to confirmed appointment.</p>
+                      <h3 className="mt-3 text-[0.9375rem] font-semibold text-slate-900">Marta is booked</h3>
+                      <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">From inquiry to confirmed appointment.</p>
                       <div className="mt-3 space-y-2">
                         {["Earliest slot confirmed", "Reminder set", "Deposit visible"].map((item) => (
-                          <div key={item} className="flex items-center gap-2 text-xs text-slate-600">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-teal-600" />
+                          <div key={item} className="flex items-center gap-2 text-[0.8125rem] text-slate-600">
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
                             {item}
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="workspace-rail-card p-4">
+                    <div className="workspace-rail-card p-4 shadow-sm">
                       <p className="workspace-section-label">Operator view</p>
                       <div className="mt-3 space-y-2">
                         <div className="app-card-muted px-3 py-2.5">
-                          <p className="text-[10px] text-slate-500">Staff takeover</p>
-                          <p className="mt-0.5 text-xs font-semibold text-slate-900">Available anytime</p>
+                          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">Staff takeover</p>
+                          <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Available anytime</p>
                         </div>
                         <div className="app-card-muted px-3 py-2.5">
-                          <p className="text-[10px] text-slate-500">AI training</p>
-                          <p className="mt-0.5 text-xs font-semibold text-slate-900">Grounded in clinic data</p>
+                          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">AI training</p>
+                          <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Grounded in clinic data</p>
                         </div>
                       </div>
                     </div>
@@ -405,9 +405,9 @@ export default function LandingPage() {
 
       <main>
         {/* ── HOW IT WORKS ── */}
-        <section className="marketing-section marketing-surface-slate">
+        <section className="marketing-section marketing-surface-warm">
           <div className="marketing-container">
-            <div className="mb-14 max-w-3xl">
+            <div className="mb-16 max-w-4xl">
               <div className="marketing-kicker mb-5">
                 <Workflow className="h-3 w-3" />
                 How it works
@@ -420,10 +420,13 @@ export default function LandingPage() {
                 capturing requests, surfacing follow-up — so nothing slips between the cracks.
               </p>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {howItWorks.map((step) => (
-                <div key={step.step} className="rounded-2xl border border-white/70 bg-white p-7 shadow-sm sm:p-8">
-                  <span className="text-4xl font-bold tabular-nums text-slate-200">{step.step}</span>
+                <div
+                  key={step.step}
+                  className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-md shadow-slate-900/5 sm:p-9"
+                >
+                  <span className="text-5xl font-bold tabular-nums text-slate-200">{step.step}</span>
                   <h3 className="marketing-h3 mt-5">{step.title}</h3>
                   <p className="marketing-body mt-3">{step.description}</p>
                 </div>
@@ -433,10 +436,10 @@ export default function LandingPage() {
         </section>
 
         {/* ── WHAT YOU GET ── */}
-        <section id="product" className="marketing-section marketing-surface-white border-y border-slate-200/80">
+        <section id="product" className="marketing-section marketing-surface-white border-y border-slate-300/70">
           <div className="marketing-container">
-            <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
+            <div className="mb-16 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-4xl">
                 <div className="marketing-kicker mb-5">
                   <LayoutGrid className="h-3 w-3" />
                   What you get
@@ -460,7 +463,10 @@ export default function LandingPage() {
 
             <div className="marketing-feature-grid">
               {featureCards.map((card) => (
-                <div key={card.title} className="rounded-2xl border border-slate-200/90 bg-slate-50/80 p-7 shadow-sm transition-shadow hover:shadow-md sm:p-8">
+                <div
+                  key={card.title}
+                  className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/90 p-8 shadow-md transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lg sm:p-9"
+                >
                   <div className="marketing-icon-wrap h-12 w-12">
                     <card.icon className="h-6 w-6" />
                   </div>
@@ -514,8 +520,8 @@ export default function LandingPage() {
         {/* ── TRUST ── */}
         <section id="trust" className="marketing-section marketing-surface-mist">
           <div className="marketing-container">
-            <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
+            <div className="mb-16 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-4xl">
                 <div className="marketing-kicker mb-5">
                   <ShieldCheck className="h-3 w-3" />
                   Trust &amp; oversight
@@ -538,9 +544,12 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {trustCards.map((item) => (
-                <div key={item.title} className="rounded-2xl border border-white/80 bg-white/90 p-7 shadow-sm sm:p-8">
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-teal-100/80 bg-white/95 p-8 shadow-md shadow-teal-900/5 backdrop-blur-sm sm:p-9"
+                >
                   <div className="marketing-icon-wrap h-12 w-12">
                     <item.icon className="h-6 w-6" />
                   </div>
@@ -555,7 +564,7 @@ export default function LandingPage() {
         {/* ── PRICING ── */}
         <section id="pricing" className="marketing-section marketing-surface-slate">
           <div className="marketing-container">
-            <div className="mb-14 text-center">
+            <div className="mb-16 text-center">
               <div className="marketing-kicker mx-auto mb-5">
                 <Sparkles className="h-3 w-3" />
                 Pricing
@@ -579,8 +588,8 @@ export default function LandingPage() {
                 <div
                   key={plan.id}
                   className={`relative flex flex-col overflow-hidden rounded-2xl border bg-white p-8 sm:p-9 ${plan.highlighted
-                      ? "border-[#0F766E] shadow-xl shadow-teal-900/10 ring-1 ring-[#0F766E]/20"
-                      : "border-white/80 shadow-md shadow-slate-900/5"
+                    ? "border-[#0F766E] shadow-xl shadow-teal-900/10 ring-1 ring-[#0F766E]/20"
+                    : "border-white/80 shadow-md shadow-slate-900/5"
                     }`}
                 >
                   {plan.badge ? (
@@ -588,9 +597,9 @@ export default function LandingPage() {
                       {plan.badge}
                     </div>
                   ) : null}
-                  <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{plan.name}</h3>
-                  <div className="mt-5 flex items-end gap-2">
-                    <span className="text-4xl font-bold tabular-nums text-[#0F172A]">{plan.price}</span>
+                  <h3 className="text-lg font-semibold text-[#0F172A]">{plan.name}</h3>
+                  <div className="mt-6 flex items-end gap-2">
+                    <span className="text-5xl font-bold tabular-nums tracking-tight text-[#0F172A]">{plan.price}</span>
                     <span className="pb-1.5 text-[0.9375rem] font-medium text-[#64748B]">{plan.period}</span>
                   </div>
                   <p className="marketing-body mt-5">{plan.description}</p>
@@ -616,8 +625,8 @@ export default function LandingPage() {
                         onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
                         disabled={checkoutLoading === plan.id}
                         className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[0.9375rem] font-semibold transition-colors disabled:opacity-60 ${plan.highlighted
-                            ? "marketing-cta-primary !w-full shadow-lg"
-                            : "border border-slate-300 bg-white text-[#0F172A] hover:bg-slate-50"
+                          ? "marketing-cta-primary !w-full shadow-lg"
+                          : "border border-slate-300 bg-white text-[#0F172A] hover:bg-slate-50"
                           }`}
                       >
                         {checkoutLoading === plan.id ? "Loading..." : plan.cta}
@@ -644,10 +653,10 @@ export default function LandingPage() {
         </section>
 
         {/* ── FAQ TEASER ── */}
-        <section id="faq" className="marketing-section marketing-surface-white border-y border-slate-200/80">
+        <section id="faq" className="marketing-section marketing-surface-elevated border-y border-slate-300/60">
           <div className="marketing-container">
-            <div className="grid gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] xl:gap-16">
-              <div className="max-w-xl">
+            <div className="grid gap-14 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.4fr)] xl:gap-20">
+              <div className="max-w-lg xl:max-w-xl">
                 <div className="marketing-kicker mb-5">
                   <ShieldCheck className="h-3 w-3" />
                   Common questions
@@ -666,13 +675,13 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {faqs.map((item) => (
                   <div
                     key={item.question}
-                    className="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-7 sm:p-8"
+                    className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm sm:p-9"
                   >
-                    <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                    <h3 className="text-lg font-semibold text-[#0F172A]">{item.question}</h3>
                     <p className="marketing-body mt-3">{item.answer}</p>
                   </div>
                 ))}
@@ -691,10 +700,10 @@ export default function LandingPage() {
                     <Sparkles className="h-3.5 w-3.5" />
                     Get started today
                   </div>
-                  <h2 className="mt-6 text-[clamp(1.875rem,2vw+1rem,2.75rem)] font-bold tracking-tight text-white">
+                  <h2 className="mt-6 text-[clamp(2rem,2.2vw+1rem,3rem)] font-bold tracking-tight text-white">
                     See the difference in your first week.
                   </h2>
-                  <p className="mt-5 max-w-xl text-[1.125rem] leading-relaxed text-teal-100">
+                  <p className="mt-6 max-w-xl text-[1.1875rem] leading-relaxed text-teal-50/95">
                     Configure the assistant with your real clinic information, let your team work from one workspace, and see what a complete front-desk operating system feels like.
                   </p>
                 </div>

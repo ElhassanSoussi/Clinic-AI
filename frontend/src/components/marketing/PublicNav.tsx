@@ -17,8 +17,8 @@ export function PublicNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200/90 bg-white/90 backdrop-blur-md">
-      <div className="marketing-container flex h-16 max-w-[90rem] items-center justify-between sm:h-[4.25rem]">
+    <nav className="sticky top-0 z-40 border-b border-slate-300/80 bg-white/85 shadow-[0_1px_0_rgb(15_23_42/0.04)] backdrop-blur-lg backdrop-saturate-150">
+      <div className="marketing-container flex h-[4.25rem] items-center justify-between sm:h-[4.5rem]">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/15">
             <Bot className="h-5 w-5 text-white" />
@@ -35,8 +35,8 @@ export function PublicNav() {
               key={link.href}
               href={link.href}
               className={`rounded-lg px-4 py-2.5 text-[0.9375rem] font-medium transition-colors ${pathname === link.href || pathname.startsWith(link.href + "/")
-                  ? "bg-slate-100 text-[#0F172A]"
-                  : "text-[#475569] hover:bg-slate-50 hover:text-[#0F172A]"
+                ? "bg-slate-100 text-[#0F172A]"
+                : "text-[#475569] hover:bg-slate-50 hover:text-[#0F172A]"
                 }`}
             >
               {link.label}
