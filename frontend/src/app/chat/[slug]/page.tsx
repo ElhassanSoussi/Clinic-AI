@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, use } from "react";
 import {
   Send,
   Loader2,
@@ -231,6 +231,19 @@ export default function ChatPage({
   };
 
   const step = bookingStep(currentIntent);
+  const bookingProgressBarRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = bookingProgressBarRef.current;
+    if (!el || step === null || leadCaptured) return;
+    const max = STEP_LABELS.length;
+    const clamped = Math.min(max, Math.max(1, Math.floor(step)));
+    el.setAttribute("aria-valuenow", String(clamped));
+    el.setAttribute("aria-valuemin", "1");
+    el.setAttribute("aria-valuemax", String(max));
+    el.setAttribute("aria-valuetext", `Step ${clamped} of ${max}`);
+  }, [step, leadCaptured]);
+
   const inputDisabled = sending || bootstrapped === false;
   const sendDisabled = sending || !input.trim() || bootstrapped === false;
   const inputPlaceholder = buildInputPlaceholder(bootstrapped, leadCaptured, step);
@@ -339,10 +352,18 @@ export default function ChatPage({
 
         {step !== null && !leadCaptured ? (
           <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide shrink-0">
+            <span
+              id="chat-booking-progress-label"
+              className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide shrink-0"
+            >
               Booking {step}/6
             </span>
-            <div className="flex-1 flex gap-1" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={6}>
+            <div
+              ref={bookingProgressBarRef}
+              className="flex-1 flex gap-1"
+              role="progressbar"
+              aria-labelledby="chat-booking-progress-label"
+            >
               {STEP_LABELS.map((label, i) => (
                 <div key={label} className="flex-1 flex flex-col items-center gap-0.5">
                   <div className={`h-1 w-full rounded-full transition-colors ${progressBarClass(i, step)}`} title={label} />

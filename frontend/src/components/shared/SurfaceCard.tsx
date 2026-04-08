@@ -23,7 +23,7 @@ export function SurfaceCard({
         <div className="flex flex-col gap-1 border-b border-[#E2E8F0] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             {title ? (
-              <h2 className="text-sm font-medium text-[#0F172A]">{title}</h2>
+              <h2 className="text-[0.9375rem] font-semibold tracking-tight text-[#0F172A]">{title}</h2>
             ) : null}
             {description ? (
               <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{description}</p>

@@ -16,7 +16,8 @@ test.describe("Leads page", () => {
   test("leads page has request status cards", async ({ page }) => {
     await page.goto("/dashboard/leads");
     await expect(page.locator("main")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText("All requests").first()).toBeVisible();
+    await expect(page.getByText("Request mix").first()).toBeVisible();
+    await expect(page.locator("aside").getByText("All", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("New").first()).toBeVisible();
   });
 });

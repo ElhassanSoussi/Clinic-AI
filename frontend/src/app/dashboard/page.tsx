@@ -27,6 +27,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SurfaceCard } from "@/components/shared/SurfaceCard";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { RightRailCard } from "@/components/ui";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
@@ -211,9 +212,17 @@ export default function DashboardPage() {
     1,
   );
 
+  const quickRoutes = [
+    { href: "/dashboard/inbox", label: "Inbox" },
+    { href: "/dashboard/leads", label: "Pipeline" },
+    { href: "/dashboard/appointments", label: "Appointments" },
+    { href: "/dashboard/operations", label: "Operations" },
+  ] as const;
+
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <LayoutGrid className="h-3.5 w-3.5" />
@@ -221,7 +230,7 @@ export default function DashboardPage() {
           </>
         }
         title="Front desk at a glance"
-        description="Patient volume, booking status, and items that need your attention right now."
+        description="Operational home for conversation volume, bookings, and the next staff actions—without losing the thread of what matters today."
         actions={
           billing && billing.plan !== "premium" ? (
             <Link
@@ -324,46 +333,56 @@ export default function DashboardPage() {
       {/* ── Main layout: canvas + right rail ── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-5 xl:order-none">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748B]">Command overview</p>
-            <p className="mt-1 text-sm text-[#475569]">
-              Live front-desk demand, bookings, and the next places staff should look.
-            </p>
-          </div>
-
-          {/* Hero panel */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white px-5 py-4 shadow-sm">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-xl">
-                <h2 className="text-lg font-semibold tracking-tight text-[#0F172A]">
-                  What happened, what needs attention, and where things stand.
-                </h2>
-                <p className="mt-1 text-sm leading-relaxed text-[#475569]">
-                  Live counts from conversations, bookings, and staff actions across the workspace.
+        <div className="order-1 min-w-0 space-y-6 xl:order-none">
+          <WorkspaceBand>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 max-w-xl">
+                <p className="workspace-section-label">Today&apos;s pressure</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                  Unresolved patient threads, follow-up load, and decisions waiting on staff—triage these before diving into individual records.
                 </p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:w-56">
-                <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Live demand</p>
-                  <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{analytics.conversations_total}</p>
-                  <p className="mt-0.5 text-xs text-[#475569]">Active conversations</p>
+              <div className="flex w-full flex-col gap-4 lg:max-w-md lg:items-end">
+                <div className="grid w-full grid-cols-3 gap-3 sm:max-w-md">
+                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Unresolved</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.unresolved_count}</p>
+                  </div>
+                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Follow-ups</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.follow_up_needed_count}</p>
+                  </div>
+                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Review</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{analytics.human_review_required_count}</p>
+                  </div>
                 </div>
-                <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Booked now</p>
-                  <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{analytics.booked_requests}</p>
-                  <p className="mt-0.5 text-xs text-[#475569]">Confirmed requests</p>
+                <div className="flex flex-wrap gap-2">
+                  {quickRoutes.map((r) => (
+                    <Link
+                      key={r.href}
+                      href={r.href}
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#475569] shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                    >
+                      {r.label}
+                      <ArrowRight className="h-3 w-3 text-[#94A3B8]" />
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
+          </WorkspaceBand>
 
-          {/* Stat cards */}
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {statCards.map((card) => (
-              <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
-            ))}
-          </div>
+          <SurfaceCard
+            title="Pipeline & recovery"
+            description="Volume and outcome signals across conversations—pair with appointments for timing and deposits."
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {statCards.map((card) => (
+                <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
+              ))}
+            </div>
+          </SurfaceCard>
 
           {/* Appointment row */}
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -397,8 +416,8 @@ export default function DashboardPage() {
 
           {/* Performance snapshot */}
           <SurfaceCard
-            title="Performance snapshot"
-            description="Throughput, deposits, and review load from the last period of activity."
+            title="Throughput, deposits & review"
+            description="How the assistant and staff moved work—value recovered, automation, and deposit motion."
             action={
               <Link
                 href="/dashboard/inbox"

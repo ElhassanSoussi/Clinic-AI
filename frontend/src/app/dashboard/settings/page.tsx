@@ -1338,8 +1338,9 @@ export default function SettingsPage() {
   const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <Settings className="h-3.5 w-3.5" />
@@ -1347,10 +1348,10 @@ export default function SettingsPage() {
           </>
         }
         title="Clinic settings"
-        description="What you save here is what the public assistant can use: identity, hours, services, FAQs, fallback wording, spreadsheet data, and branding. Going live is a separate step so you can finish setup before patients see an &ldquo;active&rdquo; chat."
+        description="A configuration console: identity, channels, knowledge sources, embed readiness, and go-live—grouped into modules so setup feels sequential, not like one endless form."
       />
       {clinic ? (
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="workspace-main-frame p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
               <p className="workspace-section-label">Assistant visibility</p>
@@ -1461,6 +1462,10 @@ export default function SettingsPage() {
         </div>
 
         <div className="order-1 min-w-0 space-y-6 xl:order-none">
+          <div>
+            <p className="workspace-section-label">Configuration modules</p>
+            <p className="mt-1 text-sm text-[#475569]">Expand a section to edit. Save applies the whole form and updates assistant behavior together with the dashboard.</p>
+          </div>
           {saveMessage && (
             <div
               className={`p-3 text-sm rounded-lg border ${saveMessage.includes("success") || saveMessage.includes("copied")

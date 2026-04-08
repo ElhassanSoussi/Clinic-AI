@@ -10,7 +10,6 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { MetricCard } from "@/components/shared/MetricCard";
 import type { CustomerProfileSummary } from "@/types";
 import { formatCustomerNotePreview } from "@/lib/format-helpers";
 
@@ -63,8 +62,9 @@ export default function CustomersPage() {
   const customersNeedingAttention = customers.filter((customer) => customer.open_request_count > 0).length;
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <ContactRound className="h-3.5 w-3.5" />
@@ -72,11 +72,16 @@ export default function CustomersPage() {
           </>
         }
         title="Patient directory"
-        description="A single place to see who has spoken with your assistant, how often they engaged, and whether a booking is in motion."
+        description="Relationship-centric profiles: engagement history, open requests, and last touch—meant for context before you open the inbox or a booking."
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
+      <div className="workspace-split">
         <div className="order-1 min-w-0 space-y-4 xl:order-none">
+          <div>
+            <p className="workspace-section-label">Directory</p>
+            <p className="mt-1 text-sm text-[#475569]">Search the full profile list. Cards surface conversation depth and whether something is still open.</p>
+          </div>
+
           {/* Search + summary */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md min-w-0 flex-1">
@@ -179,17 +184,26 @@ export default function CustomersPage() {
         </div>
 
         {/* Right rail */}
-        <div className="order-2 space-y-3 xl:order-none">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Overview</p>
-            <div className="mt-2.5 space-y-2">
-              <MetricCard label="Profiles tracked" value={customers.length} icon={ContactRound} tone="slate" />
-              <MetricCard label="With bookings" value={customersWithBookings} icon={ContactRound} tone="emerald" />
-              <MetricCard label="Open requests" value={customersNeedingAttention} icon={ContactRound} tone="amber" />
+        <aside className="workspace-side-rail order-2 xl:order-none">
+          <div className="workspace-rail-card p-4 xl:sticky xl:top-6">
+            <p className="workspace-rail-title">Directory health</p>
+            <div className="mt-3 grid grid-cols-1 gap-2">
+              {[
+                { label: "Profiles", value: customers.length },
+                { label: "With bookings", value: customersWithBookings },
+                { label: "Open requests", value: customersNeedingAttention },
+              ].map((row) => (
+                <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
+                  <p className="mt-0.5 text-xl font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                </div>
+              ))}
             </div>
+            <p className="mt-3 text-xs leading-relaxed text-[#475569]">
+              Open requests means at least one active booking or intake still in motion for that patient.
+            </p>
           </div>
-
-        </div>
+        </aside>
       </div>
     </div>
   );

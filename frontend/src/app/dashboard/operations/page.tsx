@@ -411,7 +411,7 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       {operationsLoadNotice ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
           <p className="font-semibold">Live operations data did not load</p>
@@ -429,6 +429,7 @@ export default function OperationsPage() {
         </div>
       ) : null}
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -436,18 +437,19 @@ export default function OperationsPage() {
           </>
         }
         title="Operations command center"
-        description="Channel readiness, reminder prep, deposits, waitlist, and bookings that need staff action — in one operational surface."
+        description="Readiness first, channels second, then live queues and automations—structured so you can scan system health before working individual bookings."
       />
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
       {/* System readiness */}
       {systemReadiness && (
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+        <div className="workspace-main-frame p-4 sm:p-5">
           <div className="mb-3 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
             <div>
-              <h2 className="text-sm font-semibold text-[#0F172A]">System readiness</h2>
+              <p className="workspace-section-label">Foundation</p>
+              <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">System readiness</h2>
               <p className="mt-0.5 text-sm text-[#475569]">
                 This shows which integrations and protected capabilities are ready, partial, missing, or blocked right now.
               </p>
@@ -497,11 +499,12 @@ export default function OperationsPage() {
       )}
 
       {/* Channel readiness */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+      <div className="workspace-main-frame p-4 sm:p-5">
         <div className="mb-3 flex items-center gap-2">
           <PhoneMissed className="h-4 w-4 text-[#0F766E]" />
           <div>
-            <h2 className="text-sm font-semibold text-[#0F172A]">Channel readiness</h2>
+            <p className="workspace-section-label">Surface area</p>
+            <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">Channel readiness</h2>
             <p className="mt-0.5 text-sm text-[#475569]">
               Web chat is live now. SMS can send when Twilio is configured, while the rest of the inbox stays ready for future channels without pretending they are connected.
             </p>
@@ -569,58 +572,71 @@ export default function OperationsPage() {
       </div>
 
       {/* Outbound activity metrics */}
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Outbound SMS</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.outbound_sms_total ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Real delivery attempts logged through the SMS channel.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">AI Replies</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.ai_replies_sent ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Assistant-generated SMS replies successfully sent to patients.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Human Review</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.human_review_required ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">SMS threads waiting for staff review before a reply goes out.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Suggested Sent</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.suggested_replies_sent ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">AI drafts approved or edited by staff and sent by SMS.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Reminders Sent</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.reminders_sent ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Booked-request reminders successfully sent by SMS.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Missed-Call Texts</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.missed_call_texts_sent ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Recovery texts sent after missed calls.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Manual Takeovers</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.manual_takeover_threads ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">SMS threads currently held for staff instead of AI auto-reply.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Failed or Skipped</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">
-            {(outboundActivity?.failed_sends ?? 0) + (outboundActivity?.skipped_sends ?? 0)}
-          </p>
-          <p className="mt-1 text-xs text-[#475569]">Review why sending was blocked or failed.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">AI Reply Failures</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.ai_reply_failures ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Assistant replies that could not be sent and still need staff review.</p>
-        </div>
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Blocked for Review</p>
-          <p className="mt-1.5 text-lg font-bold text-[#0F172A]">{outboundActivity?.blocked_for_review ?? 0}</p>
-          <p className="mt-1 text-xs text-[#475569]">Risky or unsupported SMS messages held for staff review.</p>
+      <div className="workspace-main-frame p-4 sm:p-5">
+        <p className="workspace-section-label">Signals</p>
+        <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">Outbound &amp; SMS telemetry</h2>
+        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[#475569]">
+          One board for delivery, review load, and failure modes—ground truth from the messaging layer, not decorative charts.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {[
+            {
+              label: "Outbound SMS",
+              value: outboundActivity?.outbound_sms_total ?? 0,
+              hint: "Delivery attempts logged through SMS.",
+            },
+            {
+              label: "AI replies",
+              value: outboundActivity?.ai_replies_sent ?? 0,
+              hint: "Assistant-generated SMS successfully sent.",
+            },
+            {
+              label: "Human review",
+              value: outboundActivity?.human_review_required ?? 0,
+              hint: "Threads waiting on staff before send.",
+            },
+            {
+              label: "Suggested sent",
+              value: outboundActivity?.suggested_replies_sent ?? 0,
+              hint: "Staff-approved drafts sent by SMS.",
+            },
+            {
+              label: "Reminders sent",
+              value: outboundActivity?.reminders_sent ?? 0,
+              hint: "Booked-request reminders via SMS.",
+            },
+            {
+              label: "Missed-call texts",
+              value: outboundActivity?.missed_call_texts_sent ?? 0,
+              hint: "Recovery texts after missed calls.",
+            },
+            {
+              label: "Manual takeovers",
+              value: outboundActivity?.manual_takeover_threads ?? 0,
+              hint: "Threads held for staff vs AI auto-reply.",
+            },
+            {
+              label: "Failed or skipped",
+              value: (outboundActivity?.failed_sends ?? 0) + (outboundActivity?.skipped_sends ?? 0),
+              hint: "Blocked or failed send attempts.",
+            },
+            {
+              label: "AI reply failures",
+              value: outboundActivity?.ai_reply_failures ?? 0,
+              hint: "Replies that could not be sent.",
+            },
+            {
+              label: "Blocked for review",
+              value: outboundActivity?.blocked_for_review ?? 0,
+              hint: "Held for policy or safety review.",
+            },
+          ].map((cell) => (
+            <div key={cell.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">{cell.label}</p>
+              <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{cell.value}</p>
+              <p className="mt-1 text-xs leading-relaxed text-[#475569]">{cell.hint}</p>
+            </div>
+          ))}
         </div>
       </div>
 

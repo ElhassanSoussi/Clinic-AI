@@ -10,6 +10,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import type { Clinic, FollowUpTask, Opportunity } from "@/types";
 
 function opportunityHref(opportunity: Opportunity): string | null {
@@ -88,6 +89,26 @@ export default function OpportunitiesPage() {
     [opportunities, queuedOpportunityIds]
   );
 
+  const triageHigh = useMemo(
+    () => triageItems.filter((opportunity) => opportunity.priority === "high"),
+    [triageItems]
+  );
+
+  const triageRest = useMemo(
+    () => triageItems.filter((opportunity) => opportunity.priority !== "high"),
+    [triageItems]
+  );
+
+  const sortedFollowUps = useMemo(() => {
+    const copy = [...followUps];
+    copy.sort((a, b) => {
+      if (a.priority === "high" && b.priority !== "high") return -1;
+      if (a.priority !== "high" && b.priority === "high") return 1;
+      return 0;
+    });
+    return copy;
+  }, [followUps]);
+
   const queueFollowUp = async (
     opportunity: Opportunity,
     status: FollowUpTask["status"] = "open"
@@ -150,8 +171,9 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <AlertTriangle className="h-3.5 w-3.5" />
@@ -159,7 +181,7 @@ export default function OpportunitiesPage() {
           </>
         }
         title="Follow-up & recovery"
-        description="Triage stalled requests and recovery threads before they go cold. Queue work for the team, snooze what can wait, or mark done when handled."
+        description="Triage stalled requests before they go cold, then commit work to the queue. High urgency surfaces first in both columns."
       />
 
       {error && (
@@ -176,14 +198,40 @@ export default function OpportunitiesPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_260px]">
+      <WorkspaceBand>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="workspace-section-label">Work in flight</p>
+            <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+              Queue = committed follow-ups. Triage = candidates still waiting for a decision.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Queued", value: followUps.length, tone: "bg-[#CCFBF1]/90 text-[#115E59] border-[#99f6e4]" },
+              { label: "Triage", value: triageItems.length, tone: "bg-amber-50 text-amber-800 border-amber-200" },
+              { label: "High urgency", value: triageHigh.length, tone: "bg-rose-50 text-rose-800 border-rose-200" },
+            ].map((chip) => (
+              <div
+                key={chip.label}
+                className={`min-w-[6.5rem] rounded-lg border px-3 py-2 text-center ${chip.tone}`}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-wide opacity-90">{chip.label}</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">{chip.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </WorkspaceBand>
+
+      <div className="workspace-split">
         <div className="order-1 min-w-0 space-y-4 xl:order-none">
           {/* Follow-up queue */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-4">
+          <div className="workspace-main-frame p-4 sm:p-5">
+            <div className="mb-3 flex items-center justify-between gap-4 border-b border-[#E2E8F0] pb-3">
               <div>
                 <p className="text-sm font-semibold text-[#0F172A]">Active recovery queue</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">Committed follow-ups with clear due dates and actions.</p>
+                <p className="mt-0.5 text-xs text-[#64748B]">Committed follow-ups—high urgency sorted to the top.</p>
               </div>
               <span className="rounded-md bg-[#CCFBF1]/90 px-2 py-0.5 text-xs font-semibold text-[#115E59]">{followUps.length} active</span>
             </div>
@@ -196,7 +244,7 @@ export default function OpportunitiesPage() {
               />
             ) : (
               <div className="space-y-2.5">
-                {followUps.map((task) => {
+                {sortedFollowUps.map((task) => {
                   const href = followUpHref(task);
                   const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
                   return (
@@ -261,11 +309,11 @@ export default function OpportunitiesPage() {
           </div>
 
           {/* Triage */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <div className="mb-2.5 flex items-center justify-between gap-3">
+          <div className="workspace-main-frame p-4 sm:p-5">
+            <div className="mb-2.5 flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3">
               <div>
                 <p className="text-sm font-semibold text-[#0F172A]">Needs triage</p>
-                <p className="mt-0.5 text-xs text-[#475569]">Rules-based risk items from conversations and requests.</p>
+                <p className="mt-0.5 text-xs text-[#475569]">Rules-based risk items—review high urgency first.</p>
               </div>
               <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">{triageItems.length} pending</span>
             </div>
@@ -277,63 +325,126 @@ export default function OpportunitiesPage() {
                 description="New recovery items appear when conversations stall or requests age. If inbox and leads are quiet, this staying empty is expected."
               />
             ) : (
-              <div className="space-y-2.5">
-                {triageItems.map((opportunity) => {
-                  const href = opportunityHref(opportunity);
-                  const busy = savingId === opportunity.id;
-                  return (
-                    <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(opportunity.priority === "high")}`}>
-                      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
-                              {opportunity.priority === "high" ? "High" : "Follow-up"}
-                            </span>
-                            <span className="text-xs text-[#64748B]">{opportunity.customer_name}</span>
-                            {opportunity.occurred_at && (
-                              <span className="inline-flex items-center gap-1 text-xs text-[#64748B]">
-                                <Clock className="w-3 h-3" />
-                                <span>{timeAgo(opportunity.occurred_at)}</span>
-                              </span>
-                            )}
+              <div className="space-y-4">
+                {triageHigh.length > 0 ? (
+                  <div>
+                    <p className="workspace-section-label">High urgency</p>
+                    <div className="mt-2 space-y-2.5">
+                      {triageHigh.map((opportunity) => {
+                        const href = opportunityHref(opportunity);
+                        const busy = savingId === opportunity.id;
+                        return (
+                          <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(true)}`}>
+                            <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
+                                    High
+                                  </span>
+                                  <span className="text-xs text-[#64748B]">{opportunity.customer_name}</span>
+                                  {opportunity.occurred_at && (
+                                    <span className="inline-flex items-center gap-1 text-xs text-[#64748B]">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{timeAgo(opportunity.occurred_at)}</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm font-semibold text-[#0F172A]">{opportunity.title}</p>
+                                <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{opportunity.detail}</p>
+                              </div>
+                              <div className="flex shrink-0 flex-wrap gap-1.5">
+                                {href && (
+                                  <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
+                                    Open
+                                  </Link>
+                                )}
+                                <button
+                                  onClick={() => queueFollowUp(opportunity, "open")}
+                                  disabled={busy}
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                >
+                                  {busy && <Loader2 className="w-3 h-3 animate-spin" />}
+                                  <span>Queue</span>
+                                </button>
+                                <button
+                                  onClick={() => queueFollowUp(opportunity, "completed")}
+                                  disabled={busy}
+                                  className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                                >
+                                  Handled
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm font-semibold text-[#0F172A]">{opportunity.title}</p>
-                          <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{opportunity.detail}</p>
-                        </div>
-                        <div className="flex shrink-0 flex-wrap gap-1.5">
-                          {href && (
-                            <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
-                              Open
-                            </Link>
-                          )}
-                          <button
-                            onClick={() => queueFollowUp(opportunity, "open")}
-                            disabled={busy}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                          >
-                            {busy && <Loader2 className="w-3 h-3 animate-spin" />}
-                            <span>Queue</span>
-                          </button>
-                          <button
-                            onClick={() => queueFollowUp(opportunity, "completed")}
-                            disabled={busy}
-                            className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
-                          >
-                            Handled
-                          </button>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                ) : null}
+
+                {triageRest.length > 0 ? (
+                  <div>
+                    <p className="workspace-section-label">{triageHigh.length > 0 ? "Other triage" : "Triage"}</p>
+                    <div className="mt-2 space-y-2.5">
+                      {triageRest.map((opportunity) => {
+                        const href = opportunityHref(opportunity);
+                        const busy = savingId === opportunity.id;
+                        return (
+                          <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(false)}`}>
+                            <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
+                                    Follow-up
+                                  </span>
+                                  <span className="text-xs text-[#64748B]">{opportunity.customer_name}</span>
+                                  {opportunity.occurred_at && (
+                                    <span className="inline-flex items-center gap-1 text-xs text-[#64748B]">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{timeAgo(opportunity.occurred_at)}</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm font-semibold text-[#0F172A]">{opportunity.title}</p>
+                                <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{opportunity.detail}</p>
+                              </div>
+                              <div className="flex shrink-0 flex-wrap gap-1.5">
+                                {href && (
+                                  <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
+                                    Open
+                                  </Link>
+                                )}
+                                <button
+                                  onClick={() => queueFollowUp(opportunity, "open")}
+                                  disabled={busy}
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                >
+                                  {busy && <Loader2 className="w-3 h-3 animate-spin" />}
+                                  <span>Queue</span>
+                                </button>
+                                <button
+                                  onClick={() => queueFollowUp(opportunity, "completed")}
+                                  disabled={busy}
+                                  className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                                >
+                                  Handled
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
         </div>
 
         {/* Right rail */}
-        <div className="order-2 space-y-3 xl:order-none">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+        <aside className="workspace-side-rail order-2 xl:order-none">
+          <div className="workspace-rail-card p-4 xl:sticky xl:top-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Automation</p>
             <div className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
               <p className="text-xs font-semibold text-[#0F172A]">Auto follow-up</p>
@@ -362,9 +473,7 @@ export default function OpportunitiesPage() {
               </div>
             </div>
           </div>
-
-
-        </div>
+        </aside>
       </div>
     </div>
   );

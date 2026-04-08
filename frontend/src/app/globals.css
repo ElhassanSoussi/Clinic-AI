@@ -208,6 +208,65 @@ a {
   color: var(--color-app-text-muted);
 }
 
+/* Vertical rhythm for authenticated workspace pages */
+.workspace-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Billing: usage meter — native <progress>, no inline width styles */
+.billing-usage-meter {
+  display: block;
+  width: 100%;
+  height: 0.625rem;
+  border: none;
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: #f1f5f9;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.billing-usage-meter::-webkit-progress-bar {
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.billing-usage-meter::-webkit-progress-value {
+  border-radius: 9999px;
+  transition: width 0.2s ease-out;
+}
+
+.billing-usage-meter[data-usage-tone="ok"]::-webkit-progress-value {
+  background-color: #0f766e;
+}
+
+.billing-usage-meter[data-usage-tone="warn"]::-webkit-progress-value {
+  background-color: #f59e0b;
+}
+
+.billing-usage-meter[data-usage-tone="critical"]::-webkit-progress-value {
+  background-color: #ef4444;
+}
+
+.billing-usage-meter::-moz-progress-bar {
+  border-radius: 9999px;
+  transition: width 0.2s ease-out;
+}
+
+.billing-usage-meter[data-usage-tone="ok"]::-moz-progress-bar {
+  background-color: #0f766e;
+}
+
+.billing-usage-meter[data-usage-tone="warn"]::-moz-progress-bar {
+  background-color: #f59e0b;
+}
+
+.billing-usage-meter[data-usage-tone="critical"]::-moz-progress-bar {
+  background-color: #ef4444;
+}
+
 .app-card {
   background: var(--color-app-surface);
   border: 1px solid var(--color-app-border);

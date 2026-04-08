@@ -7,7 +7,6 @@ import {
   Search,
   ArrowRight,
   UserRound,
-  MessageSquareMore,
   Bot,
   TriangleAlert,
   CalendarDays,
@@ -20,7 +19,6 @@ import { timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, FrontdeskStatusBadge, getChannelConfig } from "@/components/shared/FrontdeskBadges";
 import type { ChannelType, Clinic, InboxConversation } from "@/types";
@@ -124,8 +122,9 @@ export default function InboxPage() {
   if (error) return <ErrorState variant="calm" message={error} onRetry={loadInbox} />;
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <Inbox className="h-3.5 w-3.5" />
@@ -133,32 +132,35 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="Every patient conversation in one place — web chat, SMS, and staff notes. Review, respond, or hand off."
+        description="Triage column: filters and volume on the left, searchable threads in the center, and channel context on the right. Everything stays tied to the same live list."
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_1fr_240px]">
+      <div className="workspace-column-layout">
         {/* Left rail — filters */}
         <aside className="hidden space-y-3 xl:block">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Inbox filters</p>
-            <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
-              Scan volume, then narrow by status or channel — counts stay in sync.
+          <div className="workspace-rail-card p-4">
+            <p className="workspace-section-label">Filters</p>
+            <p className="mt-2 text-xs leading-relaxed text-[#64748B]">
+              Narrow by status or channel. Counts mirror the full inbox, not just the current search.
             </p>
 
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">Volume</p>
-            <div className="mt-2 space-y-1.5">
+            <p className="mt-4 workspace-section-label">Volume</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
               {[
-                { label: "All", value: counts.all, tone: "slate" as const },
-                { label: "Open", value: counts.open, tone: "blue" as const },
-                { label: "Follow-up", value: counts.needs_follow_up, tone: "amber" as const },
-                { label: "Resolved", value: counts.booked + counts.handled, tone: "emerald" as const },
-              ].map((card) => (
-                <MetricCard key={card.label} label={card.label} value={card.value} icon={MessageSquareMore} tone={card.tone} />
+                { label: "All", value: counts.all },
+                { label: "Open", value: counts.open },
+                { label: "Follow-up", value: counts.needs_follow_up },
+                { label: "Settled", value: counts.booked + counts.handled },
+              ].map((row) => (
+                <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
+                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                </div>
               ))}
             </div>
 
             <div className="mt-4 border-t border-[#E2E8F0] pt-4">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">Status</p>
+              <p className="workspace-section-label">Status</p>
               <div className="mt-2 space-y-1">
                 {STATUS_FILTERS.map((filter) => {
                   const count = counts[filter.value];
@@ -182,8 +184,8 @@ export default function InboxPage() {
           </div>
 
           {/* Channel filters */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Channels</p>
+          <div className="workspace-rail-card p-4">
+            <p className="workspace-section-label">Channels</p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setChannelFilter("all")}
@@ -215,8 +217,12 @@ export default function InboxPage() {
 
         {/* Center — thread list */}
         <div className="order-1 min-w-0 space-y-3 xl:order-none">
+          <div>
+            <p className="workspace-section-label">Threads</p>
+            <p className="mt-1 text-sm text-[#475569]">Search and open a conversation—status accent on the row matches the filter buckets.</p>
+          </div>
           {/* Search bar */}
-          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
+          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-[0_1px_2px_rgb(15_23_42/0.05)]">
             <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
             <input
               type="text"
@@ -344,8 +350,8 @@ export default function InboxPage() {
         </div>
 
         {/* Right rail — context */}
-        <aside className="order-2 space-y-3 xl:order-none">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+        <aside className="workspace-side-rail order-2 xl:order-none">
+          <div className="workspace-rail-card p-4">
             <div className="flex items-center gap-2">
               <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
                 <Bot className="h-2.5 w-2.5" />
@@ -373,8 +379,8 @@ export default function InboxPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-sm font-semibold text-[#0F172A]">Focus areas</p>
+          <div className="workspace-rail-card p-4">
+            <p className="workspace-section-label">Focus</p>
             <div className="mt-2 space-y-1.5">
               <div className="flex items-start gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-50">

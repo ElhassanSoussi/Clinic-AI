@@ -7,6 +7,10 @@ type PageHeaderProps = {
   title: string;
   description?: string;
   actions?: ReactNode;
+  /** Extra classes on the header wrapper */
+  className?: string;
+  /** Subtle separator under the title block for page→workspace transition */
+  showDivider?: boolean;
 };
 
 export function PageHeader({
@@ -14,9 +18,13 @@ export function PageHeader({
   title,
   description,
   actions,
+  className = "",
+  showDivider = false,
 }: Readonly<PageHeaderProps>) {
   return (
-    <header className="mb-6 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+    <header
+      className={`mb-6 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between ${showDivider ? "border-b border-[#E2E8F0] pb-6" : ""} ${className}`.trim()}
+    >
       <div className="min-w-0">
         {eyebrow ? (
           <div className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B]">

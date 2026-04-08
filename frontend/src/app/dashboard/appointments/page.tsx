@@ -21,6 +21,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { ChannelBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { AppointmentRecord } from "@/types";
@@ -715,53 +716,57 @@ export default function AppointmentsPage() {
     return <ErrorState variant="calm" message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <CalendarClock className="h-3.5 w-3.5" />
             Appointments
           </>
         }
-        title="Appointment board"
-        description="Timing, deposits, reminders, and appointment lifecycle in one view. Track every booking from confirmation to completion."
+        title="Booking & deposit workspace"
+        description="Confirm times, watch reminder prep, and move deposits forward—without a calendar mock-up. Every row links back to the patient thread when you need context."
       />
 
-      {viewCounts ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {APPOINTMENT_VIEWS.map((view) => {
-            const n = viewCounts[view.value] ?? 0;
-            const active = activeView === view.value;
-            return (
-              <button
-                key={view.value}
-                type="button"
-                onClick={() => setActiveView(view.value)}
-                className={`rounded-xl border px-3 py-2.5 text-left shadow-sm transition-all ${active
-                  ? "border-[#99f6e4] bg-[#CCFBF1]/90"
-                  : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
-                  }`}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B]">{view.label}</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{n}</p>
-              </button>
-            );
-          })}
+      <WorkspaceBand>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 max-w-2xl">
+            <p className="workspace-section-label">Board summary</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+              Counts reflect the live appointment board. Use views to focus on upcoming work, items that need attention, or closed states—then act from the list and the detail rail.
+            </p>
+          </div>
+          {viewCounts ? (
+            <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4 lg:max-w-2xl">
+              {APPOINTMENT_VIEWS.map((view) => {
+                const n = viewCounts[view.value] ?? 0;
+                const active = activeView === view.value;
+                return (
+                  <button
+                    key={view.value}
+                    type="button"
+                    onClick={() => setActiveView(view.value)}
+                    className={`rounded-lg border px-3 py-2.5 text-left shadow-[0_1px_2px_rgb(15_23_42/0.05)] transition-all ${active
+                      ? "border-[#99f6e4] bg-[#CCFBF1]/90"
+                      : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                      }`}
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">{view.label}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{n}</p>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </WorkspaceBand>
 
-      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 px-4 py-3 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Workspace</p>
-        <p className="mt-1 text-sm text-[#475569]">
-          Bookings are tied to patient requests from the pipeline. Confirm times here, manage reminders and deposits on the right, and jump to the inbox thread when you need the full conversation.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_1fr_320px]">
+      <div className="workspace-column-layout">
         {/* Left rail — views */}
         <div className="hidden space-y-2.5 xl:block">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Views</p>
+          <div className="workspace-rail-card p-4">
+            <p className="workspace-section-label">Views</p>
             <div className="mt-2.5 space-y-1">
               {APPOINTMENT_VIEWS.map((view) => {
                 const active = activeView === view.value;
@@ -782,8 +787,8 @@ export default function AppointmentsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Board</p>
+          <div className="workspace-rail-card p-4">
+            <p className="workspace-section-label">Board</p>
             <div className="mt-2 space-y-1.5">
               <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
                 <p className="text-xs text-[#475569]">Visible</p>
@@ -801,9 +806,9 @@ export default function AppointmentsPage() {
 
         {/* Center — appointment list */}
         <div className="min-w-0 space-y-3">
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-            <p className="text-sm font-semibold text-[#0F172A]">Appointments</p>
-            <p className="mt-0.5 text-xs text-[#475569]">Timing, reminders, deposit state, and linked patient context.</p>
+          <div>
+            <p className="workspace-section-label">Appointment list</p>
+            <p className="mt-1 text-sm text-[#475569]">Select a booking to edit schedule, reminders, and deposits in the rail.</p>
           </div>
           {appointments.length === 0 ? (
             <EmptyState
