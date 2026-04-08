@@ -275,7 +275,7 @@ export default function ChatPage({
               <Building2 className="w-4 h-4 text-teal-600 shrink-0" aria-hidden />
               Sample clinic — Bright Smile Dental
             </div>
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
               Uses Clinic AI&apos;s seeded demo workspace — same chat flow your patients get after you configure settings
               and go live with your own clinic slug, not your private dashboard data.
             </p>
@@ -297,8 +297,8 @@ export default function ChatPage({
             <p className="text-white font-semibold text-sm sm:text-base leading-snug truncate" id="chat-assistant-title">
               {assistantLabel}
             </p>
-            <p className="text-white/80 text-xs mt-0.5 leading-relaxed">{headerSubtitle}</p>
-            <p className="text-white/65 text-[11px] mt-1 leading-relaxed">
+            <p className="mt-0.5 text-sm leading-relaxed text-white/85">{headerSubtitle}</p>
+            <p className="mt-1 text-sm leading-relaxed text-white/75">
               {clinicIsLive
                 ? "Helps with scheduling questions your clinic configured. Staff may follow up."
                 : "This workspace is not live yet — the clinic may not monitor messages."}
@@ -310,13 +310,13 @@ export default function ChatPage({
                 className={`w-1.5 h-1.5 rounded-full ${clinicIsLive ? "bg-emerald-300" : "bg-slate-300"}`}
                 aria-hidden
               />
-              <span className="text-white/90 text-[11px] font-medium">{statusLabel}</span>
+              <span className="text-xs font-medium text-white/90">{statusLabel}</span>
             </span>
           </div>
         </div>
 
         {!isDemo && !clinicIsLive && brandingLoaded ? (
-          <div className="px-4 py-2.5 bg-amber-50 border-b border-amber-100 text-xs text-amber-900 flex items-start gap-2">
+          <div className="flex items-start gap-2 border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
             <Shield className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-700" aria-hidden />
             <p>
               This clinic has not finished going live. You can still type below, but answers may be incomplete —
@@ -326,7 +326,7 @@ export default function ChatPage({
         ) : null}
 
         {(telHref || hoursSummary) && clinicIsLive ? (
-          <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[11px] text-slate-600 space-y-1">
+          <div className="space-y-1 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
             {hoursSummary ? (
               <p className="flex gap-1.5">
                 <Clock className="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" aria-hidden />
@@ -354,7 +354,7 @@ export default function ChatPage({
           <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
             <span
               id="chat-booking-progress-label"
-              className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide shrink-0"
+              className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500"
             >
               Booking {step}/6
             </span>
@@ -380,11 +380,11 @@ export default function ChatPage({
           {bootstrapError && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
               <p className="font-medium">Assistant did not respond yet</p>
-              <p className="mt-1 text-amber-900/90 text-xs leading-relaxed">{bootstrapError}</p>
+              <p className="mt-1 text-sm leading-relaxed text-amber-900/90">{bootstrapError}</p>
               <button
                 type="button"
                 onClick={retryBootstrap}
-                className="mt-3 inline-flex items-center gap-1.5 min-h-9 rounded-lg bg-white border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+                className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-50"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden />
                 Try again
@@ -393,7 +393,7 @@ export default function ChatPage({
           )}
 
           {bootstrapped && messages.length > 0 && !bootstrapError ? (
-            <p className="text-[11px] text-slate-400 text-center uppercase tracking-wider">Messages</p>
+            <p className="text-center text-sm font-medium uppercase tracking-wider text-slate-500">Messages</p>
           ) : null}
 
           {messages.map((msg) => (
@@ -411,7 +411,7 @@ export default function ChatPage({
 
           {showSuggestions && bootstrapped && !sending && !bootstrapError ? (
             <div className="pt-1">
-              <p className="text-[11px] font-medium text-slate-500 mb-2">Suggested questions</p>
+              <p className="mb-2 text-sm font-medium text-slate-600">Suggested questions</p>
               <div className="flex flex-wrap gap-2">
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -436,7 +436,7 @@ export default function ChatPage({
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-emerald-900">Request received</p>
-                  <p className="text-xs text-emerald-800/90 mt-1 leading-relaxed">
+                  <p className="mt-1 text-sm leading-relaxed text-emerald-900/90">
                     {clinicName ? `${clinicName} has` : "The clinic has"} your details. Someone from the team will follow
                     up to confirm — this assistant does not replace medical advice or emergencies.
                   </p>
@@ -453,7 +453,7 @@ export default function ChatPage({
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-emerald-900">Demo: request captured</p>
-                  <p className="text-xs text-emerald-800/90 mt-1 leading-relaxed">
+                  <p className="mt-1 text-sm leading-relaxed text-emerald-900/90">
                     In your clinic, this would sync to the dashboard for staff to review and call the patient back.
                   </p>
                   <Link
@@ -465,9 +465,9 @@ export default function ChatPage({
                         metadata: { cta: "in_chat_register" },
                       })
                     }
-                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-800 hover:underline"
+                    className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-800 hover:underline"
                   >
-                    Get this for your clinic <ArrowRight className="w-3 h-3" aria-hidden />
+                    Get this for your clinic <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                   </Link>
                 </div>
               </div>
@@ -479,7 +479,7 @@ export default function ChatPage({
               <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                 <div className="flex items-center gap-2">
                   <Loader2 className="brand-spinner w-4 h-4 animate-spin" aria-hidden />
-                  <span className="text-xs text-slate-500">Assistant is replying…</span>
+                  <span className="text-sm text-slate-500">Assistant is replying…</span>
                 </div>
               </div>
             </div>
@@ -516,7 +516,7 @@ export default function ChatPage({
               {sending ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden /> : <Send className="w-4 h-4" aria-hidden />}
             </button>
           </div>
-          <div className="mt-2.5 flex flex-col items-center gap-1 text-[11px] text-slate-500 text-center px-1">
+          <div className="mt-2.5 flex flex-col items-center gap-1 px-1 text-center text-sm text-slate-500">
             <p>
               <span className="font-medium text-slate-600">Clinic assistant</span>
               <span className="text-slate-300 mx-1">·</span>
@@ -593,7 +593,7 @@ export default function ChatPage({
               Talk to us
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-3 text-xs text-slate-400">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-slate-500">
             <span>14-day trial</span>
             <span className="hidden sm:inline" aria-hidden>
               ·

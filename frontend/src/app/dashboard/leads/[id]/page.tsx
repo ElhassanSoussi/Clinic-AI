@@ -229,7 +229,7 @@ export default function LeadDetailPage({
                   <dt className="text-[#64748B]">Booking state</dt>
                   <dd className="text-right">
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${appointmentStatusClass(lead.appointment_status)}`}
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${appointmentStatusClass(lead.appointment_status)}`}
                     >
                       {lead.appointment_status === "confirmed" ? "Confirmed" : humanizeSnakeCase(lead.appointment_status)}
                     </span>
@@ -239,7 +239,7 @@ export default function LeadDetailPage({
               {reminderLine ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-[#64748B]">Reminder</dt>
-                  <dd className="max-w-[14rem] text-right text-xs font-medium text-[#0F172A]">{reminderLine}</dd>
+                  <dd className="max-w-[14rem] text-right text-sm font-medium text-[#0F172A]">{reminderLine}</dd>
                 </div>
               ) : null}
               {lead.deposit_status && lead.deposit_status !== "not_required" ? (
@@ -247,7 +247,7 @@ export default function LeadDetailPage({
                   <dt className="text-[#64748B]">Deposit</dt>
                   <dd className="text-right">
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${depositStatusClass(lead.deposit_status)}`}
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${depositStatusClass(lead.deposit_status)}`}
                     >
                       {depositStatusLabel(lead.deposit_status)}
                     </span>
@@ -272,7 +272,7 @@ export default function LeadDetailPage({
                     <User className="h-4 w-4 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-xs text-[#64748B]">Name</p>
+                    <p className="text-sm text-[#64748B]">Name</p>
                     <p className="text-sm font-medium text-[#0F172A]">{lead.patient_name}</p>
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function LeadDetailPage({
                     <Phone className="h-4 w-4 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-xs text-[#64748B]">Phone</p>
+                    <p className="text-sm text-[#64748B]">Phone</p>
                     <p className="text-sm font-medium text-[#0F172A]">{lead.patient_phone || "—"}</p>
                   </div>
                 </div>
@@ -290,7 +290,7 @@ export default function LeadDetailPage({
                     <Mail className="h-4 w-4 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-xs text-[#64748B]">Email</p>
+                    <p className="text-sm text-[#64748B]">Email</p>
                     <p className="text-sm font-medium text-[#0F172A]">{lead.patient_email || "—"}</p>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function LeadDetailPage({
                     <Calendar className="h-4 w-4 text-[#475569]" />
                   </div>
                   <div>
-                    <p className="text-xs text-[#64748B]">Inbound source</p>
+                    <p className="text-sm text-[#64748B]">Inbound source</p>
                     <p className="text-sm font-medium text-[#0F172A]">{sourceLabel(lead.source, lead.slot_source)}</p>
                   </div>
                 </div>
@@ -314,15 +314,15 @@ export default function LeadDetailPage({
             >
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs font-medium text-[#64748B]">Reason for visit</p>
+                  <p className="text-sm font-medium text-[#64748B]">Reason for visit</p>
                   <p className="mt-1 text-sm text-[#0F172A]">{lead.reason_for_visit || "Not specified"}</p>
                 </div>
                 <div className="flex gap-2">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#64748B]" />
                   <div>
-                    <p className="text-xs font-medium text-[#64748B]">Preferred date / time</p>
+                    <p className="text-sm font-medium text-[#64748B]">Preferred date / time</p>
                     <p className="mt-1 text-sm text-[#0F172A]">{lead.preferred_datetime_text || "Not specified"}</p>
-                    <p className="mt-1 text-xs text-[#64748B]">
+                    <p className="mt-1 text-sm text-[#64748B]">
                       {lead.slot_source === "availability" || lead.slot_row_index
                         ? "Captured from an availability slot when the patient chose one."
                         : "Free-text preference from the patient or staff."}
@@ -331,8 +331,8 @@ export default function LeadDetailPage({
                 </div>
                 {lead.slot_row_index ? (
                   <div className="rounded-xl border border-[#99f6e4] bg-[#ECFDFB] px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#115E59]">Availability row</p>
-                    <p className="mt-1 text-xs text-[#115E59]">
+                    <p className="text-sm font-semibold uppercase tracking-wider text-[#115E59]">Availability row</p>
+                    <p className="mt-1 text-sm text-[#115E59]">
                       Linked to row <strong>{lead.slot_row_index}</strong> in your Availability sheet — not a separate scheduling product.
                     </p>
                   </div>

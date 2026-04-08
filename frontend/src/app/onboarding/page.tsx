@@ -168,7 +168,7 @@ function FaqStepContent({
                 className="p-4 border border-slate-100 rounded-lg bg-slate-50"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-sm font-medium text-[#64748B]">
                     FAQ #{i + 1}
                   </span>
                   <button
@@ -1423,35 +1423,35 @@ export default function OnboardingPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+      <div className="app-shell-bg flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0F766E] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="app-shell-bg min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-[4.25rem] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shadow-sm">
-            <Bot className="w-5 h-5 text-white" />
+      <header className="sticky top-0 z-10 border-b border-[#E2E8F0] bg-white/95 backdrop-blur-lg">
+        <div className="mx-auto flex h-[4.25rem] max-w-5xl items-center gap-3 px-4 sm:px-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm shadow-teal-900/10">
+            <Bot className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <span className="font-semibold text-slate-900 block leading-tight">Clinic AI</span>
-            <span className="text-xs text-slate-500">Front desk assistant setup</span>
+            <span className="block text-[0.9375rem] font-semibold leading-tight text-[#0F172A]">Clinic AI</span>
+            <span className="text-sm text-[#64748B]">Front desk assistant setup</span>
           </div>
-          <span className="ml-auto text-xs font-medium text-slate-500 tabular-nums shrink-0 hidden sm:block">
+          <span className="ml-auto hidden shrink-0 tabular-nums text-sm font-medium text-[#64748B] sm:block">
             Step {step}/{STEPS.length}
           </span>
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-16">
+      <div className="mx-auto max-w-5xl px-4 py-8 pb-16 sm:px-6">
         <OnboardingPageProgress step={step} onSelectStep={setStep} />
 
         {/* Step content */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-md shadow-slate-200/50">
+        <div className="ds-card overflow-hidden">
           {/* ==================== STEP 1: Clinic Info ==================== */}
           {step === 1 && (
             <div className="p-6 sm:p-8">

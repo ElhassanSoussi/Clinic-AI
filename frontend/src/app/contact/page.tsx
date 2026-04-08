@@ -2,9 +2,11 @@
 
 import { useState, type ComponentProps } from "react";
 import Link from "next/link";
-import { Bot, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 import { getPublicApiUrl } from "@/lib/api-url";
 import { isValidEmail } from "@/lib/utils";
+import { PublicNav } from "@/components/marketing/PublicNav";
+import { PublicFooter } from "@/components/marketing/PublicFooter";
 
 type ContactFormSubmitEvent = Parameters<
   NonNullable<ComponentProps<"form">["onSubmit"]>
@@ -62,159 +64,165 @@ export default function ContactPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Nav */}
-      <nav className="border-b border-slate-100 bg-white/95 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-slate-900">Clinic AI</span>
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
-        </div>
-      </nav>
+    <div className="public-marketing-root flex min-h-screen flex-col">
+      <PublicNav />
 
-      <div className="max-w-lg mx-auto px-6 py-16">
-        {submitted ? (
-          <div className="text-center py-12">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-7 h-7 text-emerald-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              Thank you!
-            </h1>
-            <p className="text-slate-500 mb-6">
-              We&apos;ll be in touch within one business day.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to home
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                Book a Demo
+      <main className="flex-1 marketing-section-tight">
+        <div className="marketing-container marketing-container--narrow mx-auto max-w-xl py-12 sm:py-16">
+          {submitted ? (
+            <div className="ds-card px-8 py-14 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#0F766E]">
+                <CheckCircle2 className="h-8 w-8" aria-hidden />
+              </div>
+              <h1 className="text-[clamp(1.5rem,2vw,1.875rem)] font-bold tracking-tight text-[#0F172A]">
+                Thank you
               </h1>
-              <p className="text-slate-500">
-                See how Clinic AI works for your practice. We&apos;ll walk you through setup and answer any questions.
+              <p className="marketing-body mx-auto mt-3 max-w-md text-[#475569]">
+                We&apos;ll be in touch within one business day with next steps tailored to your practice.
               </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
-                  Your name <span className="text-red-400">*</span>
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => update("name", e.target.value)}
-                  maxLength={100}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
-                  placeholder="Dr. Jane Smith"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="clinic_name" className="block text-sm font-medium text-slate-700 mb-1">
-                  Clinic name
-                </label>
-                <input
-                  id="clinic_name"
-                  type="text"
-                  value={form.clinic_name}
-                  onChange={(e) => update("clinic_name", e.target.value)}
-                  maxLength={200}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
-                  placeholder="Bright Smile Dental"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                  Email <span className="text-red-400">*</span>
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
-                  maxLength={200}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
-                  placeholder="jane@clinic.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => update("phone", e.target.value)}
-                  maxLength={30}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
-                  placeholder="(555) 123-4567"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-1">
-                  Anything we should know?
-                </label>
-                <textarea
-                  id="message"
-                  value={form.message}
-                  onChange={(e) => update("message", e.target.value)}
-                  maxLength={2000}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors resize-none"
-                  placeholder="Tell us about your clinic, current workflow, or what you're looking for..."
-                />
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              <Link
+                href="/"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-5 py-3 text-[0.9375rem] font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
               >
-                {submitting ? "Sending..." : "Request a Demo"}
-                {!submitting && <Send className="w-4 h-4" />}
-              </button>
-            </form>
-
-            <p className="text-center text-xs text-slate-400 mt-4">
-              Or get started immediately with a{" "}
-              <Link href="/register" className="text-teal-600 hover:text-teal-700 font-medium">
-                free trial
+                <ArrowLeft className="h-4 w-4" aria-hidden />
+                Back to home
               </Link>
-              .
-            </p>
-          </>
-        )}
-      </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-10 text-center sm:text-left">
+                <div className="mb-4 flex justify-center sm:justify-start">
+                  <div className="marketing-kicker">
+                    <Send className="h-3 w-3" aria-hidden />
+                    Talk to us
+                  </div>
+                </div>
+                <h1 className="marketing-h2 text-balance">
+                  Book a walkthrough or ask us anything
+                </h1>
+                <p className="marketing-lead mx-auto mt-4 max-w-xl text-balance sm:mx-0">
+                  We&apos;ll show you how Clinic AI fits your front desk — setup, inbox, and go-live — without pressure.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="ds-card space-y-5 p-6 sm:p-8">
+                <div>
+                  <label htmlFor="name" className="ds-field-label">
+                    Your name <span className="font-normal text-[#DC2626]">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => update("name", e.target.value)}
+                    maxLength={100}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Dr. Jane Smith"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="clinic_name" className="ds-field-label">
+                    Clinic name
+                  </label>
+                  <input
+                    id="clinic_name"
+                    type="text"
+                    value={form.clinic_name}
+                    onChange={(e) => update("clinic_name", e.target.value)}
+                    maxLength={200}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Bright Smile Dental"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="ds-field-label">
+                    Email <span className="font-normal text-[#DC2626]">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => update("email", e.target.value)}
+                    maxLength={200}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="jane@clinic.com"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="ds-field-label">
+                    Phone
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => update("phone", e.target.value)}
+                    maxLength={30}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="ds-field-label">
+                    Anything we should know?
+                  </label>
+                  <textarea
+                    id="message"
+                    value={form.message}
+                    onChange={(e) => update("message", e.target.value)}
+                    maxLength={2000}
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Tell us about your clinic, current workflow, or what you're looking for..."
+                  />
+                </div>
+
+                {error && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-[#DC2626]">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="marketing-cta-primary !w-full disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {submitting ? "Sending…" : "Request a conversation"}
+                  {!submitting && <Send className="h-4 w-4" aria-hidden />}
+                </button>
+              </form>
+
+              <p className="mt-6 text-center text-[0.9375rem] leading-relaxed text-[#64748B]">
+                Prefer to explore on your own?{" "}
+                <Link href="/register" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  Start a free trial
+                </Link>{" "}
+                or{" "}
+                <Link href="/chat/demo" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  try the live demo
+                </Link>
+                .
+              </p>
+              <div className="mt-6 flex justify-center sm:justify-start">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-[0.9375rem] font-medium text-[#475569] transition-colors hover:text-[#0F172A]"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden />
+                  Back to home
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      <PublicFooter />
     </div>
   );
 }

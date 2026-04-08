@@ -182,7 +182,7 @@ function ClinicInformationSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">
+      <p className="ds-help-text mb-4">
         Shown on the public chat page (contact strip) and used when the assistant references your clinic. Accurate phone
         and hours reduce wrong answers and unnecessary callbacks.
       </p>
@@ -258,7 +258,7 @@ function AssistantMessagesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">
+      <p className="ds-help-text mb-4">
         These messages are injected by the assistant when patients send a simple greeting (including the first hidden handshake) and when the assistant has no confident answer. They are not a substitute for clinical advice.
       </p>
       <div className="space-y-4">
@@ -266,7 +266,7 @@ function AssistantMessagesSectionContent({
           <label htmlFor="greeting" className="block text-sm font-medium text-[#0F172A] mb-1.5">
             Greeting Message
           </label>
-          <p className="text-xs text-[#475569] mb-1.5">
+          <p className="ds-help-text mb-1.5">
             Used for short greetings. If empty, the assistant uses a sensible default with your clinic name.
           </p>
           <textarea
@@ -281,7 +281,7 @@ function AssistantMessagesSectionContent({
           <label htmlFor="fallback" className="block text-sm font-medium text-[#0F172A] mb-1.5">
             Fallback Message
           </label>
-          <p className="text-xs text-[#475569] mb-1.5">
+          <p className="ds-help-text mb-1.5">
             Shown when the assistant cannot answer from your FAQs, services, hours, and configured knowledge — instead of guessing.
           </p>
           <textarea
@@ -312,7 +312,7 @@ function ServicesSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">The assistant uses this list to answer patient questions about what your clinic offers. Only services listed here will be mentioned.</p>
+      <p className="ds-help-text mb-4">The assistant uses this list to answer patient questions about what your clinic offers. Only services listed here will be mentioned.</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {services.map((service, index) => (
           <span
@@ -365,7 +365,7 @@ function BusinessHoursSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">The assistant references these hours when patients ask about availability. Keep them current to avoid incorrect information.</p>
+      <p className="ds-help-text mb-4">The assistant references these hours when patients ask about availability. Keep them current to avoid incorrect information.</p>
       <div className="space-y-3">
         {DAYS.map((day) => (
           <div key={day} className="flex items-center gap-3">
@@ -402,7 +402,7 @@ function FaqSectionContent({
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-[#475569]">
+        <p className="ds-help-text min-w-0 flex-1 pr-3">
           Common questions the assistant can answer directly instead of holding for staff.
         </p>
         <button
@@ -425,7 +425,7 @@ function FaqSectionContent({
               className="p-4 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC]"
             >
               <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-medium text-[#475569]">
+                <span className="text-sm font-medium text-[#64748B]">
                   FAQ #{index + 1}
                 </span>
                 <button
@@ -610,7 +610,7 @@ function GoogleSheetsSectionContent({
           >
             <div>
               <h4 className="text-sm font-semibold text-[#0F172A]">Advanced manual setup</h4>
-              <p className="text-xs text-[#475569] mt-1">
+              <p className="ds-help-text mt-1">
                 Use your own spreadsheet ID if you do not want quick connect.
               </p>
             </div>
@@ -619,7 +619,7 @@ function GoogleSheetsSectionContent({
 
           {showManualSetup ? (
             <div className="border-t border-[#E2E8F0] px-3.5 py-3 space-y-4 bg-white rounded-b-xl">
-              <p className="text-xs text-[#475569]">
+              <p className="ds-help-text">
                 If you prefer manual setup, share your sheet as <b>Editor</b> with{" "}
                 <code className="bg-[#F1F5F9] px-1 py-0.5 rounded text-[#0F172A] select-all">
                   clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
@@ -730,7 +730,7 @@ function EmailNotificationsSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">Receive an email alert each time the assistant captures a new patient request, so nothing is missed.</p>
+      <p className="ds-help-text mb-4">Receive an email alert each time the assistant captures a new patient request, so nothing is missed.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <div className="relative">
@@ -799,7 +799,7 @@ function SchedulingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">
+      <p className="ds-help-text mb-4">
         When enabled, the assistant can offer slots from an <span className="font-medium text-[#0F172A]">Availability</span> tab in the same spreadsheet you connected (Google Sheets or the workbook from Microsoft Excel quick connect).
       </p>
       <div className="space-y-4">
@@ -830,13 +830,15 @@ function SchedulingSectionContent({
                 className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                 placeholder="e.g., Availability"
               />
-              <p className="text-xs text-[#64748B] mt-1.5">
-                Default is <span className="font-medium">Availability</span>. Use &ldquo;Test connection&rdquo; under Spreadsheets to verify headers when using Google Sheets.
+              <p className="ds-muted-text mt-1.5">
+                Default is <span className="font-medium text-[#475569]">Availability</span>. Use &ldquo;Test connection&rdquo; under Spreadsheets to verify headers when using Google Sheets.
               </p>
             </div>
             <div className="p-4 bg-[#CCFBF1] rounded-lg border border-[#99f6e4]">
-              <h4 className="text-xs font-bold text-[#115E59] uppercase tracking-wider mb-2">Required sheet format</h4>
-              <p className="text-xs text-[#115E59] leading-relaxed font-medium">
+              <h4 className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#115E59]">
+                Required sheet format
+              </h4>
+              <p className="text-sm font-medium leading-relaxed text-[#115E59]">
                 Your tab must have these headers in the first row:
               </p>
               <code className="block mt-2 font-mono text-xs bg-white/80 p-2 rounded border border-[#99f6e4]/50 text-[#115E59] select-all">
@@ -844,11 +846,11 @@ function SchedulingSectionContent({
               </code>
               <div className="mt-3 flex items-start gap-2">
                 <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-1.5 shrink-0" />
-                <p className="text-xs text-[#0F766E]">Only rows with Status = <span className="font-bold">available</span> will be shown to patients.</p>
+                <p className="text-sm text-[#0F766E]">Only rows with Status = <span className="font-bold">available</span> will be shown to patients.</p>
               </div>
               <div className="mt-1 flex items-start gap-2">
                 <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-1.5 shrink-0" />
-                <p className="text-xs text-[#0F766E]">
+                <p className="text-sm text-[#0F766E]">
                   The assistant walks patients through the booking steps; your team confirms details in the dashboard.
                 </p>
               </div>
@@ -873,7 +875,7 @@ function BrandingSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">
+      <p className="ds-help-text mb-4">
         Applies to the public patient page and embed widget header (<span className="font-medium text-[#0F172A]">/chat/your-clinic-slug</span>). Your clinic name still appears in context when it differs from the assistant name.
       </p>
       <div className="space-y-4 max-w-lg">
@@ -889,7 +891,7 @@ function BrandingSectionContent({
             className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
             placeholder='e.g., "Sarah from Smile Dental"'
           />
-          <p className="mt-1 text-xs text-[#64748B]">
+          <p className="ds-muted-text mt-1">
             Shown as the title in the chat header. Leave blank to use a short default label.
           </p>
         </div>
@@ -933,18 +935,18 @@ function EmbedSectionContent({
 }>) {
   return (
     <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-      <p className="text-xs text-[#475569] mb-4">
+      <p className="ds-help-text mb-4">
         Add this snippet to your site to load the same patient experience as{" "}
         <span className="font-medium text-[#0F172A]">/chat/{clinic.slug}</span>. The assistant only uses data you save
         here. Until you go live, patients still see a clear &ldquo;not live&rdquo; state on the public page.
       </p>
       {!isLive ? (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
           Your clinic is not live yet — embed this anytime for staging, but expect the public chat to show a not-live notice until you go live from Settings or the dashboard header.
         </div>
       ) : null}
       <div className="relative group">
-        <pre className="bg-[#F8FAFC] p-4 rounded-lg text-xs text-[#0F172A] overflow-x-auto border border-[#E2E8F0] whitespace-pre-wrap">
+        <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-sm text-[#0F172A]">
           {embedCode}
         </pre>
         <button
@@ -1358,7 +1360,7 @@ export default function SettingsPage() {
               <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
               <p className="mt-1.5 text-sm leading-6 text-[#475569]">
                 Public page{" "}
-                <span className="font-mono text-xs text-[#0F172A]">/chat/{clinic.slug}</span>
+                <span className="font-mono text-sm text-[#0F172A]">/chat/{clinic.slug}</span>
                 {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
                 surface after you click &ldquo;Save settings.&rdquo;
                 {systemStatus?.status === "READY" && !clinic.is_live
@@ -1366,7 +1368,7 @@ export default function SettingsPage() {
                   : null}
               </p>
               {!clinic.is_live && systemStatus && systemStatus.status !== "READY" && systemStatus.status !== "LIVE" ? (
-                <p className="mt-2 text-xs text-[#64748B]">
+                <p className="ds-muted-text mt-2">
                   The dashboard status chip and the checklist below share the same rules.{" "}
                   <button
                     type="button"
@@ -1394,7 +1396,7 @@ export default function SettingsPage() {
                   {clinic.is_live ? "Live" : "Not live"}
                 </span>
                 {systemStatus && systemStatus.status !== "LIVE" && systemStatusCfg ? (
-                  <span className={`text-xs font-medium ${systemStatusCfg.color}`}>
+                  <span className={`text-sm font-medium ${systemStatusCfg.color}`}>
                     Dashboard: {systemStatusCfg.label}
                   </span>
                 ) : null}

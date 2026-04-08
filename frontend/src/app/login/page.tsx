@@ -202,7 +202,7 @@ export default function LoginPage() {
             </div>
 
             <div className="auth-panel-card mt-10 p-6 xl:mt-12">
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+              <p className="text-sm font-semibold uppercase tracking-[0.1em] text-slate-400">
                 What stays true
               </p>
               <div className="mt-4 space-y-3 text-[0.9375rem] leading-relaxed text-slate-300">

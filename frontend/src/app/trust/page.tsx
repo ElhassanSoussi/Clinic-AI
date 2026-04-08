@@ -157,7 +157,7 @@ export default function TrustPage() {
                     <p className="marketing-lead mt-4">{p.body}</p>
                   </div>
                   <div className="landing-shell p-7">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+                    <p className="ds-eyebrow text-[#64748B]">
                       What this means in practice
                     </p>
                     <ul className="mt-5 space-y-3">

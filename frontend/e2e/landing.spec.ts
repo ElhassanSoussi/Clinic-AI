@@ -44,7 +44,7 @@ test.describe("Landing page", () => {
     const footer = page.locator("footer");
     await expect(footer).toBeVisible();
     await expect(footer.getByRole("link", { name: "Sign in" })).toBeVisible();
-    await expect(footer.getByRole("link", { name: /start free/i })).toBeVisible();
+    await expect(footer.getByRole("link", { name: /start free/i }).first()).toBeVisible();
     await expect(
       footer.getByRole("link", { name: "Privacy", exact: true }),
     ).toBeVisible();
