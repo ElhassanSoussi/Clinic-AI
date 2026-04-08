@@ -137,7 +137,7 @@ export default function ProductPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
           <div className="max-w-3xl">
             <div className="marketing-kicker mb-6">
@@ -205,11 +205,11 @@ export default function ProductPage() {
         <div className="marketing-container">
 
           {/* Module deep-dives */}
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="space-y-8">
             {modules.map((mod, i) => (
               <section
                 key={mod.name}
-                className="marketing-section"
+                className={`marketing-section ${i % 2 === 1 ? "marketing-section-elevated" : ""}`}
               >
                 <div className={`grid items-center gap-10 xl:grid-cols-2 ${i % 2 === 1 ? "xl:grid-flow-dense" : ""}`}>
                   <div className={i % 2 === 1 ? "xl:col-start-2" : ""}>

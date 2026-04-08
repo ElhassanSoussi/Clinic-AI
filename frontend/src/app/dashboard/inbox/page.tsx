@@ -133,323 +133,347 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="Triage column: filters and volume on the left, searchable threads in the center, and channel context on the right. Everything stays tied to the same live list."
+        description="One triage surface: filters and volume stack on the left, searchable threads in the center rail, and operating context on the right—same live list, composed as a workbench."
       />
 
-      <div className="workspace-column-layout">
-        {/* Left rail — filters */}
-        <aside className="hidden space-y-3 xl:block">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Filters</p>
-            <p className="mt-2 text-xs leading-relaxed text-[#64748B]">
-              Narrow by status or channel. Counts mirror the full inbox, not just the current search.
-            </p>
+      <div className="wave-workbench">
+        <div className="wave-workbench-head">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workbench</p>
+            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Conversation triage</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-900">
+              {counts.open} open
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
+              {counts.needs_follow_up} review
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-900">
+              {counts.booked} booked
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#475569]">
+              {counts.handled} settled
+            </span>
+          </div>
+        </div>
+        <div className="wave-workbench-body">
+          <div className="workspace-column-layout">
+            {/* Left rail — filters */}
+            <aside className="hidden space-y-3 xl:block">
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Filters</p>
+                <p className="mt-2 text-xs leading-relaxed text-[#64748B]">
+                  Narrow by status or channel. Counts mirror the full inbox, not just the current search.
+                </p>
 
-            <p className="mt-4 workspace-section-label">Volume</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {[
-                { label: "All", value: counts.all },
-                { label: "Open", value: counts.open },
-                { label: "Follow-up", value: counts.needs_follow_up },
-                { label: "Settled", value: counts.booked + counts.handled },
-              ].map((row) => (
-                <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2 text-center">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
-                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                <p className="mt-4 workspace-section-label">Volume</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {[
+                    { label: "All", value: counts.all },
+                    { label: "Open", value: counts.open },
+                    { label: "Follow-up", value: counts.needs_follow_up },
+                    { label: "Settled", value: counts.booked + counts.handled },
+                  ].map((row) => (
+                    <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2 text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
+                      <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-4 border-t border-[#E2E8F0] pt-4">
-              <p className="workspace-section-label">Status</p>
-              <div className="mt-2 space-y-1">
+                <div className="mt-4 border-t border-[#E2E8F0] pt-4">
+                  <p className="workspace-section-label">Status</p>
+                  <div className="mt-2 space-y-1">
+                    {STATUS_FILTERS.map((filter) => {
+                      const count = counts[filter.value];
+                      const active = statusFilter === filter.value;
+                      return (
+                        <button
+                          key={filter.value}
+                          onClick={() => setStatusFilter(filter.value)}
+                          className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
+                            ? "bg-[#CCFBF1]/90 text-[#115E59]"
+                            : "text-[#475569] hover:bg-[#F8FAFC]"
+                            }`}
+                        >
+                          <span>{filter.label}</span>
+                          <span className={`text-xs ${active ? "text-[#0F766E]" : "text-[#64748B]"}`}>{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Channel filters */}
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Channels</p>
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setChannelFilter("all")}
+                    className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${channelFilter === "all"
+                      ? "bg-[#0F172A] text-white"
+                      : "border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]"
+                      }`}
+                  >
+                    All <span className="ml-1 text-xs opacity-70">{channelCounts.all}</span>
+                  </button>
+                  {channelOptions.map((channel) => {
+                    const active = channelFilter === channel;
+                    const config = getChannelConfig(channel);
+                    return (
+                      <button
+                        key={channel}
+                        onClick={() => setChannelFilter(channel)}
+                        className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${active ? config.className : "bg-white text-[#475569] border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                          }`}
+                      >
+                        {config.label}
+                        <span className="ml-1 text-xs opacity-70">{channelCounts[channel] ?? 0}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </aside>
+
+            {/* Center — thread list */}
+            <div className="order-1 min-w-0 space-y-3 xl:order-none">
+              <div>
+                <p className="workspace-section-label">Threads</p>
+                <p className="mt-1 text-sm text-[#475569]">Search and open a conversation—status accent on the row matches the filter buckets.</p>
+              </div>
+              {/* Search bar */}
+              <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-[0_1px_2px_rgb(15_23_42/0.05)]">
+                <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by patient, phone, email, or text..."
+                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+                />
+                <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
+              </div>
+
+              {/* Mobile filters */}
+              <div className="flex flex-wrap gap-2 xl:hidden">
                 {STATUS_FILTERS.map((filter) => {
-                  const count = counts[filter.value];
                   const active = statusFilter === filter.value;
                   return (
                     <button
                       key={filter.value}
                       onClick={() => setStatusFilter(filter.value)}
-                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
-                        ? "bg-[#CCFBF1]/90 text-[#115E59]"
-                        : "text-[#475569] hover:bg-[#F8FAFC]"
+                      type="button"
+                      className={`min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${active ? "bg-[#CCFBF1] text-[#0F766E]" : "text-[#64748B] hover:bg-[#F8FAFC]"
                         }`}
                     >
-                      <span>{filter.label}</span>
-                      <span className={`text-xs ${active ? "text-[#0F766E]" : "text-[#64748B]"}`}>{count}</span>
+                      {filter.label} <span className="text-xs opacity-60">{counts[filter.value]}</span>
                     </button>
                   );
                 })}
               </div>
-            </div>
-          </div>
 
-          {/* Channel filters */}
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Channels</p>
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
-              <button
-                onClick={() => setChannelFilter("all")}
-                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${channelFilter === "all"
-                  ? "bg-[#0F172A] text-white"
-                  : "border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F8FAFC]"
-                  }`}
-              >
-                All <span className="ml-1 text-xs opacity-70">{channelCounts.all}</span>
-              </button>
-              {channelOptions.map((channel) => {
-                const active = channelFilter === channel;
-                const config = getChannelConfig(channel);
-                return (
-                  <button
-                    key={channel}
-                    onClick={() => setChannelFilter(channel)}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${active ? config.className : "bg-white text-[#475569] border-[#E2E8F0] hover:bg-[#F8FAFC]"
-                      }`}
-                  >
-                    {config.label}
-                    <span className="ml-1 text-xs opacity-70">{channelCounts[channel] ?? 0}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </aside>
-
-        {/* Center — thread list */}
-        <div className="order-1 min-w-0 space-y-3 xl:order-none">
-          <div>
-            <p className="workspace-section-label">Threads</p>
-            <p className="mt-1 text-sm text-[#475569]">Search and open a conversation—status accent on the row matches the filter buckets.</p>
-          </div>
-          {/* Search bar */}
-          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-[0_1px_2px_rgb(15_23_42/0.05)]">
-            <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by patient, phone, email, or text..."
-              className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
-            />
-            <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
-          </div>
-
-          {/* Mobile filters */}
-          <div className="flex flex-wrap gap-2 xl:hidden">
-            {STATUS_FILTERS.map((filter) => {
-              const active = statusFilter === filter.value;
-              return (
-                <button
-                  key={filter.value}
-                  onClick={() => setStatusFilter(filter.value)}
-                  type="button"
-                  className={`min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${active ? "bg-[#CCFBF1] text-[#0F766E]" : "text-[#64748B] hover:bg-[#F8FAFC]"
-                    }`}
-                >
-                  {filter.label} <span className="text-xs opacity-60">{counts[filter.value]}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {filtered.length === 0 ? (() => {
-            const activationStatus = clinic ? computeSystemStatus(clinic).status : null;
-            let emptyTitle = threads.length === 0 ? "No conversations yet" : "No conversations match these filters";
-            let emptyDescription =
-              "Web chat creates threads as soon as patients message your public assistant. SMS and other channels appear when they are configured in your environment.";
-            let emptyAction: ReactNode | undefined;
-            if (threads.length > 0) {
-              emptyDescription = channelFilter === "all"
-                ? "Try clearing search or widening the status filter."
-                : `No threads for ${getChannelConfig(channelFilter).label}. Other channels may still have volume — choose &ldquo;All&rdquo; to compare.`;
-            } else if (activationStatus && activationStatus !== "LIVE") {
-              if (activationStatus === "READY") {
-                emptyTitle = "No threads yet — assistant not published";
-                emptyDescription =
-                  "Setup checklist is complete, but patient traffic only creates threads after you use Go live in the top bar. Preview your chat page first, then publish when you are ready.";
-              } else {
-                emptyTitle = "Inbox fills after go-live";
-                emptyDescription =
-                  "Finish the remaining items in Settings (clinic info, services, spreadsheet, scheduling), then use Go live. Until then an empty inbox is expected — focus on configuration and preview.";
-              }
-              const firstGap = clinic ? computeSystemStatus(clinic).items.find((i) => !i.completed) : null;
-              emptyAction = (
-                <div className="flex flex-wrap justify-center gap-2">
-                  <Link
-                    href={
-                      firstGap
-                        ? `/dashboard/settings?section=${encodeURIComponent(firstGap.drawerSection)}`
-                        : "/dashboard/settings"
-                    }
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    Continue setup
-                  </Link>
-                  {clinic?.slug ? (
-                    <a
-                      href={`/chat/${clinic.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Preview chat
-                    </a>
-                  ) : null}
-                  <Link
-                    href="/dashboard/leads"
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-                  >
-                    Booking pipeline
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              );
-            } else {
-              emptyAction = (
-                <div className="flex flex-wrap justify-center gap-2">
-                  <Link
-                    href="/dashboard/settings"
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    Settings &amp; embed
-                  </Link>
-                  {clinic?.slug ? (
-                    <a
-                      href={`/chat/${clinic.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Open patient chat
-                    </a>
-                  ) : null}
-                  <Link
-                    href="/dashboard/leads"
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-                  >
-                    Booking pipeline
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              );
-            }
-            return (
-              <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
-                <EmptyState
-                  icon={<Inbox className="w-5 h-5 text-[#64748B]" />}
-                  title={emptyTitle}
-                  description={emptyDescription}
-                  action={emptyAction}
-                />
-              </div>
-            );
-          })() : (
-            <div className="space-y-2">
-              {filtered.map((thread) => (
-                <button
-                  key={thread.id}
-                  onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                  className={`app-row-hover w-full rounded-lg border border-[#E2E8F0] bg-white pl-3 pr-3.5 py-2.5 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md ${threadAccentClass(thread.derived_status)}`}
-                >
-                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-[#0F172A]">{thread.customer_name}</p>
-                        <ChannelBadge channel={thread.channel} withIcon />
-                        <FrontdeskStatusBadge status={thread.derived_status} />
-                        {thread.unlinked && (
-                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-600">
-                            Unlinked
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm leading-relaxed text-[#475569]">{thread.last_message_preview}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#475569]">
-                        {(thread.customer_phone || thread.customer_email) && (
-                          <span>{thread.customer_phone || thread.customer_email}</span>
-                        )}
-                        {thread.lead_id && (
-                          <span className="inline-flex items-center gap-1">
-                            <UserRound className="w-3 h-3" />
-                            <span>Linked</span>
-                          </span>
-                        )}
-                        {thread.last_message_role && (
-                          <span className="capitalize">{thread.last_message_role} replied last</span>
-                        )}
-                        {thread.thread_type === "event" && <span>Recovery thread</span>}
-                      </div>
+              {filtered.length === 0 ? (() => {
+                const activationStatus = clinic ? computeSystemStatus(clinic).status : null;
+                let emptyTitle = threads.length === 0 ? "No conversations yet" : "No conversations match these filters";
+                let emptyDescription =
+                  "Web chat creates threads as soon as patients message your public assistant. SMS and other channels appear when they are configured in your environment.";
+                let emptyAction: ReactNode | undefined;
+                if (threads.length > 0) {
+                  emptyDescription = channelFilter === "all"
+                    ? "Try clearing search or widening the status filter."
+                    : `No threads for ${getChannelConfig(channelFilter).label}. Other channels may still have volume — choose &ldquo;All&rdquo; to compare.`;
+                } else if (activationStatus && activationStatus !== "LIVE") {
+                  if (activationStatus === "READY") {
+                    emptyTitle = "No threads yet — assistant not published";
+                    emptyDescription =
+                      "Setup checklist is complete, but patient traffic only creates threads after you use Go live in the top bar. Preview your chat page first, then publish when you are ready.";
+                  } else {
+                    emptyTitle = "Inbox fills after go-live";
+                    emptyDescription =
+                      "Finish the remaining items in Settings (clinic info, services, spreadsheet, scheduling), then use Go live. Until then an empty inbox is expected — focus on configuration and preview.";
+                  }
+                  const firstGap = clinic ? computeSystemStatus(clinic).items.find((i) => !i.completed) : null;
+                  emptyAction = (
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Link
+                        href={
+                          firstGap
+                            ? `/dashboard/settings?section=${encodeURIComponent(firstGap.drawerSection)}`
+                            : "/dashboard/settings"
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                        Continue setup
+                      </Link>
+                      {clinic?.slug ? (
+                        <a
+                          href={`/chat/${clinic.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Preview chat
+                        </a>
+                      ) : null}
+                      <Link
+                        href="/dashboard/leads"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                      >
+                        Booking pipeline
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2 text-xs text-[#64748B]">
-                      <span>{thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                  );
+                } else {
+                  emptyAction = (
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Link
+                        href="/dashboard/settings"
+                        className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                        Settings &amp; embed
+                      </Link>
+                      {clinic?.slug ? (
+                        <a
+                          href={`/chat/${clinic.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Open patient chat
+                        </a>
+                      ) : null}
+                      <Link
+                        href="/dashboard/leads"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                      >
+                        Booking pipeline
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+                    <EmptyState
+                      icon={<Inbox className="w-5 h-5 text-[#64748B]" />}
+                      title={emptyTitle}
+                      description={emptyDescription}
+                      action={emptyAction}
+                    />
+                  </div>
+                );
+              })() : (
+                <div className="space-y-2">
+                  {filtered.map((thread) => (
+                    <button
+                      key={thread.id}
+                      onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
+                      className={`app-row-hover w-full rounded-lg border border-[#E2E8F0] bg-white pl-3 pr-3.5 py-2.5 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md ${threadAccentClass(thread.derived_status)}`}
+                    >
+                      <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-semibold text-[#0F172A]">{thread.customer_name}</p>
+                            <ChannelBadge channel={thread.channel} withIcon />
+                            <FrontdeskStatusBadge status={thread.derived_status} />
+                            {thread.unlinked && (
+                              <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-600">
+                                Unlinked
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm leading-relaxed text-[#475569]">{thread.last_message_preview}</p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#475569]">
+                            {(thread.customer_phone || thread.customer_email) && (
+                              <span>{thread.customer_phone || thread.customer_email}</span>
+                            )}
+                            {thread.lead_id && (
+                              <span className="inline-flex items-center gap-1">
+                                <UserRound className="w-3 h-3" />
+                                <span>Linked</span>
+                              </span>
+                            )}
+                            {thread.last_message_role && (
+                              <span className="capitalize">{thread.last_message_role} replied last</span>
+                            )}
+                            {thread.thread_type === "event" && <span>Recovery thread</span>}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2 text-xs text-[#64748B]">
+                          <span>{thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right rail — context */}
+            <aside className="workspace-side-rail order-2 xl:order-none">
+              <div className="workspace-rail-card p-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
+                    <Bot className="h-2.5 w-2.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#0F172A]">Operating model</p>
+                    <p className="text-xs text-[#475569]">Review, take over, or move patients forward</p>
+                  </div>
+                </div>
+                <div className="mt-2.5 space-y-1.5">
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Review needed</p>
+                    <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{counts.needs_follow_up}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
+                      Threads waiting for staff review or follow-up.
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Booked</p>
+                    <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{counts.booked}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
+                      Conversations that reached a booked outcome.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Focus</p>
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex items-start gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-50">
+                      <TriangleAlert className="h-2.5 w-2.5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#0F172A]">Follow-up pressure</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Delayed replies, recovery threads, and unlinked items.</p>
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          )}
+                  <div className="flex items-start gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[#CCFBF1]">
+                      <CalendarDays className="h-2.5 w-2.5 text-[#0F766E]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#0F172A]">Booking handoff</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Contact, book, or add notes directly from the thread.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
-
-        {/* Right rail — context */}
-        <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="workspace-rail-card p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
-                <Bot className="h-2.5 w-2.5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-[#0F172A]">Operating model</p>
-                <p className="text-xs text-[#475569]">Review, take over, or move patients forward</p>
-              </div>
-            </div>
-            <div className="mt-2.5 space-y-1.5">
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Review needed</p>
-                <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{counts.needs_follow_up}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
-                  Threads waiting for staff review or follow-up.
-                </p>
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Booked</p>
-                <p className="mt-0.5 text-2xl font-semibold text-[#0F172A]">{counts.booked}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
-                  Conversations that reached a booked outcome.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Focus</p>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-start gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-50">
-                  <TriangleAlert className="h-2.5 w-2.5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-[#0F172A]">Follow-up pressure</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Delayed replies, recovery threads, and unlinked items.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[#CCFBF1]">
-                  <CalendarDays className="h-2.5 w-2.5 text-[#0F766E]" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-[#0F172A]">Booking handoff</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Contact, book, or add notes directly from the thread.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );

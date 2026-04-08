@@ -444,7 +444,7 @@ export default function OperationsPage() {
 
       {/* System readiness */}
       {systemReadiness && (
-        <div className="workspace-main-frame p-4 sm:p-5">
+        <div className="wave-ops-zone p-4 sm:p-5">
           <div className="mb-3 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
             <div>
@@ -499,7 +499,7 @@ export default function OperationsPage() {
       )}
 
       {/* Channel readiness */}
-      <div className="workspace-main-frame p-4 sm:p-5">
+      <div className="wave-ops-zone p-4 sm:p-5">
         <div className="mb-3 flex items-center gap-2">
           <PhoneMissed className="h-4 w-4 text-[#0F766E]" />
           <div>
@@ -572,7 +572,7 @@ export default function OperationsPage() {
       </div>
 
       {/* Outbound activity metrics */}
-      <div className="workspace-main-frame p-4 sm:p-5">
+      <div className="wave-ops-zone p-4 sm:p-5">
         <p className="workspace-section-label">Signals</p>
         <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">Outbound &amp; SMS telemetry</h2>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[#475569]">

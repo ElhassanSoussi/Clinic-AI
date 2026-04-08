@@ -96,8 +96,9 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page space-y-6">
       <PageHeader
+        showDivider
         eyebrow={
           <>
             <User className="h-3.5 w-3.5" />
@@ -105,29 +106,30 @@ export default function AccountPage() {
           </>
         }
         title="Account & security"
-        description="Your login credentials, display name, and workspace identity. Changes here affect how you appear across the product."
+        description="Identity and sign-in for this workspace owner—separate from clinic configuration in Settings."
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px_1fr_240px]">
-        {/* Left rail */}
-        <aside className="order-2 xl:order-none">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-rail-title">Account overview</p>
-            <div className="mt-3 space-y-2.5">
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-sm text-[#64748B]">Signed in as</p>
-                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">{user?.email || "Unknown"}</p>
-              </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-sm text-[#64748B]">Role</p>
-                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Owner</p>
-              </div>
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(14rem,17.5rem)_1fr]">
+        {/* Summary rail */}
+        <aside className="order-2 xl:order-none xl:sticky xl:top-6 xl:self-start">
+          <div className="wave-command-slab space-y-3 !py-4">
+            <p className="workspace-section-label">Signed-in operator</p>
+            <div className="rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-2.5 shadow-sm">
+              <p className="text-xs text-[#64748B]">Email</p>
+              <p className="mt-0.5 text-sm font-semibold text-[#0F172A] break-all">{user?.email || "Unknown"}</p>
             </div>
+            <div className="rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-2.5 shadow-sm">
+              <p className="text-xs text-[#64748B]">Role</p>
+              <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Owner</p>
+            </div>
+            <p className="text-xs leading-relaxed text-[#64748B]">
+              Use this page for profile and password only. Clinic hours, services, and embed live under Settings.
+            </p>
           </div>
         </aside>
 
         {/* Main content */}
-        <div className="order-1 min-w-0 space-y-2 xl:order-none">
+        <div className="order-1 min-w-0 space-y-4 xl:order-none">
           {/* Profile Section */}
           <section className="ds-card overflow-hidden">
             <button
@@ -278,17 +280,6 @@ export default function AccountPage() {
             )}
           </section>
         </div>
-
-        {/* Right rail */}
-        <aside className="order-3 xl:order-none">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-rail-title">Security note</p>
-            <div className="mt-3 space-y-2 text-sm leading-relaxed text-[#475569]">
-              <p>Your account controls the operator identity shown across the workspace.</p>
-              <p>Use this page to keep sign-in secure without changing the rest of the clinic configuration.</p>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );
@@ -298,8 +289,8 @@ function Feedback({ state }: Readonly<{ state: NonNullable<FeedbackState> }>) {
   return (
     <div
       className={`mb-4 p-3 text-sm rounded-lg border flex items-center gap-2 ${state.type === "success"
-          ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-          : "bg-red-50 text-red-700 border-red-100"
+        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+        : "bg-red-50 text-red-700 border-red-100"
         }`}
     >
       {state.type === "success" ? (

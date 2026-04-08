@@ -1355,332 +1355,349 @@ export default function SettingsPage() {
         title="Clinic settings"
         description="A configuration console: identity, channels, knowledge sources, embed readiness, and go-live—grouped into modules so setup feels sequential, not like one endless form."
       />
-      {clinic ? (
-        <div className="ds-control-hero-panel relative p-5 sm:p-6">
-          <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="workspace-section-label">Assistant visibility</p>
-              <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
-              <p className="mt-1.5 text-sm leading-6 text-[#475569]">
-                Public page{" "}
-                <span className="font-mono text-sm text-[#0F172A]">
-                  /chat/{clinic.slug?.trim() ? clinic.slug : "your-clinic-slug"}
-                </span>
-                {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
-                surface after you click &ldquo;Save settings.&rdquo;
-                {systemStatus?.status === "READY" && !clinic.is_live
-                  ? " Your dashboard checklist is complete — go live when you want the assistant to show as active for patients."
-                  : null}
-              </p>
-              {!clinic.is_live && systemStatus && systemStatus.status !== "READY" && systemStatus.status !== "LIVE" ? (
-                <p className="ds-muted-text mt-2">
-                  The dashboard status chip and the checklist below share the same rules.{" "}
-                  <button
-                    type="button"
-                    onClick={jumpToFirstSetupGap}
-                    className="font-semibold text-[#0F766E] hover:underline"
-                  >
-                    Open the first incomplete section
-                  </button>
-                  .
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-col gap-3 shrink-0 sm:flex-row sm:items-center lg:flex-col lg:items-stretch">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${clinic.is_live
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-amber-200 bg-amber-50 text-amber-900"
-                    }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${clinic.is_live ? "bg-emerald-500" : "bg-amber-500"}`}
-                    aria-hidden
-                  />
-                  {clinic.is_live ? "Live" : "Not live"}
-                </span>
-                {systemStatus && systemStatus.status !== "LIVE" && systemStatusCfg ? (
-                  <span className={`text-sm font-medium ${systemStatusCfg.color}`}>
-                    Dashboard: {systemStatusCfg.label}
+      <div className="wave-settings-deck space-y-6">
+        {clinic ? (
+          <div className="ds-control-hero-panel relative p-5 sm:p-6">
+            <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="workspace-section-label">Assistant visibility</p>
+                <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
+                <p className="mt-1.5 text-sm leading-6 text-[#475569]">
+                  Public page{" "}
+                  <span className="font-mono text-sm text-[#0F172A]">
+                    /chat/{clinic.slug?.trim() ? clinic.slug : "your-clinic-slug"}
                   </span>
+                  {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
+                  surface after you click &ldquo;Save settings.&rdquo;
+                  {systemStatus?.status === "READY" && !clinic.is_live
+                    ? " Your dashboard checklist is complete — go live when you want the assistant to show as active for patients."
+                    : null}
+                </p>
+                {!clinic.is_live && systemStatus && systemStatus.status !== "READY" && systemStatus.status !== "LIVE" ? (
+                  <p className="ds-muted-text mt-2">
+                    The dashboard status chip and the checklist below share the same rules.{" "}
+                    <button
+                      type="button"
+                      onClick={jumpToFirstSetupGap}
+                      className="font-semibold text-[#0F766E] hover:underline"
+                    >
+                      Open the first incomplete section
+                    </button>
+                    .
+                  </p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={`/chat/${clinic.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
-                >
-                  <ExternalLink className="h-4 w-4 shrink-0" />
-                  Preview patient chat
-                </a>
-                {systemStatus?.status === "READY" && !clinic.is_live ? (
-                  <button
-                    type="button"
-                    onClick={() => setGoLiveModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+              <div className="flex flex-col gap-3 shrink-0 sm:flex-row sm:items-center lg:flex-col lg:items-stretch">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${clinic.is_live
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-amber-200 bg-amber-50 text-amber-900"
+                      }`}
                   >
-                    <Rocket className="h-4 w-4 shrink-0" />
-                    Go live
-                  </button>
-                ) : null}
-                {!clinic.is_live && systemStatus && systemStatus.status !== "READY" ? (
-                  <button
-                    type="button"
-                    onClick={jumpToFirstSetupGap}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${clinic.is_live ? "bg-emerald-500" : "bg-amber-500"}`}
+                      aria-hidden
+                    />
+                    {clinic.is_live ? "Live" : "Not live"}
+                  </span>
+                  {systemStatus && systemStatus.status !== "LIVE" && systemStatusCfg ? (
+                    <span className={`text-sm font-medium ${systemStatusCfg.color}`}>
+                      Dashboard: {systemStatusCfg.label}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={`/chat/${clinic.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
                   >
-                    Next setup section
-                  </button>
-                ) : null}
+                    <ExternalLink className="h-4 w-4 shrink-0" />
+                    Preview patient chat
+                  </a>
+                  {systemStatus?.status === "READY" && !clinic.is_live ? (
+                    <button
+                      type="button"
+                      onClick={() => setGoLiveModalOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+                    >
+                      <Rocket className="h-4 w-4 shrink-0" />
+                      Go live
+                    </button>
+                  ) : null}
+                  {!clinic.is_live && systemStatus && systemStatus.status !== "READY" ? (
+                    <button
+                      type="button"
+                      onClick={jumpToFirstSetupGap}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+                    >
+                      Next setup section
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : null}
-      <div className="workspace-stage">
-        <div className="workspace-side-rail order-2 xl:order-none">
-          <div className="ds-rail-panel relative p-5 xl:sticky xl:top-6">
-            <p className="workspace-section-label">Configuration status</p>
-            <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0F172A]">{completedCount}/10</p>
-            <p className="mt-1 text-sm text-[#475569]">Sections configured</p>
-            <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0]">
-              <div className="settings-progress h-full rounded-full bg-[#0F766E] transition-all" />
+        ) : null}
+        <div className="workspace-stage">
+          <div className="workspace-side-rail order-2 xl:order-none">
+            <div className="ds-rail-panel relative p-5 xl:sticky xl:top-6">
+              <p className="workspace-section-label">Configuration status</p>
+              <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0F172A]">{completedCount}/10</p>
+              <p className="mt-1 text-sm text-[#475569]">Sections configured</p>
+              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0]">
+                <div className="settings-progress h-full rounded-full bg-[#0F766E] transition-all" />
+              </div>
+              <p className="mt-4 text-sm leading-6 text-[#475569]">
+                Save to update assistant behavior and the dashboard. The embed section stays &ldquo;incomplete&rdquo; until you
+                go live so this meter matches what patients see as active vs staging.
+              </p>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Save settings
+              </button>
             </div>
-            <p className="mt-4 text-sm leading-6 text-[#475569]">
-              Save to update assistant behavior and the dashboard. The embed section stays &ldquo;incomplete&rdquo; until you
-              go live so this meter matches what patients see as active vs staging.
-            </p>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              Save settings
-            </button>
           </div>
-        </div>
 
-        <div className="order-1 min-w-0 space-y-6 xl:order-none">
-          <div>
-            <p className="workspace-section-label">Configuration modules</p>
-            <p className="mt-1 text-sm text-[#475569]">Expand a section to edit. Save applies the whole form and updates assistant behavior together with the dashboard.</p>
-          </div>
-          {saveMessage && (
-            <div
-              className={`p-3 text-sm rounded-lg border ${saveMessage.includes("success") || saveMessage.includes("copied")
-                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                : "bg-red-50 text-red-700 border-red-100"
-                }`}
-            >
-              {saveMessage}
+          <div className="order-1 min-w-0 space-y-6 xl:order-none">
+            <div className="wave-command-slab !py-4">
+              <p className="workspace-section-label">Control center layout</p>
+              <p className="mt-1 text-sm text-[#475569]">
+                The left rail is your setup meter; the center column is every module in recommended order; the right column is operator guidance. Expand one module at a time—Save at left applies the full form.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">
+                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Foundation</span>
+                <span className="text-[#94A3B8]">→</span>
+                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Knowledge</span>
+                <span className="text-[#94A3B8]">→</span>
+                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Channels &amp; alerts</span>
+                <span className="text-[#94A3B8]">→</span>
+                <span className="rounded-md border border-[#99f6e4] bg-[#CCFBF1]/60 px-2 py-1 text-[#115E59]">Go live</span>
+              </div>
             </div>
-          )}
+            <div>
+              <p className="workspace-section-label">Configuration modules</p>
+              <p className="mt-1 text-sm text-[#475569]">Expand a section to edit. Save applies the whole form and updates assistant behavior together with the dashboard.</p>
+            </div>
+            {saveMessage && (
+              <div
+                className={`p-3 text-sm rounded-lg border ${saveMessage.includes("success") || saveMessage.includes("copied")
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : "bg-red-50 text-red-700 border-red-100"
+                  }`}
+              >
+                {saveMessage}
+              </div>
+            )}
 
-          <div className="space-y-2">
-            <SettingsSection
-              sectionKey="clinic-info"
-              label="Clinic Information"
-              icon={Building2}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <ClinicInformationSectionContent
-                name={name}
-                setName={setName}
-                phone={phone}
-                setPhone={setPhone}
-                email={email}
-                setEmail={setEmail}
-                address={address}
-                setAddress={setAddress}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="assistant-messages"
-              label="Assistant Messages"
-              icon={MessageCircle}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <AssistantMessagesSectionContent
-                greeting={greeting}
-                setGreeting={setGreeting}
-                fallback={fallback}
-                setFallback={setFallback}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="services"
-              label="Services"
-              icon={Stethoscope}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <ServicesSectionContent
-                services={services}
-                newService={newService}
-                setNewService={setNewService}
-                addService={addService}
-                removeService={removeService}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="hours"
-              label="Business Hours"
-              icon={Clock}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <BusinessHoursSectionContent hours={hours} setHours={setHours} />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="faq"
-              label="FAQ"
-              icon={HelpCircle}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <FaqSectionContent
-                faq={faq}
-                addFaq={addFaq}
-                updateFaq={updateFaq}
-                removeFaq={removeFaq}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="google-sheets"
-              label="Spreadsheets"
-              icon={Sheet}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <GoogleSheetsSectionContent
-                googleSheetId={googleSheetId}
-                setGoogleSheetId={setGoogleSheetId}
-                googleSheetTab={googleSheetTab}
-                setGoogleSheetTab={setGoogleSheetTab}
-                handleValidateSheets={handleValidateSheets}
-                validatingSheets={validatingSheets}
-                sheetsValidation={sheetsValidation}
-                availabilityEnabled={availabilityEnabled}
-                availabilitySheetTab={availabilitySheetTab}
-                connectingGoogle={connectingGoogle}
-                startGoogleConnect={startGoogleConnect}
-                googleConnectMessage={googleConnectMessage}
-                googleConnectTone={googleConnectTone}
-                excelWorkbookId={excelWorkbookId}
-                excelWorkbookUrl={excelWorkbookUrl}
-                connectingExcel={connectingExcel}
-                startMicrosoftConnect={startMicrosoftConnect}
-                excelConnectMessage={excelConnectMessage}
-                excelConnectTone={excelConnectTone}
-                showManualSetup={showManualSetup}
-                setShowManualSetup={setShowManualSetup}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="email-notifications"
-              label="Email Notifications"
-              icon={Send}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <EmailNotificationsSectionContent
-                notificationsEnabled={notificationsEnabled}
-                setNotificationsEnabled={setNotificationsEnabled}
-                notificationEmail={notificationEmail}
-                setNotificationEmail={setNotificationEmail}
-                handleTestEmail={handleTestEmail}
-                testingEmail={testingEmail}
-                testEmailResult={testEmailResult}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="scheduling"
-              label="Availability & Scheduling"
-              icon={Calendar}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <SchedulingSectionContent
-                availabilityEnabled={availabilityEnabled}
-                setAvailabilityEnabled={setAvailabilityEnabled}
-                availabilitySheetTab={availabilitySheetTab}
-                setAvailabilitySheetTab={setAvailabilitySheetTab}
-              />
-            </SettingsSection>
-
-            <SettingsSection
-              sectionKey="branding"
-              label="Branding"
-              icon={Palette}
-              openSections={openSections}
-              toggleSection={toggleSection}
-              statusState={statusState}
-            >
-              <BrandingSectionContent
-                assistantName={assistantName}
-                setAssistantName={setAssistantName}
-                primaryColor={primaryColor}
-                setPrimaryColor={setPrimaryColor}
-              />
-            </SettingsSection>
-
-            {clinic && (
+            <div className="space-y-2">
               <SettingsSection
-                sectionKey="embed"
-                label="Embed on Website"
-                icon={Code}
+                sectionKey="clinic-info"
+                label="Clinic Information"
+                icon={Building2}
                 openSections={openSections}
                 toggleSection={toggleSection}
                 statusState={statusState}
               >
-                <EmbedSectionContent
-                  clinic={clinic}
-                  embedCode={embedCode}
-                  setSaveMessage={setSaveMessage}
-                  isLive={!!clinic.is_live}
+                <ClinicInformationSectionContent
+                  name={name}
+                  setName={setName}
+                  phone={phone}
+                  setPhone={setPhone}
+                  email={email}
+                  setEmail={setEmail}
+                  address={address}
+                  setAddress={setAddress}
                 />
               </SettingsSection>
-            )}
-          </div>
-        </div>
 
-        <div className="workspace-side-rail order-3 xl:order-none">
-          <div className="workspace-rail-card p-5">
-            <p className="workspace-section-label">Setup guidance</p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">
-              <p>
-                Work top to bottom once, then revisit as your clinic changes. Phone, hours, and FAQs flow through to the
-                public chat; the spreadsheet powers leads and optional scheduling.
-              </p>
-              <p>
-                The dashboard status chip uses the same spreadsheet checklist as here (Google or Microsoft). Email alerts
-                are optional but recommended so new requests do not sit unnoticed.
-              </p>
+              <SettingsSection
+                sectionKey="assistant-messages"
+                label="Assistant Messages"
+                icon={MessageCircle}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <AssistantMessagesSectionContent
+                  greeting={greeting}
+                  setGreeting={setGreeting}
+                  fallback={fallback}
+                  setFallback={setFallback}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="services"
+                label="Services"
+                icon={Stethoscope}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <ServicesSectionContent
+                  services={services}
+                  newService={newService}
+                  setNewService={setNewService}
+                  addService={addService}
+                  removeService={removeService}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="hours"
+                label="Business Hours"
+                icon={Clock}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <BusinessHoursSectionContent hours={hours} setHours={setHours} />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="faq"
+                label="FAQ"
+                icon={HelpCircle}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <FaqSectionContent
+                  faq={faq}
+                  addFaq={addFaq}
+                  updateFaq={updateFaq}
+                  removeFaq={removeFaq}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="google-sheets"
+                label="Spreadsheets"
+                icon={Sheet}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <GoogleSheetsSectionContent
+                  googleSheetId={googleSheetId}
+                  setGoogleSheetId={setGoogleSheetId}
+                  googleSheetTab={googleSheetTab}
+                  setGoogleSheetTab={setGoogleSheetTab}
+                  handleValidateSheets={handleValidateSheets}
+                  validatingSheets={validatingSheets}
+                  sheetsValidation={sheetsValidation}
+                  availabilityEnabled={availabilityEnabled}
+                  availabilitySheetTab={availabilitySheetTab}
+                  connectingGoogle={connectingGoogle}
+                  startGoogleConnect={startGoogleConnect}
+                  googleConnectMessage={googleConnectMessage}
+                  googleConnectTone={googleConnectTone}
+                  excelWorkbookId={excelWorkbookId}
+                  excelWorkbookUrl={excelWorkbookUrl}
+                  connectingExcel={connectingExcel}
+                  startMicrosoftConnect={startMicrosoftConnect}
+                  excelConnectMessage={excelConnectMessage}
+                  excelConnectTone={excelConnectTone}
+                  showManualSetup={showManualSetup}
+                  setShowManualSetup={setShowManualSetup}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="email-notifications"
+                label="Email Notifications"
+                icon={Send}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <EmailNotificationsSectionContent
+                  notificationsEnabled={notificationsEnabled}
+                  setNotificationsEnabled={setNotificationsEnabled}
+                  notificationEmail={notificationEmail}
+                  setNotificationEmail={setNotificationEmail}
+                  handleTestEmail={handleTestEmail}
+                  testingEmail={testingEmail}
+                  testEmailResult={testEmailResult}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="scheduling"
+                label="Availability & Scheduling"
+                icon={Calendar}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <SchedulingSectionContent
+                  availabilityEnabled={availabilityEnabled}
+                  setAvailabilityEnabled={setAvailabilityEnabled}
+                  availabilitySheetTab={availabilitySheetTab}
+                  setAvailabilitySheetTab={setAvailabilitySheetTab}
+                />
+              </SettingsSection>
+
+              <SettingsSection
+                sectionKey="branding"
+                label="Branding"
+                icon={Palette}
+                openSections={openSections}
+                toggleSection={toggleSection}
+                statusState={statusState}
+              >
+                <BrandingSectionContent
+                  assistantName={assistantName}
+                  setAssistantName={setAssistantName}
+                  primaryColor={primaryColor}
+                  setPrimaryColor={setPrimaryColor}
+                />
+              </SettingsSection>
+
+              {clinic && (
+                <SettingsSection
+                  sectionKey="embed"
+                  label="Embed on Website"
+                  icon={Code}
+                  openSections={openSections}
+                  toggleSection={toggleSection}
+                  statusState={statusState}
+                >
+                  <EmbedSectionContent
+                    clinic={clinic}
+                    embedCode={embedCode}
+                    setSaveMessage={setSaveMessage}
+                    isLive={!!clinic.is_live}
+                  />
+                </SettingsSection>
+              )}
+            </div>
+          </div>
+
+          <div className="workspace-side-rail order-3 xl:order-none">
+            <div className="workspace-rail-card p-5">
+              <p className="workspace-section-label">Setup guidance</p>
+              <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">
+                <p>
+                  Work top to bottom once, then revisit as your clinic changes. Phone, hours, and FAQs flow through to the
+                  public chat; the spreadsheet powers leads and optional scheduling.
+                </p>
+                <p>
+                  The dashboard status chip uses the same spreadsheet checklist as here (Google or Microsoft). Email alerts
+                  are optional but recommended so new requests do not sit unnoticed.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -21,7 +21,6 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { ChannelBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { AppointmentRecord, Clinic } from "@/types";
@@ -738,12 +737,12 @@ export default function AppointmentsPage() {
         description="Confirm times, watch reminder prep, and move deposits forward—without a calendar mock-up. Every row links back to the patient thread when you need context."
       />
 
-      <WorkspaceBand>
+      <div className="wave-command-slab space-y-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-2xl">
-            <p className="workspace-section-label">Board summary</p>
+            <p className="workspace-section-label">Booking &amp; deposit board</p>
             <p className="mt-2 text-sm leading-relaxed text-[#475569]">
-              Counts reflect the live appointment board. Use views to focus on upcoming work, items that need attention, or closed states—then act from the list and the detail rail.
+              Counts are live. Switch views to focus on upcoming work, attention items, or closed states—then act from the list and the detail rail. This is the operating surface for reminders and deposits, not a placeholder calendar.
             </p>
           </div>
           {viewCounts ? (
@@ -757,7 +756,7 @@ export default function AppointmentsPage() {
                     type="button"
                     onClick={() => setActiveView(view.value)}
                     className={`rounded-lg border px-3 py-2.5 text-left shadow-[0_1px_2px_rgb(15_23_42/0.05)] transition-all ${active
-                      ? "border-[#99f6e4] bg-[#CCFBF1]/90"
+                      ? "border-[#99f6e4] bg-[#CCFBF1]/90 ring-1 ring-[#5eead4]/50"
                       : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
                       }`}
                   >
@@ -769,164 +768,209 @@ export default function AppointmentsPage() {
             </div>
           ) : null}
         </div>
-      </WorkspaceBand>
-
-      <div className="workspace-column-layout">
-        {/* Left rail — views */}
-        <div className="hidden space-y-2.5 xl:block">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Views</p>
-            <div className="mt-2.5 space-y-1">
-              {APPOINTMENT_VIEWS.map((view) => {
-                const active = activeView === view.value;
-                return (
-                  <button
-                    key={view.value}
-                    onClick={() => setActiveView(view.value)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
-                      ? "bg-[#CCFBF1]/90 text-[#115E59]"
-                      : "text-[#475569] hover:bg-[#F8FAFC]"
-                      }`}
-                  >
-                    <span>{view.label}</span>
-                    {active && <span className="text-xs text-[#0F766E]">Active</span>}
-                  </button>
-                );
-              })}
-            </div>
+        <div className="grid grid-cols-1 gap-2 border-t border-[#E2E8F0]/80 pt-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Visible rows</p>
+            <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{appointments.length}</p>
+            <p className="mt-0.5 text-xs text-[#475569]">Filtered by the active view below.</p>
           </div>
-
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Board</p>
-            <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Visible</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{appointments.length}</p>
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">View</p>
-                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
-                  {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
-                </p>
-              </div>
-            </div>
+          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Active lens</p>
+            <p className="mt-1 text-sm font-semibold text-[#0F172A]">
+              {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "—"}
+            </p>
+            <p className="mt-0.5 text-xs text-[#475569]">Use views to change what the center list shows.</p>
+          </div>
+          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Workflow</p>
+            <p className="mt-1 text-sm font-semibold text-[#0F172A]">Reminders · deposits · reschedule</p>
+            <p className="mt-0.5 text-xs text-[#475569]">Select a row to edit in the right rail.</p>
           </div>
         </div>
+      </div>
 
-        {/* Center — appointment list */}
-        <div className="min-w-0 space-y-3">
-          <div>
-            <p className="workspace-section-label">Appointment list</p>
-            <p className="mt-1 text-sm text-[#475569]">Select a booking to edit schedule, reminders, and deposits in the rail.</p>
+      <div className="wave-workbench">
+        <div className="wave-workbench-head">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>
+            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Bookings, rail, and views</p>
           </div>
-          {appointments.length === 0 ? (
-            <EmptyState
-              icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
-              title={`No ${APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "matching"} appointments`}
-              description={
-                clinic && computeSystemStatus(clinic).status !== "LIVE"
-                  ? "Switch views or confirm bookings from Leads once times are set. Before go-live, an empty board is normal — finish setup, publish the assistant, then move requests from Leads into confirmed appointments."
-                  : "Switch views to see other stages, or mark a request as booked in Leads once a time is confirmed — it appears here after the board refreshes."
-              }
-              action={
-                <div className="flex flex-wrap justify-center gap-2">
-                  <Link
-                    href="/dashboard/leads"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                  >
-                    Open booking pipeline
-                  </Link>
-                  {clinic && computeSystemStatus(clinic).status !== "LIVE" ? (
-                    <Link
-                      href="/dashboard/settings"
-                      className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                    >
-                      Settings &amp; go-live
-                    </Link>
-                  ) : null}
+          {viewCounts ? (
+            <div className="flex flex-wrap gap-2">
+              {APPOINTMENT_VIEWS.map((view) => (
+                <span
+                  key={view.value}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${activeView === view.value
+                    ? "border-[#99f6e4] bg-[#CCFBF1] text-[#115E59]"
+                    : "border-[#E2E8F0] bg-white text-[#475569]"
+                    }`}
+                >
+                  {view.label}{" "}
+                  <span className="tabular-nums opacity-80">{viewCounts[view.value] ?? 0}</span>
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div className="wave-workbench-body">
+          <div className="workspace-column-layout">
+            {/* Left rail — views */}
+            <div className="hidden space-y-2.5 xl:block">
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Views</p>
+                <div className="mt-2.5 space-y-1">
+                  {APPOINTMENT_VIEWS.map((view) => {
+                    const active = activeView === view.value;
+                    return (
+                      <button
+                        key={view.value}
+                        onClick={() => setActiveView(view.value)}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
+                          ? "bg-[#CCFBF1]/90 text-[#115E59]"
+                          : "text-[#475569] hover:bg-[#F8FAFC]"
+                          }`}
+                      >
+                        <span>{view.label}</span>
+                        {active && <span className="text-xs text-[#0F766E]">Active</span>}
+                      </button>
+                    );
+                  })}
                 </div>
-              }
-            />
-          ) : (
-            <div className="space-y-2">
-              {appointments.map((appointment) => {
-                const active = selectedLeadId === appointment.lead_id;
-                return (
-                  <button
-                    key={appointment.lead_id}
-                    onClick={() => setSelectedLeadId(appointment.lead_id)}
-                    className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${active
-                      ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
-                      : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
-                      }`}
-                  >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                          <p className="truncate text-sm font-semibold text-[#0F172A]">{appointment.patient_name}</p>
-                          <ChannelBadge channel={appointment.source} withIcon />
-                          <LeadStatusBadge status={appointment.lead_status} />
-                        </div>
-                        <p className="truncate text-sm text-[#475569]">
-                          {appointment.reason_for_visit || "No visit reason recorded"}
-                        </p>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
-                            {appointmentStatusLabel(appointment.appointment_status)}
-                          </span>
-                          {appointment.reminder_status !== "not_ready" && (
-                            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
-                              Reminder {humanizeStatus(appointment.reminder_status)}
-                            </span>
-                          )}
-                          {appointment.follow_up_open && (
-                            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">Follow-up</span>
-                          )}
-                          {appointment.deposit_status !== "not_required" && (
-                            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
-                              {depositStatusLabel(appointment.deposit_status)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="shrink-0 sm:text-right">
-                        <p className="text-sm font-semibold text-[#0F172A]">
-                          {appointment.appointment_starts_at
-                            ? formatDateTime(appointment.appointment_starts_at)
-                            : appointment.preferred_datetime_text || "Time not set"}
-                        </p>
-                        <p className="mt-0.5 text-xs text-[#64748B]">
-                          Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+              </div>
 
-        {/* Right rail — detail */}
-        {selectedAppointment && selectedDraft && (
-          <AppointmentDetailRail
-            appointment={selectedAppointment}
-            draft={selectedDraft}
-            onUpdateDraft={(patch) => updateDraft(selectedAppointment.lead_id, patch)}
-            onSaveDetails={saveDetails}
-            onReschedule={rescheduleAppointment}
-            onCancel={cancelAppointment}
-            onMarkNoShow={markNoShow}
-            onReopen={reopenAppointment}
-            onRequestDeposit={requestDeposit}
-            onClearDeposit={clearDepositRequirement}
-            onCopyLink={copyDepositLink}
-            depositLink={depositLink}
-            depositMessage={depositMessage}
-            depositActionLeadId={depositActionLeadId}
-            savingLeadId={savingLeadId}
-          />
-        )}
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Board</p>
+                <div className="mt-2 space-y-1.5">
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs text-[#475569]">Visible</p>
+                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{appointments.length}</p>
+                  </div>
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs text-[#475569]">View</p>
+                    <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
+                      {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center — appointment list */}
+            <div className="min-w-0 space-y-3">
+              <div>
+                <p className="workspace-section-label">Appointment list</p>
+                <p className="mt-1 text-sm text-[#475569]">Select a booking to edit schedule, reminders, and deposits in the rail.</p>
+              </div>
+              {appointments.length === 0 ? (
+                <EmptyState
+                  icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
+                  title={`No ${APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "matching"} appointments`}
+                  description={
+                    clinic && computeSystemStatus(clinic).status !== "LIVE"
+                      ? "Switch views or confirm bookings from Leads once times are set. Before go-live, an empty board is normal — finish setup, publish the assistant, then move requests from Leads into confirmed appointments."
+                      : "Switch views to see other stages, or mark a request as booked in Leads once a time is confirmed — it appears here after the board refreshes."
+                  }
+                  action={
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Link
+                        href="/dashboard/leads"
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                      >
+                        Open booking pipeline
+                      </Link>
+                      {clinic && computeSystemStatus(clinic).status !== "LIVE" ? (
+                        <Link
+                          href="/dashboard/settings"
+                          className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                        >
+                          Settings &amp; go-live
+                        </Link>
+                      ) : null}
+                    </div>
+                  }
+                />
+              ) : (
+                <div className="space-y-2">
+                  {appointments.map((appointment) => {
+                    const active = selectedLeadId === appointment.lead_id;
+                    return (
+                      <button
+                        key={appointment.lead_id}
+                        onClick={() => setSelectedLeadId(appointment.lead_id)}
+                        className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${active
+                          ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
+                          : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
+                          }`}
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                              <p className="truncate text-sm font-semibold text-[#0F172A]">{appointment.patient_name}</p>
+                              <ChannelBadge channel={appointment.source} withIcon />
+                              <LeadStatusBadge status={appointment.lead_status} />
+                            </div>
+                            <p className="truncate text-sm text-[#475569]">
+                              {appointment.reason_for_visit || "No visit reason recorded"}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
+                                {appointmentStatusLabel(appointment.appointment_status)}
+                              </span>
+                              {appointment.reminder_status !== "not_ready" && (
+                                <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                  Reminder {humanizeStatus(appointment.reminder_status)}
+                                </span>
+                              )}
+                              {appointment.follow_up_open && (
+                                <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">Follow-up</span>
+                              )}
+                              {appointment.deposit_status !== "not_required" && (
+                                <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
+                                  {depositStatusLabel(appointment.deposit_status)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="shrink-0 sm:text-right">
+                            <p className="text-sm font-semibold text-[#0F172A]">
+                              {appointment.appointment_starts_at
+                                ? formatDateTime(appointment.appointment_starts_at)
+                                : appointment.preferred_datetime_text || "Time not set"}
+                            </p>
+                            <p className="mt-0.5 text-xs text-[#64748B]">
+                              Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Right rail — detail */}
+            {selectedAppointment && selectedDraft && (
+              <AppointmentDetailRail
+                appointment={selectedAppointment}
+                draft={selectedDraft}
+                onUpdateDraft={(patch) => updateDraft(selectedAppointment.lead_id, patch)}
+                onSaveDetails={saveDetails}
+                onReschedule={rescheduleAppointment}
+                onCancel={cancelAppointment}
+                onMarkNoShow={markNoShow}
+                onReopen={reopenAppointment}
+                onRequestDeposit={requestDeposit}
+                onClearDeposit={clearDepositRequirement}
+                onCopyLink={copyDepositLink}
+                depositLink={depositLink}
+                depositMessage={depositMessage}
+                depositActionLeadId={depositActionLeadId}
+                savingLeadId={savingLeadId}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

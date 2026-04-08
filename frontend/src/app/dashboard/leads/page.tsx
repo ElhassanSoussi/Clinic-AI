@@ -18,7 +18,6 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { timeAgo } from "@/lib/utils";
 import { computeSystemStatus } from "@/lib/system-status";
 import type { Lead, LeadStatus, Clinic } from "@/types";
@@ -361,19 +360,44 @@ export default function LeadsPage() {
         description="A single board for intake requests: stage, urgency, and next action stay visible so the list feels like a working queue—not a flat export."
       />
 
-      <WorkspaceBand>
-        <p className="workspace-section-label">How requests move</p>
-        <p className="mt-2 text-sm leading-relaxed text-[#475569]">
-          <span className="font-semibold text-[#0F172A]">New</span>
-          <span className="mx-1.5 text-[#94A3B8]">→</span>
-          <span className="font-semibold text-[#0F172A]">Contacted</span>
-          <span className="mx-1.5 text-[#94A3B8]">→</span>
-          <span className="font-semibold text-[#0F172A]">Booked</span>
-          <span className="mx-1.5 text-[#94A3B8]">→</span>
-          <span className="font-semibold text-[#0F172A]">Closed</span>
-          <span className="ml-2 text-[#64748B]">Advance with the inline status control; Appointments picks up timing, reminders, and deposits.</span>
-        </p>
-      </WorkspaceBand>
+      <div className="wave-command-slab space-y-4">
+        <div>
+          <p className="workspace-section-label">Live pipeline</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(
+              [
+                { label: "New", value: counts.new, box: "border-sky-200 bg-sky-50" },
+                { label: "Contacted", value: counts.contacted, box: "border-violet-200 bg-violet-50" },
+                { label: "Booked", value: counts.booked, box: "border-emerald-200 bg-emerald-50" },
+                { label: "Closed", value: counts.closed, box: "border-[#E2E8F0] bg-white" },
+              ] as const
+            ).map((row) => (
+              <div
+                key={row.label}
+                className="min-w-[5.25rem] flex-1 rounded-lg border border-transparent px-0 py-0 text-center sm:flex-none"
+              >
+                <div className={`rounded-lg border px-2.5 py-2 shadow-[0_1px_2px_rgb(15_23_42/0.05)] ${row.box}`}>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
+                  <p className="mt-0.5 text-lg font-bold tabular-nums text-[#0F172A]">{row.value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="workspace-section-label">How requests move</p>
+          <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+            <span className="font-semibold text-[#0F172A]">New</span>
+            <span className="mx-1.5 text-[#94A3B8]">→</span>
+            <span className="font-semibold text-[#0F172A]">Contacted</span>
+            <span className="mx-1.5 text-[#94A3B8]">→</span>
+            <span className="font-semibold text-[#0F172A]">Booked</span>
+            <span className="mx-1.5 text-[#94A3B8]">→</span>
+            <span className="font-semibold text-[#0F172A]">Closed</span>
+            <span className="ml-2 text-[#64748B]">Advance with the inline status control; Appointments picks up timing, reminders, and deposits.</span>
+          </p>
+        </div>
+      </div>
 
       {usageWarningBanner}
 
@@ -384,113 +408,134 @@ export default function LeadsPage() {
         </div>
       )}
 
-      <div className="workspace-column-layout">
-        {/* Left rail — filters */}
-        <aside className="hidden space-y-3 xl:block">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Request mix</p>
-            <div className="mt-2.5 grid grid-cols-2 gap-2">
-              {(
-                [
-                  { label: "All", value: counts.all },
-                  { label: "New", value: counts.new },
-                  { label: "Contacted", value: counts.contacted },
-                  { label: "Booked", value: counts.booked },
-                ] as const
-              ).map((row) => (
-                <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-2 text-center">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
-                  <p className="mt-0.5 text-base font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
-                </div>
-              ))}
-            </div>
+      <div className="wave-workbench">
+        <div className="wave-workbench-head">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Pipeline desk</p>
+            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Request queue &amp; context</p>
           </div>
-
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-section-label">Filter by status</p>
-            <div className="mt-2.5 space-y-1">
-              {STATUS_OPTIONS.map((opt) => {
-                const count = opt.value === "" ? counts.all : counts[opt.value as keyof typeof counts] ?? 0;
-                const active = statusFilter === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => setStatusFilter(opt.value)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
-                      }`}
-                  >
-                    <span>{opt.label}</span>
-                    <span className={`text-xs ${active ? "text-teal-500" : "text-[#64748B]"}`}>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span className="rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-[#475569]">
+              {counts.new + counts.contacted} in flight
+            </span>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-900">
+              {counts.booked} booked
+            </span>
+            <span className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-2.5 py-1 text-[#475569]">
+              {filtered.length} in view
+            </span>
           </div>
-        </aside>
-
-        {/* Center — list */}
-        <div className="order-1 min-w-0 space-y-3 xl:order-none">
-          <div>
-            <p className="workspace-section-label">Open requests</p>
-            <p className="mt-1 text-sm text-[#475569]">Each row carries the suggested next step for that stage.</p>
-          </div>
-          {/* Mobile filters */}
-          <div className="flex flex-wrap gap-2 xl:hidden">
-            {STATUS_OPTIONS.map((opt) => {
-              const active = statusFilter === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => setStatusFilter(opt.value)}
-                  type="button"
-                  className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
-                    }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search */}
-          <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
-            <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by name, phone, email, or visit reason..."
-              className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
-            />
-            <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
-          </div>
-
-          {content}
         </div>
+        <div className="wave-workbench-body">
+          <div className="workspace-column-layout">
+            {/* Left rail — filters */}
+            <aside className="hidden space-y-3 xl:block">
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Request mix</p>
+                <div className="mt-2.5 grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { label: "All", value: counts.all },
+                      { label: "New", value: counts.new },
+                      { label: "Contacted", value: counts.contacted },
+                      { label: "Booked", value: counts.booked },
+                    ] as const
+                  ).map((row) => (
+                    <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-2 text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
+                      <p className="mt-0.5 text-base font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-        {/* Right rail — context */}
-        <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="workspace-rail-card p-4">
-            <p className="workspace-rail-title">Pipeline snapshot</p>
-            <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
-              Open work is everything before a booking is confirmed or explicitly closed.
-            </p>
-            <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Open work</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.new + counts.contacted}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Waiting on booking, follow-up, or closure.</p>
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-section-label">Filter by status</p>
+                <div className="mt-2.5 space-y-1">
+                  {STATUS_OPTIONS.map((opt) => {
+                    const count = opt.value === "" ? counts.all : counts[opt.value as keyof typeof counts] ?? 0;
+                    const active = statusFilter === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setStatusFilter(opt.value)}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
+                          }`}
+                      >
+                        <span>{opt.label}</span>
+                        <span className={`text-xs ${active ? "text-teal-500" : "text-[#64748B]"}`}>{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Closed</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.closed}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">No longer needing front-desk attention.</p>
+            </aside>
+
+            {/* Center — list */}
+            <div className="order-1 min-w-0 space-y-3 xl:order-none">
+              <div>
+                <p className="workspace-section-label">Open requests</p>
+                <p className="mt-1 text-sm text-[#475569]">Each row carries the suggested next step for that stage.</p>
               </div>
+              {/* Mobile filters */}
+              <div className="flex flex-wrap gap-2 xl:hidden">
+                {STATUS_OPTIONS.map((opt) => {
+                  const active = statusFilter === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setStatusFilter(opt.value)}
+                      type="button"
+                      className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Search */}
+              <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
+                <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by name, phone, email, or visit reason..."
+                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+                />
+                <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
+              </div>
+
+              {content}
             </div>
+
+            {/* Right rail — context */}
+            <aside className="workspace-side-rail order-2 xl:order-none">
+              <div className="workspace-rail-card p-4">
+                <p className="workspace-rail-title">Pipeline snapshot</p>
+                <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+                  Open work is everything before a booking is confirmed or explicitly closed.
+                </p>
+                <div className="mt-2 space-y-1.5">
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Open work</p>
+                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.new + counts.contacted}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Waiting on booking, follow-up, or closure.</p>
+                  </div>
+                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Closed</p>
+                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.closed}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">No longer needing front-desk attention.</p>
+                  </div>
+                </div>
+              </div>
+
+
+            </aside>
           </div>
-
-
-        </aside>
+        </div>
       </div>
     </div>
   );

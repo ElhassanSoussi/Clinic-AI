@@ -22,7 +22,6 @@ import { clampPercentInt } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import type {
   ChatResponse,
   Clinic,
@@ -363,7 +362,7 @@ export default function TrainingPage() {
       <div className="workspace-split items-start">
         <div className="order-1 min-w-0 space-y-6 xl:order-none">
           {/* Knowledge readiness */}
-          <WorkspaceBand className="border-[#99f6e4] bg-[#F0FDFA]/50">
+          <div className="wave-command-slab border-[#99f6e4] bg-[#F0FDFA]/40">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex items-center gap-2">
@@ -403,299 +402,305 @@ export default function TrainingPage() {
                 </div>
               </div>
             )}
-          </WorkspaceBand>
+          </div>
 
           {/* Two-column: sources + preview */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_0.88fr]">
-            {/* Knowledge sources */}
-            <div className="space-y-4">
-              {/* Structured knowledge */}
-              <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-                <div className="mb-2.5 flex items-center gap-2">
-                  <Bot className="w-3.5 h-3.5 text-[#0F766E]" />
-                  <p className="text-sm font-semibold text-[#0F172A]">Current sources</p>
-                </div>
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  {structuredKnowledge.map((item) => (
-                    <div key={item.label} className="rounded-lg border border-[#E2E8F0] p-2.5">
-                      <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {[
-                    { label: "Services", section: "services" },
-                    { label: "FAQ", section: "faq" },
-                    { label: "Tone", section: "assistant-messages" },
-                  ].map((link) => (
-                    <Link
-                      key={link.section}
-                      href={settingsHref(link.section)}
-                      className="rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-                    >
-                      Edit {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Document uploads */}
-              <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-                <div className="mb-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Upload className="w-3.5 h-3.5 text-[#0F766E]" />
-                    <p className="text-sm font-semibold text-[#0F172A]">Document uploads</p>
+          <div className="wave-zone-panel !shadow-[var(--ds-shadow-lg)]">
+            <div className="mb-4 border-b border-[var(--color-app-border)] pb-3">
+              <p className="workspace-section-label">Knowledge work surface</p>
+              <p className="mt-1 text-sm text-[#475569]">Structured sources and uploads on the left, live preview on the right—one composed training desk.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_0.88fr]">
+              {/* Knowledge sources */}
+              <div className="space-y-4">
+                {/* Structured knowledge */}
+                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                  <div className="mb-2.5 flex items-center gap-2">
+                    <Bot className="w-3.5 h-3.5 text-[#0F766E]" />
+                    <p className="text-sm font-semibold text-[#0F172A]">Current sources</p>
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.txt"
-                    onChange={handleFileUpload}
-                    aria-label="Upload training document"
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                  >
-                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                    <span>Upload PDF or TXT</span>
-                  </button>
-                </div>
-
-                <p className="mb-2.5 text-xs leading-relaxed text-[#475569]">
-                  Upload clinic documents (policies, procedures, service guides) to teach the assistant. Files are processed into searchable knowledge chunks.
-                </p>
-
-                {documents.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
-                    <p>Documents are optional. Your settings (services, FAQ, hours) already power answers.</p>
-                    <p className="mt-2">Upload PDF or TXT when you want policies or long-form detail in retrieval — processing may take a minute.</p>
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      <Link
-                        href={settingsHref("services")}
-                        className="inline-flex items-center rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-                      >
-                        Services &amp; FAQ in Settings
-                      </Link>
-                      <Link
-                        href="/dashboard/settings"
-                        className="inline-flex items-center rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                      >
-                        Full setup checklist
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#E2E8F0] px-2.5 py-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {docStatusIcon(doc.status)}
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-[#0F172A]">{doc.filename}</p>
-                            <p className="text-xs text-[#475569]">
-                              {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
-                              {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
-                            </p>
-                            {doc.status === "failed" && doc.error_message && (
-                              <p className="mt-0.5 text-xs text-rose-500">{doc.error_message}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          {doc.status === "failed" && (
-                            <button
-                              onClick={() => handleReprocessDocument(doc)}
-                              className="text-amber-600 hover:text-amber-700"
-                              title="Reprocess"
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeleteDocument(doc)}
-                            className="text-[#64748B] hover:text-rose-600"
-                            aria-label={`Delete ${doc.filename}`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    {structuredKnowledge.map((item) => (
+                      <div key={item.label} className="rounded-lg border border-[#E2E8F0] p-2.5">
+                        <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
                       </div>
                     ))}
                   </div>
-                )}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[
+                      { label: "Services", section: "services" },
+                      { label: "FAQ", section: "faq" },
+                      { label: "Tone", section: "assistant-messages" },
+                    ].map((link) => (
+                      <Link
+                        key={link.section}
+                        href={settingsHref(link.section)}
+                        className="rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                      >
+                        Edit {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Document uploads */}
+                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-3.5 h-3.5 text-[#0F766E]" />
+                      <p className="text-sm font-semibold text-[#0F172A]">Document uploads</p>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.txt"
+                      onChange={handleFileUpload}
+                      aria-label="Upload training document"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                    >
+                      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                      <span>Upload PDF or TXT</span>
+                    </button>
+                  </div>
+
+                  <p className="mb-2.5 text-xs leading-relaxed text-[#475569]">
+                    Upload clinic documents (policies, procedures, service guides) to teach the assistant. Files are processed into searchable knowledge chunks.
+                  </p>
+
+                  {documents.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
+                      <p>Documents are optional. Your settings (services, FAQ, hours) already power answers.</p>
+                      <p className="mt-2">Upload PDF or TXT when you want policies or long-form detail in retrieval — processing may take a minute.</p>
+                      <div className="mt-4 flex flex-wrap justify-center gap-2">
+                        <Link
+                          href={settingsHref("services")}
+                          className="inline-flex items-center rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                        >
+                          Services &amp; FAQ in Settings
+                        </Link>
+                        <Link
+                          href="/dashboard/settings"
+                          className="inline-flex items-center rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                        >
+                          Full setup checklist
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#E2E8F0] px-2.5 py-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {docStatusIcon(doc.status)}
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-[#0F172A]">{doc.filename}</p>
+                              <p className="text-xs text-[#475569]">
+                                {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
+                                {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
+                              </p>
+                              {doc.status === "failed" && doc.error_message && (
+                                <p className="mt-0.5 text-xs text-rose-500">{doc.error_message}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            {doc.status === "failed" && (
+                              <button
+                                onClick={() => handleReprocessDocument(doc)}
+                                className="text-amber-600 hover:text-amber-700"
+                                title="Reprocess"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteDocument(doc)}
+                              className="text-[#64748B] hover:text-rose-600"
+                              aria-label={`Delete ${doc.filename}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Custom notes */}
+                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                  <div className="mb-2.5 flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-[#475569]" />
+                    <p className="text-sm font-semibold text-[#0F172A]">Custom notes</p>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newTitle}
+                      onChange={(event) => setNewTitle(event.target.value)}
+                      placeholder="Title, e.g. Insurance exceptions"
+                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    />
+                    <textarea
+                      value={newContent}
+                      onChange={(event) => setNewContent(event.target.value)}
+                      rows={3}
+                      placeholder="Details your assistant should know..."
+                      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    />
+                    <button
+                      onClick={createSource}
+                      disabled={saving || !newTitle.trim() || !newContent.trim()}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                    >
+                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                      <span>Save note</span>
+                    </button>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {training.custom_sources.length === 0 ? (
+                      <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
+                        <p>No custom notes yet. Use the form above for exceptions and nuance the assistant should know.</p>
+                        <p className="mt-2">
+                          Baseline facts (hours, services) still come from{" "}
+                          <Link href={settingsHref("clinic-info")} className="font-semibold text-[#115E59] hover:underline">
+                            Settings
+                          </Link>
+                          .
+                        </p>
+                      </div>
+                    ) : (
+                      training.custom_sources.map((source) => (
+                        <div key={source.id} className="rounded-lg border border-[#E2E8F0] p-2.5">
+                          {editingSourceId === source.id ? (
+                            <div className="space-y-2">
+                              <input
+                                type="text"
+                                value={editingTitle}
+                                onChange={(event) => setEditingTitle(event.target.value)}
+                                placeholder="Note title"
+                                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                              />
+                              <textarea
+                                value={editingContent}
+                                onChange={(event) => setEditingContent(event.target.value)}
+                                rows={3}
+                                placeholder="Note content"
+                                className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={saveEditedSource}
+                                  disabled={saving || !editingTitle.trim() || !editingContent.trim()}
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                >
+                                  {saving && <Loader2 className="w-3 h-3 animate-spin" />}
+                                  <span>Save</span>
+                                </button>
+                                <button
+                                  onClick={cancelEditingSource}
+                                  className="rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-[#0F172A]">{source.title}</p>
+                                <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed text-[#475569]">{source.content}</p>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                <button
+                                  onClick={() => startEditingSource(source)}
+                                  className="text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteSource(source)}
+                                  className="text-[#64748B] hover:text-rose-600"
+                                  aria-label={`Delete ${source.title}`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Custom notes */}
-              <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+              {/* Preview chat */}
+              <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm xl:sticky xl:top-20">
                 <div className="mb-2.5 flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-[#475569]" />
-                  <p className="text-sm font-semibold text-[#0F172A]">Custom notes</p>
-                </div>
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={newTitle}
-                    onChange={(event) => setNewTitle(event.target.value)}
-                    placeholder="Title, e.g. Insurance exceptions"
-                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                  />
-                  <textarea
-                    value={newContent}
-                    onChange={(event) => setNewContent(event.target.value)}
-                    rows={3}
-                    placeholder="Details your assistant should know..."
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                  />
-                  <button
-                    onClick={createSource}
-                    disabled={saving || !newTitle.trim() || !newContent.trim()}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                  >
-                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                    <span>Save note</span>
-                  </button>
+                  <Send className="w-3.5 h-3.5 text-[#0F766E]" />
+                  <p className="text-sm font-semibold text-[#0F172A]">Live preview</p>
                 </div>
 
-                <div className="mt-3 space-y-2">
-                  {training.custom_sources.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
-                      <p>No custom notes yet. Use the form above for exceptions and nuance the assistant should know.</p>
-                      <p className="mt-2">
-                        Baseline facts (hours, services) still come from{" "}
-                        <Link href={settingsHref("clinic-info")} className="font-semibold text-[#115E59] hover:underline">
-                          Settings
-                        </Link>
-                        .
+                {!clinic.is_live && (
+                  <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-xs text-amber-700">
+                    Go live before using preview. This test uses the real chat flow.
+                  </div>
+                )}
+
+                <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
+                  {previewMessages.length === 0 ? (
+                    <div className="flex h-full min-h-[12rem] flex-col items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white/60 px-4 py-6 text-center">
+                      <Bot className="mb-2 h-8 w-8 text-[#94A3B8]" aria-hidden />
+                      <p className="text-sm font-medium text-[#475569]">Test against your live configuration</p>
+                      <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-[#64748B]">
+                        Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
                       </p>
                     </div>
                   ) : (
-                    training.custom_sources.map((source) => (
-                      <div key={source.id} className="rounded-lg border border-[#E2E8F0] p-2.5">
-                        {editingSourceId === source.id ? (
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={editingTitle}
-                              onChange={(event) => setEditingTitle(event.target.value)}
-                              placeholder="Note title"
-                              className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                            />
-                            <textarea
-                              value={editingContent}
-                              onChange={(event) => setEditingContent(event.target.value)}
-                              rows={3}
-                              placeholder="Note content"
-                              className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                            />
-                            <div className="flex gap-2">
-                              <button
-                                onClick={saveEditedSource}
-                                disabled={saving || !editingTitle.trim() || !editingContent.trim()}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                              >
-                                {saving && <Loader2 className="w-3 h-3 animate-spin" />}
-                                <span>Save</span>
-                              </button>
-                              <button
-                                onClick={cancelEditingSource}
-                                className="rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold text-[#0F172A]">{source.title}</p>
-                              <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed text-[#475569]">{source.content}</p>
-                            </div>
-                            <div className="flex shrink-0 items-center gap-1.5">
-                              <button
-                                onClick={() => startEditingSource(source)}
-                                className="text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => deleteSource(source)}
-                                className="text-[#64748B] hover:text-rose-600"
-                                aria-label={`Delete ${source.title}`}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                    previewMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
+                            ? "rounded-br-sm bg-[#0F766E] text-white"
+                            : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
+                            }`}
+                        >
+                          {message.content}
+                        </div>
                       </div>
                     ))
                   )}
                 </div>
-              </div>
-            </div>
 
-            {/* Preview chat */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm xl:sticky xl:top-20">
-              <div className="mb-2.5 flex items-center gap-2">
-                <Send className="w-3.5 h-3.5 text-[#0F766E]" />
-                <p className="text-sm font-semibold text-[#0F172A]">Live preview</p>
-              </div>
-
-              {!clinic.is_live && (
-                <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-xs text-amber-700">
-                  Go live before using preview. This test uses the real chat flow.
+                <div className="mt-2.5 space-y-2">
+                  <textarea
+                    value={previewInput}
+                    onChange={(event) => setPreviewInput(event.target.value)}
+                    rows={2}
+                    placeholder="Try: Do you offer same-day appointments?"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                  />
+                  <button
+                    onClick={sendPreview}
+                    disabled={previewSending || previewDisabled || !previewInput.trim()}
+                    type="button"
+                    className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  >
+                    {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                    <span>Send test</span>
+                  </button>
                 </div>
-              )}
-
-              <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
-                {previewMessages.length === 0 ? (
-                  <div className="flex h-full min-h-[12rem] flex-col items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white/60 px-4 py-6 text-center">
-                    <Bot className="mb-2 h-8 w-8 text-[#94A3B8]" aria-hidden />
-                    <p className="text-sm font-medium text-[#475569]">Test against your live configuration</p>
-                    <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-[#64748B]">
-                      Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
-                    </p>
-                  </div>
-                ) : (
-                  previewMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
-                          ? "rounded-br-sm bg-[#0F766E] text-white"
-                          : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
-                          }`}
-                      >
-                        {message.content}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="mt-2.5 space-y-2">
-                <textarea
-                  value={previewInput}
-                  onChange={(event) => setPreviewInput(event.target.value)}
-                  rows={2}
-                  placeholder="Try: Do you offer same-day appointments?"
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                />
-                <button
-                  onClick={sendPreview}
-                  disabled={previewSending || previewDisabled || !previewInput.trim()}
-                  type="button"
-                  className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                >
-                  {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  <span>Send test</span>
-                </button>
               </div>
             </div>
           </div>

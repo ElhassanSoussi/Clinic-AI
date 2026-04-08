@@ -185,7 +185,7 @@ export default function PricingPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
+      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
           <div className="mx-auto max-w-3xl text-center">
             <div className="marketing-kicker mx-auto mb-6">

@@ -295,7 +295,7 @@ export default function LandingPage() {
       <PublicNav />
 
       {/* ── HERO ── */}
-      <section className="marketing-hero marketing-surface-white border-b border-slate-300/80">
+      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-300/80">
         <div className="marketing-container">
           <div className="landing-hero-grid">
             {/* Copy */}

@@ -28,7 +28,6 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SurfaceCard } from "@/components/shared/SurfaceCard";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { ActivationSetupBand } from "@/components/shared/ActivationSetupBand";
 import { RightRailCard } from "@/components/ui";
 import { clampPercentInt, safeCount, timeAgo } from "@/lib/utils";
@@ -270,8 +269,8 @@ export default function DashboardPage() {
             Overview
           </>
         }
-        title="Front desk at a glance"
-        description="Operational home for conversation volume, bookings, and the next staff actions—without losing the thread of what matters today."
+        title="Command center"
+        description="Pressure, pipeline, throughput, and the next staff moves—grouped so you scan the desk in seconds, not a flat grid of widgets."
         actions={
           billing && billing.plan !== "premium" ? (
             <Link
@@ -431,26 +430,26 @@ export default function DashboardPage() {
       {/* ── Main layout: canvas + right rail ── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-6 xl:order-none">
-          <WorkspaceBand>
+        <div className="order-1 min-w-0 space-y-5 xl:order-none">
+          <div className="wave-command-slab">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 max-w-xl">
-                <p className="workspace-section-label">Today&apos;s pressure</p>
+                <p className="workspace-section-label">Pressure &amp; attention</p>
                 <p className="mt-2 text-sm leading-relaxed text-[#475569]">
-                  Unresolved patient threads, follow-up load, and decisions waiting on staff—triage these before diving into individual records.
+                  Unresolved threads, follow-up load, and human review—triage this band first; everything below is status and throughput.
                 </p>
               </div>
               <div className="flex w-full flex-col gap-4 lg:max-w-md lg:items-end">
                 <div className="grid w-full grid-cols-3 gap-3 sm:max-w-md">
-                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Unresolved</p>
                     <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.unresolved_count)}</p>
                   </div>
-                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Follow-ups</p>
                     <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.follow_up_needed_count)}</p>
                   </div>
-                  <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 text-center">
+                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Review</p>
                     <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.human_review_required_count)}</p>
                   </div>
@@ -469,54 +468,54 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </WorkspaceBand>
+          </div>
 
-          <SurfaceCard
-            title="Pipeline & recovery"
-            description="Volume and outcome signals across conversations—pair with appointments for timing and deposits."
-          >
+          <div className="wave-zone-panel space-y-4">
+            <div>
+              <p className="workspace-section-label">Pipeline &amp; bookings</p>
+              <p className="mt-1 text-sm text-[#475569]">Volume and booking posture—pair with appointments for timing and deposits.</p>
+            </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {statCards.map((card) => (
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
             </div>
-          </SurfaceCard>
-
-          {/* Appointment row */}
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-            <MetricCard
-              label="Upcoming appointments"
-              value={upcomingAppointments.length}
-              icon={CalendarDays}
-              tone="teal"
-              detail="Confirmed bookings scheduled."
-            />
-            <MetricCard
-              label="Needs attention"
-              value={attentionAppointments.length}
-              icon={AlertTriangle}
-              tone="amber"
-              detail="Reschedules, cancellations, deposit follow-ups."
-            />
-            <Link
-              href="/dashboard/appointments"
-              className="flex items-start justify-between rounded-xl border border-[#E2E8F0] bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
-            >
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Appointments</p>
-                <p className="mt-1.5 text-sm font-semibold text-[#0F172A]">Manage bookings, reminders, and deposits</p>
-              </div>
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
-                <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            </Link>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+              <MetricCard
+                label="Upcoming appointments"
+                value={upcomingAppointments.length}
+                icon={CalendarDays}
+                tone="teal"
+                detail="Confirmed bookings scheduled."
+              />
+              <MetricCard
+                label="Needs attention"
+                value={attentionAppointments.length}
+                icon={AlertTriangle}
+                tone="amber"
+                detail="Reschedules, cancellations, deposit follow-ups."
+              />
+              <Link
+                href="/dashboard/appointments"
+                className="flex items-start justify-between rounded-xl border border-[#E2E8F0] bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
+              >
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Appointments</p>
+                  <p className="mt-1.5 text-sm font-semibold text-[#0F172A]">Manage bookings, reminders, and deposits</p>
+                </div>
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            </div>
           </div>
 
-          {/* Performance snapshot */}
-          <SurfaceCard
-            title="Throughput, deposits & review"
-            description="How the assistant and staff moved work—value recovered, automation, and deposit motion."
-            action={
+          <div className="wave-zone-panel space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="workspace-section-label">Throughput &amp; motion</p>
+                <p className="mt-1 text-sm text-[#475569]">How work moved—value, automation, deposits, and review load.</p>
+              </div>
               <Link
                 href="/dashboard/inbox"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
@@ -524,15 +523,14 @@ export default function DashboardPage() {
                 Open inbox
                 <ArrowRight className="h-3 w-3" />
               </Link>
-            }
-          >
+            </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {performanceCards.map((card) => (
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
             </div>
 
-            <div className="mt-2.5 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5">
+            <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Performance note</p>
               <p className="mt-0.5 text-sm text-[#475569]">{analytics.estimated_value_recovered_label}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#475569]">
@@ -541,14 +539,16 @@ export default function DashboardPage() {
                 <span>AI resolution: {clampPercentInt(analytics.ai_resolution_estimate)}%</span>
               </div>
             </div>
-          </SurfaceCard>
+          </div>
 
-          {/* Busiest hours */}
-          <SurfaceCard
-            title="Busiest contact hours"
-            description="When patients reach out most, based on incoming messages."
-            action={<Clock className="h-3.5 w-3.5 text-[#64748B]" />}
-          >
+          <div className="wave-zone-panel space-y-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="workspace-section-label">Contact rhythm</p>
+                <p className="mt-1 text-sm text-[#475569]">When patients reach out most, from live message timestamps.</p>
+              </div>
+              <Clock className="h-3.5 w-3.5 shrink-0 text-[#64748B]" aria-hidden />
+            </div>
             {!analytics.busiest_contact_hours || analytics.busiest_contact_hours.length === 0 ? (
               <EmptyState
                 icon={<Clock className="w-5 h-5 text-[#64748B]" />}
@@ -580,125 +580,129 @@ export default function DashboardPage() {
                 })}
               </div>
             )}
-          </SurfaceCard>
+          </div>
 
           {/* Two-column: Opportunities + Activity */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <SurfaceCard
-              title="Opportunities"
-              description="Stalled requests and follow-up items that may need action."
-              action={
-                <Link
-                  href="/dashboard/opportunities"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-                >
-                  View all
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              }
-            >
-              {opportunities.length === 0 ? (
-                <EmptyState
-                  icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
-                  title="No follow-up items"
-                  description="Stalled or at-risk booking requests will surface here when they need attention."
-                />
-              ) : (
-                <div className="space-y-2">
-                  {opportunities.slice(0, 5).map((opportunity) => {
-                    let href = "/dashboard/opportunities";
-                    if (opportunity.conversation_id) {
-                      href = `/dashboard/inbox/${opportunity.conversation_id}`;
-                    } else if (opportunity.lead_id) {
-                      href = `/dashboard/leads/${opportunity.lead_id}`;
-                    } else if (opportunity.customer_key) {
-                      href = `/dashboard/customers/${opportunity.customer_key}`;
-                    }
-                    return (
-                      <Link
-                        key={opportunity.id}
-                        href={href}
-                        className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#E2E8F0] hover:bg-[#F8FAFC]"
-                      >
-                        <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
-                            ? "bg-rose-50 text-rose-600"
-                            : "bg-amber-50 text-amber-600"
-                            }`}
+          <div className="wave-zone-panel">
+            <p className="workspace-section-label">Next moves</p>
+            <p className="mt-1 text-sm text-[#475569]">Follow-up pressure and the latest audit trail—short lists, not another metric wall.</p>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <SurfaceCard
+                title="Opportunities"
+                description="Stalled requests and follow-up items that may need action."
+                action={
+                  <Link
+                    href="/dashboard/opportunities"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
+                  >
+                    View all
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                }
+              >
+                {opportunities.length === 0 ? (
+                  <EmptyState
+                    icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
+                    title="No follow-up items"
+                    description="Stalled or at-risk booking requests will surface here when they need attention."
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    {opportunities.slice(0, 5).map((opportunity) => {
+                      let href = "/dashboard/opportunities";
+                      if (opportunity.conversation_id) {
+                        href = `/dashboard/inbox/${opportunity.conversation_id}`;
+                      } else if (opportunity.lead_id) {
+                        href = `/dashboard/leads/${opportunity.lead_id}`;
+                      } else if (opportunity.customer_key) {
+                        href = `/dashboard/customers/${opportunity.customer_key}`;
+                      }
+                      return (
+                        <Link
+                          key={opportunity.id}
+                          href={href}
+                          className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#E2E8F0] hover:bg-[#F8FAFC]"
                         >
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[#0F172A]">{opportunity.title}</p>
-                          <p className="mt-0.5 truncate text-xs text-[#475569]">
-                            {opportunity.customer_name} · {opportunity.detail}
-                          </p>
-                        </div>
-                        <span className="shrink-0 text-xs text-[#64748B]">
-                          {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </SurfaceCard>
-
-            <SurfaceCard
-              title="Recent activity"
-              description="Latest events across the clinic."
-              action={
-                <Link
-                  href="/dashboard/activity"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-                >
-                  View all
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              }
-            >
-              {activity.length === 0 ? (
-                emptyActivityState
-              ) : (
-                <div className="space-y-2">
-                  {activity.slice(0, 8).map((event, index) => {
-                    const config = EVENT_CONFIG[event.type] ?? EVENT_CONFIG.lead_created;
-                    const Icon = config.icon;
-                    const isLead =
-                      event.type === "lead_created" || event.type === "lead_status_changed";
-                    return (
-                      <div
-                        key={`${event.type}-${event.resource_id}-${index}`}
-                        className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3.5 py-3"
-                      >
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
-                          <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          {isLead ? (
-                            <Link
-                              href={`/dashboard/leads/${event.resource_id}`}
-                              className="block truncate text-sm font-medium text-[#0F172A] hover:text-[#115E59]"
-                            >
-                              {event.title}
-                            </Link>
-                          ) : (
-                            <p className="truncate text-sm font-medium text-[#0F172A]">{event.title}</p>
-                          )}
-                          <p className="mt-0.5 truncate text-xs text-[#475569]">{event.detail}</p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${config.bg} ${config.color}`}>
-                            {config.label}
+                          <div
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
+                              ? "bg-rose-50 text-rose-600"
+                              : "bg-amber-50 text-amber-600"
+                              }`}
+                          >
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-[#0F172A]">{opportunity.title}</p>
+                            <p className="mt-0.5 truncate text-xs text-[#475569]">
+                              {opportunity.customer_name} · {opportunity.detail}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-xs text-[#64748B]">
+                            {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
                           </span>
-                          <span className="text-xs text-[#64748B]">{timeAgo(event.timestamp)}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </SurfaceCard>
+
+              <SurfaceCard
+                title="Recent activity"
+                description="Latest events across the clinic."
+                action={
+                  <Link
+                    href="/dashboard/activity"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
+                  >
+                    View all
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                }
+              >
+                {activity.length === 0 ? (
+                  emptyActivityState
+                ) : (
+                  <div className="space-y-2">
+                    {activity.slice(0, 8).map((event, index) => {
+                      const config = EVENT_CONFIG[event.type] ?? EVENT_CONFIG.lead_created;
+                      const Icon = config.icon;
+                      const isLead =
+                        event.type === "lead_created" || event.type === "lead_status_changed";
+                      return (
+                        <div
+                          key={`${event.type}-${event.resource_id}-${index}`}
+                          className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3.5 py-3"
+                        >
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
+                            <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            {isLead ? (
+                              <Link
+                                href={`/dashboard/leads/${event.resource_id}`}
+                                className="block truncate text-sm font-medium text-[#0F172A] hover:text-[#115E59]"
+                              >
+                                {event.title}
+                              </Link>
+                            ) : (
+                              <p className="truncate text-sm font-medium text-[#0F172A]">{event.title}</p>
+                            )}
+                            <p className="mt-0.5 truncate text-xs text-[#475569]">{event.detail}</p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${config.bg} ${config.color}`}>
+                              {config.label}
+                            </span>
+                            <span className="text-xs text-[#64748B]">{timeAgo(event.timestamp)}</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </SurfaceCard>
+                      );
+                    })}
+                  </div>
+                )}
+              </SurfaceCard>
+            </div>
           </div>
 
           {/* All caught up */}
