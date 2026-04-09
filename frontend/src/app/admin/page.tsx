@@ -59,16 +59,18 @@ export default function AdminPage() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
+      <div className="auth-page-ambient flex min-h-screen items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <Shield className="w-6 h-6 text-teal-600" />
-            <h1 className="text-xl font-bold text-slate-900">Admin Access</h1>
+          <div className="mb-8 flex items-center justify-center gap-2.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-app-primary-hover)] shadow-md shadow-teal-900/20">
+              <Shield className="h-5 w-5 text-white" aria-hidden />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-[var(--color-app-text)]">Admin access</h1>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div className="auth-form-focus space-y-4 p-7">
             <div>
-              <label htmlFor="admin-secret" className="block text-sm font-medium text-slate-700 mb-1.5">
-                Admin Secret
+              <label htmlFor="admin-secret" className="mb-1.5 block text-sm font-medium text-[var(--color-app-text)]">
+                Admin secret
               </label>
               <input
                 id="admin-secret"
@@ -76,23 +78,26 @@ export default function AdminPage() {
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                className="app-input w-full py-2.5 text-sm"
                 placeholder="Enter admin secret"
               />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-[var(--color-status-danger)]">{error}</p>}
             <button
               onClick={handleLogin}
               disabled={loading || !secret.trim()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-app-primary-hover)] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[var(--color-app-primary-deep)] disabled:opacity-50"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
               Access Admin Panel
             </button>
           </div>
-          <div className="mt-4 text-center">
-            <Link href="/" className="text-sm text-slate-500 hover:text-slate-700">
-              <ArrowLeft className="w-3 h-3 inline mr-1" />
+          <div className="mt-5 text-center">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-app-text-muted)] transition-colors hover:text-[var(--color-app-text)]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
               Back to home
             </Link>
           </div>
@@ -102,77 +107,80 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="border-b border-slate-200 bg-white">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="workspace-flow-ambient min-h-screen">
+      <nav className="flow-sticky-header">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-app-primary-hover)] shadow-sm">
+                <Bot className="h-5 w-5 text-white" aria-hidden />
               </div>
             </Link>
-            <span className="text-sm font-medium text-slate-400">/</span>
-            <span className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-teal-600" />
+            <span className="text-sm font-medium text-[var(--color-app-text-muted)]">/</span>
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--color-app-text)]">
+              <Shield className="h-4 w-4 text-[var(--color-app-primary-hover)]" aria-hidden />
               Admin
             </span>
           </div>
-          <div className="flex items-center gap-4 text-sm text-slate-500">
+          <div className="flex items-center gap-4 text-sm text-[var(--color-app-text-muted)]">
             <span className="flex items-center gap-1.5">
-              <Building2 className="w-4 h-4" />
+              <Building2 className="h-4 w-4 opacity-80" aria-hidden />
               {clinics.length} clinics
             </span>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">All Clinics</h1>
+      <main className="mx-auto max-w-6xl px-6 py-8 sm:py-10">
+        <h1 className="mb-1 text-2xl font-bold tracking-tight text-[var(--color-app-text)]">All clinics</h1>
+        <p className="mb-6 text-sm text-[var(--color-app-text-muted)]">Workspace accounts and subscription state.</p>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="ds-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50">
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Clinic</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Plan</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-slate-600">Leads</th>
-                  <th className="text-right px-4 py-3 font-medium text-slate-600">Users</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Onboarded</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Created</th>
+                <tr className="ds-card-header border-b border-[var(--color-app-border)]">
+                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-app-text-secondary)]">Clinic</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-app-text-secondary)]">Plan</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-app-text-secondary)]">Status</th>
+                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-app-text-secondary)]">Leads</th>
+                  <th className="px-4 py-3 text-right font-semibold text-[var(--color-app-text-secondary)]">Users</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-app-text-secondary)]">Onboarded</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-app-text-secondary)]">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[var(--color-app-border)]">
                 {clinics.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={c.id} className="transition-colors hover:bg-[var(--color-app-canvas)]/80">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="font-medium text-slate-900">{c.name}</p>
-                        <p className="text-xs text-slate-400">{c.slug}</p>
+                        <p className="font-medium text-[var(--color-app-text)]">{c.name}</p>
+                        <p className="text-xs text-[var(--color-app-text-muted)]">{c.slug}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-700 capitalize">{c.plan || "trial"}</td>
+                    <td className="px-4 py-3 capitalize text-[var(--color-app-text-secondary)]">{c.plan || "trial"}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(c.subscription_status)}`}>
                         {c.subscription_status || "none"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-700">
+                    <td className="px-4 py-3 text-right tabular-nums text-[var(--color-app-text-secondary)]">
                       {c.monthly_leads_used ?? 0} / {c.monthly_lead_limit === -1 ? "∞" : (c.monthly_lead_limit ?? 0)}
                     </td>
-                    <td className="px-4 py-3 text-right text-slate-700 flex items-center justify-end gap-1">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
-                      {c.user_count}
+                    <td className="px-4 py-3 text-right text-[var(--color-app-text-secondary)]">
+                      <span className="inline-flex items-center justify-end gap-1 tabular-nums">
+                        <Users className="h-3.5 w-3.5 text-[var(--color-app-text-muted)]" aria-hidden />
+                        {c.user_count}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {c.onboarding_completed ? (
-                        <span className="text-emerald-600 text-xs font-medium">Yes</span>
+                        <span className="text-xs font-medium text-[var(--color-status-success)]">Yes</span>
                       ) : (
-                        <span className="text-amber-600 text-xs font-medium">No</span>
+                        <span className="text-xs font-medium text-[var(--color-status-warning)]">No</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 text-xs">
+                    <td className="px-4 py-3 text-xs text-[var(--color-app-text-muted)]">
                       {new Date(c.created_at).toLocaleDateString()}
                     </td>
                   </tr>
@@ -181,7 +189,7 @@ export default function AdminPage() {
             </table>
           </div>
           {clinics.length === 0 && (
-            <div className="py-12 text-center text-slate-400">No clinics found.</div>
+            <div className="py-12 text-center text-sm text-[var(--color-app-text-muted)]">No clinics found.</div>
           )}
         </div>
       </main>

@@ -46,8 +46,8 @@ export default function AuthCompletePage() {
           globalThis.window === undefined
             ? null
             : getPaidPlanId(
-                new URLSearchParams(globalThis.location.search).get("plan")
-              );
+              new URLSearchParams(globalThis.location.search).get("plan")
+            );
 
         const session = await waitForSession();
 
@@ -92,20 +92,20 @@ export default function AuthCompletePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <div className="text-center max-w-sm">
-          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
+      <div className="auth-page-ambient flex min-h-screen items-center justify-center px-4 py-12">
+        <div className="auth-form-focus w-full max-w-md px-8 py-10 text-center">
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+            <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--color-app-text)]">
             Sign-in failed
           </h2>
-          <p className="text-sm text-slate-500 mb-6">{error}</p>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--color-app-text-secondary)]">{error}</p>
           <Link
             href="/login"
-            className="inline-flex px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
+            className="mt-8 inline-flex items-center justify-center rounded-xl bg-[var(--color-app-primary-hover)] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[var(--color-app-primary-deep)]"
           >
-            Back to Login
+            Back to login
           </Link>
         </div>
       </div>
@@ -113,13 +113,16 @@ export default function AuthCompletePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center mx-auto mb-4">
-          <Bot className="w-6 h-6 text-white" />
+    <div className="auth-page-ambient flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="auth-form-focus w-full max-w-sm px-10 py-12 text-center">
+        <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-app-primary-hover)] shadow-md shadow-teal-900/20">
+          <Bot className="h-6 w-6 text-white" aria-hidden />
         </div>
-        <Loader2 className="w-6 h-6 animate-spin text-teal-600 mx-auto mb-3" />
-        <p className="text-sm text-slate-500">Finishing sign in...</p>
+        <Loader2 className="mx-auto h-6 w-6 animate-spin text-[var(--color-app-primary-hover)]" aria-hidden />
+        <p className="mt-5 text-sm font-medium text-[var(--color-app-text-muted)]">Finishing sign in…</p>
+        <p className="mt-2 text-xs leading-relaxed text-[var(--color-app-text-muted)]">
+          Securely completing your session. This usually takes a moment.
+        </p>
       </div>
     </div>
   );

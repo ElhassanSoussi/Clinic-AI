@@ -629,7 +629,7 @@ function TestChatStepContent({
         This preview uses your saved clinic slug and the same chat API as the live widget — not a canned demo transcript.
         Try “I&apos;d like to book an appointment” or ask about a service you added in step 2.
       </p>
-      <div className="max-w-lg mx-auto border border-slate-200 rounded-2xl overflow-hidden shadow-md shadow-slate-200/40">
+      <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-[var(--color-app-border)] chat-shell-premium">
         <div
           className="onboarding-chat-header px-4 py-3.5 text-white flex items-center gap-2"
         >
@@ -642,7 +642,7 @@ function TestChatStepContent({
           </div>
         </div>
 
-        <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50/90">
+        <div className="chat-thread-well h-80 overflow-y-auto space-y-3 p-4">
           {chatMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed border-slate-200 bg-white">
               <MessageSquare className="w-8 h-8 text-slate-300 mb-3" aria-hidden />
@@ -678,7 +678,7 @@ function TestChatStepContent({
           <div ref={chatEndRef} />
         </div>
 
-        <div className="border-t border-slate-200 p-3 bg-white flex gap-2">
+        <div className="flex gap-2 border-t border-slate-100/90 bg-gradient-to-b from-white via-slate-50/40 to-slate-50/80 p-3">
           <input
             type="text"
             value={chatInput}
@@ -689,14 +689,14 @@ function TestChatStepContent({
                 sendChatMessage();
               }
             }}
-            className="flex-1 min-w-0 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm transition-all placeholder:text-slate-400 focus:border-[var(--color-app-primary-hover)] focus:ring-2 focus:ring-[var(--color-app-primary-light)]/90"
             placeholder="Try: “What services do you offer?”"
           />
           <button
             onClick={sendChatMessage}
             disabled={chatSending || !chatInput.trim()}
             aria-label="Send chat message"
-            className="px-3 py-2 text-white bg-teal-600 rounded-xl hover:bg-teal-700 disabled:opacity-50 shadow-sm shrink-0"
+            className="shrink-0 rounded-xl bg-[var(--color-app-primary-hover)] px-3 py-2 text-white shadow-sm transition-colors hover:bg-[var(--color-app-primary-deep)] disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -1429,31 +1429,33 @@ export default function OnboardingPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="app-shell-bg flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0F766E] border-t-transparent" />
+      <div className="workspace-flow-ambient flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-app-primary-hover)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="app-shell-bg min-h-screen">
+    <div className="workspace-flow-ambient min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-[#E2E8F0] bg-white/95 backdrop-blur-lg">
+      <header className="flow-sticky-header sticky top-0 z-10">
         <div className="mx-auto flex h-[4.25rem] max-w-5xl items-center gap-3 px-4 sm:px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0F766E] shadow-sm shadow-teal-900/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-app-primary-hover)] shadow-sm shadow-teal-900/10">
             <Bot className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <span className="block text-[0.9375rem] font-semibold leading-tight text-[#0F172A]">Clinic AI</span>
-            <span className="text-sm text-[#64748B]">Front desk assistant setup</span>
+            <span className="block text-[0.9375rem] font-semibold leading-tight text-[var(--color-app-text)]">
+              Clinic AI
+            </span>
+            <span className="text-sm text-[var(--color-app-text-muted)]">Front desk assistant setup</span>
           </div>
-          <span className="ml-auto hidden shrink-0 tabular-nums text-sm font-medium text-[#64748B] sm:block">
+          <span className="ml-auto hidden shrink-0 tabular-nums text-sm font-medium text-[var(--color-app-text-muted)] sm:block">
             Step {step}/{STEPS.length}
           </span>
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-4 py-8 pb-16 sm:px-6">
+      <div className="mx-auto max-w-5xl px-4 py-8 pb-16 sm:px-6 sm:py-10">
         <OnboardingPageProgress step={step} onSelectStep={setStep} />
 
         {/* Step content */}

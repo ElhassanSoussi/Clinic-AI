@@ -36,7 +36,7 @@ export default function PrivacyPage() {
 
       <main className="marketing-section marketing-surface-mist pb-20 sm:pb-28">
         <div className="marketing-container">
-          <article className="legal-prose mx-auto max-w-3xl space-y-12">
+          <article className="legal-prose marketing-section-elevated mx-auto max-w-3xl space-y-12">
             <section>
               <h2>1. Who this policy applies to</h2>
               <div className="mt-4 space-y-4">
