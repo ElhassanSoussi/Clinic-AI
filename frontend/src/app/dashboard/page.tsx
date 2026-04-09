@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 href={`/chat/${clinic.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="app-btn app-btn-primary gap-2 text-xs
+                className="app-btn app-btn-primary gap-2 text-xs"
               >
                 <MessageSquareMore className="h-3.5 w-3.5" />
                 Test assistant
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                   href={`/chat/${clinic.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="app-btn app-btn-primary gap-2 text-sm
+                  className="app-btn app-btn-primary gap-2 text-sm"
                 >
                   <MessageSquareMore className="h-4 w-4" />
                   Preview patient chat
@@ -424,7 +424,7 @@ export default function DashboardPage() {
       {/* ═══ Main grid: canvas + right rail ═══ */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_17rem]">
         {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-5 xl:order-0
+        <div className="order-1 min-w-0 space-y-5 xl:order-0">
 
           {/* Pressure hero slab */}
           <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
@@ -688,7 +688,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Right rail ── */}
-        <div className="order-2 space-y-3 xl:order-0
+        <div className="order-2 space-y-3 xl:order-0">
           <RightRailCard title="Workspace state">
             <div className="space-y-1.5">
               <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">

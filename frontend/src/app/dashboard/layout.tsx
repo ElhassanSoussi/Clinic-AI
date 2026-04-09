@@ -560,3 +560,29 @@ export default function DashboardLayout({
       </div>
 
       {/* Modals */}
+
+      <GoLiveModals
+        confirmOpen={goLiveModal && !goLiveSuccess}
+        successOpen={goLiveSuccess}
+        loading={goLiveLoading}
+        onCancel={() => setGoLiveModal(false)}
+        onConfirm={() => {
+          void (async () => {
+            setGoLiveLoading(true);
+            try {
+              await api.clinics.goLive();
+              await fetchClinic();
+              setGoLiveModal(false);
+              setGoLiveSuccess(true);
+              globalThis.setTimeout(() => setGoLiveSuccess(false), 4000);
+            } catch {
+              /* keep modal open on error */
+            }
+            setGoLiveLoading(false);
+          })();
+        }}
+        onDismissSuccess={() => setGoLiveSuccess(false)}
+      />
+    </div>
+  );
+}
