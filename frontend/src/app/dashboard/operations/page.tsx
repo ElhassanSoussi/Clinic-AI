@@ -442,6 +442,44 @@ export default function OperationsPage() {
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
+      <section className="ds-control-hero-panel p-5 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <p className="workspace-section-label">Control center</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+              See readiness, queues, reminders, and recovery work in one operational command surface.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              Operations is where you check whether channels are configured, whether reminders are prepared, and whether communication recovery queues need human attention before anything slips.
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-4">
+              {[
+                { label: "Connected channels", value: channelReadiness.filter((item) => item.connection_status === "connected").length, detail: "Channels that can actively handle real traffic now." },
+                { label: "Due reminders", value: dueReminders.length, detail: "Reminder sends already due based on current booking data." },
+                { label: "Review queue", value: reviewQueue.length, detail: "Threads or sends that still need staff judgment." },
+                { label: "Recovery items", value: communicationQueue.length + waitlistEntries.length, detail: "Missed calls, callback requests, and waitlist work." },
+              ].map((item) => (
+                <div key={item.label} className="rounded-[1.25rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                  <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">{item.value}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
+            <p className="workspace-rail-title">Operational posture</p>
+            <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+              <p>Readiness tells you whether the clinic can safely operate each channel and automation.</p>
+              <p>Recovery queues show where missed calls, callbacks, reminders, and review workflows still need intervention.</p>
+              <p>This page is intentionally honest: prepared does not mean fully automated unless the connected provider and settings actually support it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* System readiness */}
       {systemReadiness && (
         <div className="wave-ops-zone p-4 sm:p-5">

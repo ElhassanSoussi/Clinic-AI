@@ -24,13 +24,13 @@ export function SurfaceCard({
   return (
     <section className={`ds-card overflow-hidden ${className}`.trim()}>
       {(title || description || action) && (
-        <div className="ds-card-header flex flex-col gap-1 border-b border-[var(--color-app-border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+        <div className="ds-card-header flex flex-col gap-1.5 border-b border-[var(--color-app-border)] px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 sm:py-5">
           <div className="min-w-0">
             {title ? (
               <h2 className="ds-section-title">{title}</h2>
             ) : null}
             {description ? (
-              <p className="ds-help-text mt-1 max-w-2xl">{description}</p>
+              <p className="ds-help-text mt-1.5 max-w-2xl">{description}</p>
             ) : null}
           </div>
           {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}

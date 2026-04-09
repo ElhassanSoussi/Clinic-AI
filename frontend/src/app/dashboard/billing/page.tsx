@@ -164,6 +164,11 @@ export default function BillingPage() {
     trialEndDate !== null &&
     !Number.isNaN(trialEndDate.getTime()) &&
     trialEndDate < new Date();
+  const usageSummary = isUnlimited
+    ? "Unlimited monthly patient requests on the current plan."
+    : hasFiniteCap
+      ? `${leadsUsed} of ${leadLimit} patient requests used this month.`
+      : "Usage limits will appear when your plan includes a monthly request cap.";
 
   return (
     <div className="workspace-page">
@@ -191,56 +196,148 @@ export default function BillingPage() {
         </div>
       )}
 
+      <section className="ds-control-hero-panel p-5 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-4">
+            <div>
+              <p className="workspace-section-label">Billing command</p>
+              <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+                Keep plan, usage, and payment controls in one confident surface.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                This is your entitlement layer for patient-request volume, paid features, and secure Stripe account management. Plans change here; Stripe still handles cards, invoices, and receipts.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1.3rem] border border-[#99f6e4] bg-white/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Current plan</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#0F766E] shadow-sm">
+                    {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-[#0F172A]">{billing.plan_name}</p>
+                    <span className={`mt-1 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusInfo.bg} ${statusInfo.color}`}>
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.3rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Usage this month</p>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">
+                  {leadsUsed}
+                  {isUnlimited ? "" : <span className="text-lg font-semibold text-[#64748B]"> / {leadLimit}</span>}
+                </p>
+                <p className="mt-2 text-xs leading-relaxed text-[#475569]">{usageSummary}</p>
+              </div>
+
+              <div className="rounded-[1.3rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Billing channel</p>
+                <p className="mt-3 text-base font-semibold text-[#0F172A]">
+                  {billing.has_stripe_subscription ? "Stripe customer portal available" : "Trial without active Stripe subscription"}
+                </p>
+                <p className="mt-2 text-xs leading-relaxed text-[#475569]">
+                  {billing.has_stripe_subscription
+                    ? "Open invoices, payment methods, and receipts securely through Stripe."
+                    : "The portal appears automatically once a paid subscription is created through checkout."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
+            <p className="workspace-rail-title">Stripe controls</p>
+            <p className="mt-3 text-sm leading-relaxed text-[#475569]">
+              Use the customer portal for payment methods and invoices. Use the plan grid below when you want to move to a higher tier.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              {billing.has_stripe_subscription ? (
+                <button
+                  type="button"
+                  onClick={() => void handleManageBilling()}
+                  disabled={portalLoading}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#DDE5EE] bg-white px-4 py-2.5 text-sm font-semibold text-[#0F172A] shadow-sm transition-all hover:translate-y-[-1px] hover:bg-[#F8FAFC] disabled:opacity-50"
+                >
+                  {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                  Open Stripe portal
+                </button>
+              ) : (
+                <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4 text-xs leading-relaxed text-[#64748B]">
+                  No paid subscription is attached yet. Checkout below creates the Stripe customer relationship and unlocks the portal.
+                </div>
+              )}
+
+              <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Billing posture</p>
+                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-[#475569]">
+                  <li className="flex gap-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    Critical account control stays here.
+                  </li>
+                  <li className="flex gap-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    Checkout and invoices stay in Stripe.
+                  </li>
+                  <li className="flex gap-2">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    Usage is measured from real patient-request volume.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="wave-billing-shell">
         <div className="workspace-split items-start">
           <div className="min-w-0 space-y-4">
-            {/* Current plan + usage */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* Current Plan Card */}
-              <div className="workspace-main-frame border-[#99f6e4] bg-[#CCFBF1]/40 p-5 shadow-[0_1px_3px_rgb(15_23_42/0.06)]">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#115E59]">Current plan</p>
-                <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-xl bg-[#CCFBF1] flex items-center justify-center text-[#0F766E]">
-                        {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-semibold tracking-tight text-[#0F172A]">{billing.plan_name}</h2>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${statusInfo.bg} ${statusInfo.color}`}>
-                          {statusInfo.label}
-                        </span>
-                      </div>
-                    </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+              <div className="workspace-main-frame border-[#99f6e4] bg-[#CCFBF1]/35 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#115E59]">Plan status</p>
+                    <h3 className="mt-2 text-xl font-semibold tracking-tight text-[#0F172A]">{billing.plan_name}</h3>
+                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#475569]">
+                      {isTrial
+                        ? "Trial keeps the workspace live while you finish setup, validate chat, and decide when to unlock paid capacity."
+                        : "Your workspace is on a paid plan. Use this area to understand current status before opening the Stripe portal or changing tiers."}
+                    </p>
                     {isTrial && trialEndsStr && (
-                      <p className={`text-sm mt-2 ${isTrialExpired ? "text-red-600 font-medium" : "text-[#475569]"}`}>
+                      <p className={`mt-3 text-sm ${isTrialExpired ? "font-medium text-red-600" : "text-[#475569]"}`}>
                         {isTrialExpired ? "Trial expired on " : "Trial ends "}
                         {trialEndsStr}
                       </p>
                     )}
                     {billing.subscription_status === "past_due" && (
-                      <div className="flex items-center gap-2 mt-2 text-sm text-red-600">
-                        <AlertTriangle className="w-4 h-4" />
-                        Payment failed. Please update your payment method to continue service.
+                      <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-3 text-sm text-red-700">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <div>
+                          <p className="font-medium">Payment issue detected</p>
+                          <p className="text-red-600">Update the payment method in Stripe to keep paid features uninterrupted.</p>
+                        </div>
                       </div>
                     )}
                     {billing.subscription_status === "canceled" && (
-                      <p className="text-sm text-amber-600 mt-2">
-                        Your subscription is canceled but remains active until the end of the billing period.
+                      <p className="mt-3 rounded-xl border border-amber-100 bg-amber-50 px-3 py-3 text-sm text-amber-700">
+                        Your subscription is canceled but remains active until the current billing period ends.
                       </p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Usage Card */}
               <div className="workspace-main-frame p-5">
-                <h3 className="text-sm font-semibold text-[#0F172A] mb-1">Usage this month</h3>
-                <p className="mb-4 text-xs text-[#64748B]">Each captured patient request counts toward your plan limit.</p>
-                <div className="flex items-end justify-between mb-2">
-                  <span className="text-sm text-[#475569]">
-                    Patient requests
-                  </span>
+                <h3 className="text-sm font-semibold text-[#0F172A]">Usage meter</h3>
+                <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+                  Every captured patient request counts toward plan capacity. This keeps billing tied to real front-desk volume instead of vanity metrics.
+                </p>
+                <div className="mt-4 flex items-end justify-between">
+                  <span className="text-sm text-[#475569]">Patient requests</span>
                   <span className="text-sm font-semibold tabular-nums text-[#0F172A]">
                     {leadsUsed}
                     {isUnlimited ? "" : ` / ${leadLimit}`}
@@ -248,27 +345,21 @@ export default function BillingPage() {
                 </div>
                 {hasFiniteCap ? (
                   <progress
-                    className="billing-usage-meter"
+                    className="billing-usage-meter mt-3"
                     data-usage-tone={usageTone}
                     max={usageMeterMax}
                     value={usageMeterValue}
                     aria-label={`Patient requests used: ${leadsUsed} of ${leadLimit}`}
                   />
                 ) : null}
-                {isUnlimited ? (
-                  <p className="text-xs text-[#64748B] mt-1">Unlimited requests on your current plan</p>
-                ) : !hasFiniteCap && !isUnlimited ? (
-                  <p className="mt-1 text-xs text-[#64748B]">
-                    Usage limits will appear when your plan includes a monthly request cap.
-                  </p>
-                ) : null}
+                <p className="mt-3 text-xs leading-relaxed text-[#64748B]">{usageSummary}</p>
                 {isAtLimit && (
-                  <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-3 text-sm text-red-700">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
                       <p className="font-medium">Request limit reached</p>
                       <p className="text-red-600">
-                        New patient conversations are paused until the next billing cycle. Upgrade your plan to continue.
+                        New patient conversations pause until the next billing cycle unless you upgrade to a higher plan.
                       </p>
                     </div>
                   </div>
@@ -279,29 +370,22 @@ export default function BillingPage() {
 
           <aside className="workspace-side-rail">
             <div className="workspace-rail-card p-5 xl:sticky xl:top-6">
-              <p className="workspace-rail-title">Account actions</p>
-              <p className="mt-2 text-xs leading-relaxed text-[#475569]">
-                Open the Stripe customer portal for payment methods and invoices. Plan changes start from the comparison grid below.
+              <p className="workspace-rail-title">Decision guide</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                Trial is best while you finish setup. Professional adds real operating volume and SMS capability. Premium removes caps and adds deposits and priority support.
               </p>
-              {billing.has_stripe_subscription ? (
-                <button
-                  type="button"
-                  onClick={() => void handleManageBilling()}
-                  disabled={portalLoading}
-                  className="mt-4 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-semibold text-[#0F172A] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
-                >
-                  {portalLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ExternalLink className="h-4 w-4" />
-                  )}
-                  Stripe customer portal
-                </button>
-              ) : (
-                <p className="mt-4 rounded-lg border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-3 py-2.5 text-xs text-[#64748B]">
-                  The portal appears once you have an active paid subscription through checkout.
-                </p>
-              )}
+              <div className="mt-4 space-y-2">
+                {[
+                  { label: "Trial", detail: "Guided setup, preview, and early validation." },
+                  { label: "Professional", detail: "Best for live clinics managing real intake volume." },
+                  { label: "Premium", detail: "For teams running deposits, high throughput, and priority support." },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-3 shadow-sm">
+                    <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </aside>
         </div>
@@ -310,12 +394,11 @@ export default function BillingPage() {
       {/* Plans Comparison */}
       <div className="mt-6">
         <div className="wave-command-slab mb-4 !py-4">
-          <p className="workspace-section-label">Decide with clarity</p>
+          <p className="workspace-section-label">Upgrade path</p>
           <p className="mt-1 text-sm text-[#475569]">
-            Trial stays free for 14 days with no card. Professional adds SMS and higher volume; Premium removes caps and adds deposits and priority support. Use the grid below—then Stripe handles payment methods and invoices.
+            Trial stays free for 14 days with no card. Professional adds SMS and higher volume. Premium removes caps and adds deposits and priority support. Choose the tier that matches your real front-desk volume, then let Stripe handle billing details.
           </p>
         </div>
-        <p className="workspace-section-label">Upgrade path</p>
         <h3 className="mt-1 text-sm font-semibold text-[#0F172A]">Compare plans</h3>
         <p className="mb-3 mt-1 text-xs text-[#64748B]">Move up when you need higher patient-request volume or professional features like Sheets sync.</p>
         {plans.length === 0 ? (

@@ -92,6 +92,24 @@ const SETTINGS_STATUS_RESOLVERS: Record<string, (state: SettingsStatusInput) => 
   embed: (state) => (state.isLive ? "completed" : "incomplete"),
 };
 
+const SETTINGS_MODULES: ReadonlyArray<{
+  key: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  group: "Foundation" | "Knowledge" | "Channels" | "Go live";
+}> = [
+  { key: "clinic-info", label: "Clinic information", icon: Building2, group: "Foundation" },
+  { key: "assistant-messages", label: "Assistant messages", icon: MessageCircle, group: "Foundation" },
+  { key: "services", label: "Services", icon: Stethoscope, group: "Knowledge" },
+  { key: "hours", label: "Business hours", icon: Clock, group: "Knowledge" },
+  { key: "faq", label: "FAQ", icon: HelpCircle, group: "Knowledge" },
+  { key: "google-sheets", label: "Spreadsheets", icon: Sheet, group: "Channels" },
+  { key: "email-notifications", label: "Email notifications", icon: Send, group: "Channels" },
+  { key: "scheduling", label: "Scheduling", icon: Calendar, group: "Channels" },
+  { key: "branding", label: "Branding", icon: Palette, group: "Go live" },
+  { key: "embed", label: "Embed", icon: Code, group: "Go live" },
+];
+
 function partialCompletionStatus(values: Array<string | boolean>): SectionStatus {
   const hasAnyValue = values.some(Boolean);
   if (hasAnyValue === false) return "not-configured";
@@ -141,7 +159,7 @@ function SettingsSection({
   const status = getSectionStatus(sectionKey, statusState);
 
   return (
-    <section className="ds-card overflow-hidden">
+    <section id={`settings-section-${sectionKey}`} className="ds-card overflow-hidden">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
@@ -1033,6 +1051,19 @@ export default function SettingsPage() {
     });
   };
 
+  const focusSection = useCallback((id: string) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    if (globalThis.window === undefined) return;
+    globalThis.requestAnimationFrame(() => {
+      const node = globalThis.document.getElementById(`settings-section-${id}`);
+      node?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
   const loadClinic = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -1466,28 +1497,68 @@ export default function SettingsPage() {
                 )}
                 Save settings
               </button>
+
+              <div className="mt-5 border-t border-[var(--color-app-border)] pt-5">
+                <p className="workspace-section-label">Modules</p>
+                <div className="mt-3 space-y-3">
+                  {(["Foundation", "Knowledge", "Channels", "Go live"] as const).map((group) => (
+                    <div key={group}>
+                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{group}</p>
+                      <div className="mt-2 space-y-1.5">
+                        {SETTINGS_MODULES.filter((module) => module.group === group).map((module) => {
+                          const status = getSectionStatus(module.key, statusState);
+                          const active = openSections.has(module.key);
+                          return (
+                            <button
+                              key={module.key}
+                              type="button"
+                              onClick={() => focusSection(module.key)}
+                              className={`flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${active
+                                ? "border-[#d8cdfd] bg-[#f5f1ff] shadow-[0_18px_24px_-24px_rgb(124_99_243/0.75)]"
+                                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
+                                }`}
+                            >
+                              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? "bg-white text-[#7C63F3]" : "bg-[#F8FAFC] text-[#64748B]"}`}>
+                                <module.icon className="h-4 w-4" />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-semibold text-[#0F172A]">{module.label}</span>
+                                <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#64748B]">
+                                  {sectionStatusLabel(status)}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="order-1 min-w-0 space-y-6 xl:order-none">
-            <div className="wave-command-slab !py-4">
-              <p className="workspace-section-label">Control center layout</p>
-              <p className="mt-1 text-sm text-[#475569]">
-                The left rail is your setup meter; the center column is every module in recommended order; the right column is operator guidance. Expand one module at a time—Save at left applies the full form.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-wide text-[#64748B]">
-                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Foundation</span>
-                <span className="text-[#94A3B8]">→</span>
-                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Knowledge</span>
-                <span className="text-[#94A3B8]">→</span>
-                <span className="rounded-md border border-[#E2E8F0] bg-white px-2 py-1 text-[#0F172A]">Channels &amp; alerts</span>
-                <span className="text-[#94A3B8]">→</span>
-                <span className="rounded-md border border-[#99f6e4] bg-[#CCFBF1]/60 px-2 py-1 text-[#115E59]">Go live</span>
+            <div className="wave-command-slab !py-5">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 max-w-2xl">
+                  <p className="workspace-section-label">Control center map</p>
+                  <h3 className="mt-2 text-[1.25rem] font-semibold tracking-[-0.03em] text-[#0F172A]">Configure the clinic in the same order patients experience it</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                    Foundation first, then knowledge, then channels, then go-live. Each module feeds the public chat surface, the inbox, and the dashboard readiness state.
+                  </p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2 lg:w-[22rem]">
+                  <div className="rounded-xl border border-[#E2E8F0] bg-white px-4 py-3">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Public surface</p>
+                    <p className="mt-1 text-sm font-semibold text-[#0F172A]">/chat/{clinic?.slug || "your-clinic"}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d8cdfd] bg-[#f5f1ff] px-4 py-3">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#6c58c9]">Readiness</p>
+                    <p className="mt-1 text-sm font-semibold text-[#3d2c84]">{systemStatusCfg?.label || "Needs setup"}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="workspace-section-label">Configuration modules</p>
-              <p className="mt-1 text-sm text-[#475569]">Expand a section to edit. Save applies the whole form and updates assistant behavior together with the dashboard.</p>
             </div>
             {saveMessage && (
               <div
@@ -1687,16 +1758,34 @@ export default function SettingsPage() {
 
           <div className="workspace-side-rail order-3 xl:order-none">
             <div className="workspace-rail-card p-5">
-              <p className="workspace-section-label">Setup guidance</p>
+              <p className="workspace-section-label">Go-live guidance</p>
               <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">
                 <p>
-                  Work top to bottom once, then revisit as your clinic changes. Phone, hours, and FAQs flow through to the
-                  public chat; the spreadsheet powers leads and optional scheduling.
+                  Foundation, services, hours, and FAQ control what the assistant can safely say. Spreadsheet and alert modules add workflow automation, but they do not replace the core clinic facts.
                 </p>
                 <p>
-                  The dashboard status chip uses the same spreadsheet checklist as here (Google or Microsoft). Email alerts
-                  are optional but recommended so new requests do not sit unnoticed.
+                  The dashboard header and this page use the same readiness logic. When this control center says you are ready, the patient surface is ready too.
                 </p>
+              </div>
+            </div>
+            <div className="workspace-rail-card p-5">
+              <p className="workspace-section-label">Patient-facing output</p>
+              <div className="mt-3 space-y-3">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Assistant name</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">{assistantName || clinic?.assistant_name || "Clinic Assistant"}</p>
+                </div>
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Primary color</p>
+                  <div className="mt-2 flex items-center gap-3">
+                    <span className="h-8 w-8 rounded-xl border border-white shadow-sm" style={{ backgroundColor: primaryColor }} />
+                    <span className="text-sm font-semibold text-[#0F172A]">{primaryColor}</span>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Public state</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">{clinic?.is_live ? "Live for patients" : "Staging only"}</p>
+                </div>
               </div>
             </div>
           </div>

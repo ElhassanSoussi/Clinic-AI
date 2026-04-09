@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { User, Lock, Loader2, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
+import {
+  User,
+  Lock,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
+  Mail,
+  UserCircle2,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -22,16 +31,6 @@ export default function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordFeedback, setPasswordFeedback] = useState<FeedbackState>(null);
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(["profile"]));
-
-  const toggleSection = (id: string) => {
-    setOpenSections((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const handleSaveProfile = async () => {
     if (!fullName.trim()) return;
@@ -109,45 +108,109 @@ export default function AccountPage() {
         description="Identity and sign-in for this workspace owner—separate from clinic configuration in Settings."
       />
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(14rem,17.5rem)_1fr]">
-        {/* Summary rail */}
-        <aside className="order-2 xl:order-none xl:sticky xl:top-6 xl:self-start">
-          <div className="wave-command-slab space-y-3 !py-4">
-            <p className="workspace-section-label">Signed-in operator</p>
-            <div className="rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-2.5 shadow-sm">
-              <p className="text-xs text-[#64748B]">Email</p>
-              <p className="mt-0.5 text-sm font-semibold text-[#0F172A] break-all">{user?.email || "Unknown"}</p>
+      <div className="workspace-stage">
+        <aside className="workspace-side-rail">
+          <div className="wave-command-slab space-y-4 !py-4 xl:sticky xl:top-6">
+            <div>
+              <p className="workspace-section-label">Signed-in operator</p>
+              <p className="mt-2 text-2xl font-bold tracking-tight text-[#0F172A]">
+                {fullName.trim() || "Workspace owner"}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                Manage your personal sign-in surface here. Clinic messaging, services, and embed settings stay in the main Settings control center.
+              </p>
             </div>
-            <div className="rounded-lg border border-[#E2E8F0] bg-white/80 px-3 py-2.5 shadow-sm">
-              <p className="text-xs text-[#64748B]">Role</p>
-              <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Owner</p>
+
+            <div className="space-y-2">
+              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Email</p>
+                <p className="mt-1 break-all text-sm font-semibold text-[#0F172A]">{user?.email || "Unknown"}</p>
+              </div>
+              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Role</p>
+                <p className="mt-1 text-sm font-semibold text-[#0F172A]">Owner</p>
+              </div>
+              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Security model</p>
+                <p className="mt-1 text-sm font-semibold text-[#0F172A]">Profile + password only</p>
+              </div>
             </div>
-            <p className="text-xs leading-relaxed text-[#64748B]">
-              Use this page for profile and password only. Clinic hours, services, and embed live under Settings.
-            </p>
+
+            <div className="rounded-xl border border-[#C7D2FE] bg-gradient-to-br from-white to-[#F5F3FF] px-4 py-4 shadow-sm">
+              <p className="workspace-rail-title">Account guide</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                Update your name here so the workspace header and ownership metadata stay accurate. Password changes affect only this sign-in identity.
+              </p>
+            </div>
           </div>
         </aside>
 
-        {/* Main content */}
-        <div className="order-1 min-w-0 space-y-4 xl:order-none">
-          {/* Profile Section */}
-          <section className="ds-card overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection("profile")}
-              className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-[#F8FAFC]"
-            >
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-[#475569]" />
-                <h2 className="text-base font-semibold text-[#0F172A]">Profile</h2>
+        <div className="min-w-0 space-y-5 xl:col-span-2">
+          <section className="ds-control-hero-panel p-5 sm:p-6">
+            <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+              <div className="space-y-4">
+                <div>
+                  <p className="workspace-section-label">Identity overview</p>
+                  <h2 className="mt-2 text-[1.9rem] font-bold tracking-[-0.04em] text-[#0F172A] sm:text-[2.2rem]">
+                    Keep owner access calm, clear, and recoverable.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                    This surface only controls the operator identity behind the workspace. It does not change live clinic messaging, services, or patient-facing settings.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-[#0F766E]">
+                      <UserCircle2 className="h-4 w-4" />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Display name</p>
+                    </div>
+                    <p className="mt-3 text-base font-semibold text-[#0F172A]">
+                      {fullName.trim() || "Not set yet"}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-[#0F766E]">
+                      <Mail className="h-4 w-4" />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Login email</p>
+                    </div>
+                    <p className="mt-3 truncate text-base font-semibold text-[#0F172A]">
+                      {user?.email || "Unknown"}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-[#0F766E]">
+                      <ShieldCheck className="h-4 w-4" />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Access</p>
+                    </div>
+                    <p className="mt-3 text-base font-semibold text-[#0F172A]">Workspace owner</p>
+                  </div>
+                </div>
               </div>
-              <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSections.has("profile") ? "rotate-180" : ""}`} />
-            </button>
-            {openSections.has("profile") && (
-              <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
-                {profileFeedback && (
-                  <Feedback state={profileFeedback} />
-                )}
+
+              <div className="rounded-[1.4rem] border border-[#DDE5EE] bg-white/92 p-5 shadow-[var(--ds-shadow-md)]">
+                <p className="workspace-rail-title">Account boundaries</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+                  <p>Clinic services, hours, FAQs, branding, and embed settings live in the Settings control center.</p>
+                  <p>This page is only for your owner identity and login safety.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+            <section className="ds-card overflow-hidden">
+              <div className="border-b border-[#E2E8F0] px-5 py-4">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-[#475569]" />
+                  <h2 className="text-base font-semibold text-[#0F172A]">Profile details</h2>
+                </div>
+                <p className="mt-2 text-sm text-[#475569]">
+                  Keep the display name accurate so the workspace header and activity metadata always identify the correct owner.
+                </p>
+              </div>
+              <div className="px-5 py-5">
+                {profileFeedback && <Feedback state={profileFeedback} />}
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="full-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
@@ -158,66 +221,59 @@ export default function AccountPage() {
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full rounded-xl border border-[#DDE5EE] bg-white px-4 py-3 text-sm text-[#0F172A] shadow-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="account-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      id="account-email"
-                      type="email"
-                      value={user?.email || ""}
-                      disabled
-                      className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] text-[#475569] cursor-not-allowed"
-                    />
-                    <p className="ds-muted-text mt-1">
-                      Email is tied to your login. Contact support to change it.
-                    </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="account-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                        Email
+                      </label>
+                      <input
+                        id="account-email"
+                        type="email"
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm text-[#475569] shadow-sm cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <span className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                        Role
+                      </span>
+                      <span className="inline-flex min-h-[3rem] w-full items-center rounded-xl border border-[#99f6e4] bg-[#ECFDF5] px-4 py-3 text-sm font-semibold text-[#115E59] shadow-sm">
+                        Workspace owner
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-sm font-medium text-[#0F172A] mb-1.5">
-                      Role
-                    </span>
-                    <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
-                      Owner
-                    </span>
-                  </div>
-                  <div className="pt-2">
+                  <p className="ds-muted-text">
+                    Email is tied to your login identity. If it ever needs to change, support should handle that with care.
+                  </p>
+                  <div className="pt-1">
                     <button
                       type="button"
                       onClick={handleSaveProfile}
                       disabled={savingProfile || !fullName.trim()}
-                      className="flex min-h-10 w-full items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F8F83] via-[#0F8F83] to-[#14B8A6] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:translate-y-[-1px] hover:from-[#0F766E] hover:to-[#0F8F83] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {savingProfile ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        "Save profile"
-                      )}
+                      {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save profile"}
                     </button>
                   </div>
                 </div>
               </div>
-            )}
-          </section>
+            </section>
 
-          {/* Password Section */}
-          <section className="ds-card overflow-hidden">
-            <button
-              type="button"
-              onClick={() => toggleSection("password")}
-              className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-[#F8FAFC]"
-            >
-              <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-[#475569]" />
-                <h2 className="text-base font-semibold text-[#0F172A]">Change password</h2>
+            <section className="ds-card overflow-hidden">
+              <div className="border-b border-[#E2E8F0] px-5 py-4">
+                <div className="flex items-center gap-2">
+                  <Lock className="h-4 w-4 text-[#475569]" />
+                  <h2 className="text-base font-semibold text-[#0F172A]">Password security</h2>
+                </div>
+                <p className="mt-2 text-sm text-[#475569]">
+                  Change the owner password here without touching clinic setup. This action only affects how you sign in.
+                </p>
               </div>
-              <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${openSections.has("password") ? "rotate-180" : ""}`} />
-            </button>
-            {openSections.has("password") && (
-              <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+              <div className="px-5 py-5">
                 {passwordFeedback && (
                   <Feedback state={passwordFeedback} />
                 )}
@@ -266,7 +322,7 @@ export default function AccountPage() {
                       type="button"
                       onClick={handleChangePassword}
                       disabled={savingPassword}
-                      className="flex min-h-10 w-full items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F8F83] via-[#0F8F83] to-[#14B8A6] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:translate-y-[-1px] hover:from-[#0F766E] hover:to-[#0F8F83] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {savingPassword ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -277,8 +333,8 @@ export default function AccountPage() {
                   </div>
                 </div>
               </div>
-            )}
-          </section>
+            </section>
+          </div>
         </div>
       </div>
     </div>

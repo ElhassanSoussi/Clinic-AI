@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
   const quickRoutes = [
     { href: "/dashboard/inbox", label: "Inbox" },
-    { href: "/dashboard/leads", label: "Pipeline" },
+    { href: "/dashboard/leads", label: "Leads" },
     { href: "/dashboard/appointments", label: "Appointments" },
     { href: "/dashboard/operations", label: "Operations" },
   ] as const;
@@ -432,39 +432,40 @@ export default function DashboardPage() {
         {/* ── Canvas ── */}
         <div className="order-1 min-w-0 space-y-5 xl:order-none">
           <div className="wave-command-slab">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0 max-w-xl">
-                <p className="workspace-section-label">Pressure &amp; attention</p>
-                <p className="mt-2 text-sm leading-relaxed text-[#475569]">
-                  Unresolved threads, follow-up load, and human review—triage this band first; everything below is status and throughput.
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(16rem,0.72fr)]">
+              <div className="min-w-0">
+                <p className="workspace-section-label">Front-desk pressure</p>
+                <h2 className="mt-2 text-[1.45rem] font-semibold tracking-[-0.04em] text-[#0F172A]">
+                  Scan what needs attention, then move straight into the workbench pages.
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                  This overview is your operational summary, not a separate analytics product. Unresolved conversations, follow-up load, review pressure, bookings, and training readiness all map directly to the pages your team works from next.
                 </p>
-              </div>
-              <div className="flex w-full flex-col gap-4 lg:max-w-md lg:items-end">
-                <div className="grid w-full grid-cols-3 gap-3 sm:max-w-md">
-                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Unresolved</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.unresolved_count)}</p>
-                  </div>
-                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Follow-ups</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.follow_up_needed_count)}</p>
-                  </div>
-                  <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 text-center shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Review</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{safeCount(analytics.human_review_required_count)}</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {quickRoutes.map((r) => (
                     <Link
                       key={r.href}
                       href={r.href}
-                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#475569] shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-[0_12px_20px_-18px_rgb(12_18_32/0.35)] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                     >
                       {r.label}
                       <ArrowRight className="h-3 w-3 text-[#94A3B8]" />
                     </Link>
                   ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-[#dce8f5] bg-white/95 px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(12_18_32/0.25)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Unresolved</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-[#0F172A]">{safeCount(analytics.unresolved_count)}</p>
+                </div>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(217_119_6/0.28)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">Follow-up</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-amber-900">{safeCount(analytics.follow_up_needed_count)}</p>
+                </div>
+                <div className="rounded-2xl border border-[#d8cdfd] bg-[#f5f1ff] px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(124_99_243/0.34)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6c58c9]">Review</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-[#3d2c84]">{safeCount(analytics.human_review_required_count)}</p>
                 </div>
               </div>
             </div>
@@ -738,9 +739,10 @@ export default function DashboardPage() {
           <RightRailCard title="Quick routes">
             <div className="space-y-1.5">
               {[
-                { href: "/dashboard/inbox", label: "Open inbox", detail: "Review active conversations." },
-                { href: "/dashboard/appointments", label: "Appointments", detail: "Bookings, reminders, deposits." },
-                { href: "/dashboard/opportunities", label: "Follow-up queue", detail: "Stalled requests going cold." },
+                { href: "/dashboard/inbox", label: "Inbox", detail: "Review active conversations." },
+                { href: "/dashboard/appointments", label: "Appointments", detail: "Bookings, reminders, and deposits." },
+                { href: "/dashboard/opportunities", label: "Opportunities", detail: "Stalled requests and follow-up pressure." },
+                { href: "/dashboard/training", label: "AI Training", detail: "Knowledge coverage and preview quality." },
               ].map((item) => (
                 <Link
                   key={item.href}

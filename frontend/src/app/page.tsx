@@ -294,146 +294,126 @@ export default function LandingPage() {
     <div className="public-marketing-root">
       <PublicNav />
 
-      {/* ── HERO ── */}
       <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-300/80">
         <div className="marketing-container">
-          <div className="landing-hero-grid">
-            {/* Copy */}
+          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:gap-14">
             <div className="min-w-0">
               <div className="marketing-kicker mb-6">
                 <Sparkles className="h-3 w-3" />
                 AI front-desk operating system
               </div>
-              <h1 className="marketing-h1">
-                Your clinic&apos;s AI front desk.
+              <h1 className="marketing-h1 max-w-3xl">
+                One calm workspace for your entire front desk.
               </h1>
               <p className="marketing-lead mt-7 max-w-2xl">
-                Clinic AI answers inbound patient questions, captures appointment requests,
-                and gives your team a single operating view — with human review and
-                takeover built in at every step.
+                Clinic AI responds to patients, captures appointment requests, and keeps your team operating from one inbox, one booking workflow, and one visible system of record.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/register" className="marketing-cta-primary">
-                  Start free — 14 days
+                <Link href="/register" className="marketing-cta-primary !rounded-full !px-5 !py-3.5">
+                  Start free trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="/chat/demo" className="marketing-cta-secondary">
+                <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full !px-5 !py-3.5">
                   <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
                   Try live demo
                 </Link>
               </div>
-              <p className="mt-4">
-                <Link
-                  href="/product"
-                  className="text-[0.9375rem] font-semibold text-[#0F766E] transition-colors hover:text-[#115E59]"
-                >
-                  See every module and route →
-                </Link>
-              </p>
-              <p className="mt-6 text-[1.0625rem] font-medium text-slate-600">
-                No credit card required &middot; Set up in under 15 minutes &middot; Your staff stays in control
+              <p className="mt-5 text-[1rem] font-medium text-slate-600">
+                Set up in under 15 minutes. No credit card required. Staff review and takeover included from day one.
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-2.5">
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {[
-                  "Responds 24/7",
-                  "Staff review & takeover",
-                  "Grounded in your clinic info",
-                  "One inbox for all channels",
-                ].map((feat) => (
-                  <span key={feat} className="marketing-trust-chip">
-                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
-                    {feat}
-                  </span>
+                  { label: "Responds 24/7", detail: "Handles web chat and SMS with clinic-configured information." },
+                  { label: "One operator inbox", detail: "Review threads, notes, requests, and next actions together." },
+                  { label: "Human review built in", detail: "Staff can edit, pause, or take over any thread at any point." },
+                  { label: "Bookings stay connected", detail: "Appointments, reminders, and deposits stay linked to the original inquiry." },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/80 bg-white/90 px-4 py-4 shadow-[0_18px_34px_-30px_rgb(12_18_32/0.55)]">
+                    <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.label}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-[#5D6B7C]">{item.detail}</p>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Workspace preview */}
-            <div className="relative hidden lg:block">
+            <div className="relative">
               <MarketingProductWindow
                 pathLabel="/dashboard/inbox"
-                caption="Composite preview — sidebar labels match real dashboard routes; after setup, lists and search reflect your clinic’s conversations and patients."
+                caption="Illustrative product composition — real routes include Inbox, Leads, Appointments, AI Training, Billing, and Settings after sign-in."
               >
                 <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
-                  <div className="grid gap-4 lg:grid-cols-[12.5rem_1fr_14rem] xl:grid-cols-[13rem_1fr_14.5rem]">
-                    {/* Sidebar */}
-                    <aside className="rounded-xl border border-slate-200/90 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                      <div className="mb-4 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F766E] shadow-sm">
+                  <div className="grid gap-4 xl:grid-cols-[12.75rem_1fr_14rem]">
+                    <aside className="rounded-[1.4rem] border border-white/90 bg-[linear-gradient(180deg,#f7f3ff_0%,#f1f5fb_100%)] p-4 shadow-[0_24px_40px_-32px_rgb(124_99_243/0.45)]">
+                      <div className="mb-5 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-white shadow-[0_18px_24px_-18px_rgb(15_118_110/0.72)]">
                           <Bot className="h-4 w-4" />
                         </div>
                         <div>
                           <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Clinic AI</p>
-                          <p className="text-[0.6875rem] font-medium text-[#64748B]">Signed-in workspace</p>
+                          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#7C63F3]">Workspace</p>
                         </div>
                       </div>
-                      <div className="max-h-[13.5rem] space-y-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      <div className="space-y-1.5">
                         {DASHBOARD_NAV_PREVIEW.map((item) => (
                           <div
                             key={item}
-                            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-[0.75rem] font-medium sm:py-2 sm:text-[0.8125rem] ${item === "Inbox"
-                              ? "border border-slate-200 bg-white text-[#0F172A] shadow-sm"
-                              : "text-[#475569]"
+                            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-[0.8rem] font-semibold ${item === "Inbox"
+                              ? "border border-white bg-white text-[#3d2c84] shadow-[0_18px_26px_-24px_rgb(124_99_243/0.8)]"
+                              : "text-[#526274]"
                               }`}
                           >
-                            <div
-                              className={`h-2 w-2 shrink-0 rounded-full ${item === "Inbox" ? "bg-[#0F766E]" : "bg-[#CBD5E1]"
-                                }`}
-                            />
+                            <div className={`h-2.5 w-2.5 rounded-full ${item === "Inbox" ? "bg-[#7C63F3]" : "bg-[#CBD5E1]"}`} />
                             {item}
                           </div>
                         ))}
                       </div>
                     </aside>
 
-                    {/* Main panel */}
-                    <div className="app-card p-5">
-                      <div className="workspace-toolbar border-b border-[#E2E8F0] pb-3">
-                        <div className="workspace-search min-h-[2.5rem] min-w-0 flex-1 text-[0.8125rem]">
+                    <div className="rounded-[1.55rem] border border-white/80 bg-white/95 p-5 shadow-[0_28px_50px_-34px_rgb(12_18_32/0.35)]">
+                      <div className="flex items-center gap-3 border-b border-[#E2E8F0] pb-3">
+                        <div className="workspace-search min-h-[2.6rem] min-w-0 flex-1 rounded-2xl border-white/90 bg-[#F8FAFC] text-[0.8125rem]">
                           <Search className="h-4 w-4" />
-                          <span className="truncate">Search conversations or patients</span>
+                          <span className="truncate">Search conversations, patients, or bookings</span>
                         </div>
-                        <div className="app-pill border-[#99f6e4] bg-[#CCFBF1] text-[#115E59] text-[0.8125rem]">
+                        <div className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-[0.75rem] font-semibold text-[#115E59]">
                           Appointments
                         </div>
                       </div>
-                      <div className="mt-4 space-y-2.5">
+                      <div className="mt-4 space-y-3">
                         {[
-                          { name: "Marta B.", note: "Follow-up on earliest slot", state: "Confirmed", tone: "bg-emerald-50 text-emerald-700" },
-                          { name: "New cleaning", note: "Pending staff confirmation", state: "Needs review", tone: "bg-blue-50 text-blue-700" },
-                          { name: "Missed callback", note: "Recovery queue item", state: "Queued", tone: "bg-amber-50 text-amber-700" },
-                        ].map((item, i) => (
-                          <div
-                            key={item.name}
-                            className={`app-list-row flex items-center gap-3 px-3 py-3 ${i === 0 ? "border border-[#99f6e4] bg-[#FFFFFF] shadow-sm" : ""
-                              }`}
-                          >
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                              <Users className="h-4 w-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="truncate text-[0.8125rem] font-semibold text-slate-900">{item.name}</p>
-                                <span className={`rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${item.tone}`}>
-                                  {item.state}
-                                </span>
+                          { name: "Marta B.", preview: "Requested the earliest cleaning slot this week.", state: "Confirmed", note: "Booked 1:15 PM" },
+                          { name: "Jared L.", preview: "Asked whether financing is available before booking.", state: "Needs review", note: "Awaiting staff decision" },
+                          { name: "Missed callback", preview: "Recovery thread created after a missed patient call.", state: "Queued", note: "Follow-up in progress" },
+                        ].map((item, index) => (
+                          <div key={item.name} className={`rounded-2xl border px-4 py-3 ${index === 0 ? "border-[#99f6e4] bg-[#f7fefa] shadow-[0_18px_30px_-28px_rgb(15_118_110/0.85)]" : "border-[#E2E8F0] bg-[#FBFCFE]"}`}>
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F1F5F9] text-[#7C63F3]">
+                                <Users className="h-4 w-4" />
                               </div>
-                              <p className="truncate text-[0.75rem] text-slate-600">{item.note}</p>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="truncate text-[0.875rem] font-semibold text-[#0F172A]">{item.name}</p>
+                                  <span className={`rounded-full px-2.5 py-0.5 text-[0.6875rem] font-semibold ${item.state === "Confirmed" ? "bg-emerald-50 text-emerald-700" : item.state === "Needs review" ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-700"}`}>
+                                    {item.state}
+                                  </span>
+                                </div>
+                                <p className="mt-1 truncate text-[0.75rem] text-[#526274]">{item.preview}</p>
+                                <p className="mt-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#7C63F3]">{item.note}</p>
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Rail */}
                     <div className="space-y-3">
                       <div className="workspace-rail-card p-4 shadow-sm">
                         <p className="workspace-section-label">Today</p>
-                        <h3 className="mt-3 text-[0.9375rem] font-semibold text-slate-900">Marta is booked</h3>
-                        <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">From inquiry to confirmed appointment.</p>
+                        <h3 className="mt-3 text-[1rem] font-semibold tracking-[-0.02em] text-slate-900">Booked, reviewed, and ready</h3>
+                        <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">The right rail keeps the next operational moves visible.</p>
                         <div className="mt-3 space-y-2">
-                          {["Earliest slot confirmed", "Reminder set", "Deposit visible"].map((item) => (
+                          {["Earliest slot confirmed", "Reminder queued", "Deposit visible"].map((item) => (
                             <div key={item} className="flex items-center gap-2 text-[0.8125rem] text-slate-600">
                               <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
                               {item}
@@ -442,15 +422,15 @@ export default function LandingPage() {
                         </div>
                       </div>
                       <div className="workspace-rail-card p-4 shadow-sm">
-                        <p className="workspace-section-label">Operator view</p>
+                        <p className="workspace-section-label">Why clinics use it</p>
                         <div className="mt-3 space-y-2">
                           <div className="app-card-muted px-3 py-2.5">
-                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">Staff takeover</p>
-                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Available anytime</p>
+                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">More than booking</p>
+                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Questions, intake, reminders, and follow-up</p>
                           </div>
                           <div className="app-card-muted px-3 py-2.5">
-                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">AI training</p>
-                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Grounded in clinic data</p>
+                            <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-slate-500">Team control</p>
+                            <p className="mt-1 text-[0.8125rem] font-semibold text-slate-900">Human review and takeover always available</p>
                           </div>
                         </div>
                       </div>

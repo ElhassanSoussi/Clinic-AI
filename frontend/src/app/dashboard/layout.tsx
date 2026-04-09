@@ -285,18 +285,18 @@ export default function DashboardLayout({
       <aside className="dashboard-sidebar hidden flex-col lg:flex">
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 pb-4 pt-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] shadow-[0_20px_28px_-20px_rgb(15_118_110/0.8)]">
             <Bot className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="block text-[0.9375rem] font-semibold tracking-tight text-[#0F172A]">Clinic AI</span>
-            <span className="text-[0.8125rem] font-medium text-[#64748B]">Front Desk OS</span>
+            <span className="block text-[1rem] font-semibold tracking-[-0.03em] text-[#08111F]">Clinic AI</span>
+            <span className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">Front Desk OS</span>
           </div>
         </div>
 
         {/* Clinic status card */}
         {clinic && (
-          <div className="dashboard-side-card mx-3 mb-2 px-3 py-2.5">
+          <div className="dashboard-side-card mx-3 mb-3 px-3.5 py-3">
             <p className="truncate text-[0.8125rem] font-semibold text-[#0F172A]">{clinic.name}</p>
             {statusCfg && systemStatus?.status !== "LIVE" && (
               <span className={`mt-1 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium ${statusCfg.color}`}>
@@ -369,11 +369,11 @@ export default function DashboardLayout({
         </div>
 
         {/* Operator control card */}
-        <div className="dashboard-side-card mx-3 mb-3 px-3 py-3">
+        <div className="dashboard-side-card mx-3 mb-3 px-3.5 py-3.5">
           <div className="flex items-start gap-2.5">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
             <div>
-              <p className="text-[0.8125rem] font-semibold text-[#0F172A]">Operator control</p>
+              <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-[#475569]">Operator control</p>
               <p className="mt-1 text-[0.8125rem] leading-relaxed text-[#64748B]">
                 Review, takeover, and visibility stay with your team.
               </p>
@@ -453,18 +453,31 @@ export default function DashboardLayout({
 
           {/* Page context */}
           <div className="hidden min-w-0 lg:block">
-            <p className="text-[1.1875rem] font-bold tracking-[-0.03em] text-[var(--color-app-text)]">{topBarPageLabel}</p>
+            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>
+            <p className="text-[1.25rem] font-bold tracking-[-0.04em] text-[var(--color-app-text)]">{topBarPageLabel}</p>
           </div>
 
-          {/* Quick nav to inbox */}
+          {/* Utility slab */}
           <div className="flex min-w-0 flex-1 justify-center">
+            <div className="hidden min-w-[18rem] max-w-[28rem] flex-1 items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/90 px-4 py-2 shadow-[0_16px_34px_-28px_rgb(12_18_32/0.34)] md:flex">
+              <div className="min-w-0">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Clinic status</p>
+                <p className="truncate text-sm font-semibold text-[#0F172A]">{clinic?.name || "Clinic workspace"}</p>
+              </div>
+              <Link
+                href="/dashboard/inbox"
+                className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-[0.875rem] font-semibold text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white"
+              >
+                <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
+                Open inbox
+              </Link>
+            </div>
             <Link
               href="/dashboard/inbox"
-              className="inline-flex min-h-10 shrink items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-2 text-[0.9375rem] font-medium text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white"
+              className="inline-flex min-h-10 shrink items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-2 text-[0.9375rem] font-semibold text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white md:hidden"
             >
               <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
-              <span className="hidden sm:inline">Open inbox</span>
-              <span className="sm:hidden">Inbox</span>
+              <span>Inbox</span>
             </Link>
           </div>
 
@@ -481,10 +494,10 @@ export default function DashboardLayout({
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex min-h-10 items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 transition-colors hover:bg-[#F8FAFC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
+                className="flex min-h-10 items-center gap-2.5 rounded-2xl border border-transparent bg-white/55 py-1.5 pl-1.5 pr-2 shadow-[0_10px_24px_-22px_rgb(12_18_32/0.5)] transition-colors hover:border-white/80 hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
                 aria-haspopup="true"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0F766E] text-xs font-bold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-xs font-bold text-white">
                   {userInitial}
                 </div>
                 <div className="hidden text-left sm:block">
@@ -499,11 +512,11 @@ export default function DashboardLayout({
 
               {/* Profile dropdown menu */}
               <div
-                className={`absolute right-0 mt-2 w-64 origin-top-right rounded-lg border border-[#E2E8F0] bg-white p-2 shadow-lg transition-all ${menuOpen ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+                className={`absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-2.5 shadow-[0_24px_44px_-28px_rgb(12_18_32/0.4)] transition-all ${menuOpen ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
                   }`}
                 role="menu"
               >
-                <div className="mb-1.5 rounded-md bg-[#F8FAFC] px-3 py-3">
+                <div className="mb-2 rounded-xl bg-[#F8FAFC] px-3 py-3">
                   <p className="truncate text-sm font-semibold text-[#0F172A]">{user?.full_name}</p>
                   <p className="truncate text-sm text-[#64748B]">{user?.email}</p>
                   {planLabel && (

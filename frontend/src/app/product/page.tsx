@@ -139,38 +139,60 @@ export default function ProductPage() {
       {/* Hero */}
       <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
-          <div className="max-w-3xl">
-            <div className="marketing-kicker mb-6">
-              <LayoutGrid className="h-3 w-3" />
-              The complete system
+          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <div className="max-w-3xl">
+              <div className="marketing-kicker mb-6">
+                <LayoutGrid className="h-3 w-3" />
+                The complete system
+              </div>
+              <h1 className="marketing-h1">
+                Every operational surface your clinic front desk actually needs.
+              </h1>
+              <p className="marketing-lead mt-6 max-w-2xl">
+                Clinic AI is a connected workspace for conversations, booking state, follow-up, AI training, and operational control. The modules below are real product surfaces, not a roadmap deck.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                {[
+                  "Inbox and takeover",
+                  "Appointments and reminders",
+                  "Follow-up visibility",
+                  "AI training and setup",
+                ].map((chip) => (
+                  <span key={chip} className="marketing-trust-chip">
+                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link href="/register" className="marketing-cta-primary !rounded-full">
+                  Start free trial
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full">
+                  <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
+                  Try live demo
+                </Link>
+              </div>
+              <p className="mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
+                After signup, you go straight into the real workspace and onboarding flow. Nothing below relies on a separate product tier or hidden enterprise version.
+              </p>
             </div>
-            <h1 className="marketing-h1">
-              Everything your front desk needs, in one place.
-            </h1>
-            <p className="marketing-lead mt-6 max-w-2xl">
-              Clinic AI is not a chatbot you point at your website and forget.
-              It is an operating system for your clinic&apos;s front desk — with a
-              structured inbox, appointment tracking, staff review controls, AI training,
-              and full operational visibility built in from the start. Every module below exists in the product you access after signup — not a separate pitch deck or vaporware roadmap.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/register" className="marketing-cta-primary">
-                Start free trial
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/chat/demo" className="marketing-cta-secondary">
-                <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
-                Try live demo
-              </Link>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {modules.slice(0, 4).map((module) => (
+                <div key={module.name} className="rounded-[1.6rem] border border-white/90 bg-white/92 p-6 shadow-[0_24px_46px_-34px_rgb(12_18_32/0.42)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#efeaff] text-[#7C63F3] shadow-[0_16px_24px_-20px_rgb(124_99_243/0.65)]">
+                    <module.icon className="h-5 w-5" />
+                  </div>
+                  <p className="mt-5 text-[1.05rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{module.name}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#5C6C7D]">{module.tagline}</p>
+                  <p className="mt-4 text-[0.76rem] font-semibold uppercase tracking-[0.1em] text-[#7C63F3]">
+                    {module.details[0]}
+                  </p>
+                </div>
+              ))}
             </div>
-            <p className="mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
-              <span className="font-semibold text-slate-800">Right after signup:</span> you sign in to the real workspace — guided onboarding, then{" "}
-              <span className="font-mono text-[0.8125rem] text-slate-600">/dashboard</span> with Inbox, Leads, Appointments, AI Training, and Settings.{" "}
-              <Link href="/#after-signup" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
-                See the first-week path on the home page
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </section>

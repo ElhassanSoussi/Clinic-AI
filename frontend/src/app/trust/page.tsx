@@ -98,31 +98,42 @@ export default function TrustPage() {
       {/* Hero */}
       <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
-          <div className="max-w-3xl">
-            <div className="marketing-kicker mb-6">
-              <ShieldCheck className="h-3 w-3" />
-              Trust &amp; safety
+          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="max-w-3xl">
+              <div className="marketing-kicker mb-6">
+                <ShieldCheck className="h-3 w-3" />
+                Trust &amp; safety
+              </div>
+              <h1 className="marketing-h1">
+                Built for clinics that need visibility, restraint, and control.
+              </h1>
+              <p className="marketing-lead mt-6 max-w-2xl">
+                Clinic AI is designed for real patient communication work. It prioritizes grounded answers, operator oversight, and visible workflows over automation theater.
+              </p>
+              <p className="mt-5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
+                These commitments are backed by real product controls: inbox review, manual takeover, clinic-configured knowledge, and an audit trail your team can actually follow.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link href="/register" className="marketing-cta-primary !rounded-full">
+                  Start free trial
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/product" className="marketing-cta-secondary !rounded-full">
+                  How the product works
+                </Link>
+              </div>
             </div>
-            <h1 className="marketing-h1">
-              Built for clinics that need to trust their tools.
-            </h1>
-            <p className="marketing-lead mt-6 max-w-2xl">
-              Adopting an AI system for patient communication is a serious decision.
-              This page explains exactly how Clinic AI approaches oversight, data handling,
-              and responsible behavior — so you can make an informed choice.
-            </p>
-            <p className="mt-5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
-              These commitments show up as real controls after you sign in: conversation review in{" "}
-              <span className="font-mono text-[0.8125rem] text-slate-700">/dashboard/inbox</span>, clinic facts and go-live in Settings and AI Training, and a full activity trail you can audit from the workspace — not policy text detached from the product.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/register" className="marketing-cta-primary">
-                Start free trial
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/product" className="marketing-cta-secondary">
-                How the product works
-              </Link>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {principles.slice(0, 4).map((item) => (
+                <div key={item.title} className="rounded-[1.6rem] border border-white/90 bg-white/92 p-6 shadow-[0_24px_46px_-34px_rgb(12_18_32/0.4)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#115E59] shadow-[0_18px_28px_-24px_rgb(15_118_110/0.6)]">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <p className="mt-5 text-[1rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#5C6C7D]">{item.points[0]}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

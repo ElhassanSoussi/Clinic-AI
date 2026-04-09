@@ -187,17 +187,42 @@ export default function PricingPage() {
       {/* Hero */}
       <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="marketing-kicker mx-auto mb-6">
-              <Sparkles className="h-3 w-3" />
-              Pricing
+          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+            <div className="max-w-3xl">
+              <div className="marketing-kicker mb-6">
+                <Sparkles className="h-3 w-3" />
+                Pricing
+              </div>
+              <h1 className="marketing-h1">
+                Pricing that matches how clinic teams actually operate.
+              </h1>
+              <p className="marketing-lead mt-6 max-w-2xl">
+                Start free, set up with your real clinic data, then move into the plan that fits your volume and operational needs. No hidden fees, no per-message surprises.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                {["14-day free trial", "Upgrade any time", "No lock-in contract", "Real dashboard from day one"].map((item) => (
+                  <span key={item} className="marketing-trust-chip">
+                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-            <h1 className="marketing-h1">
-              Honest pricing for real clinic operations.
-            </h1>
-            <p className="marketing-lead mt-6 mx-auto max-w-xl">
-              No per-message fees. No hidden costs. No lock-in contracts. Choose the plan that fits your patient volume and upgrade or cancel anytime.
-            </p>
+            <div className="rounded-[1.8rem] border border-white/90 bg-white/92 p-6 shadow-[0_28px_52px_-34px_rgb(12_18_32/0.42)] sm:p-8">
+              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#7C63F3]">How clinics usually choose</p>
+              <div className="mt-5 space-y-4">
+                {[
+                  { name: "Starter Trial", detail: "For evaluation and setup using your live clinic information." },
+                  { name: "Professional", detail: "For daily front-desk operations with SMS, reminders, and exports." },
+                  { name: "Premium", detail: "For higher-volume clinics that need unlimited requests and deposit workflows." },
+                ].map((item, index) => (
+                  <div key={item.name} className={`rounded-2xl border px-4 py-4 ${index === 1 ? "border-[#99f6e4] bg-[#f3fffb]" : "border-[#E2E8F0] bg-[#FBFCFE]"}`}>
+                    <p className="text-[1rem] font-semibold text-[#0F172A]">{item.name}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-[#5C6C7D]">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

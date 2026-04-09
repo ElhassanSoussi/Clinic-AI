@@ -359,61 +359,149 @@ export default function TrainingPage() {
         </div>
       )}
 
-      <div className="workspace-split items-start">
-        <div className="order-1 min-w-0 space-y-6 xl:order-none">
-          {/* Knowledge readiness */}
-          <div className="wave-command-slab border-[#99f6e4] bg-[#F0FDFA]/40">
+      <div className="workspace-stage">
+        <aside className="workspace-side-rail">
+          <div className="wave-command-slab border-[#99f6e4] bg-[#F0FDFA]/40 xl:sticky xl:top-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-[#0F766E]" />
                   <span className="workspace-section-label text-[#115E59]">Readiness</span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-[#0F172A]">{clampPercentInt(training.knowledge_score)}%</p>
-                <p className="mt-1 text-sm text-[#475569]">
-                  {training.assistant_name} draws on clinic settings, custom notes, and uploaded documents—this score summarizes coverage before you ship answers.
+                <p className="text-3xl font-bold tracking-tight text-[#0F172A]">
+                  {clampPercentInt(training.knowledge_score)}%
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                  {training.assistant_name} only performs well when the clinic has supplied real context. This score summarizes coverage before you trust it in production.
                 </p>
               </div>
-              <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
                 {knowledgeStatusLabel(training.knowledge_status)}
               </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-4 grid gap-2">
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
-                  className={`rounded-lg border p-2.5 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-[#E2E8F0] bg-[#F8FAFC]"
-                    }`}
+                  className={`rounded-xl border px-3 py-3 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-[#E2E8F0] bg-white/75"}`}
                 >
                   <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
-                  <p className="mt-0.5 text-xs text-[#64748B]">{item.detail}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{item.detail}</p>
                 </div>
               ))}
             </div>
 
             {training.knowledge_gaps.length > 0 && (
-              <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50/50 p-2.5">
-                <p className="text-sm font-semibold text-amber-800">Gaps</p>
+              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/60 p-3">
+                <p className="text-sm font-semibold text-amber-800">Coverage gaps</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {training.knowledge_gaps.map((gap) => (
-                    <span key={gap} className="rounded-md bg-white px-2 py-0.5 text-xs font-semibold text-amber-700">{gap}</span>
+                    <span key={gap} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
+                      {gap}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Two-column: sources + preview */}
+            <div className="mt-4 rounded-xl border border-[#DDE5EE] bg-white/90 p-4 shadow-sm">
+              <p className="workspace-rail-title">Document pulse</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {[
+                  { label: "Files", value: docStats.total },
+                  { label: "Ready", value: docStats.ready },
+                  { label: "Processing", value: docStats.processing },
+                  { label: "Chunks", value: docStats.total_chunks },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                    <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`mt-4 rounded-xl px-4 py-4 shadow-sm ${hasRealKnowledge ? "border border-emerald-100 bg-emerald-50/60" : "border border-[#E2E8F0] bg-[#F8FAFC]"}`}>
+              <div className="flex items-center gap-1.5">
+                {hasRealKnowledge ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                ) : (
+                  <AlertTriangle className="h-3.5 w-3.5 text-[#64748B]" />
+                )}
+                <p className={`text-xs font-semibold ${hasRealKnowledge ? "text-emerald-700" : "text-[#475569]"}`}>
+                  {hasRealKnowledge ? "Retrieval active" : "Basic mode"}
+                </p>
+              </div>
+              <p className={`mt-1 text-xs leading-relaxed ${hasRealKnowledge ? "text-emerald-600" : "text-[#475569]"}`}>
+                {hasRealKnowledge
+                  ? "The assistant now pulls from your notes and uploaded documents in addition to clinic settings."
+                  : "The assistant is still answering mostly from clinic settings only. Add notes or upload documents to deepen it."}
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <div className="min-w-0 space-y-6 xl:col-span-2">
+          <section className="ds-control-hero-panel p-5 sm:p-6">
+            <div className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
+              <div>
+                <p className="workspace-section-label">Knowledge control room</p>
+                <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+                  Ground the assistant before it ever speaks for the clinic.
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                  Use Settings for baseline facts, notes for nuance, and uploads for long-form guidance. This page is where you harden answer quality before patient traffic depends on it.
+                </p>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { label: "Settings facts", value: structuredKnowledge.length, detail: "Hours, services, FAQs, and assistant messages." },
+                    { label: "Custom notes", value: training.custom_sources.length, detail: "Exceptions and nuances your team wants preserved." },
+                    { label: "Uploads ready", value: docStats.ready, detail: "Processed files available to retrieval." },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-[1.25rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                      <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">{item.value}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
+                <p className="workspace-rail-title">Training posture</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+                  <p>Use Settings when the clinic’s baseline facts change.</p>
+                  <p>Use custom notes for exceptions, special rules, and wording your staff wants preserved.</p>
+                  <p>Use uploads for longer documents like policies, procedures, and service guides.</p>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {[
+                    { label: "Services", section: "services" },
+                    { label: "FAQ", section: "faq" },
+                    { label: "Assistant tone", section: "assistant-messages" },
+                  ].map((link) => (
+                    <Link
+                      key={link.section}
+                      href={settingsHref(link.section)}
+                      className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#BFF5EC]"
+                    >
+                      Edit {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
           <div className="wave-zone-panel !shadow-[var(--ds-shadow-lg)]">
             <div className="mb-4 border-b border-[var(--color-app-border)] pb-3">
-              <p className="workspace-section-label">Knowledge work surface</p>
-              <p className="mt-1 text-sm text-[#475569]">Structured sources and uploads on the left, live preview on the right—one composed training desk.</p>
+              <p className="workspace-section-label">Knowledge desk</p>
+              <p className="mt-1 text-sm text-[#475569]">Structured sources, file uploads, custom notes, and live preview—one composed training desk instead of separate utility panels.</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.12fr_0.88fr]">
-              {/* Knowledge sources */}
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="space-y-4">
-                {/* Structured knowledge */}
                 <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center gap-2">
                     <Bot className="w-3.5 h-3.5 text-[#0F766E]" />
@@ -427,24 +515,8 @@ export default function TrainingPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {[
-                      { label: "Services", section: "services" },
-                      { label: "FAQ", section: "faq" },
-                      { label: "Tone", section: "assistant-messages" },
-                    ].map((link) => (
-                      <Link
-                        key={link.section}
-                        href={settingsHref(link.section)}
-                        className="rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-                      >
-                        Edit {link.label}
-                      </Link>
-                    ))}
-                  </div>
                 </div>
 
-                {/* Document uploads */}
                 <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -470,13 +542,13 @@ export default function TrainingPage() {
                   </div>
 
                   <p className="mb-2.5 text-xs leading-relaxed text-[#475569]">
-                    Upload clinic documents (policies, procedures, service guides) to teach the assistant. Files are processed into searchable knowledge chunks.
+                    Upload clinic documents like policies, procedures, or service guides. Files are processed into searchable knowledge chunks for retrieval.
                   </p>
 
                   {documents.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
-                      <p>Documents are optional. Your settings (services, FAQ, hours) already power answers.</p>
-                      <p className="mt-2">Upload PDF or TXT when you want policies or long-form detail in retrieval — processing may take a minute.</p>
+                      <p>Documents are optional. Clinic settings already supply baseline answers.</p>
+                      <p className="mt-2">Upload PDF or TXT when you need policy detail or longer service guidance in retrieval.</p>
                       <div className="mt-4 flex flex-wrap justify-center gap-2">
                         <Link
                           href={settingsHref("services")}
@@ -496,7 +568,7 @@ export default function TrainingPage() {
                     <div className="space-y-2">
                       {documents.map((doc) => (
                         <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#E2E8F0] px-2.5 py-2">
-                          <div className="flex items-center gap-2 min-w-0">
+                          <div className="flex min-w-0 items-center gap-2">
                             {docStatusIcon(doc.status)}
                             <div className="min-w-0">
                               <p className="truncate text-sm font-semibold text-[#0F172A]">{doc.filename}</p>
@@ -533,7 +605,6 @@ export default function TrainingPage() {
                   )}
                 </div>
 
-                {/* Custom notes */}
                 <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center gap-2">
                     <FileText className="w-3.5 h-3.5 text-[#475569]" />
@@ -567,9 +638,9 @@ export default function TrainingPage() {
                   <div className="mt-3 space-y-2">
                     {training.custom_sources.length === 0 ? (
                       <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
-                        <p>No custom notes yet. Use the form above for exceptions and nuance the assistant should know.</p>
+                        <p>No custom notes yet. Use them for exceptions, nuance, and language your assistant should preserve.</p>
                         <p className="mt-2">
-                          Baseline facts (hours, services) still come from{" "}
+                          Baseline facts still come from{" "}
                           <Link href={settingsHref("clinic-info")} className="font-semibold text-[#115E59] hover:underline">
                             Settings
                           </Link>
@@ -642,128 +713,79 @@ export default function TrainingPage() {
                 </div>
               </div>
 
-              {/* Preview chat */}
-              <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm xl:sticky xl:top-20">
-                <div className="mb-2.5 flex items-center gap-2">
-                  <Send className="w-3.5 h-3.5 text-[#0F766E]" />
-                  <p className="text-sm font-semibold text-[#0F172A]">Live preview</p>
+              <div className="space-y-4 xl:sticky xl:top-20">
+                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                  <p className="workspace-rail-title">Grounding summary</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[#475569]">
+                    {hasRealKnowledge
+                      ? "The assistant now has real clinic context to preview more realistic responses. Keep tightening weak areas before relying on it for public chat."
+                      : "Start by adding baseline facts or one focused note. Training works best when the assistant has concrete clinic-specific material."}
+                  </p>
                 </div>
 
-                {!clinic.is_live && (
-                  <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-xs text-amber-700">
-                    Go live before using preview. This test uses the real chat flow.
+                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                  <div className="mb-2.5 flex items-center gap-2">
+                    <Send className="w-3.5 h-3.5 text-[#0F766E]" />
+                    <p className="text-sm font-semibold text-[#0F172A]">Live preview</p>
                   </div>
-                )}
 
-                <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
-                  {previewMessages.length === 0 ? (
-                    <div className="flex h-full min-h-[12rem] flex-col items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white/60 px-4 py-6 text-center">
-                      <Bot className="mb-2 h-8 w-8 text-[#94A3B8]" aria-hidden />
-                      <p className="text-sm font-medium text-[#475569]">Test against your live configuration</p>
-                      <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-[#64748B]">
-                        Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
-                      </p>
+                  {!clinic.is_live && (
+                    <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-xs text-amber-700">
+                      Go live before using preview. This test uses the real chat flow.
                     </div>
-                  ) : (
-                    previewMessages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
-                            ? "rounded-br-sm bg-[#0F766E] text-white"
-                            : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
-                            }`}
-                        >
-                          {message.content}
-                        </div>
-                      </div>
-                    ))
                   )}
-                </div>
 
-                <div className="mt-2.5 space-y-2">
-                  <textarea
-                    value={previewInput}
-                    onChange={(event) => setPreviewInput(event.target.value)}
-                    rows={2}
-                    placeholder="Try: Do you offer same-day appointments?"
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                  />
-                  <button
-                    onClick={sendPreview}
-                    disabled={previewSending || previewDisabled || !previewInput.trim()}
-                    type="button"
-                    className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                  >
-                    {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                    <span>Send test</span>
-                  </button>
+                  <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
+                    {previewMessages.length === 0 ? (
+                      <div className="flex h-full min-h-[12rem] flex-col items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white/60 px-4 py-6 text-center">
+                        <Bot className="mb-2 h-8 w-8 text-[#94A3B8]" aria-hidden />
+                        <p className="text-sm font-medium text-[#475569]">Test against your live configuration</p>
+                        <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-[#64748B]">
+                          Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
+                        </p>
+                      </div>
+                    ) : (
+                      previewMessages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
+                              ? "rounded-br-sm bg-[#0F766E] text-white"
+                              : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
+                              }`}
+                          >
+                            {message.content}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="mt-2.5 space-y-2">
+                    <textarea
+                      value={previewInput}
+                      onChange={(event) => setPreviewInput(event.target.value)}
+                      rows={2}
+                      placeholder="Try: Do you offer same-day appointments?"
+                      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    />
+                    <button
+                      onClick={sendPreview}
+                      disabled={previewSending || previewDisabled || !previewInput.trim()}
+                      type="button"
+                      className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                    >
+                      {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      <span>Send test</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Right rail */}
-        <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="workspace-rail-card p-4 xl:sticky xl:top-6">
-            <p className="workspace-rail-title">Training state</p>
-            <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Readiness</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{clampPercentInt(training.knowledge_score)}%</p>
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Gaps</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{training.knowledge_gaps.length}</p>
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Custom notes</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{training.custom_sources.length}</p>
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Documents</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{docStats.ready}</p>
-                {docStats.processing > 0 && (
-                  <p className="text-xs text-amber-600">{docStats.processing} processing</p>
-                )}
-                {docStats.failed > 0 && (
-                  <p className="text-xs text-rose-500">{docStats.failed} failed</p>
-                )}
-              </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Searchable chunks</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{docStats.total_chunks}</p>
-              </div>
-            </div>
-          </div>
-
-          {hasRealKnowledge && (
-            <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3.5 py-3 shadow-sm">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                <p className="text-xs font-semibold text-emerald-700">Retrieval active</p>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-emerald-600">
-                The assistant now uses your custom notes and uploaded documents when answering patient questions.
-              </p>
-            </div>
-          )}
-
-          {!hasRealKnowledge && (
-            <div className="mt-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-3 shadow-sm">
-              <div className="flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-[#64748B]" />
-                <p className="text-xs font-semibold text-[#475569]">Basic mode</p>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-[#475569]">
-                The assistant is answering from clinic config only (services, FAQ, hours). Upload documents or add notes to improve depth.
-              </p>
-            </div>
-          )}
-        </aside>
       </div>
     </div>
   );

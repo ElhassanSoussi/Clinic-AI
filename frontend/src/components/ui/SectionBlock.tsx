@@ -13,7 +13,7 @@ export function SectionBlock({ label, children, action, className = "" }: Sectio
   return (
     <section className={className}>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="workspace-section-label">{label}</h3>
+        <h3 className="workspace-rail-title">{label}</h3>
         {action}
       </div>
       {children}
