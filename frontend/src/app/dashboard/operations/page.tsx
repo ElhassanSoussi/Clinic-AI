@@ -437,7 +437,23 @@ export default function OperationsPage() {
           </>
         }
         title="Operations command center"
-        description="Readiness first, channels second, then live queues and automations—structured so you can scan system health before working individual bookings."
+        description="Readiness, channels, reminders, review queues, and recovery work—organized so staff can scan system health before handling specific patients."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/appointments"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              Appointments
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+            >
+              Settings
+            </Link>
+          </div>
+        }
       />
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />

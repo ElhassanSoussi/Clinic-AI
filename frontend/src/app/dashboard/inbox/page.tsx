@@ -6,7 +6,6 @@ import {
   Inbox,
   Search,
   ArrowRight,
-  UserRound,
   Bot,
   TriangleAlert,
   CalendarDays,
@@ -133,14 +132,63 @@ export default function InboxPage() {
           </>
         }
         title="Inbox"
-        description="One triage surface: filters and volume stack on the left, searchable threads in the center rail, and operating context on the right—same live list, composed as a workbench."
+        description="A purpose-built front-desk workbench: queue status on the left, live threads in the center, and operator context on the right."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              Settings
+            </Link>
+            {clinic?.slug ? (
+              <a
+                href={`/chat/${clinic.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Open chat
+              </a>
+            ) : null}
+          </div>
+        }
       />
 
-      <div className="wave-workbench workspace-workbench-premium">
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
+          <div>
+            <p className="workspace-section-label">Inbox command surface</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+              See who reached out, what channel it came from, and whether staff still need to act.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              The inbox is the live operational queue for web chat and connected channels. It is built for triage first: patient identity, channel, urgency, booking outcome, and last activity stay readable in one scan.
+            </p>
+          </div>
+          <div className="reset-kpi-grid">
+            {[
+              { label: "Threads", value: counts.all, tone: "bg-white" },
+              { label: "Open", value: counts.open, tone: "bg-sky-50" },
+              { label: "Needs review", value: counts.needs_follow_up, tone: "bg-amber-50" },
+              { label: "Booked", value: counts.booked, tone: "bg-emerald-50" },
+            ].map((item) => (
+              <div key={item.label} className={`rounded-[1.2rem] border border-[#DDE5EE] px-4 py-4 shadow-sm ${item.tone}`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#0F172A]">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="reset-workbench-shell">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workbench</p>
-            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Conversation triage</p>
+            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Conversation triage desk</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-900">
@@ -371,45 +419,46 @@ export default function InboxPage() {
                   </div>
                 );
               })() : (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {filtered.map((thread) => (
                     <button
                       key={thread.id}
                       onClick={() => router.push(`/dashboard/inbox/${thread.id}`)}
-                      className={`app-row-hover w-full rounded-lg border border-[#E2E8F0] bg-white pl-3 pr-3.5 py-2.5 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md ${threadAccentClass(thread.derived_status)}`}
+                      className={`reset-list-row app-row-hover w-full pl-3.5 pr-3.5 py-3 text-left transition-all hover:border-[#CBD5E1] hover:shadow-md ${threadAccentClass(thread.derived_status)}`}
                     >
-                      <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-[#0F172A]">{thread.customer_name}</p>
-                            <ChannelBadge channel={thread.channel} withIcon />
-                            <FrontdeskStatusBadge status={thread.derived_status} />
-                            {thread.unlinked && (
-                              <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-600">
-                                Unlinked
-                              </span>
-                            )}
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                        <div className="flex min-w-0 flex-1 gap-3">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-[linear-gradient(180deg,#ecfeff,#f8fafc)] text-sm font-bold text-[#0F766E] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                            {(thread.customer_name?.[0] || "P").toUpperCase()}
                           </div>
-                          <p className="text-sm leading-relaxed text-[#475569]">{thread.last_message_preview}</p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#475569]">
-                            {(thread.customer_phone || thread.customer_email) && (
-                              <span>{thread.customer_phone || thread.customer_email}</span>
-                            )}
-                            {thread.lead_id && (
-                              <span className="inline-flex items-center gap-1">
-                                <UserRound className="w-3 h-3" />
-                                <span>Linked</span>
-                              </span>
-                            )}
-                            {thread.last_message_role && (
-                              <span className="capitalize">{thread.last_message_role} replied last</span>
-                            )}
-                            {thread.thread_type === "event" && <span>Recovery thread</span>}
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                              <p className="text-[0.98rem] font-semibold tracking-[-0.03em] text-[#0F172A]">{thread.customer_name}</p>
+                              <ChannelBadge channel={thread.channel} withIcon />
+                              <FrontdeskStatusBadge status={thread.derived_status} />
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-relaxed text-[#475569]">{thread.last_message_preview}</p>
+                            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#475569]">
+                              {(thread.customer_phone || thread.customer_email) && (
+                                <span>{thread.customer_phone || thread.customer_email}</span>
+                              )}
+                              <span>{thread.lead_id ? "Linked request" : "No linked request"}</span>
+                              {thread.last_message_role && (
+                                <span className="capitalize">{thread.last_message_role} replied last</span>
+                              )}
+                              {thread.thread_type === "event" && <span>Recovery workflow</span>}
+                              {thread.unlinked && <span className="font-semibold text-rose-600">Needs linking</span>}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-2 text-xs text-[#64748B]">
-                          <span>{thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                        <div className="flex shrink-0 items-center justify-between gap-3 lg:block lg:min-w-[8.5rem] lg:text-right">
+                          <div className="rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#64748B] shadow-sm">
+                            {thread.last_message_at ? timeAgo(thread.last_message_at) : "Recently"}
+                          </div>
+                          <div className="mt-0 lg:mt-4 flex items-center justify-end gap-2 text-xs text-[#64748B]">
+                            <span>Open thread</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       </div>
                     </button>

@@ -263,34 +263,79 @@ export default function ChatPage({
 
   const statusLabel = !clinicIsLive ? "Unavailable" : "Active";
   const telHref = clinicPhone ? `tel:${digitsOnlyPhone(clinicPhone)}` : null;
+  const shellClassName = isEmbedded
+    ? "w-full flex flex-col overflow-hidden bg-white h-full min-h-0"
+    : "chat-stage-shell w-full max-w-3xl flex flex-col overflow-hidden";
 
   return (
     <div
-      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "chat-page-ambient min-h-screen flex flex-col items-center justify-center p-3 sm:p-5"}`}
+      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "chat-page-ambient min-h-screen px-4 py-6 sm:px-6"}`}
     >
-      {isDemo && !isEmbedded && (
-        <div className="w-full max-w-md mb-3 sm:mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <Link href="/" className="text-sm text-slate-500 hover:text-slate-800 transition-colors">
-              ← Back to Clinic AI
-            </Link>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm text-center">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <Building2 className="w-4 h-4 text-teal-600 shrink-0" aria-hidden />
-              Sample clinic — Bright Smile Dental
+      {!isEmbedded && (
+        <div className="mx-auto mb-5 w-full max-w-7xl">
+          <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:text-slate-900">
+            ← Back to Clinic AI
+          </Link>
+          <div className="mt-4 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+            <div className="reset-info-card p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                {isDemo ? "Interactive demo" : "Patient-facing workspace"}
+              </p>
+              <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.02] tracking-[-0.05em] text-[#0F172A] sm:text-[2.75rem]">
+                Calm intake on the surface. Real workflow under it.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                Patients get a clear branded assistant. Your clinic keeps the real thread, booking state, and follow-up work in the dashboard without changing the underlying chat logic.
+              </p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Clinic", value: clinicName || "Clinic AI", hint: "Branding and contact details come from live clinic settings." },
+                  { label: "Status", value: statusLabel, hint: clinicIsLive ? "Assistant is available for live patient traffic." : "Clinic is not live, so expectations stay explicit." },
+                  { label: "Flow", value: leadCaptured ? "Captured" : step ? `Booking ${step}/6` : "Q&A", hint: "The surface reflects the actual booking flow rather than a fake storyboard." },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-[1.15rem] border border-[#E2E8F0] bg-white/92 px-4 py-4 shadow-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                    <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[#0F172A]">{item.value}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#475569]">{item.hint}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Uses Clinic AI&apos;s seeded demo workspace — same chat flow your patients get after you configure settings
-              and go live with your own clinic slug, not your private dashboard data.
-            </p>
+
+            <div className="grid gap-4">
+              {isDemo && (
+                <div className="reset-info-card p-5">
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
+                    <Building2 className="w-4 h-4 text-teal-600 shrink-0" aria-hidden />
+                    Sample clinic — Bright Smile Dental
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    Uses Clinic AI&apos;s seeded demo workspace, so you can test the real flow without exposing any private clinic dashboard data.
+                  </p>
+                </div>
+              )}
+
+              <div className="reset-info-card p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Patient experience notes</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                    Answers are grounded in clinic hours, services, FAQ, and training content you configured.
+                  </div>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                    Booking requests follow a real capture flow so staff can review them downstream.
+                  </div>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                    The assistant helps with front-desk questions only. It does not replace urgent care or medical advice.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      <div
-        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "chat-shell-premium chat-shell-premium--immersive max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.4rem] border"}`}
-      >
+      <div className={`${isEmbedded ? "" : "mx-auto flex w-full max-w-7xl justify-center"}`}>
+      <div className={shellClassName}>
         <div className="brand-header chat-header-premium px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
           <div
             className="w-11 h-11 rounded-2xl bg-white/18 flex items-center justify-center text-base font-bold text-white select-none shrink-0 shadow-inner"
@@ -538,6 +583,7 @@ export default function ChatPage({
             ) : null}
           </div>
         </div>
+      </div>
       </div>
 
       <style jsx>{`

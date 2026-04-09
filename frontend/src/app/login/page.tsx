@@ -157,11 +157,11 @@ export default function LoginPage() {
         Back
       </Link>
 
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
-        <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl items-center justify-center">
+        <div className="auth-shell auth-stage-shell grid w-full max-w-7xl gap-0 overflow-hidden lg:grid-cols-[1fr_1.02fr]">
 
           {/* Left panel — marketing */}
-          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-[1.6rem] border-r border-slate-700/80 p-8 lg:flex xl:p-12">
+          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-[2rem] border-r border-slate-700/70 p-8 lg:flex xl:p-12">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/30">
@@ -178,15 +178,29 @@ export default function LoginPage() {
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Your workspace is ready
                 </div>
-                <h1 className="text-[clamp(1.75rem,1.2vw+1.25rem,2.35rem)] font-bold leading-snug tracking-tight">
-                  Welcome back. Your front desk is waiting.
+                <h1 className="text-[clamp(2.15rem,1.5vw+1.4rem,3.55rem)] font-bold leading-[1.02] tracking-[-0.05em]">
+                  Re-enter the clinic operating system your team already works from.
                 </h1>
                 <p className="auth-panel-lead mt-5">
-                  Pick up where you left off — conversations, appointment requests, follow-up items, and your AI training workspace are all in one place.
+                  Pick up conversations, booking pressure, follow-up load, and AI training from one composed workspace instead of bouncing between disconnected front-desk tools.
                 </p>
               </div>
 
-              <div className="mt-10 space-y-3">
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Inbox", value: "Live", hint: "Web chat and SMS threads" },
+                  { label: "Bookings", value: "Ready", hint: "Requests, deposits, reminders" },
+                  { label: "Team view", value: "Shared", hint: "Human review stays visible" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-[1.2rem] border border-white/10 bg-white/8 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-white">{item.value}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-400">{item.hint}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 space-y-3">
                 {trustPoints.map((item) => (
                   <div
                     key={item.text}
@@ -202,18 +216,16 @@ export default function LoginPage() {
             </div>
 
             <div className="auth-panel-card mt-10 p-6 xl:mt-12">
-              <p className="text-sm font-semibold uppercase tracking-[0.1em] text-slate-400">
-                What stays true
-              </p>
-              <div className="mt-4 space-y-3 text-[0.9375rem] leading-relaxed text-slate-300">
-                <p>The assistant only uses information you configure.</p>
-                <p>Staff can review or take over any conversation at any time.</p>
-                <p>Inbox, appointments, and follow-up stay connected in one workspace.</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.1em] text-slate-400">Operator promise</p>
+              <div className="mt-4 grid gap-3 text-[0.9375rem] leading-relaxed text-slate-300">
+                <div className="rounded-xl border border-white/10 bg-white/6 px-4 py-3">
+                  Built for real clinic operations, not generic chatbot management.
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/6 px-4 py-3">
+                  Grounded in configured clinic facts, with human takeover available any time.
+                </div>
               </div>
-              <Link
-                href="/trust"
-                className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-300 hover:text-teal-200"
-              >
+              <Link href="/trust" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-300 hover:text-teal-200">
                 Read our trust approach
               </Link>
             </div>
@@ -230,11 +242,11 @@ export default function LoginPage() {
                   </div>
                   <span className="text-base font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
-                  Sign in to your workspace
+                <h2 className="text-[2.3rem] font-bold tracking-[-0.05em] text-[#0F172A] sm:text-[2.7rem]">
+                  Sign in to Clinic AI
                 </h2>
                 <p className="marketing-body mx-auto mt-3 max-w-sm text-center text-slate-600">
-                  Continue to your inbox, appointments, and AI training panel.
+                  Continue to the workspace that runs conversations, requests, appointments, and assistant quality in one system.
                 </p>
                 <p className="marketing-body mx-auto mt-4 max-w-sm text-center text-sm text-slate-600">
                   New to Clinic AI?{" "}
@@ -248,7 +260,13 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="auth-form-focus p-8 shadow-[0_34px_70px_-42px_rgb(12_18_32/0.3)]">
+              <div className="auth-form-focus p-8 shadow-[0_40px_78px_-42px_rgb(12_18_32/0.34)]">
+                <div className="mb-5 rounded-[1rem] border border-[#DDE5EE] bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(255,255,255,0.92))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Workspace access</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                    Your dashboard keeps the same routes and behavior. This entry surface is new, not the product logic behind it.
+                  </p>
+                </div>
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}

@@ -11,7 +11,7 @@ interface SectionBlockProps {
 
 export function SectionBlock({ label, children, action, className = "" }: SectionBlockProps) {
   return (
-    <section className={className}>
+    <section className={`section-block-shell ${className}`.trim()}>
       <div className="mb-4 flex items-center justify-between gap-3 border-b border-[var(--color-app-border)]/80 pb-3">
         <h3 className="workspace-rail-title">{label}</h3>
         {action}

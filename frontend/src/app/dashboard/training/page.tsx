@@ -349,7 +349,17 @@ export default function TrainingPage() {
           </>
         }
         title="Knowledge & training"
-        description="The control room for assistant quality: structured clinic knowledge, uploads, readiness scoring, and a safe preview—before patients ever see a reply."
+        description="The control room for answer quality: structured knowledge, uploads, readiness scoring, and a safe preview before patients ever see a response."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              Settings
+            </Link>
+          </div>
+        }
       />
 
       {error && (

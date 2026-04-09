@@ -270,17 +270,26 @@ export default function DashboardPage() {
           </>
         }
         title="Command center"
-        description="Pressure, pipeline, throughput, and the next staff moves—grouped so you scan the desk in seconds, not a flat grid of widgets."
+        description="A real front-desk command surface for pressure, pipeline, bookings, and what your team should do next."
         actions={
-          billing && billing.plan !== "premium" ? (
+          <div className="flex flex-wrap gap-2">
             <Link
-              href="/dashboard/billing"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#99f6e4] bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+              href="/dashboard/inbox"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
             >
-              <Zap className="h-3.5 w-3.5" />
-              Upgrade plan
+              <Inbox className="h-3.5 w-3.5" />
+              Open inbox
             </Link>
-          ) : null
+            {billing && billing.plan !== "premium" ? (
+              <Link
+                href="/dashboard/billing"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#99f6e4] bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+              >
+                <Zap className="h-3.5 w-3.5" />
+                Upgrade plan
+              </Link>
+            ) : null}
+          </div>
         }
       />
 

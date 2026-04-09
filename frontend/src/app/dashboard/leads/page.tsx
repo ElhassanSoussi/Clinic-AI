@@ -208,17 +208,21 @@ function renderLeadsContent({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {filtered.map((lead) => (
-        <div key={lead.id} className="relative rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-all hover:border-[#E2E8F0]">
+        <div key={lead.id} className="reset-list-row relative transition-all hover:border-[#CBD5E1] hover:shadow-md">
           <button
             onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
-            className="w-full px-4 py-3 text-left"
+            className="w-full px-4 py-3.5 text-left"
           >
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
-              <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 flex-1 gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-[linear-gradient(180deg,#ecfeff,#f8fafc)] text-sm font-bold text-[#0F766E] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                  {(lead.patient_name?.[0] || "P").toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-[#0F172A]">{lead.patient_name}</p>
+                  <p className="text-[0.98rem] font-semibold tracking-[-0.03em] text-[#0F172A]">{lead.patient_name}</p>
                   <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#475569]">
                     {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                   </span>
@@ -239,6 +243,7 @@ function renderLeadsContent({
                 <p className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-medium text-[#115E59]">
                   {leadNextStepHint(lead.status)}
                 </p>
+              </div>
               </div>
             </div>
           </button>
@@ -358,8 +363,51 @@ export default function LeadsPage() {
           </>
         }
         title="Booking pipeline"
-        description="A single board for intake requests: stage, urgency, and next action stay visible so the list feels like a working queue—not a flat export."
+        description="A live intake pipeline where patient identity, request context, stage, and next staff move stay connected."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/appointments"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              Appointments
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+            >
+              Settings
+            </Link>
+          </div>
+        }
       />
+
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
+          <div>
+            <p className="workspace-section-label">Pipeline command surface</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+              Requests move from new to booked with stage, timing, and next action visible in one board.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              This is the handoff queue for your clinic, not a report. Staff can scan patient details, reason for visit, contact status, and suggested next step before opening a single record.
+            </p>
+          </div>
+          <div className="reset-kpi-grid">
+            {[
+              { label: "New", value: counts.new, tone: "bg-sky-50" },
+              { label: "Contacted", value: counts.contacted, tone: "bg-violet-50" },
+              { label: "Booked", value: counts.booked, tone: "bg-emerald-50" },
+              { label: "Closed", value: counts.closed, tone: "bg-white" },
+            ].map((item) => (
+              <div key={item.label} className={`rounded-[1.2rem] border border-[#DDE5EE] px-4 py-4 shadow-sm ${item.tone}`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
+                <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#0F172A]">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="wave-command-slab workspace-command-hero space-y-4">
         <div>
@@ -409,7 +457,7 @@ export default function LeadsPage() {
         </div>
       )}
 
-      <div className="wave-workbench workspace-workbench-premium">
+      <div className="reset-workbench-shell">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Pipeline desk</p>

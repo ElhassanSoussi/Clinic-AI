@@ -734,8 +734,46 @@ export default function AppointmentsPage() {
           </>
         }
         title="Booking & deposit workspace"
-        description="Confirm times, watch reminder prep, and move deposits forward—without a calendar mock-up. Every row links back to the patient thread when you need context."
+        description="A real booking operations surface for confirmed times, reminder readiness, deposit status, and the next staff action."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/leads"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+            >
+              Leads
+            </Link>
+            <Link
+              href="/dashboard/operations"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+            >
+              Operations
+            </Link>
+          </div>
+        }
       />
+
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
+          <div>
+            <p className="workspace-section-label">Booking command surface</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+              Turn captured requests into confirmed appointments with reminders and deposits under one roof.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              This page is intentionally not a fake calendar. It is the clinic’s booking operations board: timing, confirmation state, reminder prep, deposit status, and the thread behind each appointment all stay available together.
+            </p>
+          </div>
+          <div className="reset-kpi-grid">
+            {APPOINTMENT_VIEWS.map((view) => (
+              <div key={view.value} className={`rounded-[1.2rem] border border-[#DDE5EE] px-4 py-4 shadow-sm ${activeView === view.value ? "bg-[#CCFBF1]" : "bg-white"}`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{view.label}</p>
+                <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#0F172A]">{viewCounts?.[view.value] ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <div className="wave-command-slab workspace-command-hero space-y-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -789,7 +827,7 @@ export default function AppointmentsPage() {
         </div>
       </div>
 
-      <div className="wave-workbench workspace-workbench-premium">
+      <div className="reset-workbench-shell">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>
@@ -897,7 +935,7 @@ export default function AppointmentsPage() {
                       <button
                         key={appointment.lead_id}
                         onClick={() => setSelectedLeadId(appointment.lead_id)}
-                        className={`w-full rounded-xl border px-3.5 py-2.5 text-left transition-all ${active
+                        className={`reset-list-row w-full px-3.5 py-3 text-left transition-all ${active
                           ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
                           : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
                           }`}

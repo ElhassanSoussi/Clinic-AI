@@ -159,11 +159,11 @@ export default function RegisterPage() {
         <ArrowLeft className="h-4 w-4" />
         Back
       </Link>
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
-        <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl items-center justify-center">
+        <div className="auth-shell auth-stage-shell grid w-full max-w-7xl gap-0 overflow-hidden lg:grid-cols-[1fr_1.02fr]">
 
           {/* Left panel — marketing */}
-          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-[1.6rem] border-r border-slate-700/80 p-8 lg:flex xl:p-12">
+          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-[2rem] border-r border-slate-700/70 p-8 lg:flex xl:p-12">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/30">
@@ -180,12 +180,26 @@ export default function RegisterPage() {
                   <ShieldCheck className="h-3.5 w-3.5" />
                   14-day free trial
                 </div>
-                <h1 className="text-[clamp(1.75rem,1.2vw+1.25rem,2.35rem)] font-bold leading-snug tracking-tight">
-                  Set up your clinic&apos;s AI front desk in minutes.
+                <h1 className="text-[clamp(2.15rem,1.5vw+1.4rem,3.55rem)] font-bold leading-[1.02] tracking-[-0.05em]">
+                  Launch a calmer, smarter front desk without rebuilding your clinic around new software.
                 </h1>
                 <p className="auth-panel-lead mt-5">
                   Add your clinic details, configure the assistant with your real information, and give your team a single workspace from first inquiry to confirmed booking.
                 </p>
+              </div>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Setup", value: "Guided", hint: "Onboarding keeps the launch path clear" },
+                  { label: "Trial", value: "14 days", hint: "No card required to configure and test" },
+                  { label: "Workspace", value: "Shared", hint: "Inbox, leads, and bookings together" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-[1.2rem] border border-white/10 bg-white/8 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-white">{item.value}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-400">{item.hint}</p>
+                  </div>
+                ))}
               </div>
 
               <ul className="mt-10 space-y-3.5">
@@ -236,7 +250,7 @@ export default function RegisterPage() {
                   </div>
                   <span className="text-base font-semibold text-[#0F172A]">Clinic AI</span>
                 </Link>
-                <h2 className="text-3xl font-bold tracking-tight text-[#0F172A]">
+                <h2 className="text-[2.3rem] font-bold tracking-[-0.05em] text-[#0F172A] sm:text-[2.7rem]">
                   Create your clinic workspace
                 </h2>
                 <p className="marketing-body mx-auto mt-3 max-w-md text-center text-slate-600">
@@ -244,7 +258,13 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <div className="auth-form-focus p-8 shadow-[0_34px_70px_-42px_rgb(12_18_32/0.3)]">
+              <div className="auth-form-focus p-8 shadow-[0_40px_78px_-42px_rgb(12_18_32/0.34)]">
+                <div className="mb-5 rounded-[1rem] border border-[#DDE5EE] bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(255,255,255,0.92))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Before you start</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                    This creates the real workspace your clinic will keep using after onboarding. The flow changes visually here, not the underlying product behavior.
+                  </p>
+                </div>
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}

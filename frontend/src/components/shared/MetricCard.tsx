@@ -30,7 +30,7 @@ export function MetricCard({
   const displayValue =
     typeof value === "number" ? (Number.isFinite(value) ? value : "—") : value;
   return (
-    <div className="ds-card px-4 py-4 sm:px-5 sm:py-5">
+    <div className="ds-card metric-card-shell px-4 py-4 sm:px-5 sm:py-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[var(--color-app-text-muted)]">{label}</p>
@@ -47,6 +47,7 @@ export function MetricCard({
           <Icon className="h-[1.2rem] w-[1.2rem]" />
         </div>
       </div>
+      <div className="mt-4 h-px w-full bg-[linear-gradient(90deg,rgba(148,163,184,0.08)_0%,rgba(148,163,184,0.45)_50%,rgba(148,163,184,0.08)_100%)]" />
     </div>
   );
 }

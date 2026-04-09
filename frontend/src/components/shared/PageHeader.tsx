@@ -27,7 +27,7 @@ export function PageHeader({
 }: Readonly<PageHeaderProps>) {
   return (
     <header
-      className={`app-page-header ${showDivider ? "border-b border-[var(--color-app-border)]/80 pb-8" : ""} ${className}`.trim()}
+      className={`app-page-header page-header-shell ${showDivider ? "border-b border-[var(--color-app-border)]/80 pb-8" : ""} ${className}`.trim()}
     >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">

@@ -381,6 +381,19 @@ a {
   min-width: 0;
 }
 
+.page-header-shell {
+  position: relative;
+}
+
+.page-header-shell::after {
+  content: "";
+  display: block;
+  margin-top: 1.2rem;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, rgb(226 232 240 / 0.15) 0%, rgb(203 213 225 / 0.95) 14%, rgb(226 232 240 / 0.7) 54%, rgb(226 232 240 / 0.08) 100%);
+}
+
 /* Control-center hero strip (settings, heavy config) */
 .ds-control-hero-panel {
   position: relative;
@@ -464,6 +477,13 @@ a {
   height: 0.22rem;
   background: linear-gradient(90deg, rgb(20 184 166 / 0.65) 0%, rgb(124 99 243 / 0.35) 100%);
   opacity: 0.4;
+}
+
+.metric-card-shell {
+  box-shadow:
+    0 30px 58px -42px rgb(12 18 32 / 0.34),
+    0 16px 28px -22px rgb(13 148 136 / 0.1),
+    var(--ds-shadow-inset);
 }
 
 .ds-card-header {
@@ -1392,6 +1412,107 @@ a {
   box-shadow:
     0 20px 40px -30px rgb(12 18 32 / 0.34),
     inset 0 1px 0 rgb(255 255 255 / 0.82);
+}
+
+.right-rail-shell {
+  border-radius: 1.45rem;
+}
+
+.section-block-shell {
+  border-radius: 1.35rem;
+}
+
+.reset-kpi-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  .reset-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.reset-info-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.35rem;
+  border: 1px solid var(--color-app-border);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(247 250 253 / 0.96) 100%);
+  box-shadow:
+    0 24px 48px -34px rgb(12 18 32 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.88);
+}
+
+.reset-info-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0.26rem;
+  background: linear-gradient(90deg, rgb(20 184 166 / 0.72), rgb(124 99 243 / 0.38));
+  opacity: 0.55;
+}
+
+.reset-workbench-shell {
+  border-radius: 2rem;
+  border: 1px solid var(--color-app-border);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.985) 0%, rgb(246 249 253 / 0.975) 54%, rgb(240 244 251 / 0.95) 100%);
+  box-shadow:
+    0 44px 84px -44px rgb(12 18 32 / 0.34),
+    0 22px 38px -24px rgb(13 148 136 / 0.12);
+  overflow: hidden;
+}
+
+.reset-list-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.2rem;
+  border: 1px solid var(--color-app-border);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(248 250 252 / 0.97) 100%);
+  box-shadow:
+    0 18px 34px -30px rgb(12 18 32 / 0.24),
+    inset 0 1px 0 rgb(255 255 255 / 0.84);
+}
+
+.reset-list-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0.16rem;
+  background: linear-gradient(90deg, rgb(20 184 166 / 0.18), rgb(124 99 243 / 0.14));
+}
+
+.auth-stage-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid rgb(211 219 231 / 0.95);
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.98) 0%, rgb(245 248 252 / 0.98) 48%, rgb(239 253 250 / 0.62) 100%);
+  box-shadow:
+    0 46px 90px -48px rgb(12 18 32 / 0.34),
+    0 24px 42px -28px rgb(13 148 136 / 0.16);
+}
+
+.auth-stage-shell::before {
+  content: "";
+  position: absolute;
+  inset: -25% -10% auto 50%;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgb(20 184 166 / 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.chat-stage-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid rgb(211 219 231 / 0.95);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.985) 0%, rgb(248 250 252 / 0.975) 56%, rgb(240 253 250 / 0.78) 100%);
+  box-shadow:
+    0 44px 88px -40px rgb(12 18 32 / 0.36),
+    0 22px 42px -24px rgb(13 148 136 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.88);
 }
 
 .chat-shell-premium--immersive {
