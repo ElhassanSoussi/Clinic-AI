@@ -442,7 +442,7 @@ export default function OperationsPage() {
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
-      <section className="ds-control-hero-panel p-5 sm:p-6">
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
           <div>
             <p className="workspace-section-label">Control center</p>

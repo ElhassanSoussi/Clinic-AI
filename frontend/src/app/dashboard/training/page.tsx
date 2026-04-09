@@ -361,7 +361,7 @@ export default function TrainingPage() {
 
       <div className="workspace-stage">
         <aside className="workspace-side-rail">
-          <div className="wave-command-slab border-[#99f6e4] bg-[#F0FDFA]/40 xl:sticky xl:top-6">
+          <div className="wave-command-slab workspace-command-hero border-[#99f6e4] bg-[#F0FDFA]/40 xl:sticky xl:top-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex items-center gap-2">
@@ -443,7 +443,7 @@ export default function TrainingPage() {
         </aside>
 
         <div className="min-w-0 space-y-6 xl:col-span-2">
-          <section className="ds-control-hero-panel p-5 sm:p-6">
+          <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
             <div className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
               <div>
                 <p className="workspace-section-label">Knowledge control room</p>

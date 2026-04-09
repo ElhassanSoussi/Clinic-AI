@@ -75,7 +75,7 @@ export default function CustomersPage() {
         description="A relationship workspace built from live conversations—see engagement depth, bookings, open requests, and last touch before you open inbox or a lead."
       />
 
-      <section className="ds-control-hero-panel p-5 sm:p-6">
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
           <div>
             <p className="workspace-section-label">Relationship command</p>
@@ -114,7 +114,7 @@ export default function CustomersPage() {
 
       <div className="workspace-split">
         <div className="order-1 min-w-0 xl:order-none">
-          <div className="wave-workbench">
+          <div className="wave-workbench workspace-workbench-premium">
             <div className="wave-workbench-head">
               <div className="min-w-0">
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Relationship directory</p>
@@ -232,7 +232,7 @@ export default function CustomersPage() {
 
         {/* Right rail */}
         <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="wave-command-slab !py-4 xl:sticky xl:top-6">
+          <div className="wave-command-slab workspace-command-hero !py-4 xl:sticky xl:top-6">
             <p className="workspace-section-label">Workspace context</p>
             <p className="workspace-rail-title mt-2">Directory health</p>
             <div className="mt-3 grid grid-cols-1 gap-2">

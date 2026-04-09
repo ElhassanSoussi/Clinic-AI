@@ -121,7 +121,7 @@ export default function ActivityPage() {
       <div className="workspace-split">
         <div className="order-1 min-w-0 xl:order-none">
           {events.length > 0 ? (
-            <div className="wave-command-slab mb-4 !py-4">
+            <div className="wave-command-slab workspace-command-hero mb-4 !py-4">
               <p className="workspace-section-label">Feed snapshot</p>
               <p className="mt-1 text-sm text-[#475569]">
                 Mix of event types in this window — use it to sanity-check volume before drilling into inbox or leads.
@@ -157,7 +157,7 @@ export default function ActivityPage() {
             </div>
           ) : null}
           {events.length > 0 ? (
-            <div className="wave-workbench">
+            <div className="wave-workbench workspace-workbench-premium">
               <div className="wave-workbench-head">
                 <div className="min-w-0">
                   <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Audit workbench</p>
@@ -241,7 +241,7 @@ export default function ActivityPage() {
         </div>
 
         <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="wave-command-slab !py-4 xl:sticky xl:top-6">
+          <div className="wave-command-slab workspace-command-hero !py-4 xl:sticky xl:top-6">
             <p className="workspace-section-label">Audit rail</p>
             <p className="workspace-rail-title mt-2">At a glance</p>
             <div className="mt-3 rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">

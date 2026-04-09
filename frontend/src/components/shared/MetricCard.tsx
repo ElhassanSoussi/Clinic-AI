@@ -31,20 +31,20 @@ export function MetricCard({
     typeof value === "number" ? (Number.isFinite(value) ? value : "—") : value;
   return (
     <div className="ds-card px-4 py-4 sm:px-5 sm:py-5">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-app-text-muted)]">{label}</p>
-          <p className="mt-2 text-[1.8rem] font-bold tracking-[-0.05em] text-[var(--color-app-text)] sm:text-[2rem]">
+          <p className="text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[var(--color-app-text-muted)]">{label}</p>
+          <p className="mt-2.5 text-[1.95rem] font-bold tracking-[-0.065em] text-[var(--color-app-text)] sm:text-[2.2rem]">
             {displayValue}
           </p>
           {detail ? (
-            <p className="ds-muted-text mt-2 max-w-[16rem]">{detail}</p>
+            <p className="ds-muted-text mt-2.5 max-w-[18rem] text-[0.9rem]">{detail}</p>
           ) : null}
         </div>
         <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/70 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ${TONE_STYLES[tone]}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/70 shadow-[0_16px_28px_-16px_rgba(15,23,42,0.58)] ${TONE_STYLES[tone]}`}
         >
-          <Icon className="h-[1.125rem] w-[1.125rem]" />
+          <Icon className="h-[1.2rem] w-[1.2rem]" />
         </div>
       </div>
     </div>

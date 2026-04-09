@@ -431,7 +431,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
         {/* ── Canvas ── */}
         <div className="order-1 min-w-0 space-y-5 xl:order-none">
-          <div className="wave-command-slab">
+          <div className="wave-command-slab workspace-command-hero">
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(16rem,0.72fr)]">
               <div className="min-w-0">
                 <p className="workspace-section-label">Front-desk pressure</p>

@@ -737,7 +737,7 @@ export default function AppointmentsPage() {
         description="Confirm times, watch reminder prep, and move deposits forward—without a calendar mock-up. Every row links back to the patient thread when you need context."
       />
 
-      <div className="wave-command-slab space-y-5">
+      <div className="wave-command-slab workspace-command-hero space-y-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-2xl">
             <p className="workspace-section-label">Booking &amp; deposit board</p>
@@ -789,7 +789,7 @@ export default function AppointmentsPage() {
         </div>
       </div>
 
-      <div className="wave-workbench">
+      <div className="wave-workbench workspace-workbench-premium">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>

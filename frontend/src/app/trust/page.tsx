@@ -96,7 +96,7 @@ export default function TrustPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
+      <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
           <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div className="max-w-3xl">
@@ -126,7 +126,7 @@ export default function TrustPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               {principles.slice(0, 4).map((item) => (
-                <div key={item.title} className="rounded-[1.6rem] border border-white/90 bg-white/92 p-6 shadow-[0_24px_46px_-34px_rgb(12_18_32/0.4)]">
+                <div key={item.title} className="marketing-showcase-card p-6">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#115E59] shadow-[0_18px_28px_-24px_rgb(15_118_110/0.6)]">
                     <item.icon className="h-5 w-5" />
                   </div>

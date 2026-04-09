@@ -110,7 +110,7 @@ export default function AccountPage() {
 
       <div className="workspace-stage">
         <aside className="workspace-side-rail">
-          <div className="wave-command-slab space-y-4 !py-4 xl:sticky xl:top-6">
+          <div className="wave-command-slab workspace-command-hero space-y-4 !py-4 xl:sticky xl:top-6">
             <div>
               <p className="workspace-section-label">Signed-in operator</p>
               <p className="mt-2 text-2xl font-bold tracking-tight text-[#0F172A]">
@@ -146,7 +146,7 @@ export default function AccountPage() {
         </aside>
 
         <div className="min-w-0 space-y-5 xl:col-span-2">
-          <section className="ds-control-hero-panel p-5 sm:p-6">
+          <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
             <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
               <div className="space-y-4">
                 <div>

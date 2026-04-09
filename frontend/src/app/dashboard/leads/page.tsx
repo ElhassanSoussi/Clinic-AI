@@ -361,7 +361,7 @@ export default function LeadsPage() {
         description="A single board for intake requests: stage, urgency, and next action stay visible so the list feels like a working queue—not a flat export."
       />
 
-      <div className="wave-command-slab space-y-4">
+      <div className="wave-command-slab workspace-command-hero space-y-4">
         <div>
           <p className="workspace-section-label">Live pipeline</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -409,7 +409,7 @@ export default function LeadsPage() {
         </div>
       )}
 
-      <div className="wave-workbench">
+      <div className="wave-workbench workspace-workbench-premium">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Pipeline desk</p>

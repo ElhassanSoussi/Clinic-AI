@@ -163,7 +163,7 @@ export default function RegisterPage() {
         <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
 
           {/* Left panel — marketing */}
-          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-xl border-r border-slate-700/80 p-8 lg:flex xl:p-12">
+          <div className="auth-marketing-panel hidden flex-col justify-between rounded-l-[1.6rem] border-r border-slate-700/80 p-8 lg:flex xl:p-12">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0F766E] shadow-md shadow-teal-900/30">
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <div className="auth-form-focus p-8">
+              <div className="auth-form-focus p-8 shadow-[0_34px_70px_-42px_rgb(12_18_32/0.3)]">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}

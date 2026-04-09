@@ -196,7 +196,7 @@ export default function BillingPage() {
         </div>
       )}
 
-      <section className="ds-control-hero-panel p-5 sm:p-6">
+      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-4">
             <div>

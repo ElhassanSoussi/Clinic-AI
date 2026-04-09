@@ -185,7 +185,7 @@ export default function PricingPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-200">
+      <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-200">
         <div className="marketing-container">
           <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
             <div className="max-w-3xl">
@@ -208,7 +208,7 @@ export default function PricingPage() {
                 ))}
               </div>
             </div>
-            <div className="rounded-[1.8rem] border border-white/90 bg-white/92 p-6 shadow-[0_28px_52px_-34px_rgb(12_18_32/0.42)] sm:p-8">
+            <div className="marketing-showcase-card p-6 sm:p-8">
               <p className="text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#7C63F3]">How clinics usually choose</p>
               <div className="mt-5 space-y-4">
                 {[

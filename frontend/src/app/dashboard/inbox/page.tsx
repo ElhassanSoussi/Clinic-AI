@@ -136,7 +136,7 @@ export default function InboxPage() {
         description="One triage surface: filters and volume stack on the left, searchable threads in the center rail, and operating context on the right—same live list, composed as a workbench."
       />
 
-      <div className="wave-workbench">
+      <div className="wave-workbench workspace-workbench-premium">
         <div className="wave-workbench-head">
           <div className="min-w-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workbench</p>

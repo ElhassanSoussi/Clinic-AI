@@ -289,9 +289,9 @@ export default function ChatPage({
       )}
 
       <div
-        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "chat-shell-premium max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.25rem] border"}`}
+        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "chat-shell-premium chat-shell-premium--immersive max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.4rem] border"}`}
       >
-        <div className="brand-header px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
+        <div className="brand-header chat-header-premium px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
           <div
             className="w-11 h-11 rounded-2xl bg-white/18 flex items-center justify-center text-base font-bold text-white select-none shrink-0 shadow-inner"
             aria-hidden

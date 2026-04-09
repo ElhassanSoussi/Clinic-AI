@@ -294,7 +294,7 @@ export default function LandingPage() {
     <div className="public-marketing-root">
       <PublicNav />
 
-      <section className="marketing-hero marketing-hero-wave marketing-surface-white border-b border-slate-300/80">
+      <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-300/80">
         <div className="marketing-container">
           <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:gap-14">
             <div className="min-w-0">
@@ -329,7 +329,7 @@ export default function LandingPage() {
                   { label: "Human review built in", detail: "Staff can edit, pause, or take over any thread at any point." },
                   { label: "Bookings stay connected", detail: "Appointments, reminders, and deposits stay linked to the original inquiry." },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/80 bg-white/90 px-4 py-4 shadow-[0_18px_34px_-30px_rgb(12_18_32/0.55)]">
+                  <div key={item.label} className="marketing-showcase-card px-4 py-4">
                     <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.label}</p>
                     <p className="mt-1.5 text-sm leading-relaxed text-[#5D6B7C]">{item.detail}</p>
                   </div>
@@ -344,7 +344,7 @@ export default function LandingPage() {
               >
                 <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
                   <div className="grid gap-4 xl:grid-cols-[12.75rem_1fr_14rem]">
-                    <aside className="rounded-[1.4rem] border border-white/90 bg-[linear-gradient(180deg,#f7f3ff_0%,#f1f5fb_100%)] p-4 shadow-[0_24px_40px_-32px_rgb(124_99_243/0.45)]">
+                    <aside className="rounded-[1.55rem] border border-white/90 bg-[linear-gradient(180deg,#f7f3ff_0%,#eff5fb_100%)] p-4 shadow-[0_30px_48px_-34px_rgb(124_99_243/0.42)]">
                       <div className="mb-5 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-white shadow-[0_18px_24px_-18px_rgb(15_118_110/0.72)]">
                           <Bot className="h-4 w-4" />
@@ -370,7 +370,7 @@ export default function LandingPage() {
                       </div>
                     </aside>
 
-                    <div className="rounded-[1.55rem] border border-white/80 bg-white/95 p-5 shadow-[0_28px_50px_-34px_rgb(12_18_32/0.35)]">
+                    <div className="rounded-[1.75rem] border border-white/80 bg-white/95 p-5 shadow-[0_34px_58px_-36px_rgb(12_18_32/0.35)]">
                       <div className="flex items-center gap-3 border-b border-[#E2E8F0] pb-3">
                         <div className="workspace-search min-h-[2.6rem] min-w-0 flex-1 rounded-2xl border-white/90 bg-[#F8FAFC] text-[0.8125rem]">
                           <Search className="h-4 w-4" />
@@ -408,7 +408,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="workspace-rail-card p-4 shadow-sm">
+                      <div className="workspace-rail-card workspace-immersive-rail p-4 shadow-sm">
                         <p className="workspace-section-label">Today</p>
                         <h3 className="mt-3 text-[1rem] font-semibold tracking-[-0.02em] text-slate-900">Booked, reviewed, and ready</h3>
                         <p className="mt-1 text-[0.8125rem] leading-snug text-slate-600">The right rail keeps the next operational moves visible.</p>
@@ -421,7 +421,7 @@ export default function LandingPage() {
                           ))}
                         </div>
                       </div>
-                      <div className="workspace-rail-card p-4 shadow-sm">
+                      <div className="workspace-rail-card workspace-immersive-rail p-4 shadow-sm">
                         <p className="workspace-section-label">Why clinics use it</p>
                         <div className="mt-3 space-y-2">
                           <div className="app-card-muted px-3 py-2.5">

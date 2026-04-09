@@ -17,7 +17,7 @@ export function PublicNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-white/60 bg-[rgb(248_250_253/0.86)] shadow-[0_1px_0_rgb(255_255_255/0.8)_inset,0_12px_36px_-22px_rgb(12_18_32/0.24)] backdrop-blur-2xl backdrop-saturate-150">
+    <nav className="sticky top-0 z-40 border-b border-white/60 bg-[rgb(248_250_253/0.86)] shadow-[0_1px_0_rgb(255_255_255/0.8)_inset,0_18px_44px_-28px_rgb(12_18_32/0.28)] backdrop-blur-2xl backdrop-saturate-150">
       <div className="marketing-container flex h-[4.5rem] items-center justify-between gap-4 sm:h-[4.85rem]">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] shadow-[0_18px_30px_-18px_rgb(15_118_110/0.55)]">
@@ -29,12 +29,12 @@ export function PublicNav() {
           </div>
         </Link>
 
-        <div className="hidden items-center gap-1 rounded-full border border-white/80 bg-white/85 p-1.5 shadow-[0_12px_28px_-24px_rgb(12_18_32/0.4)] lg:flex">
+        <div className="hidden items-center gap-1 rounded-full border border-white/80 bg-white/88 p-1.5 shadow-[0_18px_34px_-24px_rgb(12_18_32/0.42)] lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-full px-4 py-2.5 text-[0.9375rem] font-semibold transition-all ${pathname === link.href || pathname.startsWith(link.href + "/")
+            className={`rounded-full px-4 py-2.5 text-[0.9375rem] font-semibold transition-all ${pathname === link.href || pathname.startsWith(link.href + "/")
                 ? "bg-[#f1edff] text-[#3d2c84] shadow-[0_10px_20px_-18px_rgb(124_99_243/0.7)]"
                 : "text-[#475569] hover:bg-slate-50 hover:text-[#0F172A]"
                 }`}
@@ -45,13 +45,10 @@ export function PublicNav() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <Link
-            href="/login"
-            className="hidden rounded-full px-4 py-2.5 text-[0.9375rem] font-semibold text-[#475569] transition-colors hover:bg-white/70 hover:text-[#0F172A] sm:block"
-          >
+          <Link href="/login" className="hidden rounded-full px-4 py-2.5 text-[0.9375rem] font-semibold text-[#475569] transition-colors hover:bg-white/70 hover:text-[#0F172A] sm:block">
             Sign in
           </Link>
-          <Link href="/register" className="marketing-cta-primary !rounded-full !px-5 !py-2.5 !text-[0.9375rem]">
+          <Link href="/register" className="marketing-cta-primary !rounded-full !px-5 !py-2.5 !text-[0.9375rem] shadow-[0_18px_36px_-18px_rgb(15_118_110/0.58)]">
             Start free trial
             <ArrowRight className="h-4 w-4" />
           </Link>
