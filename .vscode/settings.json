@@ -113,5 +113,8 @@
   "githubPullRequests.experimental.useQuickChat": true,
   "chat.disableAIFeatures": false,
   "dataWrangler.experiments.copilot.enabled": true,
-  "claudeCode.useTerminal": true
+  "claudeCode.useTerminal": true,
+  "cursor.composer.shouldChimeAfterChatFinishes": false,
+  "cursor.general.emailPrivacyEnabled": true,
+  "cursor.composer.shouldAutoSaveNonAgent": false
 }

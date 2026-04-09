@@ -640,411 +640,431 @@ export default function OperationsPage() {
         </div>
       </div>
 
-      {/* Reminder settings */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-1.5 flex items-center gap-2">
-              <BellRing className="h-4 w-4 text-[#0F766E]" />
-              <h2 className="text-sm font-semibold text-[#0F172A]">Reminder settings</h2>
-            </div>
-            <p className="text-sm text-[#475569]">
-              Reminder delivery is not automated yet. These settings prepare confirmed bookings and generate a real preview schedule for the next delivery pass.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 items-center gap-2.5 sm:grid-cols-[auto_9rem_auto]">
-            <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
-              <input
-                type="checkbox"
-                checked={reminderEnabled}
-                onChange={(event) => setReminderEnabled(event.target.checked)}
-                className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
-              />
-              <span>Enable reminder prep</span>
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={168}
-              value={reminderLeadHours}
-              onChange={(event) => setReminderLeadHours(event.target.value)}
-              placeholder="Lead hours"
-              className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-            />
-            <button
-              onClick={saveReminderSettings}
-              disabled={savingSettings}
-              className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-            >
-              {savingSettings ? "Saving..." : "Save settings"}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 gap-3 border-t border-[#E2E8F0] pt-4 lg:grid-cols-[auto_10rem]">
-          <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
-            <input
-              type="checkbox"
-              checked={followUpAutomationEnabled}
-              onChange={(event) => setFollowUpAutomationEnabled(event.target.checked)}
-              className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
-            />
-            <span>Enable auto follow-up</span>
-          </label>
-          <div>
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-[#64748B]">Delay before task creation</p>
-            <input
-              type="number"
-              min={5}
-              max={1440}
-              value={followUpDelayMinutes}
-              onChange={(event) => setFollowUpDelayMinutes(event.target.value)}
-              placeholder="Minutes"
-              className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-            />
-          </div>
-          {followUpAutomationEnabled && (
-            <button
-              onClick={runAutoFollowUps}
-              disabled={savingSettings}
-              className="mt-1 rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
-            >
-              {savingSettings ? "Running..." : "Run follow-ups now"}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Reminder delivery */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-[#0F172A]">Reminder delivery</h2>
-            <p className="mt-0.5 text-xs text-[#475569]">
-              These reminders are scheduled from real booked requests and your reminder lead time. When SMS is connected, you can send due reminders from here.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
-              {dueReminders.length} due
-            </span>
-            <button
-              onClick={sendDueReminders}
-              disabled={sendingReminderId === "batch" || dueReminders.length === 0}
-              className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-            >
-              {sendingReminderId === "batch" ? "Sending..." : "Send due reminders"}
-            </button>
-          </div>
-        </div>
-
-        {dueReminders.length > 0 && (
-          <div className="mb-4 space-y-2.5">
-            {dueReminders.map((item) => (
-              <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
-                <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
-                    <p className="mt-0.5 text-xs text-[#475569]">
-                      Appointment {formatDateTime(item.appointment_starts_at)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[#475569]">
-                      Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
-                    </p>
-                    {item.blocked_reason && (
-                      <p className="mt-1.5 text-xs text-amber-700">{item.blocked_reason}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ChannelBadge channel={item.channel} withIcon />
-                    <button
-                      onClick={() => sendReminder(item.lead_id)}
-                      disabled={sendingReminderId === item.lead_id || !item.can_send}
-                      className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-                    >
-                      {sendingReminderId === item.lead_id ? "Sending..." : "Send now"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {upcomingReminders.length === 0 ? (
-          <EmptyState
-            icon={<BellRing className="h-7 w-7 text-[#64748B]" />}
-            title="No upcoming reminders"
-            description="Reminders will appear here once booked appointments have confirmed timing and reminder prep is enabled."
-          />
-        ) : (
-          <div className="space-y-2.5">
-            {upcomingReminders.map((item) => (
-              <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
-                <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
-                    <p className="mt-0.5 text-xs text-[#475569]">
-                      Appointment {formatDateTime(item.appointment_starts_at)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[#475569]">
-                      Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
-                    </p>
-                  </div>
-                  <ChannelBadge channel={item.channel} withIcon />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recovery queue + Log form */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold text-[#0F172A]">Recovery queue</h2>
-              <p className="mt-0.5 text-xs text-[#475569]">
-                Log missed calls and callback requests now. When SMS is connected, recovery texts can be sent from the same queue.
-              </p>
-            </div>
-            <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
-              {communicationQueue.length} active
-            </span>
-          </div>
-
-          {communicationQueue.length === 0 ? (
-            <EmptyState
-              icon={<PhoneMissed className="h-7 w-7 text-[#64748B]" />}
-              title="No recovery items"
-              description="Missed calls and callback requests will appear here as they are logged."
-            />
-          ) : (
-            <div className="space-y-3">
-              {communicationQueue.map((event) => (
-                <div key={event.id} className="rounded-lg border border-[#E2E8F0] p-3">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                        <ChannelBadge channel={event.channel} withIcon />
-                        {event.channel === "missed_call" && (
-                          <span className="inline-flex rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">
-                            Missed call recovery
-                          </span>
-                        )}
-                        {event.operator_review_required && (
-                          <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
-                            Review needed
-                          </span>
-                        )}
-                        {event.manual_takeover && (
-                          <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
-                            Staff handling
-                          </span>
-                        )}
-                        {!event.manual_takeover && event.ai_auto_reply_enabled && (
-                          <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                            AI handling
-                          </span>
-                        )}
-                        {event.latest_inbound_summary && (
-                          <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
-                            Replied
-                          </span>
-                        )}
-                        <CommunicationEventStatusBadge status={event.status} />
-                        <span className="text-xs text-[#475569]">{event.customer_name}</span>
-                      </div>
-                      <p className="text-sm font-medium text-[#0F172A]">
-                        {event.summary || "Recovery item logged"}
-                      </p>
-                      {event.content && (
-                        <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{event.content}</p>
-                      )}
-                      <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-[#475569]">
-                        {event.customer_phone && <span>{event.customer_phone}</span>}
-                        {event.customer_email && <span>{event.customer_email}</span>}
-                        {event.occurred_at && <span>{timeAgo(event.occurred_at)}</span>}
-                      </div>
-                      {event.latest_outbound_status && (
-                        <div className="mt-2.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-[#475569]">Latest text-back</span>
-                            <CommunicationEventStatusBadge status={event.latest_outbound_status as CommunicationEvent["status"]} />
-                          </div>
-                          {event.latest_outbound_summary && (
-                            <p className="mt-1.5 text-sm text-[#0F172A]">{event.latest_outbound_summary}</p>
-                          )}
-                          {event.latest_outbound_reason && (
-                            <p className="mt-0.5 text-xs text-[#475569]">{event.latest_outbound_reason}</p>
-                          )}
-                        </div>
-                      )}
-                      {event.latest_inbound_summary && (
-                        <div className="mt-2.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-2.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-blue-700">Latest inbound SMS</span>
-                            {event.latest_inbound_at && (
-                              <span className="text-xs text-blue-700/80">{timeAgo(event.latest_inbound_at)}</span>
-                            )}
-                          </div>
-                          <p className="mt-1.5 text-sm text-blue-900">{event.latest_inbound_summary}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex shrink-0 flex-wrap gap-1.5">
-                      <Link
-                        href={`/dashboard/inbox/event:${event.thread_key || event.id}`}
-                        className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-                      >
-                        Open thread
-                      </Link>
-                      {event.channel === "missed_call" && (
-                        <button
-                          onClick={() => sendTextBack(event.id)}
-                          disabled={sendingTextBackId === event.id}
-                          className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
-                        >
-                          {sendingTextBackId === event.id ? "Sending..." : "Send text-back"}
-                        </button>
-                      )}
-                      {event.status !== "queued" && (
-                        <button
-                          onClick={() => updateCommunicationEvent(event, "queued")}
-                          disabled={savingCommunicationId === event.id}
-                          className="rounded-lg border border-amber-200 px-2.5 py-1.5 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
-                        >
-                          Queue
-                        </button>
-                      )}
-                      {event.status !== "attempted" && event.status !== "completed" && (
-                        <button
-                          onClick={() => updateCommunicationEvent(event, "attempted")}
-                          disabled={savingCommunicationId === event.id}
-                          className="rounded-lg border border-blue-200 px-2.5 py-1.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
-                        >
-                          Attempted
-                        </button>
-                      )}
-                      {event.status !== "completed" && (
-                        <button
-                          onClick={() => updateCommunicationEvent(event, "completed")}
-                          disabled={savingCommunicationId === event.id}
-                          className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
-                        >
-                          Complete
-                        </button>
-                      )}
-                      {event.status !== "dismissed" && (
-                        <button
-                          onClick={() => updateCommunicationEvent(event, "dismissed")}
-                          disabled={savingCommunicationId === event.id}
-                          className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
-                        >
-                          Dismiss
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-[#0F172A]">Log a recovery item</h2>
-          <p className="mt-0.5 text-xs text-[#64748B]">
-            This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
+      <div className="wave-zone-panel mt-5">
+        <div className="border-b border-[var(--color-app-border)] px-4 py-3 sm:px-5">
+          <p className="workspace-section-label">Reminders &amp; scheduled touchpoints</p>
+          <p className="mt-1 text-sm text-[#475569]">
+            Configure prep, watch due sends, and keep the reminder calendar aligned with confirmed bookings.
           </p>
-
-          <div className="mt-3 space-y-2.5">
-            <div>
-              <label htmlFor="comm-type" className="mb-1 block text-xs font-semibold text-[#475569]">Type</label>
-              <select
-                id="comm-type"
-                value={communicationForm.channel}
-                onChange={(event) => setCommunicationForm((current) => ({ ...current, channel: event.target.value as "missed_call" | "callback_request" }))}
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-              >
-                <option value="missed_call">Missed call</option>
-                <option value="callback_request">Callback request</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="comm-name" className="mb-1 block text-xs font-semibold text-[#475569]">Customer name</label>
-              <input
-                id="comm-name"
-                type="text"
-                value={communicationForm.customer_name}
-                onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_name: event.target.value }))}
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                placeholder="Patient name"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        </div>
+        <div className="space-y-4 p-4 sm:p-5">
+          {/* Reminder settings */}
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <label htmlFor="comm-phone" className="mb-1 block text-xs font-semibold text-[#475569]">Phone</label>
-                <input
-                  id="comm-phone"
-                  type="tel"
-                  value={communicationForm.customer_phone}
-                  onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_phone: event.target.value }))}
-                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                  placeholder="(555) 123-4567"
-                />
+                <div className="mb-1.5 flex items-center gap-2">
+                  <BellRing className="h-4 w-4 text-[#0F766E]" />
+                  <h2 className="text-sm font-semibold text-[#0F172A]">Reminder settings</h2>
+                </div>
+                <p className="text-sm text-[#475569]">
+                  Reminder delivery is not automated yet. These settings prepare confirmed bookings and generate a real preview schedule for the next delivery pass.
+                </p>
               </div>
-              <div>
-                <label htmlFor="comm-email" className="mb-1 block text-xs font-semibold text-[#475569]">Email</label>
+
+              <div className="grid grid-cols-1 items-center gap-2.5 sm:grid-cols-[auto_9rem_auto]">
+                <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                  <input
+                    type="checkbox"
+                    checked={reminderEnabled}
+                    onChange={(event) => setReminderEnabled(event.target.checked)}
+                    className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                  />
+                  <span>Enable reminder prep</span>
+                </label>
                 <input
-                  id="comm-email"
-                  type="email"
-                  value={communicationForm.customer_email}
-                  onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_email: event.target.value }))}
-                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                  placeholder="patient@email.com"
+                  type="number"
+                  min={1}
+                  max={168}
+                  value={reminderLeadHours}
+                  onChange={(event) => setReminderLeadHours(event.target.value)}
+                  placeholder="Lead hours"
+                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
                 />
+                <button
+                  onClick={saveReminderSettings}
+                  disabled={savingSettings}
+                  className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                >
+                  {savingSettings ? "Saving..." : "Save settings"}
+                </button>
               </div>
             </div>
 
-            <div>
-              <label htmlFor="comm-summary" className="mb-1 block text-xs font-semibold text-[#475569]">Summary</label>
-              <input
-                id="comm-summary"
-                type="text"
-                value={communicationForm.summary}
-                onChange={(event) => setCommunicationForm((current) => ({ ...current, summary: event.target.value }))}
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                placeholder="Why this needs a call or text-back"
-              />
+            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-[#E2E8F0] pt-4 lg:grid-cols-[auto_10rem]">
+              <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                <input
+                  type="checkbox"
+                  checked={followUpAutomationEnabled}
+                  onChange={(event) => setFollowUpAutomationEnabled(event.target.checked)}
+                  className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                />
+                <span>Enable auto follow-up</span>
+              </label>
+              <div>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-[#64748B]">Delay before task creation</p>
+                <input
+                  type="number"
+                  min={5}
+                  max={1440}
+                  value={followUpDelayMinutes}
+                  onChange={(event) => setFollowUpDelayMinutes(event.target.value)}
+                  placeholder="Minutes"
+                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                />
+              </div>
+              {followUpAutomationEnabled && (
+                <button
+                  onClick={runAutoFollowUps}
+                  disabled={savingSettings}
+                  className="mt-1 rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
+                >
+                  {savingSettings ? "Running..." : "Run follow-ups now"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Reminder delivery */}
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-[#0F172A]">Reminder delivery</h2>
+                <p className="mt-0.5 text-xs text-[#475569]">
+                  These reminders are scheduled from real booked requests and your reminder lead time. When SMS is connected, you can send due reminders from here.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                  {dueReminders.length} due
+                </span>
+                <button
+                  onClick={sendDueReminders}
+                  disabled={sendingReminderId === "batch" || dueReminders.length === 0}
+                  className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                >
+                  {sendingReminderId === "batch" ? "Sending..." : "Send due reminders"}
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="comm-notes" className="mb-1 block text-xs font-semibold text-[#475569]">Notes</label>
-              <textarea
-                id="comm-notes"
-                rows={3}
-                value={communicationForm.content}
-                onChange={(event) => setCommunicationForm((current) => ({ ...current, content: event.target.value }))}
-                className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
-                placeholder="Add context for the front desk team"
+            {dueReminders.length > 0 && (
+              <div className="mb-4 space-y-2.5">
+                {dueReminders.map((item) => (
+                  <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
+                        <p className="mt-0.5 text-xs text-[#475569]">
+                          Appointment {formatDateTime(item.appointment_starts_at)}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[#475569]">
+                          Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
+                        </p>
+                        {item.blocked_reason && (
+                          <p className="mt-1.5 text-xs text-amber-700">{item.blocked_reason}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ChannelBadge channel={item.channel} withIcon />
+                        <button
+                          onClick={() => sendReminder(item.lead_id)}
+                          disabled={sendingReminderId === item.lead_id || !item.can_send}
+                          className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                        >
+                          {sendingReminderId === item.lead_id ? "Sending..." : "Send now"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {upcomingReminders.length === 0 ? (
+              <EmptyState
+                icon={<BellRing className="h-7 w-7 text-[#64748B]" />}
+                title="No upcoming reminders"
+                description="Reminders will appear here once booked appointments have confirmed timing and reminder prep is enabled."
               />
+            ) : (
+              <div className="space-y-2.5">
+                {upcomingReminders.map((item) => (
+                  <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
+                        <p className="mt-0.5 text-xs text-[#475569]">
+                          Appointment {formatDateTime(item.appointment_starts_at)}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[#475569]">
+                          Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
+                        </p>
+                      </div>
+                      <ChannelBadge channel={item.channel} withIcon />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="wave-zone-panel mt-5">
+        <div className="border-b border-[var(--color-app-border)] px-4 py-3 sm:px-5">
+          <p className="workspace-section-label">Recovery &amp; human follow-up</p>
+          <p className="mt-1 text-sm text-[#475569]">
+            Missed-call and callback queue next to the log form so intake work stays in one zone.
+          </p>
+        </div>
+        <div className="p-4 sm:p-5">
+          {/* Recovery queue + Log form */}
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-[#0F172A]">Recovery queue</h2>
+                  <p className="mt-0.5 text-xs text-[#475569]">
+                    Log missed calls and callback requests now. When SMS is connected, recovery texts can be sent from the same queue.
+                  </p>
+                </div>
+                <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                  {communicationQueue.length} active
+                </span>
+              </div>
+
+              {communicationQueue.length === 0 ? (
+                <EmptyState
+                  icon={<PhoneMissed className="h-7 w-7 text-[#64748B]" />}
+                  title="No recovery items"
+                  description="Missed calls and callback requests will appear here as they are logged."
+                />
+              ) : (
+                <div className="space-y-3">
+                  {communicationQueue.map((event) => (
+                    <div key={event.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                            <ChannelBadge channel={event.channel} withIcon />
+                            {event.channel === "missed_call" && (
+                              <span className="inline-flex rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                                Missed call recovery
+                              </span>
+                            )}
+                            {event.operator_review_required && (
+                              <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                Review needed
+                              </span>
+                            )}
+                            {event.manual_takeover && (
+                              <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                                Staff handling
+                              </span>
+                            )}
+                            {!event.manual_takeover && event.ai_auto_reply_enabled && (
+                              <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                                AI handling
+                              </span>
+                            )}
+                            {event.latest_inbound_summary && (
+                              <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                Replied
+                              </span>
+                            )}
+                            <CommunicationEventStatusBadge status={event.status} />
+                            <span className="text-xs text-[#475569]">{event.customer_name}</span>
+                          </div>
+                          <p className="text-sm font-medium text-[#0F172A]">
+                            {event.summary || "Recovery item logged"}
+                          </p>
+                          {event.content && (
+                            <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{event.content}</p>
+                          )}
+                          <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-[#475569]">
+                            {event.customer_phone && <span>{event.customer_phone}</span>}
+                            {event.customer_email && <span>{event.customer_email}</span>}
+                            {event.occurred_at && <span>{timeAgo(event.occurred_at)}</span>}
+                          </div>
+                          {event.latest_outbound_status && (
+                            <div className="mt-2.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2.5">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold text-[#475569]">Latest text-back</span>
+                                <CommunicationEventStatusBadge status={event.latest_outbound_status as CommunicationEvent["status"]} />
+                              </div>
+                              {event.latest_outbound_summary && (
+                                <p className="mt-1.5 text-sm text-[#0F172A]">{event.latest_outbound_summary}</p>
+                              )}
+                              {event.latest_outbound_reason && (
+                                <p className="mt-0.5 text-xs text-[#475569]">{event.latest_outbound_reason}</p>
+                              )}
+                            </div>
+                          )}
+                          {event.latest_inbound_summary && (
+                            <div className="mt-2.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-2.5">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold text-blue-700">Latest inbound SMS</span>
+                                {event.latest_inbound_at && (
+                                  <span className="text-xs text-blue-700/80">{timeAgo(event.latest_inbound_at)}</span>
+                                )}
+                              </div>
+                              <p className="mt-1.5 text-sm text-blue-900">{event.latest_inbound_summary}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 flex-wrap gap-1.5">
+                          <Link
+                            href={`/dashboard/inbox/event:${event.thread_key || event.id}`}
+                            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                          >
+                            Open thread
+                          </Link>
+                          {event.channel === "missed_call" && (
+                            <button
+                              onClick={() => sendTextBack(event.id)}
+                              disabled={sendingTextBackId === event.id}
+                              className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
+                            >
+                              {sendingTextBackId === event.id ? "Sending..." : "Send text-back"}
+                            </button>
+                          )}
+                          {event.status !== "queued" && (
+                            <button
+                              onClick={() => updateCommunicationEvent(event, "queued")}
+                              disabled={savingCommunicationId === event.id}
+                              className="rounded-lg border border-amber-200 px-2.5 py-1.5 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                            >
+                              Queue
+                            </button>
+                          )}
+                          {event.status !== "attempted" && event.status !== "completed" && (
+                            <button
+                              onClick={() => updateCommunicationEvent(event, "attempted")}
+                              disabled={savingCommunicationId === event.id}
+                              className="rounded-lg border border-blue-200 px-2.5 py-1.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
+                            >
+                              Attempted
+                            </button>
+                          )}
+                          {event.status !== "completed" && (
+                            <button
+                              onClick={() => updateCommunicationEvent(event, "completed")}
+                              disabled={savingCommunicationId === event.id}
+                              className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                            >
+                              Complete
+                            </button>
+                          )}
+                          {event.status !== "dismissed" && (
+                            <button
+                              onClick={() => updateCommunicationEvent(event, "dismissed")}
+                              disabled={savingCommunicationId === event.id}
+                              className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+                            >
+                              Dismiss
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={createCommunicationEvent}
-              disabled={savingCommunicationId === "new"}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
-            >
-              <Plus className="h-4 w-4" />
-              {savingCommunicationId === "new" ? "Saving..." : "Log recovery item"}
-            </button>
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+              <h2 className="text-sm font-bold text-[#0F172A]">Log a recovery item</h2>
+              <p className="mt-0.5 text-xs text-[#64748B]">
+                This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
+              </p>
+
+              <div className="mt-3 space-y-2.5">
+                <div>
+                  <label htmlFor="comm-type" className="mb-1 block text-xs font-semibold text-[#475569]">Type</label>
+                  <select
+                    id="comm-type"
+                    value={communicationForm.channel}
+                    onChange={(event) => setCommunicationForm((current) => ({ ...current, channel: event.target.value as "missed_call" | "callback_request" }))}
+                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                  >
+                    <option value="missed_call">Missed call</option>
+                    <option value="callback_request">Callback request</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="comm-name" className="mb-1 block text-xs font-semibold text-[#475569]">Customer name</label>
+                  <input
+                    id="comm-name"
+                    type="text"
+                    value={communicationForm.customer_name}
+                    onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_name: event.target.value }))}
+                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Patient name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="comm-phone" className="mb-1 block text-xs font-semibold text-[#475569]">Phone</label>
+                    <input
+                      id="comm-phone"
+                      type="tel"
+                      value={communicationForm.customer_phone}
+                      onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_phone: event.target.value }))}
+                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="comm-email" className="mb-1 block text-xs font-semibold text-[#475569]">Email</label>
+                    <input
+                      id="comm-email"
+                      type="email"
+                      value={communicationForm.customer_email}
+                      onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_email: event.target.value }))}
+                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      placeholder="patient@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="comm-summary" className="mb-1 block text-xs font-semibold text-[#475569]">Summary</label>
+                  <input
+                    id="comm-summary"
+                    type="text"
+                    value={communicationForm.summary}
+                    onChange={(event) => setCommunicationForm((current) => ({ ...current, summary: event.target.value }))}
+                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Why this needs a call or text-back"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="comm-notes" className="mb-1 block text-xs font-semibold text-[#475569]">Notes</label>
+                  <textarea
+                    id="comm-notes"
+                    rows={3}
+                    value={communicationForm.content}
+                    onChange={(event) => setCommunicationForm((current) => ({ ...current, content: event.target.value }))}
+                    className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    placeholder="Add context for the front desk team"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={createCommunicationEvent}
+                  disabled={savingCommunicationId === "new"}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                >
+                  <Plus className="h-4 w-4" />
+                  {savingCommunicationId === "new" ? "Saving..." : "Log recovery item"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

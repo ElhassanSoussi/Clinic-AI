@@ -147,7 +147,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+    <div className="auth-page-ambient relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
       {/* Back link */}
       <Link
         href="/"
@@ -220,7 +220,7 @@ export default function LoginPage() {
           </div>
 
           {/* Right panel — form */}
-          <div className="flex items-center justify-center bg-white p-8 xl:p-12">
+          <div className="auth-form-column flex items-center justify-center p-8 xl:p-12">
             <div className="w-full max-w-md">
               <div className="mb-10 text-center">
                 {/* Mobile logo */}
@@ -248,7 +248,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <div className="auth-shell p-8">
+              <div className="auth-form-focus p-8">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}

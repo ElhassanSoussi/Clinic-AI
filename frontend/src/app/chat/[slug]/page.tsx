@@ -266,7 +266,7 @@ export default function ChatPage({
 
   return (
     <div
-      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-200/95 via-slate-100 to-teal-50/40 p-3 sm:p-5"}`}
+      className={`brand-scope ${isEmbedded ? "h-dvh bg-transparent flex flex-col" : "chat-page-ambient min-h-screen flex flex-col items-center justify-center p-3 sm:p-5"}`}
     >
       {isDemo && !isEmbedded && (
         <div className="w-full max-w-md mb-3 sm:mb-4">
@@ -289,7 +289,7 @@ export default function ChatPage({
       )}
 
       <div
-        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.25rem] border border-slate-200/90 shadow-[0_28px_56px_-16px_rgb(15_23_42/0.18),0_12px_24px_-12px_rgb(15_118_110/0.12),inset_0_1px_0_rgb(255_255_255/0.85)]"}`}
+        className={`w-full flex flex-col overflow-hidden bg-white ${isEmbedded ? "h-full min-h-0" : "chat-shell-premium max-w-md max-h-[min(44rem,calc(100dvh-1.5rem))] min-h-[20rem] rounded-[1.25rem] border"}`}
       >
         <div className="brand-header px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
           <div
@@ -379,7 +379,7 @@ export default function ChatPage({
         ) : null}
 
         <div
-          className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-5 py-4 space-y-4"
+          className="chat-thread-well flex-1 overflow-y-auto min-h-0 px-4 sm:px-5 py-4 space-y-4"
           aria-labelledby="chat-assistant-title"
         >
           {bootstrapError && (
@@ -492,7 +492,7 @@ export default function ChatPage({
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t border-slate-100 px-3 sm:px-4 py-3 bg-white shrink-0">
+        <div className="border-t border-slate-100/90 px-3 sm:px-4 py-3 shrink-0 bg-gradient-to-b from-white via-slate-50/40 to-slate-50/80">
           <div className="flex items-center gap-2">
             <label htmlFor="patient-chat-input" className="sr-only">
               Message to assistant

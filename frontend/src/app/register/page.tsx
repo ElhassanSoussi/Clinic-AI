@@ -10,6 +10,7 @@ import {
   Check,
   BrainCircuit,
   Users,
+  ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -150,7 +151,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="app-shell-bg relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+    <div className="auth-page-ambient relative min-h-screen overflow-hidden px-4 py-10 sm:px-6">
+      <Link
+        href="/"
+        className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-4 py-2.5 text-[0.9375rem] font-medium text-slate-600 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-300 hover:text-[#0F172A]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Link>
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
         <div className="auth-shell grid w-full max-w-6xl gap-0 overflow-hidden lg:grid-cols-[0.95fr_1.05fr]">
 
@@ -218,7 +226,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Right panel — form */}
-          <div className="flex items-center justify-center bg-white p-8 xl:p-12">
+          <div className="auth-form-column flex items-center justify-center p-8 xl:p-12">
             <div className="w-full max-w-md">
               <div className="mb-10 text-center">
                 {/* Mobile logo */}
@@ -236,7 +244,7 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <div className="auth-shell p-8">
+              <div className="auth-form-focus p-8">
                 {supabaseConfigError && (
                   <div className="mb-4 rounded-lg border border-[#FCD34D] bg-amber-50 px-4 py-3 text-sm text-[#D97706]">
                     {supabaseConfigError}
