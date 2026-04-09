@@ -76,7 +76,7 @@ function SystemStatusCTA({
       <button
         onClick={onGoLive}
         type="button"
-        className="flex min-h-10 items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-teal-900/20 transition-colors hover:bg-[#115E59]"
+        className="flex min-h-10 items-center gap-2 rounded-lg bg-app-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-teal-900/20 transition-colors hover:bg-app-primary-hover"
       >
         <Rocket className="w-3.5 h-3.5" />
         Go Live
@@ -87,7 +87,7 @@ function SystemStatusCTA({
   if (systemStatus.status === "LIVE") {
     return (
       <span className="flex items-center gap-2 rounded-lg bg-green-50 px-3.5 py-2 text-sm font-semibold text-green-800">
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#16A34A] animate-pulse" />
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-success animate-pulse" />
         <span>Live</span>
       </span>
     );

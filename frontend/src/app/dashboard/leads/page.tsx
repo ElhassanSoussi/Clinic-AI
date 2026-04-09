@@ -446,7 +446,7 @@ export default function LeadsPage() {
           </div>
         </div>
         <div className="p-5">
-          <div className="grid gap-6 xl:grid-cols-[13rem_1fr_15rem]-[13rem_1fr_15rem]">
+          <div className="grid gap-6 xl:grid-cols-[13rem_1fr_15rem]">
             {/* Left rail — filters */}
             <aside className="hidden space-y-3 xl:block">
               <div className="ds-card p-4">
