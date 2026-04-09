@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Drawer } from "@/components/shared/Drawer";
 import { api } from "@/lib/api";
+import { getPublicSiteUrl } from "@/lib/env";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
 import { setupProgressPercent } from "@/lib/utils";
 
@@ -658,7 +659,7 @@ export function SettingsDrawer({ open, onClose, initialSection }: Readonly<Setti
   };
   const completedCount = sectionKeys.filter((key) => getStatus(key, statusState) === "completed").length;
   const progressWidth = `${setupProgressPercent(completedCount, sectionKeys.length)}%`;
-  const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
+  const embedCode = `<script src="${getPublicSiteUrl()}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
   const availabilityStatus = sheetsValidation ? availabilityTabStatus(sheetsValidation) : null;
   const validationMessage = sheetsValidation
     ? renderSheetsValidation(sheetsValidation, googleSheetTab, availabilityEnabled, availabilityStatus ?? "")

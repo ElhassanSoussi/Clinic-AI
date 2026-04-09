@@ -36,6 +36,7 @@ import {
   Rocket,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getPublicSiteUrl } from "@/lib/env";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -1371,7 +1372,7 @@ export default function SettingsPage() {
   ] as const;
   const completedCount = setupSectionKeys.filter((key) => getSectionStatus(key, statusState) === "completed").length;
   const progressWidth = `${setupProgressPercent(completedCount, setupSectionKeys.length)}%`;
-  const embedCode = `<script src="${globalThis.window === undefined ? "" : globalThis.location.origin}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
+  const embedCode = `<script src="${getPublicSiteUrl()}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
     <div className="workspace-page">

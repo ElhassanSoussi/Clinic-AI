@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { getPublicSiteUrl } from "@/lib/env";
 import type { Clinic, FaqEntry, SheetsValidation } from "@/types";
 import { isSafeExternalUrl, setupProgressPercent } from "@/lib/utils";
 
@@ -1414,7 +1415,7 @@ export default function OnboardingPage() {
   };
 
   // Copy embed code
-  const origin = globalThis.window === undefined ? "" : globalThis.location.origin;
+  const origin = getPublicSiteUrl();
   const embedCode = clinic
     ? `<script src="${origin}/widget.js" data-clinic="${clinic.slug}"></script>`
     : "";

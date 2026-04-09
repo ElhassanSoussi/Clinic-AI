@@ -112,3 +112,14 @@ export function getSiteMetadataBaseUrl(): string {
   }
   return "https://clinicaireply.com";
 }
+
+export function getPublicSiteUrl(): string {
+  const explicit = normalizeEnvValue(process.env.NEXT_PUBLIC_SITE_URL);
+  if (explicit) {
+    return explicit.replace(/\/$/, "");
+  }
+  if (typeof globalThis.window !== "undefined" && globalThis.location?.origin) {
+    return globalThis.location.origin.replace(/\/$/, "");
+  }
+  return "https://clinicaireply.com";
+}

@@ -14,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getPublicSiteUrl } from "@/lib/env";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -148,7 +149,7 @@ function buildEmptyStateConfig(
           </a>
           <button
             onClick={() => {
-              const code = `<script src="${globalThis.location.origin}/widget.js" data-clinic="${clinic.slug}"></script>`;
+              const code = `<script src="${getPublicSiteUrl()}/widget.js" data-clinic="${clinic.slug}"></script>`;
               navigator.clipboard.writeText(code);
               setEmbedCopied(true);
               setTimeout(() => setEmbedCopied(false), 2000);
