@@ -71,9 +71,9 @@ const QUICK_ACTIONS: {
       target: "closed",
       label: "Mark closed",
       icon: XCircle,
-      bg: "bg-[#F1F5F9]",
-      hover: "hover:bg-[#F8FAFC]",
-      text: "text-[#475569]",
+      bg: "bg-app-surface-alt",
+      hover: "hover:bg-app-surface-alt",
+      text: "text-app-text-muted",
     },
   ];
 
@@ -182,7 +182,7 @@ export default function LeadDetailPage({
     lead.status === "closed" ? "neutral" : lead.status === "booked" ? "information" : "attention";
 
   return (
-    <div className="workspace-page min-w-0">
+    <div className="ds-workspace-main-area space-y-6 min-w-0">
       <DetailBackLink href="/dashboard/leads">Back to Leads</DetailBackLink>
 
       <PageHeader
@@ -205,28 +205,28 @@ export default function LeadDetailPage({
           <OperationalCallout title="Operational focus" tone={calloutTone}>
             {leadNextStepHint(lead.status as LeadStatus)}
           </OperationalCallout>
-          <div className="flex flex-col justify-center rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-3.5 sm:px-5">
-            <p className="workspace-rail-title mb-2">Request snapshot</p>
+          <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
+            <p className="ds-eyebrow mb-2">Request snapshot</p>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-3">
-                <dt className="text-[#64748B]">Source</dt>
-                <dd className="text-right font-medium text-[#0F172A]">{sourceLabel(lead.source, lead.slot_source)}</dd>
+                <dt className="text-app-text-muted">Source</dt>
+                <dd className="text-right font-medium text-app-text">{sourceLabel(lead.source, lead.slot_source)}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-[#64748B]">Preferred time</dt>
-                <dd className="max-w-[14rem] text-right font-medium text-[#0F172A]">
+                <dt className="text-app-text-muted">Preferred time</dt>
+                <dd className="max-w-56 text-right font-medium text-app-text">
                   {lead.preferred_datetime_text || "—"}
                 </dd>
               </div>
               {appointmentSummary ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#64748B]">Confirmed time</dt>
-                  <dd className="text-right font-medium text-[#0F172A]">{appointmentSummary}</dd>
+                  <dt className="text-app-text-muted">Confirmed time</dt>
+                  <dd className="text-right font-medium text-app-text">{appointmentSummary}</dd>
                 </div>
               ) : null}
               {lead.appointment_status ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#64748B]">Booking state</dt>
+                  <dt className="text-app-text-muted">Booking state</dt>
                   <dd className="text-right">
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${appointmentStatusClass(lead.appointment_status)}`}
@@ -238,13 +238,13 @@ export default function LeadDetailPage({
               ) : null}
               {reminderLine ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#64748B]">Reminder</dt>
-                  <dd className="max-w-[14rem] text-right text-sm font-medium text-[#0F172A]">{reminderLine}</dd>
+                  <dt className="text-app-text-muted">Reminder</dt>
+                  <dd className="max-w-56 text-right text-sm font-medium text-app-text">{reminderLine}</dd>
                 </div>
               ) : null}
               {lead.deposit_status && lead.deposit_status !== "not_required" ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#64748B]">Deposit</dt>
+                  <dt className="text-app-text-muted">Deposit</dt>
                   <dd className="text-right">
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${depositStatusClass(lead.deposit_status)}`}
@@ -259,7 +259,7 @@ export default function LeadDetailPage({
         </div>
       </WorkspaceBand>
 
-      <div className="workspace-split">
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
           <div className="app-card p-5 sm:p-6">
             <DetailSection
@@ -268,39 +268,39 @@ export default function LeadDetailPage({
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
-                    <User className="h-4 w-4 text-[#475569]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
+                    <User className="h-4 w-4 text-app-text-muted" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#64748B]">Name</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_name}</p>
+                    <p className="text-sm text-app-text-muted">Name</p>
+                    <p className="text-sm font-medium text-app-text">{lead.patient_name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
-                    <Phone className="h-4 w-4 text-[#475569]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
+                    <Phone className="h-4 w-4 text-app-text-muted" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#64748B]">Phone</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_phone || "—"}</p>
+                    <p className="text-sm text-app-text-muted">Phone</p>
+                    <p className="text-sm font-medium text-app-text">{lead.patient_phone || "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
-                    <Mail className="h-4 w-4 text-[#475569]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
+                    <Mail className="h-4 w-4 text-app-text-muted" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#64748B]">Email</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{lead.patient_email || "—"}</p>
+                    <p className="text-sm text-app-text-muted">Email</p>
+                    <p className="text-sm font-medium text-app-text">{lead.patient_email || "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F1F5F9]">
-                    <Calendar className="h-4 w-4 text-[#475569]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
+                    <Calendar className="h-4 w-4 text-app-text-muted" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#64748B]">Inbound source</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{sourceLabel(lead.source, lead.slot_source)}</p>
+                    <p className="text-sm text-app-text-muted">Inbound source</p>
+                    <p className="text-sm font-medium text-app-text">{sourceLabel(lead.source, lead.slot_source)}</p>
                   </div>
                 </div>
               </div>
@@ -314,15 +314,15 @@ export default function LeadDetailPage({
             >
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-[#64748B]">Reason for visit</p>
-                  <p className="mt-1 text-sm text-[#0F172A]">{lead.reason_for_visit || "Not specified"}</p>
+                  <p className="text-sm font-medium text-app-text-muted">Reason for visit</p>
+                  <p className="mt-1 text-sm text-app-text">{lead.reason_for_visit || "Not specified"}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#64748B]" />
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-app-text-muted" />
                   <div>
-                    <p className="text-sm font-medium text-[#64748B]">Preferred date / time</p>
-                    <p className="mt-1 text-sm text-[#0F172A]">{lead.preferred_datetime_text || "Not specified"}</p>
-                    <p className="mt-1 text-sm text-[#64748B]">
+                    <p className="text-sm font-medium text-app-text-muted">Preferred date / time</p>
+                    <p className="mt-1 text-sm text-app-text">{lead.preferred_datetime_text || "Not specified"}</p>
+                    <p className="mt-1 text-sm text-app-text-muted">
                       {lead.slot_source === "availability" || lead.slot_row_index
                         ? "Captured from an availability slot when the patient chose one."
                         : "Free-text preference from the patient or staff."}
@@ -330,9 +330,9 @@ export default function LeadDetailPage({
                   </div>
                 </div>
                 {lead.slot_row_index ? (
-                  <div className="rounded-xl border border-[#99f6e4] bg-[#ECFDFB] px-4 py-3">
-                    <p className="text-sm font-semibold uppercase tracking-wider text-[#115E59]">Availability row</p>
-                    <p className="mt-1 text-sm text-[#115E59]">
+                  <div className="rounded-xl border border-teal-200 bg-app-accent-wash px-4 py-3">
+                    <p className="text-sm font-semibold uppercase tracking-wider text-app-accent-dark">Availability row</p>
+                    <p className="mt-1 text-sm text-app-accent-dark">
                       Linked to row <strong>{lead.slot_row_index}</strong> in your Availability sheet — not a separate scheduling product.
                     </p>
                   </div>
@@ -355,8 +355,8 @@ export default function LeadDetailPage({
                     >
                       <div
                         className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm ${msg.role === "user"
-                          ? "bg-[#0F766E] text-white"
-                          : "bg-white text-[#0F172A] ring-1 ring-[#E2E8F0]"
+                          ? "bg-app-primary text-white"
+                          : "bg-app-surface text-app-text ring-1 ring-app-border"
                           }`}
                       >
                         {msg.content}
@@ -367,7 +367,7 @@ export default function LeadDetailPage({
                 {conversationId ? (
                   <Link
                     href={`/dashboard/inbox/${conversationId}`}
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#115E59] hover:text-[#0F766E]"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-app-accent-dark hover:text-app-primary"
                   >
                     <Inbox className="h-4 w-4" />
                     Open full thread in inbox
@@ -380,7 +380,7 @@ export default function LeadDetailPage({
 
         <aside className="flex min-w-0 flex-col gap-4">
           <div>
-            <p className="workspace-rail-title mb-2">Pipeline actions</p>
+            <p className="ds-eyebrow mb-2">Pipeline actions</p>
             <div className="flex flex-wrap gap-2">
               {QUICK_ACTIONS.filter((a) => a.target !== lead.status).map((action) => (
                 <button
@@ -405,14 +405,14 @@ export default function LeadDetailPage({
             <DetailSection label="Record & notes">
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="lead-status" className="block text-sm font-medium text-[#0F172A]">
+                  <label htmlFor="lead-status" className="block text-sm font-medium text-app-text">
                     Status
                   </label>
                   <select
                     id="lead-status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value as LeadStatus)}
-                    className="mt-1.5 w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="mt-1.5 w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                   >
                     {STATUS_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -423,7 +423,7 @@ export default function LeadDetailPage({
                 </div>
 
                 <div>
-                  <label htmlFor="lead-notes" className="block text-sm font-medium text-[#0F172A]">
+                  <label htmlFor="lead-notes" className="block text-sm font-medium text-app-text">
                     Internal notes
                   </label>
                   <textarea
@@ -431,7 +431,7 @@ export default function LeadDetailPage({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={5}
-                    className="mt-1.5 w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="mt-1.5 w-full resize-none rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Operational context for your team only…"
                   />
                 </div>
@@ -442,7 +442,7 @@ export default function LeadDetailPage({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-app-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-app-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

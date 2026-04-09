@@ -74,7 +74,7 @@ export default function ActivityPage() {
   if (loading) return <LoadingState message="Loading activity..." detail="Recent workspace events" />;
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -90,7 +90,7 @@ export default function ActivityPage() {
             type="button"
             onClick={() => loadActivity(true)}
             disabled={refreshing}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-app-border bg-app-surface px-3 py-2 text-sm font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
           >
             {refreshing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -111,29 +111,29 @@ export default function ActivityPage() {
           <button
             type="button"
             onClick={() => void loadActivity()}
-            className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#115E59]"
+            className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-app-primary px-4 py-2 text-sm font-semibold text-white hover:bg-app-primary-hover"
           >
             Try again
           </button>
         </div>
       ) : null}
 
-      <div className="workspace-split">
-        <div className="order-1 min-w-0 xl:order-none">
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+        <div className="order-1 min-w-0 xl:order-0">
           {events.length > 0 ? (
-            <div className="wave-command-slab workspace-command-hero mb-4 !py-4">
-              <p className="workspace-section-label">Feed snapshot</p>
-              <p className="mt-1 text-sm text-[#475569]">
+            <div className="ds-card mb-4 py-4!">
+              <p className="ds-eyebrow">Feed snapshot</p>
+              <p className="mt-1 text-sm text-app-text-muted">
                 Mix of event types in this window — use it to sanity-check volume before drilling into inbox or leads.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {eventMix.map(({ type, count }) => (
                   <span
                     key={type}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#475569] shadow-sm"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-app-border bg-app-surface px-2.5 py-1 text-xs font-semibold text-app-text-muted shadow-sm"
                   >
-                    <span className="text-[#0F172A]">{EVENT_TYPE_LABELS[type]?.label ?? type}</span>
-                    <span className="tabular-nums text-[#64748B]">{count}</span>
+                    <span className="text-app-text">{EVENT_TYPE_LABELS[type]?.label ?? type}</span>
+                    <span className="tabular-nums text-app-text-muted">{count}</span>
                   </span>
                 ))}
               </div>
@@ -141,39 +141,39 @@ export default function ActivityPage() {
           ) : null}
 
           {events.length === 0 && !fetchNotice ? (
-            <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+            <div className="rounded-xl border border-app-border bg-app-surface shadow-sm">
               <EmptyState
-                icon={<Activity className="w-5 h-5 text-[#64748B]" />}
+                icon={<Activity className="w-5 h-5 text-app-text-muted" />}
                 title="No activity yet"
                 description="Events log as patients chat, leads move, and staff act. Right after setup, an empty timeline is normal until the first conversation arrives."
               />
             </div>
           ) : null}
           {events.length === 0 && fetchNotice ? (
-            <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC]/80 px-6 py-12 text-center">
-              <Clock3 className="mx-auto h-8 w-8 text-[#94A3B8]" aria-hidden />
-              <p className="mt-3 text-sm font-medium text-[#475569]">No events to show yet</p>
-              <p className="mt-1 text-xs text-[#64748B]">Use <span className="font-semibold text-[#475569]">Try again</span> above to reload the audit feed.</p>
+            <div className="rounded-xl border border-dashed border-app-border bg-app-surface-alt/80 px-6 py-12 text-center">
+              <Clock3 className="mx-auto h-8 w-8 text-app-text-muted" aria-hidden />
+              <p className="mt-3 text-sm font-medium text-app-text-muted">No events to show yet</p>
+              <p className="mt-1 text-xs text-app-text-muted">Use <span className="font-semibold text-app-text-muted">Try again</span> above to reload the audit feed.</p>
             </div>
           ) : null}
           {events.length > 0 ? (
             <div className="wave-workbench workspace-workbench-premium">
-              <div className="wave-workbench-head">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-5 py-4">
                 <div className="min-w-0">
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Audit workbench</p>
-                  <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Day-grouped timeline</p>
+                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-app-text-muted">Audit workbench</p>
+                  <p className="mt-0.5 text-sm font-semibold text-app-text">Day-grouped timeline</p>
                 </div>
-                <span className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1 text-xs font-semibold text-[#115E59]">
+                <span className="rounded-full border border-teal-200 bg-app-accent-wash px-2.5 py-1 text-xs font-semibold text-app-accent-dark">
                   {events.length} events · newest first
                 </span>
               </div>
-              <div className="wave-workbench-body !p-0">
-                <div className="overflow-hidden rounded-[1rem] border border-[var(--color-app-border)] bg-[var(--color-app-surface)] shadow-[var(--ds-shadow-md)]">
-                  <div className="border-b border-[#E2E8F0] bg-[var(--color-app-canvas)]/60 px-4 py-3 sm:px-5">
-                    <p className="workspace-section-label">Timeline</p>
-                    <p className="mt-1 text-sm text-[#475569]">Each row is a single audit event; day headers break the scroll into reviewable chunks.</p>
+              <div className="p-0">
+                <div className="overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-(--ds-shadow-md)">
+                  <div className="border-b border-app-border bg-app-canvas/60 px-4 py-3 sm:px-5">
+                    <p className="ds-eyebrow">Timeline</p>
+                    <p className="mt-1 text-sm text-app-text-muted">Each row is a single audit event; day headers break the scroll into reviewable chunks.</p>
                   </div>
-                  <ul className="divide-y divide-[#E2E8F0]">
+                  <ul className="divide-y divide-app-border">
                     {events.map((event, i) => {
                       const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.lead_created;
                       const Icon = config.icon;
@@ -185,12 +185,12 @@ export default function ActivityPage() {
                       return (
                         <Fragment key={`${event.type}-${event.resource_id}-${i}`}>
                           {showDay ? (
-                            <li className="border-b border-[#E2E8F0] bg-gradient-to-r from-[#F8FAFC] to-white px-4 py-2.5 sm:px-5">
-                              <p className="workspace-section-label">{dayLabel}</p>
+                            <li className="border-b border-app-border bg-linear-to-r from-app-surface-alt to-app-surface px-4 py-2.5 sm:px-5">
+                              <p className="ds-eyebrow">{dayLabel}</p>
                             </li>
                           ) : null}
                           <li
-                            className="flex gap-3 bg-white/50 px-4 py-3.5 sm:px-5"
+                            className="flex gap-3 bg-app-surface/50 px-4 py-3.5 sm:px-5"
                           >
                             <div className="relative flex shrink-0 flex-col items-center">
                               <div
@@ -200,7 +200,7 @@ export default function ActivityPage() {
                               </div>
                               {i < events.length - 1 ? (
                                 <span
-                                  className="mt-1 w-px flex-1 min-h-[1rem] bg-[#E2E8F0]"
+                                  className="mt-1 w-px flex-1 min-h-4 bg-app-border"
                                   aria-hidden
                                 />
                               ) : null}
@@ -210,15 +210,15 @@ export default function ActivityPage() {
                                 {isLead ? (
                                   <Link
                                     href={`/dashboard/leads/${event.resource_id}`}
-                                    className="text-sm font-semibold text-[#0F172A] hover:text-[#115E59]"
+                                    className="text-sm font-semibold text-app-text hover:text-app-accent-dark"
                                   >
                                     {event.title}
                                   </Link>
                                 ) : (
-                                  <p className="text-sm font-semibold text-[#0F172A]">{event.title}</p>
+                                  <p className="text-sm font-semibold text-app-text">{event.title}</p>
                                 )}
                                 <time
-                                  className="text-xs font-medium text-[#64748B]"
+                                  className="text-xs font-medium text-app-text-muted"
                                   dateTime={event.timestamp}
                                   title={event.timestamp}
                                 >
@@ -226,7 +226,7 @@ export default function ActivityPage() {
                                 </time>
                               </div>
                               {event.detail ? (
-                                <p className="mt-1 text-sm leading-relaxed text-[#475569]">{event.detail}</p>
+                                <p className="mt-1 text-sm leading-relaxed text-app-text-muted">{event.detail}</p>
                               ) : null}
                             </div>
                           </li>
@@ -240,26 +240,26 @@ export default function ActivityPage() {
           ) : null}
         </div>
 
-        <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="wave-command-slab workspace-command-hero !py-4 xl:sticky xl:top-6">
-            <p className="workspace-section-label">Audit rail</p>
-            <p className="workspace-rail-title mt-2">At a glance</p>
-            <div className="mt-3 rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
-              <p className="text-xs text-[#64748B]">Events in view</p>
-              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-[#0F172A]">{events.length}</p>
+        <aside className="space-y-3 order-2 xl:order-0">
+          <div className="ds-card py-4! xl:sticky xl:top-6">
+            <p className="ds-eyebrow">Audit rail</p>
+            <p className="ds-eyebrow mt-2">At a glance</p>
+            <div className="mt-3 rounded-lg border border-app-border bg-app-surface/90 px-3 py-2.5 shadow-sm">
+              <p className="text-xs text-app-text-muted">Events in view</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-app-text">{events.length}</p>
             </div>
             {eventMix.length > 0 ? (
               <div className="mt-3 space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">Top types</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-app-text-muted">Top types</p>
                 {eventMix.slice(0, 3).map(({ type, count }) => (
-                  <div key={type} className="flex items-center justify-between rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs">
-                    <span className="font-medium text-[#0F172A]">{EVENT_TYPE_LABELS[type]?.label ?? type}</span>
-                    <span className="tabular-nums font-semibold text-[#475569]">{count}</span>
+                  <div key={type} className="flex items-center justify-between rounded-lg border border-app-border bg-app-surface-alt px-2.5 py-1.5 text-xs">
+                    <span className="font-medium text-app-text">{EVENT_TYPE_LABELS[type]?.label ?? type}</span>
+                    <span className="tabular-nums font-semibold text-app-text-muted">{count}</span>
                   </div>
                 ))}
               </div>
             ) : null}
-            <p className="mt-3 text-xs leading-relaxed text-[#475569]">
+            <p className="mt-3 text-xs leading-relaxed text-app-text-muted">
               Lead events link to the request record. Conversation events are best traced from the inbox thread list.
             </p>
           </div>

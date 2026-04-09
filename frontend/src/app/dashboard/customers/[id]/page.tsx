@@ -44,7 +44,7 @@ function lastOutcomeLabel(outcome: CustomerProfileDetail["last_outcome"]): strin
 
 function lastOutcomeClass(outcome: CustomerProfileDetail["last_outcome"]): string {
   if (outcome === "booked") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (outcome === "lost") return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
+  if (outcome === "lost") return "bg-app-surface-alt text-app-text border-app-border";
   return "bg-amber-50 text-amber-700 border-amber-200";
 }
 
@@ -52,7 +52,7 @@ function smsStatusClass(profile: CustomerProfileDetail): string {
   if (profile.latest_sms_pending_review) return "bg-blue-50 text-blue-700 border-blue-200";
   if (profile.latest_sms_manual_takeover) return "bg-amber-50 text-amber-700 border-amber-200";
   if (profile.latest_sms_ai_auto_reply_enabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
+  return "bg-app-surface-alt text-app-text border-app-border";
 }
 
 function smsStatusLabel(profile: CustomerProfileDetail): string {
@@ -150,7 +150,7 @@ export default function CustomerProfilePage({
         : "neutral";
 
   return (
-    <div className="workspace-page min-w-0">
+    <div className="ds-workspace-main-area space-y-6 min-w-0">
       <DetailBackLink href="/dashboard/customers">Back to Customers</DetailBackLink>
 
       <PageHeader
@@ -188,24 +188,24 @@ export default function CustomerProfilePage({
           <OperationalCallout title="Operational focus" headline={op.title} tone={calloutTone}>
             {op.body}
           </OperationalCallout>
-          <div className="flex flex-col justify-center rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-3.5 sm:px-5">
-            <p className="workspace-rail-title mb-3">Activity</p>
+          <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
+            <p className="ds-eyebrow mb-3">Activity</p>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <dt className="text-xs text-[#64748B]">Conversations</dt>
-                <dd className="text-lg font-semibold text-[#0F172A]">{profile.conversation_count}</dd>
+                <dt className="text-xs text-app-text-muted">Conversations</dt>
+                <dd className="text-lg font-semibold text-app-text">{profile.conversation_count}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[#64748B]">Requests</dt>
-                <dd className="text-lg font-semibold text-[#0F172A]">{profile.lead_count}</dd>
+                <dt className="text-xs text-app-text-muted">Requests</dt>
+                <dd className="text-lg font-semibold text-app-text">{profile.lead_count}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[#64748B]">Interactions</dt>
-                <dd className="text-lg font-semibold text-[#0F172A]">{profile.total_interactions}</dd>
+                <dt className="text-xs text-app-text-muted">Interactions</dt>
+                <dd className="text-lg font-semibold text-app-text">{profile.total_interactions}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[#64748B]">SMS</dt>
-                <dd className="text-xs font-semibold leading-snug text-[#0F172A]">
+                <dt className="text-xs text-app-text-muted">SMS</dt>
+                <dd className="text-xs font-semibold leading-snug text-app-text">
                   {profile.latest_sms_thread_id ? smsStatusLabel(profile) : "No active thread"}
                 </dd>
               </div>
@@ -214,7 +214,7 @@ export default function CustomerProfilePage({
         </div>
       </WorkspaceBand>
 
-      <div className="workspace-split">
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
           <div className="app-card p-5 sm:p-6">
             <DetailSection
@@ -233,33 +233,33 @@ export default function CustomerProfilePage({
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
-                    <UserRound className="h-4 w-4 text-[#475569]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
+                    <UserRound className="h-4 w-4 text-app-text-muted" />
                   </div>
                   <div>
-                    <p className="text-xs text-[#64748B]">Name</p>
-                    <p className="text-sm font-medium text-[#0F172A]">{profile.name}</p>
+                    <p className="text-xs text-app-text-muted">Name</p>
+                    <p className="text-sm font-medium text-app-text">{profile.name}</p>
                   </div>
                 </div>
                 {profile.phone ? (
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
-                      <Phone className="h-4 w-4 text-[#475569]" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
+                      <Phone className="h-4 w-4 text-app-text-muted" />
                     </div>
                     <div>
-                      <p className="text-xs text-[#64748B]">Phone</p>
-                      <p className="text-sm font-medium text-[#0F172A]">{profile.phone}</p>
+                      <p className="text-xs text-app-text-muted">Phone</p>
+                      <p className="text-sm font-medium text-app-text">{profile.phone}</p>
                     </div>
                   </div>
                 ) : null}
                 {profile.email ? (
                   <div className="flex items-center gap-2.5 sm:col-span-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
-                      <Mail className="h-4 w-4 text-[#475569]" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
+                      <Mail className="h-4 w-4 text-app-text-muted" />
                     </div>
                     <div>
-                      <p className="text-xs text-[#64748B]">Email</p>
-                      <p className="text-sm font-medium text-[#0F172A]">{profile.email}</p>
+                      <p className="text-xs text-app-text-muted">Email</p>
+                      <p className="text-sm font-medium text-app-text">{profile.email}</p>
                     </div>
                   </div>
                 ) : null}
@@ -302,12 +302,12 @@ export default function CustomerProfilePage({
                   <Link
                     key={lead.id}
                     href={`/dashboard/leads/${lead.id}`}
-                    className="block rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]"
+                    className="block rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[#0F172A]">{lead.reason_for_visit || "Appointment request"}</p>
-                        <p className="mt-0.5 text-xs text-[#64748B]">{lead.preferred_datetime_text || "Preferred time not captured"}</p>
+                        <p className="truncate text-sm font-medium text-app-text">{lead.reason_for_visit || "Appointment request"}</p>
+                        <p className="mt-0.5 text-xs text-app-text-muted">{lead.preferred_datetime_text || "Preferred time not captured"}</p>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                         <LeadStatusBadge status={lead.status} />
@@ -333,18 +333,18 @@ export default function CustomerProfilePage({
                   <Link
                     key={conversation.id}
                     href={`/dashboard/inbox/${conversation.id}`}
-                    className="block rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]"
+                    className="block rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt"
                   >
                     <div className="mb-1.5 flex items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <ChannelBadge channel={conversation.channel} withIcon />
                         <FrontdeskStatusBadge status={conversation.derived_status} />
                       </div>
-                      <span className="text-xs text-[#64748B]">
+                      <span className="text-xs text-app-text-muted">
                         {conversation.last_message_at ? timeAgo(conversation.last_message_at) : "—"}
                       </span>
                     </div>
-                    <p className="text-sm leading-relaxed text-[#0F172A]">{conversation.last_message_preview}</p>
+                    <p className="text-sm leading-relaxed text-app-text">{conversation.last_message_preview}</p>
                   </Link>
                 ))}
               </div>
@@ -368,7 +368,7 @@ export default function CustomerProfilePage({
                   type="button"
                   onClick={sendSms}
                   disabled={sendingSms || !smsBody.trim()}
-                  className="mt-3 rounded-lg bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  className="mt-3 rounded-lg bg-app-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                 >
                   {sendingSms ? "Sending…" : "Send SMS"}
                 </button>
@@ -387,16 +387,16 @@ export default function CustomerProfilePage({
             {profile.timeline.map((item) => {
               const href = timelineHref(profile, item);
               const content = (
-                <div className="rounded-xl border border-[#E2E8F0] px-3.5 py-3 transition-colors hover:border-[#99f6e4] hover:bg-[#F8FAFC]">
+                <div className="rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt">
                   <div className="mb-1.5 flex items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       {item.channel ? <ChannelBadge channel={item.channel} withIcon /> : null}
                       <TimelineItemBadge item={item} />
                     </div>
-                    <span className="text-xs text-[#64748B]">{item.occurred_at ? timeAgo(item.occurred_at) : "—"}</span>
+                    <span className="text-xs text-app-text-muted">{item.occurred_at ? timeAgo(item.occurred_at) : "—"}</span>
                   </div>
-                  <p className="text-sm font-medium text-[#0F172A]">{item.title}</p>
-                  <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{item.detail}</p>
+                  <p className="text-sm font-medium text-app-text">{item.title}</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{item.detail}</p>
                 </div>
               );
 
@@ -413,13 +413,13 @@ export default function CustomerProfilePage({
           </div>
 
           {profile.timeline.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5 text-sm text-[#475569]">
+            <div className="rounded-xl border border-dashed border-app-border bg-app-surface-alt px-4 py-3.5 text-sm text-app-text-muted">
               No cross-channel activity has been recorded for this customer yet.
             </div>
           ) : null}
 
           {profile.last_interaction_at ? (
-            <p className="mt-4 text-xs text-[#64748B]">Most recent activity: {formatDateTime(profile.last_interaction_at)}</p>
+            <p className="mt-4 text-xs text-app-text-muted">Most recent activity: {formatDateTime(profile.last_interaction_at)}</p>
           ) : null}
         </DetailSection>
       </div>

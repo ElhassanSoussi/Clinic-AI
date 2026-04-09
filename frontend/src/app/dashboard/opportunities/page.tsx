@@ -30,18 +30,18 @@ function followUpHref(task: FollowUpTask): string | null {
 function priorityClass(priority: "high" | "medium" | "low"): string {
   if (priority === "high") return "bg-rose-50 text-rose-700 border-rose-200";
   if (priority === "medium") return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
+  return "bg-app-surface-alt text-app-text border-app-border";
 }
 
 function taskStatusClass(status: FollowUpTask["status"]): string {
   if (status === "snoozed") return "bg-blue-50 text-blue-700 border-blue-200";
   if (status === "completed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-[#CCFBF1] text-[#115E59] border-[#99f6e4]";
+  return "bg-app-accent-wash text-app-accent-dark border-teal-200";
 }
 
 function recoveryCardClass(isHigh: boolean): string {
   if (isHigh) return "border border-rose-200 bg-rose-50/30 shadow-sm ring-1 ring-rose-100";
-  return "border border-[#E2E8F0] bg-white shadow-sm";
+  return "border border-app-border bg-app-surface shadow-sm";
 }
 
 export default function OpportunitiesPage() {
@@ -171,7 +171,7 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -191,7 +191,7 @@ export default function OpportunitiesPage() {
           <button
             type="button"
             onClick={() => void loadData()}
-            className="mt-2 text-xs font-semibold text-[#0F766E] hover:underline"
+            className="mt-2 text-xs font-semibold text-app-primary hover:underline"
           >
             Refresh data
           </button>
@@ -201,14 +201,14 @@ export default function OpportunitiesPage() {
       <WorkspaceBand>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <p className="workspace-section-label">Work in flight</p>
-            <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+            <p className="ds-eyebrow">Work in flight</p>
+            <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
               Queue = committed follow-ups. Triage = candidates still waiting for a decision.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Queued", value: followUps.length, tone: "bg-[#CCFBF1]/90 text-[#115E59] border-[#99f6e4]" },
+              { label: "Queued", value: followUps.length, tone: "bg-app-accent-wash/90 text-app-accent-dark border-teal-200" },
               { label: "Triage", value: triageItems.length, tone: "bg-amber-50 text-amber-800 border-amber-200" },
               { label: "High urgency", value: triageHigh.length, tone: "bg-rose-50 text-rose-800 border-rose-200" },
             ].map((chip) => (
@@ -224,21 +224,21 @@ export default function OpportunitiesPage() {
         </div>
       </WorkspaceBand>
 
-      <div className="workspace-split">
-        <div className="order-1 min-w-0 space-y-4 xl:order-none">
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+        <div className="order-1 min-w-0 space-y-4 xl:order-0">
           {/* Follow-up queue */}
           <div className="workspace-main-frame p-4 sm:p-5">
-            <div className="mb-3 flex items-center justify-between gap-4 border-b border-[#E2E8F0] pb-3">
+            <div className="mb-3 flex items-center justify-between gap-4 border-b border-app-border pb-3">
               <div>
-                <p className="text-sm font-semibold text-[#0F172A]">Active recovery queue</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">Committed follow-ups—high urgency sorted to the top.</p>
+                <p className="text-sm font-semibold text-app-text">Active recovery queue</p>
+                <p className="mt-0.5 text-xs text-app-text-muted">Committed follow-ups—high urgency sorted to the top.</p>
               </div>
-              <span className="rounded-md bg-[#CCFBF1]/90 px-2 py-0.5 text-xs font-semibold text-[#115E59]">{followUps.length} active</span>
+              <span className="rounded-md bg-app-accent-wash/90 px-2 py-0.5 text-xs font-semibold text-app-accent-dark">{followUps.length} active</span>
             </div>
 
             {followUps.length === 0 ? (
               <EmptyState
-                icon={<CheckCircle2 className="w-5 h-5 text-[#64748B]" />}
+                icon={<CheckCircle2 className="w-5 h-5 text-app-text-muted" />}
                 title="Queue is clear"
                 description="When you queue an item from triage below, it lands here with due context. An empty queue either means nothing is committed yet or the team has cleared recent work."
               />
@@ -259,20 +259,20 @@ export default function OpportunitiesPage() {
                               {task.status === "snoozed" ? "Snoozed" : "Queued"}
                             </span>
                             {task.auto_generated && (
-                              <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#475569]">Auto</span>
+                              <span className="rounded-md bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text-muted">Auto</span>
                             )}
-                            <span className="text-xs text-[#64748B]">{task.customer_name}</span>
+                            <span className="text-xs text-app-text-muted">{task.customer_name}</span>
                           </div>
-                          <p className="text-sm font-semibold text-[#0F172A]">{task.title}</p>
-                          <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{task.detail}</p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs text-[#64748B]">
+                          <p className="text-sm font-semibold text-app-text">{task.title}</p>
+                          <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{task.detail}</p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs text-app-text-muted">
                             {task.due_at && <span>Due {formatDateTime(task.due_at)}</span>}
                             {task.note && <span>{task.note}</span>}
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-1.5">
                           {href && (
-                            <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
+                            <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
                               Open
                             </Link>
                           )}
@@ -280,7 +280,7 @@ export default function OpportunitiesPage() {
                             <button
                               onClick={() => updateFollowUp(task, { status: "completed", lead_status: "contacted" })}
                               disabled={savingId === task.id}
-                              className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
+                              className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash disabled:opacity-50"
                             >
                               {savingId === task.id ? "..." : "Contacted"}
                             </button>
@@ -310,17 +310,17 @@ export default function OpportunitiesPage() {
 
           {/* Triage */}
           <div className="workspace-main-frame p-4 sm:p-5">
-            <div className="mb-2.5 flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3">
+            <div className="mb-2.5 flex items-center justify-between gap-3 border-b border-app-border pb-3">
               <div>
-                <p className="text-sm font-semibold text-[#0F172A]">Needs triage</p>
-                <p className="mt-0.5 text-xs text-[#475569]">Rules-based risk items—review high urgency first.</p>
+                <p className="text-sm font-semibold text-app-text">Needs triage</p>
+                <p className="mt-0.5 text-xs text-app-text-muted">Rules-based risk items—review high urgency first.</p>
               </div>
               <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">{triageItems.length} pending</span>
             </div>
 
             {triageItems.length === 0 ? (
               <EmptyState
-                icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
+                icon={<AlertTriangle className="w-5 h-5 text-app-text-muted" />}
                 title="Nothing waiting in triage"
                 description="New recovery items appear when conversations stall or requests age. If inbox and leads are quiet, this staying empty is expected."
               />
@@ -328,7 +328,7 @@ export default function OpportunitiesPage() {
               <div className="space-y-4">
                 {triageHigh.length > 0 ? (
                   <div>
-                    <p className="workspace-section-label">High urgency</p>
+                    <p className="ds-eyebrow">High urgency</p>
                     <div className="mt-2 space-y-2.5">
                       {triageHigh.map((opportunity) => {
                         const href = opportunityHref(opportunity);
@@ -341,27 +341,27 @@ export default function OpportunitiesPage() {
                                   <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
                                     High
                                   </span>
-                                  <span className="text-xs text-[#64748B]">{opportunity.customer_name}</span>
+                                  <span className="text-xs text-app-text-muted">{opportunity.customer_name}</span>
                                   {opportunity.occurred_at && (
-                                    <span className="inline-flex items-center gap-1 text-xs text-[#64748B]">
+                                    <span className="inline-flex items-center gap-1 text-xs text-app-text-muted">
                                       <Clock className="w-3 h-3" />
                                       <span>{timeAgo(opportunity.occurred_at)}</span>
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm font-semibold text-[#0F172A]">{opportunity.title}</p>
-                                <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{opportunity.detail}</p>
+                                <p className="text-sm font-semibold text-app-text">{opportunity.title}</p>
+                                <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{opportunity.detail}</p>
                               </div>
                               <div className="flex shrink-0 flex-wrap gap-1.5">
                                 {href && (
-                                  <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
+                                  <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
                                     Open
                                   </Link>
                                 )}
                                 <button
                                   onClick={() => queueFollowUp(opportunity, "open")}
                                   disabled={busy}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                                 >
                                   {busy && <Loader2 className="w-3 h-3 animate-spin" />}
                                   <span>Queue</span>
@@ -384,7 +384,7 @@ export default function OpportunitiesPage() {
 
                 {triageRest.length > 0 ? (
                   <div>
-                    <p className="workspace-section-label">{triageHigh.length > 0 ? "Other triage" : "Triage"}</p>
+                    <p className="ds-eyebrow">{triageHigh.length > 0 ? "Other triage" : "Triage"}</p>
                     <div className="mt-2 space-y-2.5">
                       {triageRest.map((opportunity) => {
                         const href = opportunityHref(opportunity);
@@ -397,27 +397,27 @@ export default function OpportunitiesPage() {
                                   <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
                                     Follow-up
                                   </span>
-                                  <span className="text-xs text-[#64748B]">{opportunity.customer_name}</span>
+                                  <span className="text-xs text-app-text-muted">{opportunity.customer_name}</span>
                                   {opportunity.occurred_at && (
-                                    <span className="inline-flex items-center gap-1 text-xs text-[#64748B]">
+                                    <span className="inline-flex items-center gap-1 text-xs text-app-text-muted">
                                       <Clock className="w-3 h-3" />
                                       <span>{timeAgo(opportunity.occurred_at)}</span>
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm font-semibold text-[#0F172A]">{opportunity.title}</p>
-                                <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{opportunity.detail}</p>
+                                <p className="text-sm font-semibold text-app-text">{opportunity.title}</p>
+                                <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{opportunity.detail}</p>
                               </div>
                               <div className="flex shrink-0 flex-wrap gap-1.5">
                                 {href && (
-                                  <Link href={href} className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]">
+                                  <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
                                     Open
                                   </Link>
                                 )}
                                 <button
                                   onClick={() => queueFollowUp(opportunity, "open")}
                                   disabled={busy}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                                 >
                                   {busy && <Loader2 className="w-3 h-3 animate-spin" />}
                                   <span>Queue</span>
@@ -443,33 +443,33 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* Right rail */}
-        <aside className="workspace-side-rail order-2 xl:order-none">
-          <div className="workspace-rail-card p-4 xl:sticky xl:top-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Automation</p>
-            <div className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-              <p className="text-xs font-semibold text-[#0F172A]">Auto follow-up</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
+        <aside className="space-y-3 order-2 xl:order-0">
+          <div className="ds-card p-4 xl:sticky xl:top-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Automation</p>
+            <div className="mt-2 rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+              <p className="text-xs font-semibold text-app-text">Auto follow-up</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">
                 Creates tasks from stalled conversations and aging requests.
               </p>
-              <label className="mt-2 inline-flex items-center gap-2 text-xs text-[#0F172A]">
+              <label className="mt-2 inline-flex items-center gap-2 text-xs text-app-text">
                 <input
                   type="checkbox"
                   checked={Boolean(clinic?.follow_up_automation_enabled)}
                   onChange={(event) => toggleAutomation(event.target.checked)}
                   disabled={savingAutomation}
-                  className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                  className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                 />
                 {savingAutomation ? "Saving..." : "Enabled"}
               </label>
             </div>
             <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Queued</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{followUps.length}</p>
+              <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                <p className="text-xs text-app-text-muted">Queued</p>
+                <p className="mt-0.5 text-lg font-bold text-app-text">{followUps.length}</p>
               </div>
-              <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                <p className="text-xs text-[#475569]">Needs triage</p>
-                <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{triageItems.length}</p>
+              <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                <p className="text-xs text-app-text-muted">Needs triage</p>
+                <p className="mt-0.5 text-lg font-bold text-app-text">{triageItems.length}</p>
               </div>
             </div>
           </div>

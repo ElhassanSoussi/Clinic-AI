@@ -71,18 +71,18 @@ export default function ContactPage() {
         <div className="marketing-container marketing-container--narrow mx-auto max-w-xl py-12 sm:py-16">
           {submitted ? (
             <div className="ds-card px-8 py-14 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#0F766E]">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-app-accent-wash text-app-primary">
                 <CheckCircle2 className="h-8 w-8" aria-hidden />
               </div>
-              <h1 className="text-[clamp(1.5rem,2vw,1.875rem)] font-bold tracking-tight text-[#0F172A]">
+              <h1 className="text-[clamp(1.5rem,2vw,1.875rem)] font-bold tracking-tight text-app-text">
                 Thank you
               </h1>
-              <p className="marketing-body mx-auto mt-3 max-w-md text-[#475569]">
+              <p className="marketing-body mx-auto mt-3 max-w-md text-app-text-muted">
                 We&apos;ll be in touch within one business day with next steps tailored to your practice.
               </p>
               <Link
                 href="/"
-                className="mt-8 inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-5 py-3 text-[0.9375rem] font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-5 py-3 text-[0.9375rem] font-semibold text-app-text shadow-sm transition-colors hover:bg-app-surface-alt"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden />
                 Back to home
@@ -105,11 +105,11 @@ export default function ContactPage() {
                 </p>
                 <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mx-0">
                   Want to poke around the product first?{" "}
-                  <Link href="/register" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  <Link href="/register" className="font-semibold text-app-primary hover:text-app-accent-dark">
                     Start the free trial
                   </Link>
                   {" · "}
-                  <Link href="/product" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  <Link href="/product" className="font-semibold text-app-primary hover:text-app-accent-dark">
                     Module map &amp; routes
                   </Link>
                   .
@@ -119,7 +119,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="ds-card space-y-5 p-6 sm:p-8">
                 <div>
                   <label htmlFor="name" className="ds-field-label">
-                    Your name <span className="font-normal text-[#DC2626]">*</span>
+                    Your name <span className="font-normal text-red-600">*</span>
                   </label>
                   <input
                     id="name"
@@ -127,7 +127,7 @@ export default function ContactPage() {
                     value={form.name}
                     onChange={(e) => update("name", e.target.value)}
                     maxLength={100}
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Dr. Jane Smith"
                   />
                 </div>
@@ -142,14 +142,14 @@ export default function ContactPage() {
                     value={form.clinic_name}
                     onChange={(e) => update("clinic_name", e.target.value)}
                     maxLength={200}
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Bright Smile Dental"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="ds-field-label">
-                    Email <span className="font-normal text-[#DC2626]">*</span>
+                    Email <span className="font-normal text-red-600">*</span>
                   </label>
                   <input
                     id="email"
@@ -157,7 +157,7 @@ export default function ContactPage() {
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
                     maxLength={200}
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="jane@clinic.com"
                   />
                 </div>
@@ -172,7 +172,7 @@ export default function ContactPage() {
                     value={form.phone}
                     onChange={(e) => update("phone", e.target.value)}
                     maxLength={30}
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="(555) 123-4567"
                   />
                 </div>
@@ -187,13 +187,13 @@ export default function ContactPage() {
                     onChange={(e) => update("message", e.target.value)}
                     maxLength={2000}
                     rows={3}
-                    className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full resize-none rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Tell us about your clinic, current workflow, or what you're looking for..."
                   />
                 </div>
 
                 {error && (
-                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-[#DC2626]">
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
                     {error}
                   </p>
                 )}
@@ -201,20 +201,20 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="marketing-cta-primary !w-full disabled:pointer-events-none disabled:opacity-50"
+                  className="marketing-cta-primary w-full! disabled:pointer-events-none disabled:opacity-50"
                 >
                   {submitting ? "Sending…" : "Request a conversation"}
                   {!submitting && <Send className="h-4 w-4" aria-hidden />}
                 </button>
               </form>
 
-              <p className="mt-6 text-center text-[0.9375rem] leading-relaxed text-[#64748B]">
+              <p className="mt-6 text-center text-[0.9375rem] leading-relaxed text-app-text-muted">
                 Prefer to explore on your own?{" "}
-                <Link href="/register" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                <Link href="/register" className="font-semibold text-app-primary hover:text-app-accent-dark">
                   Start a free trial
                 </Link>{" "}
                 or{" "}
-                <Link href="/chat/demo" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                <Link href="/chat/demo" className="font-semibold text-app-primary hover:text-app-accent-dark">
                   try the live demo
                 </Link>
                 .
@@ -222,7 +222,7 @@ export default function ContactPage() {
               <div className="mt-6 flex justify-center sm:justify-start">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-2 text-[0.9375rem] font-medium text-[#475569] transition-colors hover:text-[#0F172A]"
+                  className="inline-flex items-center gap-2 text-[0.9375rem] font-medium text-app-text-muted transition-colors hover:text-app-text"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
                   Back to home

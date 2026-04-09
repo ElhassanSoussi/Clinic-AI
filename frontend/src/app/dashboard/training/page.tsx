@@ -67,7 +67,7 @@ function docStatusIcon(status: KnowledgeDocument["status"]) {
     case "failed":
       return <XCircle className="h-3.5 w-3.5 text-rose-500" />;
     default:
-      return <Loader2 className="h-3.5 w-3.5 animate-spin text-[#64748B]" />;
+      return <Loader2 className="h-3.5 w-3.5 animate-spin text-app-text-muted" />;
   }
 }
 
@@ -339,7 +339,7 @@ export default function TrainingPage() {
   const hasRealKnowledge = (training.custom_sources?.length ?? 0) > 0 || docStats.ready > 0;
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -354,7 +354,7 @@ export default function TrainingPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/dashboard/settings"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+              className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted shadow-sm transition-colors hover:bg-app-surface-alt"
             >
               Settings
             </Link>
@@ -370,18 +370,18 @@ export default function TrainingPage() {
       )}
 
       <div className="workspace-stage">
-        <aside className="workspace-side-rail">
-          <div className="wave-command-slab workspace-command-hero border-[#99f6e4] bg-[#F0FDFA]/40 xl:sticky xl:top-6">
+        <aside className="space-y-3">
+          <div className="ds-card border-teal-200 bg-app-accent-wash/40 xl:sticky xl:top-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0F766E]" />
-                  <span className="workspace-section-label text-[#115E59]">Readiness</span>
+                  <Sparkles className="w-3.5 h-3.5 text-app-primary" />
+                  <span className="ds-eyebrow text-app-accent-dark">Readiness</span>
                 </div>
-                <p className="text-3xl font-bold tracking-tight text-[#0F172A]">
+                <p className="text-3xl font-bold tracking-tight text-app-text">
                   {clampPercentInt(training.knowledge_score)}%
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
                   {training.assistant_name} only performs well when the clinic has supplied real context. This score summarizes coverage before you trust it in production.
                 </p>
               </div>
@@ -394,10 +394,10 @@ export default function TrainingPage() {
               {training.readiness_items.map((item) => (
                 <div
                   key={item.key}
-                  className={`rounded-xl border px-3 py-3 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-[#E2E8F0] bg-white/75"}`}
+                  className={`rounded-xl border px-3 py-3 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-app-border bg-app-surface/75"}`}
                 >
-                  <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-[#64748B]">{item.detail}</p>
+                  <p className="text-sm font-semibold text-app-text">{item.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                 </div>
               ))}
             </div>
@@ -407,7 +407,7 @@ export default function TrainingPage() {
                 <p className="text-sm font-semibold text-amber-800">Coverage gaps</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {training.knowledge_gaps.map((gap) => (
-                    <span key={gap} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
+                    <span key={gap} className="rounded-full bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
                       {gap}
                     </span>
                   ))}
@@ -415,8 +415,8 @@ export default function TrainingPage() {
               </div>
             )}
 
-            <div className="mt-4 rounded-xl border border-[#DDE5EE] bg-white/90 p-4 shadow-sm">
-              <p className="workspace-rail-title">Document pulse</p>
+            <div className="mt-4 rounded-xl border border-app-border bg-app-surface/90 p-4 shadow-sm">
+              <p className="ds-eyebrow">Document pulse</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {[
                   { label: "Files", value: docStats.total },
@@ -424,26 +424,26 @@ export default function TrainingPage() {
                   { label: "Processing", value: docStats.processing },
                   { label: "Chunks", value: docStats.total_chunks },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
-                    <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{item.value}</p>
+                  <div key={item.label} className="rounded-xl border border-app-border bg-app-surface-alt px-3 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
+                    <p className="mt-1 text-lg font-bold tabular-nums text-app-text">{item.value}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className={`mt-4 rounded-xl px-4 py-4 shadow-sm ${hasRealKnowledge ? "border border-emerald-100 bg-emerald-50/60" : "border border-[#E2E8F0] bg-[#F8FAFC]"}`}>
+            <div className={`mt-4 rounded-xl px-4 py-4 shadow-sm ${hasRealKnowledge ? "border border-emerald-100 bg-emerald-50/60" : "border border-app-border bg-app-surface-alt"}`}>
               <div className="flex items-center gap-1.5">
                 {hasRealKnowledge ? (
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 ) : (
-                  <AlertTriangle className="h-3.5 w-3.5 text-[#64748B]" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-app-text-muted" />
                 )}
-                <p className={`text-xs font-semibold ${hasRealKnowledge ? "text-emerald-700" : "text-[#475569]"}`}>
+                <p className={`text-xs font-semibold ${hasRealKnowledge ? "text-emerald-700" : "text-app-text-muted"}`}>
                   {hasRealKnowledge ? "Retrieval active" : "Basic mode"}
                 </p>
               </div>
-              <p className={`mt-1 text-xs leading-relaxed ${hasRealKnowledge ? "text-emerald-600" : "text-[#475569]"}`}>
+              <p className={`mt-1 text-xs leading-relaxed ${hasRealKnowledge ? "text-emerald-600" : "text-app-text-muted"}`}>
                 {hasRealKnowledge
                   ? "The assistant now pulls from your notes and uploaded documents in addition to clinic settings."
                   : "The assistant is still answering mostly from clinic settings only. Add notes or upload documents to deepen it."}
@@ -453,14 +453,14 @@ export default function TrainingPage() {
         </aside>
 
         <div className="min-w-0 space-y-6 xl:col-span-2">
-          <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+          <section className="ds-card p-5 sm:p-6">
             <div className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
               <div>
-                <p className="workspace-section-label">Knowledge control room</p>
-                <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+                <p className="ds-eyebrow">Knowledge control room</p>
+                <h2 className="mt-2 text-[1.95rem] font-bold tracking-tight text-app-text sm:text-[2.35rem]">
                   Ground the assistant before it ever speaks for the clinic.
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
                   Use Settings for baseline facts, notes for nuance, and uploads for long-form guidance. This page is where you harden answer quality before patient traffic depends on it.
                 </p>
 
@@ -470,18 +470,18 @@ export default function TrainingPage() {
                     { label: "Custom notes", value: training.custom_sources.length, detail: "Exceptions and nuances your team wants preserved." },
                     { label: "Uploads ready", value: docStats.ready, detail: "Processed files available to retrieval." },
                   ].map((item) => (
-                    <div key={item.label} className="rounded-[1.25rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
-                      <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">{item.value}</p>
-                      <p className="mt-2 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                    <div key={item.label} className="rounded-[1.25rem] border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
+                      <p className="mt-3 text-2xl font-bold tracking-tight text-app-text">{item.value}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
-                <p className="workspace-rail-title">Training posture</p>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+              <div className="rounded-[1.45rem] border border-app-border bg-app-surface/94 p-5 shadow-(--ds-shadow-md)">
+                <p className="ds-eyebrow">Training posture</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-app-text-muted">
                   <p>Use Settings when the clinic’s baseline facts change.</p>
                   <p>Use custom notes for exceptions, special rules, and wording your staff wants preserved.</p>
                   <p>Use uploads for longer documents like policies, procedures, and service guides.</p>
@@ -495,7 +495,7 @@ export default function TrainingPage() {
                     <Link
                       key={link.section}
                       href={settingsHref(link.section)}
-                      className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#BFF5EC]"
+                      className="rounded-full border border-teal-200 bg-app-accent-wash px-3 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-teal-100"
                     >
                       Edit {link.label}
                     </Link>
@@ -505,33 +505,33 @@ export default function TrainingPage() {
             </div>
           </section>
 
-          <div className="wave-zone-panel !shadow-[var(--ds-shadow-lg)]">
-            <div className="mb-4 border-b border-[var(--color-app-border)] pb-3">
-              <p className="workspace-section-label">Knowledge desk</p>
-              <p className="mt-1 text-sm text-[#475569]">Structured sources, file uploads, custom notes, and live preview—one composed training desk instead of separate utility panels.</p>
+          <div className="wave-zone-panel shadow-(--ds-shadow-lg)!">
+            <div className="mb-4 border-b border-app-border pb-3">
+              <p className="ds-eyebrow">Knowledge desk</p>
+              <p className="mt-1 text-sm text-app-text-muted">Structured sources, file uploads, custom notes, and live preview—one composed training desk instead of separate utility panels.</p>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="space-y-4">
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center gap-2">
-                    <Bot className="w-3.5 h-3.5 text-[#0F766E]" />
-                    <p className="text-sm font-semibold text-[#0F172A]">Current sources</p>
+                    <Bot className="w-3.5 h-3.5 text-app-primary" />
+                    <p className="text-sm font-semibold text-app-text">Current sources</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     {structuredKnowledge.map((item) => (
-                      <div key={item.label} className="rounded-lg border border-[#E2E8F0] p-2.5">
-                        <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                      <div key={item.label} className="rounded-lg border border-app-border p-2.5">
+                        <p className="text-sm font-semibold text-app-text">{item.label}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Upload className="w-3.5 h-3.5 text-[#0F766E]" />
-                      <p className="text-sm font-semibold text-[#0F172A]">Document uploads</p>
+                      <Upload className="w-3.5 h-3.5 text-app-primary" />
+                      <p className="text-sm font-semibold text-app-text">Document uploads</p>
                     </div>
                     <input
                       ref={fileInputRef}
@@ -544,31 +544,31 @@ export default function TrainingPage() {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                     >
                       {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
                       <span>Upload PDF or TXT</span>
                     </button>
                   </div>
 
-                  <p className="mb-2.5 text-xs leading-relaxed text-[#475569]">
+                  <p className="mb-2.5 text-xs leading-relaxed text-app-text-muted">
                     Upload clinic documents like policies, procedures, or service guides. Files are processed into searchable knowledge chunks for retrieval.
                   </p>
 
                   {documents.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-5 text-center text-xs leading-relaxed text-[#64748B]">
+                    <div className="rounded-lg border border-dashed border-app-border px-4 py-5 text-center text-xs leading-relaxed text-app-text-muted">
                       <p>Documents are optional. Clinic settings already supply baseline answers.</p>
                       <p className="mt-2">Upload PDF or TXT when you need policy detail or longer service guidance in retrieval.</p>
                       <div className="mt-4 flex flex-wrap justify-center gap-2">
                         <Link
                           href={settingsHref("services")}
-                          className="inline-flex items-center rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                          className="inline-flex items-center rounded-lg border border-teal-200 bg-app-accent-wash px-2.5 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
                         >
                           Services &amp; FAQ in Settings
                         </Link>
                         <Link
                           href="/dashboard/settings"
-                          className="inline-flex items-center rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                          className="inline-flex items-center rounded-lg border border-app-border bg-app-surface px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
                         >
                           Full setup checklist
                         </Link>
@@ -577,12 +577,12 @@ export default function TrainingPage() {
                   ) : (
                     <div className="space-y-2">
                       {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#E2E8F0] px-2.5 py-2">
+                        <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-app-border px-2.5 py-2">
                           <div className="flex min-w-0 items-center gap-2">
                             {docStatusIcon(doc.status)}
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-[#0F172A]">{doc.filename}</p>
-                              <p className="text-xs text-[#475569]">
+                              <p className="truncate text-sm font-semibold text-app-text">{doc.filename}</p>
+                              <p className="text-xs text-app-text-muted">
                                 {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
                                 {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
                               </p>
@@ -603,7 +603,7 @@ export default function TrainingPage() {
                             )}
                             <button
                               onClick={() => handleDeleteDocument(doc)}
-                              className="text-[#64748B] hover:text-rose-600"
+                              className="text-app-text-muted hover:text-rose-600"
                               aria-label={`Delete ${doc.filename}`}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -615,10 +615,10 @@ export default function TrainingPage() {
                   )}
                 </div>
 
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-[#475569]" />
-                    <p className="text-sm font-semibold text-[#0F172A]">Custom notes</p>
+                    <FileText className="w-3.5 h-3.5 text-app-text-muted" />
+                    <p className="text-sm font-semibold text-app-text">Custom notes</p>
                   </div>
                   <div className="space-y-2">
                     <input
@@ -626,19 +626,19 @@ export default function TrainingPage() {
                       value={newTitle}
                       onChange={(event) => setNewTitle(event.target.value)}
                       placeholder="Title, e.g. Insurance exceptions"
-                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     />
                     <textarea
                       value={newContent}
                       onChange={(event) => setNewContent(event.target.value)}
                       rows={3}
                       placeholder="Details your assistant should know..."
-                      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     />
                     <button
                       onClick={createSource}
                       disabled={saving || !newTitle.trim() || !newContent.trim()}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                     >
                       {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                       <span>Save note</span>
@@ -647,11 +647,11 @@ export default function TrainingPage() {
 
                   <div className="mt-3 space-y-2">
                     {training.custom_sources.length === 0 ? (
-                      <div className="rounded-lg border border-dashed border-[#E2E8F0] px-4 py-4 text-center text-xs text-[#64748B]">
+                      <div className="rounded-lg border border-dashed border-app-border px-4 py-4 text-center text-xs text-app-text-muted">
                         <p>No custom notes yet. Use them for exceptions, nuance, and language your assistant should preserve.</p>
                         <p className="mt-2">
                           Baseline facts still come from{" "}
-                          <Link href={settingsHref("clinic-info")} className="font-semibold text-[#115E59] hover:underline">
+                          <Link href={settingsHref("clinic-info")} className="font-semibold text-app-accent-dark hover:underline">
                             Settings
                           </Link>
                           .
@@ -659,7 +659,7 @@ export default function TrainingPage() {
                       </div>
                     ) : (
                       training.custom_sources.map((source) => (
-                        <div key={source.id} className="rounded-lg border border-[#E2E8F0] p-2.5">
+                        <div key={source.id} className="rounded-lg border border-app-border p-2.5">
                           {editingSourceId === source.id ? (
                             <div className="space-y-2">
                               <input
@@ -667,27 +667,27 @@ export default function TrainingPage() {
                                 value={editingTitle}
                                 onChange={(event) => setEditingTitle(event.target.value)}
                                 placeholder="Note title"
-                                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                               />
                               <textarea
                                 value={editingContent}
                                 onChange={(event) => setEditingContent(event.target.value)}
                                 rows={3}
                                 placeholder="Note content"
-                                className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                                className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                               />
                               <div className="flex gap-2">
                                 <button
                                   onClick={saveEditedSource}
                                   disabled={saving || !editingTitle.trim() || !editingContent.trim()}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                                 >
                                   {saving && <Loader2 className="w-3 h-3 animate-spin" />}
                                   <span>Save</span>
                                 </button>
                                 <button
                                   onClick={cancelEditingSource}
-                                  className="rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                                  className="rounded-lg border border-app-border px-3 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
                                 >
                                   Cancel
                                 </button>
@@ -696,19 +696,19 @@ export default function TrainingPage() {
                           ) : (
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <p className="text-sm font-semibold text-[#0F172A]">{source.title}</p>
-                                <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed text-[#475569]">{source.content}</p>
+                                <p className="text-sm font-semibold text-app-text">{source.title}</p>
+                                <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed text-app-text-muted">{source.content}</p>
                               </div>
                               <div className="flex shrink-0 items-center gap-1.5">
                                 <button
                                   onClick={() => startEditingSource(source)}
-                                  className="text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
+                                  className="text-xs font-semibold text-app-accent-dark hover:text-app-accent-dark"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   onClick={() => deleteSource(source)}
-                                  className="text-[#64748B] hover:text-rose-600"
+                                  className="text-app-text-muted hover:text-rose-600"
                                   aria-label={`Delete ${source.title}`}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -724,19 +724,19 @@ export default function TrainingPage() {
               </div>
 
               <div className="space-y-4 xl:sticky xl:top-20">
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-                  <p className="workspace-rail-title">Grounding summary</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#475569]">
+                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
+                  <p className="ds-eyebrow">Grounding summary</p>
+                  <p className="mt-3 text-sm leading-relaxed text-app-text-muted">
                     {hasRealKnowledge
                       ? "The assistant now has real clinic context to preview more realistic responses. Keep tightening weak areas before relying on it for public chat."
                       : "Start by adding baseline facts or one focused note. Training works best when the assistant has concrete clinic-specific material."}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
                   <div className="mb-2.5 flex items-center gap-2">
-                    <Send className="w-3.5 h-3.5 text-[#0F766E]" />
-                    <p className="text-sm font-semibold text-[#0F172A]">Live preview</p>
+                    <Send className="w-3.5 h-3.5 text-app-primary" />
+                    <p className="text-sm font-semibold text-app-text">Live preview</p>
                   </div>
 
                   {!clinic.is_live && (
@@ -745,12 +745,12 @@ export default function TrainingPage() {
                     </div>
                   )}
 
-                  <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
+                  <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-app-border bg-app-surface-alt p-2.5">
                     {previewMessages.length === 0 ? (
-                      <div className="flex h-full min-h-[12rem] flex-col items-center justify-center rounded-md border border-dashed border-[#CBD5E1] bg-white/60 px-4 py-6 text-center">
-                        <Bot className="mb-2 h-8 w-8 text-[#94A3B8]" aria-hidden />
-                        <p className="text-sm font-medium text-[#475569]">Test against your live configuration</p>
-                        <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-[#64748B]">
+                      <div className="flex h-full min-h-48 flex-col items-center justify-center rounded-md border border-dashed border-app-border bg-app-surface/60 px-4 py-6 text-center">
+                        <Bot className="mb-2 h-8 w-8 text-app-text-muted" aria-hidden />
+                        <p className="text-sm font-medium text-app-text-muted">Test against your live configuration</p>
+                        <p className="mt-1 max-w-60 text-xs leading-relaxed text-app-text-muted">
                           Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
                         </p>
                       </div>
@@ -762,8 +762,8 @@ export default function TrainingPage() {
                         >
                           <div
                             className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
-                              ? "rounded-br-sm bg-[#0F766E] text-white"
-                              : "rounded-bl-sm border border-[#E2E8F0] bg-white text-[#0F172A]"
+                              ? "rounded-br-sm bg-app-primary text-white"
+                              : "rounded-bl-sm border border-app-border bg-app-surface text-app-text"
                               }`}
                           >
                             {message.content}
@@ -779,13 +779,13 @@ export default function TrainingPage() {
                       onChange={(event) => setPreviewInput(event.target.value)}
                       rows={2}
                       placeholder="Try: Do you offer same-day appointments?"
-                      className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     />
                     <button
                       onClick={sendPreview}
                       disabled={previewSending || previewDisabled || !previewInput.trim()}
                       type="button"
-                      className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                      className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-app-primary px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                     >
                       {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                       <span>Send test</span>

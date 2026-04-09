@@ -264,7 +264,7 @@ export default function ChatPage({
   const statusLabel = !clinicIsLive ? "Unavailable" : "Active";
   const telHref = clinicPhone ? `tel:${digitsOnlyPhone(clinicPhone)}` : null;
   const shellClassName = isEmbedded
-    ? "w-full flex flex-col overflow-hidden bg-white h-full min-h-0"
+    ? "w-full flex flex-col overflow-hidden bg-app-surface h-full min-h-0"
     : "chat-stage-shell w-full max-w-3xl flex flex-col overflow-hidden";
 
   return (
@@ -273,18 +273,18 @@ export default function ChatPage({
     >
       {!isEmbedded && (
         <div className="mx-auto mb-5 w-full max-w-7xl">
-          <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:text-slate-900">
+          <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-app-surface/90 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:text-slate-900">
             ← Back to Clinic AI
           </Link>
           <div className="mt-4 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
             <div className="reset-info-card p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">
                 {isDemo ? "Interactive demo" : "Patient-facing workspace"}
               </p>
-              <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.02] tracking-[-0.05em] text-[#0F172A] sm:text-[2.75rem]">
+              <h1 className="mt-3 text-[2.2rem] font-bold leading-[1.02] tracking-tight text-app-text sm:text-[2.75rem]">
                 Calm intake on the surface. Real workflow under it.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-app-text-muted">
                 Patients get a clear branded assistant. Your clinic keeps the real thread, booking state, and follow-up work in the dashboard without changing the underlying chat logic.
               </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -293,10 +293,10 @@ export default function ChatPage({
                   { label: "Status", value: statusLabel, hint: clinicIsLive ? "Assistant is available for live patient traffic." : "Clinic is not live, so expectations stay explicit." },
                   { label: "Flow", value: leadCaptured ? "Captured" : step ? `Booking ${step}/6` : "Q&A", hint: "The surface reflects the actual booking flow rather than a fake storyboard." },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-[1.15rem] border border-[#E2E8F0] bg-white/92 px-4 py-4 shadow-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
-                    <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[#0F172A]">{item.value}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#475569]">{item.hint}</p>
+                  <div key={item.label} className="rounded-[1.15rem] border border-app-border bg-app-surface/92 px-4 py-4 shadow-sm">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
+                    <p className="mt-2 text-xl font-semibold tracking-tight text-app-text">{item.value}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{item.hint}</p>
                   </div>
                 ))}
               </div>
@@ -316,15 +316,15 @@ export default function ChatPage({
               )}
 
               <div className="reset-info-card p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Patient experience notes</p>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Patient experience notes</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-app-text-muted">
+                  <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
                     Answers are grounded in clinic hours, services, FAQ, and training content you configured.
                   </div>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                  <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
                     Booking requests follow a real capture flow so staff can review them downstream.
                   </div>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                  <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
                     The assistant helps with front-desk questions only. It does not replace urgent care or medical advice.
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function ChatPage({
       <div className={shellClassName}>
         <div className="brand-header chat-header-premium px-4 sm:px-5 pt-4 pb-3 flex items-start gap-3 border-b border-white/10">
           <div
-            className="w-11 h-11 rounded-2xl bg-white/18 flex items-center justify-center text-base font-bold text-white select-none shrink-0 shadow-inner"
+            className="w-11 h-11 rounded-2xl bg-app-surface/18 flex items-center justify-center text-base font-bold text-white select-none shrink-0 shadow-inner"
             aria-hidden
           >
             {(clinicName?.[0] || assistantLabel?.[0] || "C").toUpperCase()}
@@ -434,7 +434,7 @@ export default function ChatPage({
               <button
                 type="button"
                 onClick={retryBootstrap}
-                className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-50"
+                className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-amber-200 bg-app-surface px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-50"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden />
                 Try again
@@ -537,7 +537,7 @@ export default function ChatPage({
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t border-slate-100/90 px-3 sm:px-4 py-3 shrink-0 bg-gradient-to-b from-white via-slate-50/40 to-slate-50/80">
+        <div className="border-t border-slate-100/90 px-3 sm:px-4 py-3 shrink-0 bg-linear-to-b from-white via-slate-50/40 to-slate-50/80">
           <div className="flex items-center gap-2">
             <label htmlFor="patient-chat-input" className="sr-only">
               Message to assistant
@@ -553,7 +553,7 @@ export default function ChatPage({
               placeholder={inputPlaceholder}
               disabled={inputDisabled}
               autoComplete="off"
-              className="flex-1 min-w-0 px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 placeholder:text-slate-400 disabled:opacity-45 disabled:cursor-not-allowed transition-all"
+              className="flex-1 min-w-0 px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-app-surface focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 placeholder:text-slate-400 disabled:opacity-45 disabled:cursor-not-allowed transition-all"
             />
             <button
               type="button"
@@ -610,7 +610,7 @@ export default function ChatPage({
       `}</style>
 
       {isDemo && !isEmbedded && (
-        <div className="w-full max-w-md mt-4 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div className="w-full max-w-md mt-4 bg-app-surface rounded-xl border border-slate-200 p-5 shadow-sm">
           <h3 className="text-base font-semibold text-slate-900 text-center">Want this for your clinic?</h3>
           <p className="text-sm text-slate-500 text-center mt-1.5 leading-relaxed">
             Same calm patient experience, wired to your services, hours, and dashboard — without rebuilding your site.

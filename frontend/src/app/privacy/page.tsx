@@ -27,7 +27,7 @@ export default function PrivacyPage() {
             <p className="mt-4 text-base font-medium text-slate-500">
               Last updated: {lastUpdated}
             </p>
-            <p className="marketing-lead mt-6 !max-w-none">
+            <p className="marketing-lead mt-6 max-w-none!">
               This Privacy Policy describes how Clinic AI (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;the platform&rdquo;) collects, uses, stores, and protects information when you use our service. By using Clinic AI, you agree to the practices described in this policy.
             </p>
           </div>
@@ -147,8 +147,8 @@ export default function PrivacyPage() {
 
             <section>
               <h2>8. Medical disclaimer</h2>
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                <p className="!font-semibold !text-[#0F172A]">
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-app-surface p-6 shadow-sm sm:p-8">
+                <p className="font-semibold! text-app-text!">
                   Clinic AI is an administrative intake and scheduling tool only.
                 </p>
                 <p className="mt-3">
@@ -183,7 +183,7 @@ export default function PrivacyPage() {
               <div className="mt-4">
                 <p>
                   For questions, concerns, or data requests related to this privacy policy, please use the{" "}
-                  <Link href="/contact" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  <Link href="/contact" className="font-semibold text-app-primary hover:text-app-accent-dark">
                     contact page
                   </Link>
                   .

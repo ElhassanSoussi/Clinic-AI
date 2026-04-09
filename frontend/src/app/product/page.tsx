@@ -159,18 +159,18 @@ export default function ProductPage() {
                   "AI training and setup",
                 ].map((chip) => (
                   <span key={chip} className="marketing-trust-chip">
-                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <Check className="h-4 w-4 shrink-0 text-app-primary" />
                     {chip}
                   </span>
                 ))}
               </div>
               <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/register" className="marketing-cta-primary !rounded-full">
+                <Link href="/register" className="marketing-cta-primary rounded-full!">
                   Start free trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full">
-                  <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
+                <Link href="/chat/demo" className="marketing-cta-secondary rounded-full!">
+                  <MessageSquareMore className="h-4 w-4 text-app-primary" />
                   Try live demo
                 </Link>
               </div>
@@ -182,12 +182,12 @@ export default function ProductPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               {modules.slice(0, 4).map((module) => (
                 <div key={module.name} className="marketing-showcase-card p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#efeaff] text-[#7C63F3] shadow-[0_16px_24px_-20px_rgb(124_99_243/0.65)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-500 shadow-[0_16px_24px_-20px_rgb(124_99_243/0.65)]">
                     <module.icon className="h-5 w-5" />
                   </div>
-                  <p className="mt-5 text-[1.05rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{module.name}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#5C6C7D]">{module.tagline}</p>
-                  <p className="mt-4 text-[0.76rem] font-semibold uppercase tracking-[0.1em] text-[#7C63F3]">
+                  <p className="mt-5 text-[1.05rem] font-semibold tracking-[-0.02em] text-app-text">{module.name}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-app-text-muted">{module.tagline}</p>
+                  <p className="mt-4 text-[0.76rem] font-semibold uppercase tracking-widest text-violet-500">
                     {module.details[0]}
                   </p>
                 </div>
@@ -211,12 +211,12 @@ export default function ProductPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-white/80 bg-white px-4 py-4 shadow-sm"
+                className="flex items-center gap-3 rounded-xl border border-white/80 bg-app-surface px-4 py-4 shadow-sm"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-wash text-app-accent-dark">
                   <item.icon className="h-4 w-4" />
                 </div>
-                <span className="text-[0.9375rem] font-medium text-[#0F172A]">{item.label}</span>
+                <span className="text-[0.9375rem] font-medium text-app-text">{item.label}</span>
               </div>
             ))}
           </div>
@@ -244,7 +244,7 @@ export default function ProductPage() {
                     <ul className="mt-6 space-y-3">
                       {mod.details.map((detail) => (
                         <li key={detail} className="marketing-body flex items-start gap-3">
-                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-wash text-app-accent-dark">
                             <Check className="h-3.5 w-3.5" />
                           </div>
                           {detail}
@@ -262,15 +262,15 @@ export default function ProductPage() {
                       <div className="marketing-icon-wrap mb-5 h-12 w-12">
                         <mod.icon className="h-6 w-6" />
                       </div>
-                      <h3 className="text-lg font-semibold text-[#0F172A]">{mod.name}</h3>
-                      <p className="mt-2 text-sm text-[#64748B]">{mod.tagline}</p>
+                      <h3 className="text-lg font-semibold text-app-text">{mod.name}</h3>
+                      <p className="mt-2 text-sm text-app-text-muted">{mod.tagline}</p>
                       <div className="mt-6 space-y-2.5">
                         {mod.details.slice(0, 3).map((detail) => (
                           <div
                             key={detail}
-                            className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0F172A]"
+                            className="flex items-center gap-3 rounded-lg border border-app-border bg-app-surface-alt px-4 py-3 text-sm font-medium text-app-text"
                           >
-                            <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                            <Check className="h-4 w-4 shrink-0 text-app-primary" />
                             {detail}
                           </div>
                         ))}
@@ -283,7 +283,7 @@ export default function ProductPage() {
           </div>
 
           {/* How it fits together */}
-          <section className="marketing-section border-t border-[#E2E8F0]">
+          <section className="marketing-section border-t border-app-border">
             <div className="mb-12 max-w-2xl">
               <div className="marketing-kicker mb-5">
                 <Workflow className="h-3 w-3" />
@@ -322,9 +322,9 @@ export default function ProductPage() {
                 },
               ].map((item) => (
                 <div key={item.step} className="marketing-card p-6">
-                  <span className="text-3xl font-bold text-[#E2E8F0]">{item.step}</span>
-                  <h3 className="mt-4 text-base font-semibold text-[#0F172A]">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[#475569]">{item.body}</p>
+                  <span className="text-3xl font-bold text-app-border">{item.step}</span>
+                  <h3 className="mt-4 text-base font-semibold text-app-text">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-app-text-muted">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -335,10 +335,10 @@ export default function ProductPage() {
         {/* CTA */}
         <section className="marketing-final-act">
           <div className="marketing-container">
-            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
+            <div className="overflow-hidden rounded-3xl bg-app-primary px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
               <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-widest text-teal-100">
                     <Sparkles className="h-3.5 w-3.5" />
                     Ready to see it live?
                   </div>
@@ -352,7 +352,7 @@ export default function ProductPage() {
                 <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-surface px-8 py-4 text-[1rem] font-semibold text-app-primary shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free — 14 days
                     <ArrowRight className="h-4 w-4" />

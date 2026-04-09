@@ -27,7 +27,7 @@ export default function TermsPage() {
             <p className="mt-4 text-base font-medium text-slate-500">
               Last updated: {lastUpdated}
             </p>
-            <p className="marketing-lead mt-6 !max-w-none">
+            <p className="marketing-lead mt-6 max-w-none!">
               These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of the Clinic AI platform. By creating an account or using the service, you agree to be bound by these Terms. If you do not agree, do not use the platform.
             </p>
           </div>
@@ -51,8 +51,8 @@ export default function TermsPage() {
 
             <section>
               <h2>2. Not medical advice</h2>
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                <p className="!font-semibold !text-[#0F172A]">
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-app-surface p-6 shadow-sm sm:p-8">
+                <p className="font-semibold! text-app-text!">
                   Clinic AI is strictly an administrative intake and scheduling tool.
                 </p>
                 <p className="mt-3">
@@ -135,7 +135,7 @@ export default function TermsPage() {
               <div className="mt-4 space-y-4">
                 <p>
                   Our handling of personal data is described in the{" "}
-                  <Link href="/privacy" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  <Link href="/privacy" className="font-semibold text-app-primary hover:text-app-accent-dark">
                     Privacy Policy
                   </Link>
                   , which is incorporated into these Terms by reference. By using the platform, you consent to the data practices described in the Privacy Policy.
@@ -217,7 +217,7 @@ export default function TermsPage() {
               <div className="mt-4">
                 <p>
                   For questions about these Terms, please use the{" "}
-                  <Link href="/contact" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+                  <Link href="/contact" className="font-semibold text-app-primary hover:text-app-accent-dark">
                     contact page
                   </Link>
                   .

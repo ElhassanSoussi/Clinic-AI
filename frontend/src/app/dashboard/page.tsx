@@ -153,7 +153,7 @@ export default function DashboardPage() {
     if (clinic && systemStatus === "LIVE") {
       return (
         <EmptyState
-          icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
+          icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
           title="No activity yet"
           description="Your assistant is live. Activity appears as patients use web chat (and SMS when configured). No volume yet is normal right after go-live."
           action={
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 href={`/chat/${clinic.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                className="app-btn app-btn-primary gap-2 text-xs
               >
                 <MessageSquareMore className="h-3.5 w-3.5" />
                 Test assistant
@@ -175,14 +175,14 @@ export default function DashboardPage() {
     if (clinic && systemStatus === "READY") {
       return (
         <EmptyState
-          icon={<MessageSquareMore className="h-5 w-5 text-[#64748B]" />}
+          icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
           title="Ready to go live"
           description="Setup is complete. Use Go live in the top bar when you want patients to see an active assistant on your public chat page."
           action={
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link
                 href={settingsHref()}
-                className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+                className="app-btn app-btn-secondary gap-2 text-sm"
               >
                 <Settings className="h-4 w-4" />
                 Review settings
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                   href={`/chat/${clinic.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+                  className="app-btn app-btn-primary gap-2 text-sm
                 >
                   <MessageSquareMore className="h-4 w-4" />
                   Preview patient chat
@@ -205,13 +205,13 @@ export default function DashboardPage() {
     }
     return (
       <EmptyState
-        icon={<MessageSquareMore className="w-5 h-5 text-[#64748B]" />}
+        icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
         title="Setup not complete"
         description="Complete your clinic details in settings so the assistant knows how to respond accurately."
         action={
           <button
             onClick={() => router.push(settingsHref())}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+            className="app-btn app-btn-primary gap-2 text-xs"
           >
             <Settings className="h-3.5 w-3.5" />
             Open settings
@@ -260,7 +260,7 @@ export default function DashboardPage() {
   ] as const;
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-5">
       <PageHeader
         showDivider
         eyebrow={
@@ -270,21 +270,15 @@ export default function DashboardPage() {
           </>
         }
         title="Command center"
-        description="A real front-desk command surface for pressure, pipeline, bookings, and what your team should do next."
+        description="Pressure, pipeline, bookings, and what your team should do next."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
-              href="/dashboard/inbox"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
-            >
+            <Link href="/dashboard/inbox" className="app-btn app-btn-secondary gap-2">
               <Inbox className="h-3.5 w-3.5" />
               Open inbox
             </Link>
             {billing && billing.plan !== "premium" ? (
-              <Link
-                href="/dashboard/billing"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#99f6e4] bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
-              >
+              <Link href="/dashboard/billing" className="app-btn app-btn-primary gap-2">
                 <Zap className="h-3.5 w-3.5" />
                 Upgrade plan
               </Link>
@@ -297,64 +291,57 @@ export default function DashboardPage() {
         <ActivationSetupBand clinic={clinic} conversationsTotal={analytics.conversations_total} />
       ) : null}
 
-      {/* ── First lead success banner ── */}
+      {/* Degraded analytics warning */}
       {analyticsDegraded ? (
-        <div className="flex flex-wrap items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3">
+        <div className="ds-card flex flex-wrap items-start gap-3 border-amber-200 bg-amber-50/80 px-4 py-3">
           <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-amber-900">Front-desk metrics did not load</p>
             <p className="mt-0.5 text-xs leading-relaxed text-amber-800/90">
-              The rest of the dashboard is still available. Counts below may show zero until the metrics service responds — use &ldquo;Try again&rdquo; or refresh shortly.
+              Counts below may show zero until the metrics service responds.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void loadDashboard()}
-            className="shrink-0 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+            className="app-btn app-btn-secondary shrink-0 text-xs"
           >
             Retry metrics
           </button>
         </div>
       ) : null}
 
+      {/* Welcome from onboarding */}
       {showWelcomeFromOnboarding && (
-        <div className="rounded-xl border border-[#99f6e4] bg-[#CCFBF1]/50 px-4 py-4">
+        <div className="ds-card border-teal-200 bg-teal-50/50 px-4 py-4">
           <div className="flex flex-wrap items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-              <Rocket className="h-5 w-5 text-[#0F766E]" aria-hidden />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+              <Rocket className="h-4 w-4 text-app-primary" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#115E59]">Setup complete — you&apos;re on the dashboard</p>
-              <p className="mt-1 text-sm leading-relaxed text-[#475569]">
-                Onboarding saved your clinic profile. <span className="font-semibold text-[#0F172A]">Next:</span> confirm
-                details in Settings, open <span className="font-semibold text-[#0F172A]">Patient Chat</span> from the
-                sidebar to preview your assistant, then use <span className="font-semibold text-[#0F172A]">Go live</span>{" "}
-                in the header when you are ready. First patient threads appear in Inbox; captured requests surface in
-                Leads.
+              <p className="text-sm font-semibold text-teal-900">Setup complete — you&apos;re on the dashboard</p>
+              <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
+                Confirm details in Settings, preview your assistant via{" "}
+                <span className="font-semibold text-app-text">Patient Chat</span>, then{" "}
+                <span className="font-semibold text-app-text">Go live</span> when ready.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowWelcomeFromOnboarding(false)}
-              className="shrink-0 rounded-lg p-1 text-[#64748B] transition-colors hover:bg-white/80 hover:text-[#0F172A]"
+              className="shrink-0 rounded-lg p-1 text-teal-400 hover:text-teal-600"
               aria-label="Dismiss"
             >
               ×
             </button>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#99f6e4]/60 pt-4">
-            <Link
-              href={settingsHref()}
-              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
-            >
-              <Settings className="h-4 w-4" />
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-teal-200/60 pt-3">
+            <Link href={settingsHref()} className="app-btn app-btn-secondary gap-2 text-sm">
+              <Settings className="h-3.5 w-3.5" />
               Open settings
             </Link>
-            <Link
-              href="/dashboard/inbox"
-              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-sm font-semibold text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC]"
-            >
-              <Inbox className="h-4 w-4" />
+            <Link href="/dashboard/inbox" className="app-btn app-btn-secondary gap-2 text-sm">
+              <Inbox className="h-3.5 w-3.5" />
               Inbox
             </Link>
             {clinic?.slug ? (
@@ -362,9 +349,9 @@ export default function DashboardPage() {
                 href={`/chat/${clinic.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+                className="app-btn app-btn-primary gap-2 text-sm"
               >
-                <MessageSquareMore className="h-4 w-4" />
+                <MessageSquareMore className="h-3.5 w-3.5" />
                 Preview chat
               </a>
             ) : null}
@@ -372,8 +359,9 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* First lead success */}
       {showFirstLeadSuccess && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
+        <div className="ds-card border-emerald-200 bg-emerald-50/40 px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
@@ -394,21 +382,18 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Billing alerts ── */}
+      {/* Billing alerts */}
       {billing && (
         <div className="space-y-3">
           {leadUsage?.isAtLimit && billing.plan !== "trial" && (
-            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
+            <div className="ds-card border-rose-200 bg-rose-50/60 px-4 py-3">
               <div className="flex flex-wrap items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
                   <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
                 </div>
-                <Link
-                  href="/dashboard/billing"
-                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#0F766E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
-                >
+                <Link href="/dashboard/billing" className="app-btn app-btn-primary shrink-0 gap-1.5 text-xs">
                   <Zap className="h-3 w-3" />
                   Upgrade
                 </Link>
@@ -417,7 +402,7 @@ export default function DashboardPage() {
           )}
 
           {billing.subscription_status === "past_due" && (
-            <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
+            <div className="ds-card border-rose-200 bg-rose-50/60 px-4 py-3">
               <div className="flex flex-wrap items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
                 <div className="min-w-0 flex-1">
@@ -426,7 +411,7 @@ export default function DashboardPage() {
                 </div>
                 <Link
                   href="/dashboard/billing"
-                  className="inline-flex min-h-10 shrink-0 items-center rounded-xl border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                  className="app-btn app-btn-secondary shrink-0 border-rose-200 text-xs text-rose-700 hover:bg-rose-100"
                 >
                   Fix payment
                 </Link>
@@ -436,54 +421,56 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Main layout: canvas + right rail ── */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_280px]">
+      {/* ═══ Main grid: canvas + right rail ═══ */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_17rem]">
         {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-5 xl:order-none">
-          <div className="wave-command-slab workspace-command-hero">
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(16rem,0.72fr)]">
+        <div className="order-1 min-w-0 space-y-5 xl:order-0
+
+          {/* Pressure hero slab */}
+          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
               <div className="min-w-0">
-                <p className="workspace-section-label">Front-desk pressure</p>
-                <h2 className="mt-2 text-[1.45rem] font-semibold tracking-[-0.04em] text-[#0F172A]">
+                <p className="ds-eyebrow text-app-text-muted">Front-desk pressure</p>
+                <h2 className="mt-2 text-lg font-semibold tracking-tight text-app-text">
                   Scan what needs attention, then move straight into the workbench pages.
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
-                  This overview is your operational summary, not a separate analytics product. Unresolved conversations, follow-up load, review pressure, bookings, and training readiness all map directly to the pages your team works from next.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {quickRoutes.map((r) => (
                     <Link
                       key={r.href}
                       href={r.href}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-[0_12px_20px_-18px_rgb(12_18_32/0.35)] transition-colors hover:border-[#CBD5E1] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                      className="app-btn app-btn-secondary gap-1.5 text-xs"
                     >
                       {r.label}
-                      <ArrowRight className="h-3 w-3 text-[#94A3B8]" />
+                      <ArrowRight className="h-3 w-3 text-app-text-muted" />
                     </Link>
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-[#dce8f5] bg-white/95 px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(12_18_32/0.25)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Unresolved</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-[#0F172A]">{safeCount(analytics.unresolved_count)}</p>
+
+              {/* Pressure counters */}
+              <div className="flex gap-2">
+                <div className="ds-card flex w-24 flex-col items-center justify-center border-app-border bg-app-surface-alt py-3">
+                  <p className="ds-eyebrow text-app-text-muted">Unresolved</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-app-text">{safeCount(analytics.unresolved_count)}</p>
                 </div>
-                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(217_119_6/0.28)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">Follow-up</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-amber-900">{safeCount(analytics.follow_up_needed_count)}</p>
+                <div className="ds-card flex w-24 flex-col items-center justify-center border-amber-200 bg-amber-50/60 py-3">
+                  <p className="ds-eyebrow text-amber-700">Follow-up</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-amber-900">{safeCount(analytics.follow_up_needed_count)}</p>
                 </div>
-                <div className="rounded-2xl border border-[#d8cdfd] bg-[#f5f1ff] px-3 py-3.5 text-center shadow-[0_18px_28px_-24px_rgb(124_99_243/0.34)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6c58c9]">Review</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-[#3d2c84]">{safeCount(analytics.human_review_required_count)}</p>
+                <div className="ds-card flex w-24 flex-col items-center justify-center border-violet-200 bg-violet-50/60 py-3">
+                  <p className="ds-eyebrow text-violet-700">Review</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-violet-900">{safeCount(analytics.human_review_required_count)}</p>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="wave-zone-panel space-y-4">
+          {/* Pipeline & bookings */}
+          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
             <div>
-              <p className="workspace-section-label">Pipeline &amp; bookings</p>
-              <p className="mt-1 text-sm text-[#475569]">Volume and booking posture—pair with appointments for timing and deposits.</p>
+              <p className="ds-eyebrow text-app-text-muted">Pipeline &amp; bookings</p>
+              <p className="mt-1 text-sm text-app-text-muted">Volume and booking posture — pair with appointments for timing and deposits.</p>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {statCards.map((card) => (
@@ -491,47 +478,32 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              <MetricCard
-                label="Upcoming appointments"
-                value={upcomingAppointments.length}
-                icon={CalendarDays}
-                tone="teal"
-                detail="Confirmed bookings scheduled."
-              />
-              <MetricCard
-                label="Needs attention"
-                value={attentionAppointments.length}
-                icon={AlertTriangle}
-                tone="amber"
-                detail="Reschedules, cancellations, deposit follow-ups."
-              />
+              <MetricCard label="Upcoming appointments" value={upcomingAppointments.length} icon={CalendarDays} tone="teal" detail="Confirmed bookings scheduled." />
+              <MetricCard label="Needs attention" value={attentionAppointments.length} icon={AlertTriangle} tone="amber" detail="Reschedules, cancellations, deposit follow-ups." />
               <Link
                 href="/dashboard/appointments"
-                className="flex items-start justify-between rounded-xl border border-[#E2E8F0] bg-white px-4 py-3.5 shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
+                className="ds-card flex items-start justify-between border-app-border bg-app-surface px-4 py-3.5 transition-all hover:bg-app-surface-alt"
               >
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B]">Appointments</p>
-                  <p className="mt-1.5 text-sm font-semibold text-[#0F172A]">Manage bookings, reminders, and deposits</p>
+                  <p className="ds-eyebrow text-app-text-muted">Appointments</p>
+                  <p className="mt-1.5 text-sm font-semibold text-app-text">Manage bookings, reminders, and deposits</p>
                 </div>
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#CCFBF1] text-[#0F766E]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-teal-50 text-app-primary">
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>
             </div>
-          </div>
+          </section>
 
-          <div className="wave-zone-panel space-y-4">
+          {/* Throughput & motion */}
+          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="workspace-section-label">Throughput &amp; motion</p>
-                <p className="mt-1 text-sm text-[#475569]">How work moved—value, automation, deposits, and review load.</p>
+                <p className="ds-eyebrow text-app-text-muted">Throughput &amp; motion</p>
+                <p className="mt-1 text-sm text-app-text-muted">How work moved — value, automation, deposits, and review load.</p>
               </div>
-              <Link
-                href="/dashboard/inbox"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-              >
-                Open inbox
-                <ArrowRight className="h-3 w-3" />
+              <Link href="/dashboard/inbox" className="text-xs font-semibold text-app-primary hover:underline">
+                Open inbox →
               </Link>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -539,85 +511,78 @@ export default function DashboardPage() {
                 <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
               ))}
             </div>
-
-            <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">Performance note</p>
-              <p className="mt-0.5 text-sm text-[#475569]">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#475569]">
+            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3.5 py-2.5">
+              <p className="ds-eyebrow text-app-text-muted">Performance note</p>
+              <p className="mt-0.5 text-sm text-app-text-muted">{analytics.estimated_value_recovered_label}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-app-text-muted">
                 <span>Manual takeovers: {safeCount(analytics.manual_takeover_threads)}</span>
                 <span>Blocked for review: {safeCount(analytics.blocked_for_review_count)}</span>
                 <span>AI resolution: {clampPercentInt(analytics.ai_resolution_estimate)}%</span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="wave-zone-panel space-y-3">
+          {/* Contact rhythm */}
+          <section className="ds-card space-y-3 border-app-border bg-app-surface px-5 py-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="workspace-section-label">Contact rhythm</p>
-                <p className="mt-1 text-sm text-[#475569]">When patients reach out most, from live message timestamps.</p>
+                <p className="ds-eyebrow text-app-text-muted">Contact rhythm</p>
+                <p className="mt-1 text-sm text-app-text-muted">When patients reach out most, from live message timestamps.</p>
               </div>
-              <Clock className="h-3.5 w-3.5 shrink-0 text-[#64748B]" aria-hidden />
+              <Clock className="h-3.5 w-3.5 shrink-0 text-app-text-muted" aria-hidden />
             </div>
             {!analytics.busiest_contact_hours || analytics.busiest_contact_hours.length === 0 ? (
               <EmptyState
-                icon={<Clock className="w-5 h-5 text-[#64748B]" />}
+                icon={<Clock className="h-5 w-5 text-app-text-muted" />}
                 title="Not enough data yet"
                 description="Contact-hour patterns will appear after patients begin interacting with the assistant."
               />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {analytics.busiest_contact_hours.map((bucket) => {
                   const count = typeof bucket.count === "number" && Number.isFinite(bucket.count) ? bucket.count : 0;
                   const ratio = busiestHourMaxCount > 0 ? count / busiestHourMaxCount : 0;
                   const barUnits = Number.isFinite(ratio) ? Math.max(20, Math.min(100, ratio * 100)) : 20;
                   return (
                     <div key={bucket.hour} className="flex items-center gap-3">
-                      <div className="w-20 text-xs font-medium text-[#475569]">{bucket.label}</div>
-                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[#F1F5F9]">
-                        <svg
-                          className="block h-full w-full text-[#0F766E]"
-                          viewBox="0 0 100 100"
-                          preserveAspectRatio="none"
-                          aria-hidden
-                        >
+                      <div className="w-20 text-xs font-medium text-app-text-muted">{bucket.label}</div>
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-app-surface-alt">
+                        <svg className="block h-full w-full text-app-primary" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
                           <rect width={barUnits} height="100" fill="currentColor" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium text-[#475569]">{count}</span>
+                      <span className="text-xs font-medium tabular-nums text-app-text-muted">{count}</span>
                     </div>
                   );
                 })}
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Two-column: Opportunities + Activity */}
-          <div className="wave-zone-panel">
-            <p className="workspace-section-label">Next moves</p>
-            <p className="mt-1 text-sm text-[#475569]">Follow-up pressure and the latest audit trail—short lists, not another metric wall.</p>
-            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* Opportunities + Activity */}
+          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
+            <div>
+              <p className="ds-eyebrow text-app-text-muted">Next moves</p>
+              <p className="mt-1 text-sm text-app-text-muted">Follow-up pressure and the latest audit trail.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <SurfaceCard
                 title="Opportunities"
                 description="Stalled requests and follow-up items that may need action."
                 action={
-                  <Link
-                    href="/dashboard/opportunities"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-                  >
-                    View all
-                    <ArrowRight className="h-3 w-3" />
+                  <Link href="/dashboard/opportunities" className="text-xs font-semibold text-app-primary hover:underline">
+                    View all →
                   </Link>
                 }
               >
                 {opportunities.length === 0 ? (
                   <EmptyState
-                    icon={<AlertTriangle className="w-5 h-5 text-[#64748B]" />}
+                    icon={<AlertTriangle className="h-5 w-5 text-app-text-muted" />}
                     title="No follow-up items"
                     description="Stalled or at-risk booking requests will surface here when they need attention."
                   />
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {opportunities.slice(0, 5).map((opportunity) => {
                       let href = "/dashboard/opportunities";
                       if (opportunity.conversation_id) {
@@ -631,10 +596,10 @@ export default function DashboardPage() {
                         <Link
                           key={opportunity.id}
                           href={href}
-                          className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#E2E8F0] hover:bg-[#F8FAFC]"
+                          className="app-list-row flex items-center gap-3"
                         >
                           <div
-                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
                               ? "bg-rose-50 text-rose-600"
                               : "bg-amber-50 text-amber-600"
                               }`}
@@ -642,12 +607,12 @@ export default function DashboardPage() {
                             <AlertTriangle className="h-3.5 w-3.5" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-[#0F172A]">{opportunity.title}</p>
-                            <p className="mt-0.5 truncate text-xs text-[#475569]">
+                            <p className="truncate text-sm font-medium text-app-text">{opportunity.title}</p>
+                            <p className="mt-0.5 truncate text-xs text-app-text-muted">
                               {opportunity.customer_name} · {opportunity.detail}
                             </p>
                           </div>
-                          <span className="shrink-0 text-xs text-[#64748B]">
+                          <span className="shrink-0 text-xs text-app-text-muted">
                             {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
                           </span>
                         </Link>
@@ -661,19 +626,15 @@ export default function DashboardPage() {
                 title="Recent activity"
                 description="Latest events across the clinic."
                 action={
-                  <Link
-                    href="/dashboard/activity"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#115E59] hover:text-[#115E59]"
-                  >
-                    View all
-                    <ArrowRight className="h-3 w-3" />
+                  <Link href="/dashboard/activity" className="text-xs font-semibold text-app-primary hover:underline">
+                    View all →
                   </Link>
                 }
               >
                 {activity.length === 0 ? (
                   emptyActivityState
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {activity.slice(0, 8).map((event, index) => {
                       const config = EVENT_CONFIG[event.type] ?? EVENT_CONFIG.lead_created;
                       const Icon = config.icon;
@@ -682,29 +643,29 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={`${event.type}-${event.resource_id}-${index}`}
-                          className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] px-3.5 py-3"
+                          className="app-list-row flex items-center gap-3"
                         >
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
+                          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
                             <Icon className={`h-3.5 w-3.5 ${config.color}`} />
                           </div>
                           <div className="min-w-0 flex-1">
                             {isLead ? (
                               <Link
                                 href={`/dashboard/leads/${event.resource_id}`}
-                                className="block truncate text-sm font-medium text-[#0F172A] hover:text-[#115E59]"
+                                className="block truncate text-sm font-medium text-app-text hover:text-app-primary"
                               >
                                 {event.title}
                               </Link>
                             ) : (
-                              <p className="truncate text-sm font-medium text-[#0F172A]">{event.title}</p>
+                              <p className="truncate text-sm font-medium text-app-text">{event.title}</p>
                             )}
-                            <p className="mt-0.5 truncate text-xs text-[#475569]">{event.detail}</p>
+                            <p className="mt-0.5 truncate text-xs text-app-text-muted">{event.detail}</p>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
                             <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${config.bg} ${config.color}`}>
                               {config.label}
                             </span>
-                            <span className="text-xs text-[#64748B]">{timeAgo(event.timestamp)}</span>
+                            <span className="text-xs text-app-text-muted">{timeAgo(event.timestamp)}</span>
                           </div>
                         </div>
                       );
@@ -713,7 +674,7 @@ export default function DashboardPage() {
                 )}
               </SurfaceCard>
             </div>
-          </div>
+          </section>
 
           {/* All caught up */}
           {safeCount(analytics.conversations_total) > 0 &&
@@ -727,16 +688,16 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Right rail ── */}
-        <div className="order-2 space-y-3 xl:order-none">
+        <div className="order-2 space-y-3 xl:order-0
           <RightRailCard title="Workspace state">
-            <div className="space-y-2">
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs text-[#475569]">System</p>
-                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">{systemStatus ?? "Not ready"}</p>
+            <div className="space-y-1.5">
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs text-app-text-muted">System</p>
+                <p className="mt-0.5 text-sm font-semibold text-app-text">{systemStatus ?? "Not ready"}</p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs text-[#475569]">Current plan</p>
-                <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs text-app-text-muted">Current plan</p>
+                <p className="mt-0.5 text-sm font-semibold text-app-text">
                   {billing?.plan
                     ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1)
                     : "Unavailable"}
@@ -746,7 +707,7 @@ export default function DashboardPage() {
           </RightRailCard>
 
           <RightRailCard title="Quick routes">
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {[
                 { href: "/dashboard/inbox", label: "Inbox", detail: "Review active conversations." },
                 { href: "/dashboard/appointments", label: "Appointments", detail: "Bookings, reminders, and deposits." },
@@ -756,32 +717,32 @@ export default function DashboardPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-lg border border-[#E2E8F0] px-3 py-2.5 transition-all hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
+                  className="app-list-row block"
                 >
-                  <p className="text-sm font-medium text-[#0F172A]">{item.label}</p>
-                  <p className="mt-0.5 text-xs text-[#475569]">{item.detail}</p>
+                  <p className="text-sm font-medium text-app-text">{item.label}</p>
+                  <p className="mt-0.5 text-xs text-app-text-muted">{item.detail}</p>
                 </Link>
               ))}
             </div>
           </RightRailCard>
 
           <RightRailCard title="Daily focus">
-            <div className="space-y-2">
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-sm font-medium text-[#0F172A]">Human review</p>
-                <p className="mt-0.5 text-xs text-[#475569]">
+            <div className="space-y-1.5">
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-sm font-medium text-app-text">Human review</p>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   {safeCount(analytics.human_review_required_count)} conversations waiting for a staff decision.
                 </p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-sm font-medium text-[#0F172A]">Attention required</p>
-                <p className="mt-0.5 text-xs text-[#475569]">
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-sm font-medium text-app-text">Attention required</p>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   {attentionAppointments.length} bookings blocked by prep, reschedule, or deposit needs.
                 </p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-sm font-medium text-[#0F172A]">Opportunity pressure</p>
-                <p className="mt-0.5 text-xs text-[#475569]">
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-sm font-medium text-app-text">Opportunity pressure</p>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   {safeCount(analytics.follow_up_needed_count)} follow-ups and {safeCount(analytics.unresolved_count)}{" "}
                   unresolved requests.
                 </p>

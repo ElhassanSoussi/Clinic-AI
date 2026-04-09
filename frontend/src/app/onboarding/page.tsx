@@ -169,7 +169,7 @@ function FaqStepContent({
                 className="p-4 border border-slate-100 rounded-lg bg-slate-50"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-sm font-medium text-[#64748B]">
+                  <span className="text-sm font-medium text-app-text-muted">
                     FAQ #{i + 1}
                   </span>
                   <button
@@ -186,7 +186,7 @@ function FaqStepContent({
                   onChange={(e) =>
                     updateFaq(i, "question", e.target.value)
                   }
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 mb-3"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500 mb-3"
                   placeholder="Question"
                 />
                 <textarea
@@ -195,7 +195,7 @@ function FaqStepContent({
                     updateFaq(i, "answer", e.target.value)
                   }
                   rows={2}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500 resize-none"
                   placeholder="Answer"
                 />
               </div>
@@ -321,7 +321,7 @@ function GoogleSheetsStepContent({
             </p>
           ) : null}
           {googleSheetId ? (
-            <div className="mt-4 rounded-lg border border-emerald-200 bg-white p-3 text-sm text-emerald-800">
+            <div className="mt-4 rounded-lg border border-emerald-200 bg-app-surface p-3 text-sm text-emerald-800">
               Google Sheets is connected.
               <div className="mt-2 flex flex-wrap gap-3">
                 <code className="rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-900">{googleSheetId}</code>
@@ -338,7 +338,7 @@ function GoogleSheetsStepContent({
           ) : null}
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-200 bg-white">
+        <div className="p-4 rounded-xl border border-slate-200 bg-app-surface">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h4 className="text-sm font-semibold text-slate-900 mb-1">Microsoft Excel</h4>
@@ -398,7 +398,7 @@ function GoogleSheetsStepContent({
           </button>
 
           {showManualSetup ? (
-            <div className="border-t border-slate-200 px-4 py-4 space-y-6 bg-white rounded-b-xl">
+            <div className="border-t border-slate-200 px-4 py-4 space-y-6 bg-app-surface rounded-b-xl">
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                 <h4 className="text-sm font-semibold text-blue-800 mb-2">
                   Manual setup instructions
@@ -407,7 +407,7 @@ function GoogleSheetsStepContent({
                   <li>Create a Google Sheet (or use an existing one)</li>
                   <li>
                     <span>Click <b>Share</b> and add this email as an <b>Editor</b>:</span>
-                    <code className="block mt-1 bg-white/80 px-2 py-1 rounded text-blue-900 select-all break-all">
+                    <code className="block mt-1 bg-app-surface/80 px-2 py-1 rounded text-blue-900 select-all break-all">
                       clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
                     </code>
                   </li>
@@ -427,7 +427,7 @@ function GoogleSheetsStepContent({
                     setGoogleSheetId(e.target.value);
                     setSheetsValidation(null);
                   }}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   placeholder="https://docs.google.com/spreadsheets/d/..."
                 />
               </div>
@@ -441,7 +441,7 @@ function GoogleSheetsStepContent({
                   type="text"
                   value={googleSheetTab}
                   onChange={(e) => setGoogleSheetTab(e.target.value)}
-                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   placeholder="Sheet1"
                 />
               </div>
@@ -461,7 +461,7 @@ function GoogleSheetsStepContent({
                       }`}
                   />
                   <div
-                    className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""
+                    className={`dot absolute left-1 top-1 bg-app-surface w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""
                       }`}
                   />
                 </div>
@@ -483,13 +483,13 @@ function GoogleSheetsStepContent({
                       onChange={(e) =>
                         setAvailabilitySheetTab(e.target.value)
                       }
-                      className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                      className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       placeholder="Availability"
                     />
                   </div>
                   <div className="p-3 bg-teal-50 rounded-lg border border-teal-100 text-xs text-teal-700">
                     Required headers:{" "}
-                    <code className="bg-white/80 px-1 py-0.5 rounded">
+                    <code className="bg-app-surface/80 px-1 py-0.5 rounded">
                       Date | Time | Status | Patient Name | Lead ID
                     </code>
                   </div>
@@ -514,7 +514,7 @@ function GoogleSheetsStepContent({
                         }`}
                     />
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? "translate-x-4" : ""
+                      className={`dot absolute left-1 top-1 bg-app-surface w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? "translate-x-4" : ""
                         }`}
                     />
                   </div>
@@ -528,7 +528,7 @@ function GoogleSheetsStepContent({
                       type="email"
                       value={notificationEmail}
                       onChange={(e) => setNotificationEmail(e.target.value)}
-                      className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                       placeholder={email || "your@email.com"}
                     />
                   </div>
@@ -630,7 +630,7 @@ function TestChatStepContent({
         This preview uses your saved clinic slug and the same chat API as the live widget — not a canned demo transcript.
         Try “I&apos;d like to book an appointment” or ask about a service you added in step 2.
       </p>
-      <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-[var(--color-app-border)] chat-shell-premium">
+      <div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-app-border chat-shell-premium">
         <div
           className="onboarding-chat-header px-4 py-3.5 text-white flex items-center gap-2"
         >
@@ -645,7 +645,7 @@ function TestChatStepContent({
 
         <div className="chat-thread-well h-80 overflow-y-auto space-y-3 p-4">
           {chatMessages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed border-slate-200 bg-white">
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed border-slate-200 bg-app-surface">
               <MessageSquare className="w-8 h-8 text-slate-300 mb-3" aria-hidden />
               <p className="text-sm font-medium text-slate-700">Send a first message</p>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-xs">
@@ -662,7 +662,7 @@ function TestChatStepContent({
               <div
                 className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm ${msg.role === "user"
                   ? "bg-teal-600 text-white rounded-br-md"
-                  : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
+                  : "bg-app-surface text-slate-700 border border-slate-200 rounded-bl-md"
                   }`}
               >
                 {msg.content}
@@ -671,7 +671,7 @@ function TestChatStepContent({
           ))}
           {chatSending && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3">
+              <div className="bg-app-surface border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3">
                 <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
               </div>
             </div>
@@ -679,7 +679,7 @@ function TestChatStepContent({
           <div ref={chatEndRef} />
         </div>
 
-        <div className="flex gap-2 border-t border-slate-100/90 bg-gradient-to-b from-white via-slate-50/40 to-slate-50/80 p-3">
+        <div className="flex gap-2 border-t border-slate-100/90 bg-linear-to-b from-white via-slate-50/40 to-slate-50/80 p-3">
           <input
             type="text"
             value={chatInput}
@@ -690,14 +690,14 @@ function TestChatStepContent({
                 sendChatMessage();
               }
             }}
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm transition-all placeholder:text-slate-400 focus:border-[var(--color-app-primary-hover)] focus:ring-2 focus:ring-[var(--color-app-primary-light)]/90"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-app-surface px-3 py-2.5 text-sm transition-all placeholder:text-slate-400 focus:border-app-primary-hover focus:ring-2 focus:ring-app-primary-light/90"
             placeholder="Try: “What services do you offer?”"
           />
           <button
             onClick={sendChatMessage}
             disabled={chatSending || !chatInput.trim()}
             aria-label="Send chat message"
-            className="shrink-0 rounded-xl bg-[var(--color-app-primary-hover)] px-3 py-2 text-white shadow-sm transition-colors hover:bg-[var(--color-app-primary-deep)] disabled:opacity-50"
+            className="shrink-0 rounded-xl bg-app-primary-hover px-3 py-2 text-white shadow-sm transition-colors hover:bg-app-primary-deep disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -780,7 +780,7 @@ function EmbedWidgetStepContent({
             </li>
             <li>
               Paste the code just before the{" "}
-              <code className="bg-white/80 px-1 py-0.5 rounded">
+              <code className="bg-app-surface/80 px-1 py-0.5 rounded">
                 &lt;/body&gt;
               </code>{" "}
               closing tag
@@ -808,7 +808,7 @@ function EmbedWidgetStepContent({
               You can also share this link directly with patients:
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 text-sm bg-white/80 px-3 py-2 rounded border border-teal-200 text-teal-900 truncate">
+              <code className="flex-1 text-sm bg-app-surface/80 px-3 py-2 rounded border border-teal-200 text-teal-900 truncate">
                 {directChatLink}
               </code>
               <a
@@ -948,7 +948,7 @@ function OnboardingPageProgress({
           </h1>
           {guidance ? <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">{guidance}</p> : null}
         </div>
-        <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-center sm:text-right shadow-sm">
+        <div className="shrink-0 rounded-lg border border-slate-200 bg-app-surface px-3 py-2 text-center sm:text-right shadow-sm">
           <p className="text-xs font-medium text-slate-500">Progress</p>
           <p className="text-lg font-semibold tabular-nums text-teal-700">{pct}%</p>
         </div>
@@ -1431,7 +1431,7 @@ export default function OnboardingPage() {
   if (authLoading || loading) {
     return (
       <div className="workspace-flow-ambient flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-app-primary-hover)] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-app-primary-hover border-t-transparent" />
       </div>
     );
   }
@@ -1441,16 +1441,16 @@ export default function OnboardingPage() {
       {/* Header */}
       <header className="flow-sticky-header sticky top-0 z-10">
         <div className="mx-auto flex h-[4.25rem] max-w-5xl items-center gap-3 px-4 sm:px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-app-primary-hover)] shadow-sm shadow-teal-900/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-primary-hover shadow-sm shadow-teal-900/10">
             <Bot className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <span className="block text-[0.9375rem] font-semibold leading-tight text-[var(--color-app-text)]">
+            <span className="block text-[0.9375rem] font-semibold leading-tight text-app-text">
               Clinic AI
             </span>
-            <span className="text-sm text-[var(--color-app-text-muted)]">Front desk assistant setup</span>
+            <span className="text-sm text-app-text-muted">Front desk assistant setup</span>
           </div>
-          <span className="ml-auto hidden shrink-0 tabular-nums text-sm font-medium text-[var(--color-app-text-muted)] sm:block">
+          <span className="ml-auto hidden shrink-0 tabular-nums text-sm font-medium text-app-text-muted sm:block">
             Step {step}/{STEPS.length}
           </span>
         </div>
@@ -1481,7 +1481,7 @@ export default function OnboardingPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.name
+                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-app-surface focus:ring-1 ${errors.name
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
                       : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
                       }`}
@@ -1501,7 +1501,7 @@ export default function OnboardingPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.phone
+                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-app-surface focus:ring-1 ${errors.phone
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500"
                         : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
                         }`}
@@ -1522,7 +1522,7 @@ export default function OnboardingPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-white focus:ring-1 ${errors.email
+                      className={`w-full px-3.5 py-2.5 text-sm border rounded-lg bg-app-surface focus:ring-1 ${errors.email
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500"
                         : "border-slate-200 focus:border-teal-500 focus:ring-teal-500"
                         }`}
@@ -1544,7 +1544,7 @@ export default function OnboardingPage() {
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     placeholder="123 Main St, Suite 100, City, State"
                   />
                 </div>
@@ -1564,7 +1564,7 @@ export default function OnboardingPage() {
                         type="text"
                         value={assistantName}
                         onChange={(e) => setAssistantName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         placeholder='e.g., "Sarah from Smile Dental"'
                       />
                       <p className="mt-1 text-xs text-slate-400">
@@ -1639,7 +1639,7 @@ export default function OnboardingPage() {
                         addService();
                       }
                     }}
-                    className="flex-1 px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                    className="flex-1 px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     placeholder="e.g., Teeth Cleaning, Consultation, Urgent Care"
                   />
                   <button
@@ -1689,7 +1689,7 @@ export default function OnboardingPage() {
                               prev.includes(s) ? prev : [...prev, s]
                             )
                           }
-                          className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 transition-colors"
+                          className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-app-surface border border-slate-200 rounded-full hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 transition-colors"
                         >
                           + {s}
                         </button>
@@ -1723,7 +1723,7 @@ export default function OnboardingPage() {
                       onChange={(e) =>
                         setHours({ ...hours, [day]: e.target.value })
                       }
-                      className="flex-1 px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                      className="flex-1 px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-app-surface focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       placeholder='9:00 AM - 5:00 PM or "Closed"'
                     />
                   </div>

@@ -142,15 +142,15 @@ function AppointmentDetailRail({
   return (
     <div className="space-y-3">
       {/* Patient info */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-1.5">
-              <h2 className="text-base font-bold text-[#0F172A]">{appointment.patient_name}</h2>
+              <h2 className="text-base font-bold text-app-text">{appointment.patient_name}</h2>
               <ChannelBadge channel={appointment.source} withIcon />
               <LeadStatusBadge status={appointment.lead_status} />
             </div>
-            <p className="text-xs text-[#64748B]">
+            <p className="text-xs text-app-text-muted">
               {appointment.appointment_starts_at
                 ? formatDateTime(appointment.appointment_starts_at)
                 : appointment.preferred_datetime_text || "Scheduling details still pending."}
@@ -160,7 +160,7 @@ function AppointmentDetailRail({
             {appointment.thread_id && (
               <Link
                 href={`/dashboard/inbox/${appointment.thread_id}`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Thread</span>
@@ -169,13 +169,13 @@ function AppointmentDetailRail({
             {appointment.customer_key ? (
               <Link
                 href={`/dashboard/customers/${appointment.customer_key}`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
               >
                 <UserRound className="w-3.5 h-3.5" />
                 <span>Customer</span>
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs text-[#64748B]">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-app-border px-2.5 py-1.5 text-xs text-app-text-muted">
                 <UserRound className="w-3.5 h-3.5" />
                 <span>No customer profile</span>
               </span>
@@ -185,70 +185,70 @@ function AppointmentDetailRail({
 
         <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
-              <Phone className="w-3 h-3 text-[#64748B]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-surface-alt">
+              <Phone className="w-3 h-3 text-app-text-muted" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#64748B]">Phone</p>
-              <p className="break-words text-sm font-semibold text-[#0F172A]">{appointment.patient_phone || "No phone"}</p>
+              <p className="text-xs text-app-text-muted">Phone</p>
+              <p className="wrap-break-word text-sm font-semibold text-app-text">{appointment.patient_phone || "No phone"}</p>
             </div>
           </div>
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
-              <UserRound className="w-3 h-3 text-[#64748B]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-surface-alt">
+              <UserRound className="w-3 h-3 text-app-text-muted" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#64748B]">Email</p>
-              <p className="break-words text-sm font-semibold text-[#0F172A]">{appointment.patient_email || "No email"}</p>
+              <p className="text-xs text-app-text-muted">Email</p>
+              <p className="wrap-break-word text-sm font-semibold text-app-text">{appointment.patient_email || "No email"}</p>
             </div>
           </div>
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
-              <Clock3 className="w-3 h-3 text-[#64748B]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-surface-alt">
+              <Clock3 className="w-3 h-3 text-app-text-muted" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#64748B]">Reminder</p>
-              <p className="text-sm font-semibold text-[#0F172A]">{humanizeStatus(appointment.reminder_status)}</p>
+              <p className="text-xs text-app-text-muted">Reminder</p>
+              <p className="text-sm font-semibold text-app-text">{humanizeStatus(appointment.reminder_status)}</p>
             </div>
           </div>
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#F8FAFC]">
-              <Wallet className="w-3 h-3 text-[#64748B]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-app-surface-alt">
+              <Wallet className="w-3 h-3 text-app-text-muted" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#64748B]">Deposit</p>
-              <p className="text-sm font-semibold text-[#0F172A]">{depositStatusLabel(appointment.deposit_status)}</p>
+              <p className="text-xs text-app-text-muted">Deposit</p>
+              <p className="text-sm font-semibold text-app-text">{depositStatusLabel(appointment.deposit_status)}</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2.5">
+        <div className="mt-3 rounded-lg border border-app-border bg-app-surface-alt p-2.5">
           <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${appointmentStatusClass(appointment.appointment_status)}`}>
               {appointmentStatusLabel(appointment.appointment_status)}
             </span>
-            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${appointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-[#F1F5F9] text-[#475569]"
+            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${appointment.reminder_ready ? "bg-emerald-50 text-emerald-700" : "bg-app-surface-alt text-app-text-muted"
               }`}>
               {appointment.reminder_ready ? "Reminder ready" : "Not ready"}
             </span>
           </div>
-          <p className="text-xs leading-relaxed text-[#475569]">
+          <p className="text-xs leading-relaxed text-app-text-muted">
             {reminderCaption(appointment)}
           </p>
         </div>
       </div>
 
       {/* Deposit */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <p className="text-sm font-semibold text-[#0F172A]">Booking deposit</p>
-        <p className="mt-0.5 text-xs text-[#64748B]">Request a Stripe deposit and track delivery.</p>
+      <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
+        <p className="text-sm font-semibold text-app-text">Booking deposit</p>
+        <p className="mt-0.5 text-xs text-app-text-muted">Request a Stripe deposit and track delivery.</p>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${depositStatusClass(appointment.deposit_status)}`}>
             {depositStatusLabel(appointment.deposit_status)}
           </span>
           {appointment.deposit_amount_cents ? (
-            <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+            <span className="rounded-md bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
               {formatMoney(appointment.deposit_amount_cents)}
             </span>
           ) : null}
@@ -261,7 +261,7 @@ function AppointmentDetailRail({
 
         <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[10rem_1fr]">
           <div>
-            <label htmlFor="deposit-amount" className="mb-1 block text-xs font-semibold text-[#64748B]">Amount (cents)</label>
+            <label htmlFor="deposit-amount" className="mb-1 block text-xs font-semibold text-app-text-muted">Amount (cents)</label>
             <input
               id="deposit-amount"
               type="number"
@@ -270,17 +270,17 @@ function AppointmentDetailRail({
               value={draft.depositAmountCents}
               onChange={(event) => onUpdateDraft({ depositAmountCents: event.target.value })}
               placeholder="e.g. 5000"
-              className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+              className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm text-app-text focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
             />
-            <p className="mt-1 text-xs text-[#64748B]">5000 = {formatMoney(5000)}</p>
+            <p className="mt-1 text-xs text-app-text-muted">5000 = {formatMoney(5000)}</p>
           </div>
-          <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">State</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">
+          <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">State</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">
               {depositStateCaption(appointment)}
             </p>
             {appointment.deposit_requested_at && appointment.deposit_status !== "paid" && (
-              <p className="mt-1 text-xs text-[#64748B]">Requested {formatDateTime(appointment.deposit_requested_at)}</p>
+              <p className="mt-1 text-xs text-app-text-muted">Requested {formatDateTime(appointment.deposit_requested_at)}</p>
             )}
           </div>
         </div>
@@ -289,14 +289,14 @@ function AppointmentDetailRail({
           <button
             onClick={() => onRequestDeposit(true)}
             disabled={isDepositLoading || appointment.appointment_status !== "confirmed" || appointment.deposit_status === "paid"}
-            className="rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+            className="rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
           >
             {depositButtonLabel(appointment, isDepositLoading)}
           </button>
           <button
             onClick={() => onRequestDeposit(false)}
             disabled={isDepositLoading || appointment.appointment_status !== "confirmed"}
-            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+            className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
           >
             Link only
           </button>
@@ -309,11 +309,11 @@ function AppointmentDetailRail({
           </button>
         </div>
 
-        {depositMessage && <p className="mt-2 text-xs text-[#475569]">{depositMessage}</p>}
+        {depositMessage && <p className="mt-2 text-xs text-app-text-muted">{depositMessage}</p>}
 
         {(depositLink || appointment.deposit_status === "requested") && (
           <div className="mt-3">
-            <label htmlFor="deposit-link" className="mb-1 block text-xs font-semibold text-[#64748B]">Deposit link</label>
+            <label htmlFor="deposit-link" className="mb-1 block text-xs font-semibold text-app-text-muted">Deposit link</label>
             <div className="flex gap-1.5">
               <input
                 id="deposit-link"
@@ -321,12 +321,12 @@ function AppointmentDetailRail({
                 value={depositLink}
                 readOnly
                 placeholder="Create or resend to generate a link"
-                className="h-9 min-w-0 flex-1 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs text-[#475569]"
+                className="h-9 min-w-0 flex-1 rounded-lg border border-app-border bg-app-surface-alt px-3 text-xs text-app-text-muted"
               />
               <button
                 onClick={onCopyLink}
                 disabled={!depositLink}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>Copy</span>
@@ -337,9 +337,9 @@ function AppointmentDetailRail({
       </div>
 
       {/* Edit booking */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <p className="text-sm font-semibold text-[#0F172A]">Edit booking</p>
-        <p className="mt-0.5 text-xs text-[#64748B]">Time, reason, and internal note.</p>
+      <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
+        <p className="text-sm font-semibold text-app-text">Edit booking</p>
+        <p className="mt-0.5 text-xs text-app-text-muted">Time, reason, and internal note.</p>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input
@@ -347,14 +347,14 @@ function AppointmentDetailRail({
             value={draft.date}
             onChange={(event) => onUpdateDraft({ date: event.target.value })}
             title="Appointment date"
-            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
           />
           <input
             type="time"
             value={draft.time}
             onChange={(event) => onUpdateDraft({ time: event.target.value })}
             title="Appointment time"
-            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
           />
         </div>
 
@@ -363,7 +363,7 @@ function AppointmentDetailRail({
           value={draft.reason}
           onChange={(event) => onUpdateDraft({ reason: event.target.value })}
           placeholder="Reason for visit"
-          className="mt-2 h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+          className="mt-2 h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
         />
 
         <textarea
@@ -371,21 +371,21 @@ function AppointmentDetailRail({
           value={draft.note}
           onChange={(event) => onUpdateDraft({ note: event.target.value })}
           placeholder="Internal booking note"
-          className="mt-2 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+          className="mt-2 w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
         />
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           <button
             onClick={onSaveDetails}
             disabled={isSaving}
-            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+            className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Save details"}
           </button>
           <button
             onClick={onReschedule}
             disabled={isSaving}
-            className="rounded-lg bg-[#0F766E] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+            className="rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Reschedule"}
           </button>
@@ -393,9 +393,9 @@ function AppointmentDetailRail({
       </div>
 
       {/* Actions */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <p className="text-sm font-semibold text-[#0F172A]">Actions</p>
-        <p className="mt-0.5 text-xs text-[#64748B]">Lifecycle changes — no external sync implied.</p>
+      <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
+        <p className="text-sm font-semibold text-app-text">Actions</p>
+        <p className="mt-0.5 text-xs text-app-text-muted">Lifecycle changes — no external sync implied.</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           <button
@@ -427,7 +427,7 @@ function AppointmentDetailRail({
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Link
             href={`/dashboard/leads/${appointment.lead_id}`}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-app-border px-2.5 py-2 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             <span>Request detail</span>
@@ -435,13 +435,13 @@ function AppointmentDetailRail({
           {appointment.thread_id ? (
             <Link
               href={`/dashboard/inbox/${appointment.thread_id}`}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#99f6e4] px-2.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-teal-200 px-2.5 py-2 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span>Inbox thread</span>
             </Link>
           ) : (
-            <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-2.5 py-2 text-xs text-[#64748B]">
+            <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-app-border px-2.5 py-2 text-xs text-app-text-muted">
               <MessageSquare className="w-3.5 h-3.5" />
               <span>No thread</span>
             </span>
@@ -724,7 +724,7 @@ export default function AppointmentsPage() {
     return <ErrorState variant="calm" message={error} onRetry={() => loadAppointments(activeView)} />;
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -739,13 +739,13 @@ export default function AppointmentsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/dashboard/leads"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+              className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted shadow-sm transition-colors hover:bg-app-surface-alt"
             >
               Leads
             </Link>
             <Link
               href="/dashboard/operations"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+              className="inline-flex items-center gap-2 rounded-xl bg-app-primary px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover"
             >
               Operations
             </Link>
@@ -753,33 +753,33 @@ export default function AppointmentsPage() {
         }
       />
 
-      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+      <section className="ds-card p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
           <div>
-            <p className="workspace-section-label">Booking command surface</p>
-            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+            <p className="ds-eyebrow">Booking command surface</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-tight text-app-text sm:text-[2.35rem]">
               Turn captured requests into confirmed appointments with reminders and deposits under one roof.
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
               This page is intentionally not a fake calendar. It is the clinic’s booking operations board: timing, confirmation state, reminder prep, deposit status, and the thread behind each appointment all stay available together.
             </p>
           </div>
-          <div className="reset-kpi-grid">
+          <div className="grid grid-cols-2 gap-2">
             {APPOINTMENT_VIEWS.map((view) => (
-              <div key={view.value} className={`rounded-[1.2rem] border border-[#DDE5EE] px-4 py-4 shadow-sm ${activeView === view.value ? "bg-[#CCFBF1]" : "bg-white"}`}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{view.label}</p>
-                <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#0F172A]">{viewCounts?.[view.value] ?? "—"}</p>
+              <div key={view.value} className={`rounded-2xl border border-app-border px-4 py-4 shadow-sm ${activeView === view.value ? "bg-app-accent-wash" : "bg-app-surface"}`}>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">{view.label}</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-app-text">{viewCounts?.[view.value] ?? "—"}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <div className="wave-command-slab workspace-command-hero space-y-5">
+      <div className="ds-card space-y-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 max-w-2xl">
-            <p className="workspace-section-label">Booking &amp; deposit board</p>
-            <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+            <p className="ds-eyebrow">Booking &amp; deposit board</p>
+            <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
               Counts are live. Switch views to focus on upcoming work, attention items, or closed states—then act from the list and the detail rail. This is the operating surface for reminders and deposits, not a placeholder calendar.
             </p>
           </div>
@@ -794,44 +794,44 @@ export default function AppointmentsPage() {
                     type="button"
                     onClick={() => setActiveView(view.value)}
                     className={`rounded-lg border px-3 py-2.5 text-left shadow-[0_1px_2px_rgb(15_23_42/0.05)] transition-all ${active
-                      ? "border-[#99f6e4] bg-[#CCFBF1]/90 ring-1 ring-[#5eead4]/50"
-                      : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                      ? "border-teal-200 bg-app-accent-wash/90 ring-1 ring-teal-300/50"
+                      : "border-app-border bg-app-surface hover:border-app-border"
                       }`}
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">{view.label}</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-[#0F172A]">{n}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">{view.label}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-app-text">{n}</p>
                   </button>
                 );
               })}
             </div>
           ) : null}
         </div>
-        <div className="grid grid-cols-1 gap-2 border-t border-[#E2E8F0]/80 pt-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Visible rows</p>
-            <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{appointments.length}</p>
-            <p className="mt-0.5 text-xs text-[#475569]">Filtered by the active view below.</p>
+        <div className="grid grid-cols-1 gap-2 border-t border-app-border/80 pt-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-app-border bg-app-surface/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">Visible rows</p>
+            <p className="mt-1 text-lg font-bold tabular-nums text-app-text">{appointments.length}</p>
+            <p className="mt-0.5 text-xs text-app-text-muted">Filtered by the active view below.</p>
           </div>
-          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Active lens</p>
-            <p className="mt-1 text-sm font-semibold text-[#0F172A]">
+          <div className="rounded-lg border border-app-border bg-app-surface/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">Active lens</p>
+            <p className="mt-1 text-sm font-semibold text-app-text">
               {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "—"}
             </p>
-            <p className="mt-0.5 text-xs text-[#475569]">Use views to change what the center list shows.</p>
+            <p className="mt-0.5 text-xs text-app-text-muted">Use views to change what the center list shows.</p>
           </div>
-          <div className="rounded-lg border border-[#E2E8F0] bg-white/90 px-3 py-2.5 shadow-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">Workflow</p>
-            <p className="mt-1 text-sm font-semibold text-[#0F172A]">Reminders · deposits · reschedule</p>
-            <p className="mt-0.5 text-xs text-[#475569]">Select a row to edit in the right rail.</p>
+          <div className="rounded-lg border border-app-border bg-app-surface/90 px-3 py-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">Workflow</p>
+            <p className="mt-1 text-sm font-semibold text-app-text">Reminders · deposits · reschedule</p>
+            <p className="mt-0.5 text-xs text-app-text-muted">Select a row to edit in the right rail.</p>
           </div>
         </div>
       </div>
 
-      <div className="reset-workbench-shell">
-        <div className="wave-workbench-head">
+      <div className="ds-card overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-5 py-4">
           <div className="min-w-0">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>
-            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Bookings, rail, and views</p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-app-text-muted">Workspace</p>
+            <p className="mt-0.5 text-sm font-semibold text-app-text">Bookings, rail, and views</p>
           </div>
           {viewCounts ? (
             <div className="flex flex-wrap gap-2">
@@ -839,8 +839,8 @@ export default function AppointmentsPage() {
                 <span
                   key={view.value}
                   className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${activeView === view.value
-                    ? "border-[#99f6e4] bg-[#CCFBF1] text-[#115E59]"
-                    : "border-[#E2E8F0] bg-white text-[#475569]"
+                    ? "border-teal-200 bg-app-accent-wash text-app-accent-dark"
+                    : "border-app-border bg-app-surface text-app-text-muted"
                     }`}
                 >
                   {view.label}{" "}
@@ -850,12 +850,12 @@ export default function AppointmentsPage() {
             </div>
           ) : null}
         </div>
-        <div className="wave-workbench-body">
-          <div className="workspace-column-layout">
+        <div className="p-5">
+          <div className="grid gap-6 xl:grid-cols-[13rem_1fr_15rem]">
             {/* Left rail — views */}
             <div className="hidden space-y-2.5 xl:block">
-              <div className="workspace-rail-card p-4">
-                <p className="workspace-section-label">Views</p>
+              <div className="ds-card p-4">
+                <p className="ds-eyebrow">Views</p>
                 <div className="mt-2.5 space-y-1">
                   {APPOINTMENT_VIEWS.map((view) => {
                     const active = activeView === view.value;
@@ -864,28 +864,28 @@ export default function AppointmentsPage() {
                         key={view.value}
                         onClick={() => setActiveView(view.value)}
                         className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active
-                          ? "bg-[#CCFBF1]/90 text-[#115E59]"
-                          : "text-[#475569] hover:bg-[#F8FAFC]"
+                          ? "bg-app-accent-wash/90 text-app-accent-dark"
+                          : "text-app-text-muted hover:bg-app-surface-alt"
                           }`}
                       >
                         <span>{view.label}</span>
-                        {active && <span className="text-xs text-[#0F766E]">Active</span>}
+                        {active && <span className="text-xs text-app-primary">Active</span>}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="workspace-rail-card p-4">
-                <p className="workspace-section-label">Board</p>
+              <div className="ds-card p-4">
+                <p className="ds-eyebrow">Board</p>
                 <div className="mt-2 space-y-1.5">
-                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                    <p className="text-xs text-[#475569]">Visible</p>
-                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{appointments.length}</p>
+                  <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                    <p className="text-xs text-app-text-muted">Visible</p>
+                    <p className="mt-0.5 text-lg font-bold text-app-text">{appointments.length}</p>
                   </div>
-                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                    <p className="text-xs text-[#475569]">View</p>
-                    <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">
+                  <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                    <p className="text-xs text-app-text-muted">View</p>
+                    <p className="mt-0.5 text-sm font-semibold text-app-text">
                       {APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label}
                     </p>
                   </div>
@@ -896,12 +896,12 @@ export default function AppointmentsPage() {
             {/* Center — appointment list */}
             <div className="min-w-0 space-y-3">
               <div>
-                <p className="workspace-section-label">Appointment list</p>
-                <p className="mt-1 text-sm text-[#475569]">Select a booking to edit schedule, reminders, and deposits in the rail.</p>
+                <p className="ds-eyebrow">Appointment list</p>
+                <p className="mt-1 text-sm text-app-text-muted">Select a booking to edit schedule, reminders, and deposits in the rail.</p>
               </div>
               {appointments.length === 0 ? (
                 <EmptyState
-                  icon={<CalendarClock className="w-7 h-7 text-[#64748B]" />}
+                  icon={<CalendarClock className="w-7 h-7 text-app-text-muted" />}
                   title={`No ${APPOINTMENT_VIEWS.find((v) => v.value === activeView)?.label ?? "matching"} appointments`}
                   description={
                     clinic && computeSystemStatus(clinic).status !== "LIVE"
@@ -912,14 +912,14 @@ export default function AppointmentsPage() {
                     <div className="flex flex-wrap justify-center gap-2">
                       <Link
                         href="/dashboard/leads"
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+                        className="inline-flex items-center gap-2 rounded-xl bg-app-primary px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover"
                       >
                         Open booking pipeline
                       </Link>
                       {clinic && computeSystemStatus(clinic).status !== "LIVE" ? (
                         <Link
                           href="/dashboard/settings"
-                          className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                          className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
                         >
                           Settings &amp; go-live
                         </Link>
@@ -935,19 +935,19 @@ export default function AppointmentsPage() {
                       <button
                         key={appointment.lead_id}
                         onClick={() => setSelectedLeadId(appointment.lead_id)}
-                        className={`reset-list-row w-full px-3.5 py-3 text-left transition-all ${active
-                          ? "border-[#99f6e4] bg-[#CCFBF1]/70 shadow-sm"
-                          : "border-[#E2E8F0] bg-white hover:border-[#E2E8F0]"
+                        className={`app-list-row w-full px-3.5 py-3 text-left transition-all ${active
+                          ? "border-teal-200 bg-app-accent-wash/70 shadow-sm"
+                          : "border-app-border bg-app-surface hover:border-app-border"
                           }`}
                       >
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
                             <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                              <p className="truncate text-sm font-semibold text-[#0F172A]">{appointment.patient_name}</p>
+                              <p className="truncate text-sm font-semibold text-app-text">{appointment.patient_name}</p>
                               <ChannelBadge channel={appointment.source} withIcon />
                               <LeadStatusBadge status={appointment.lead_status} />
                             </div>
-                            <p className="truncate text-sm text-[#475569]">
+                            <p className="truncate text-sm text-app-text-muted">
                               {appointment.reason_for_visit || "No visit reason recorded"}
                             </p>
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -970,12 +970,12 @@ export default function AppointmentsPage() {
                             </div>
                           </div>
                           <div className="shrink-0 sm:text-right">
-                            <p className="text-sm font-semibold text-[#0F172A]">
+                            <p className="text-sm font-semibold text-app-text">
                               {appointment.appointment_starts_at
                                 ? formatDateTime(appointment.appointment_starts_at)
                                 : appointment.preferred_datetime_text || "Time not set"}
                             </p>
-                            <p className="mt-0.5 text-xs text-[#64748B]">
+                            <p className="mt-0.5 text-xs text-app-text-muted">
                               Updated {timeAgo(appointment.updated_at || appointment.appointment_starts_at || "")}
                             </p>
                           </div>

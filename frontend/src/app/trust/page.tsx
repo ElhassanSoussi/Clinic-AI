@@ -114,11 +114,11 @@ export default function TrustPage() {
                 These commitments are backed by real product controls: inbox review, manual takeover, clinic-configured knowledge, and an audit trail your team can actually follow.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/register" className="marketing-cta-primary !rounded-full">
+                <Link href="/register" className="marketing-cta-primary rounded-full!">
                   Start free trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="/product" className="marketing-cta-secondary !rounded-full">
+                <Link href="/product" className="marketing-cta-secondary rounded-full!">
                   How the product works
                 </Link>
               </div>
@@ -127,11 +127,11 @@ export default function TrustPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               {principles.slice(0, 4).map((item) => (
                 <div key={item.title} className="marketing-showcase-card p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#115E59] shadow-[0_18px_28px_-24px_rgb(15_118_110/0.6)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-app-accent-wash text-app-accent-dark shadow-[0_18px_28px_-24px_rgb(15_118_110/0.6)]">
                     <item.icon className="h-5 w-5" />
                   </div>
-                  <p className="mt-5 text-[1rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.title}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#5C6C7D]">{item.points[0]}</p>
+                  <p className="mt-5 text-[1rem] font-semibold tracking-[-0.02em] text-app-text">{item.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-app-text-muted">{item.points[0]}</p>
                 </div>
               ))}
             </div>
@@ -153,12 +153,12 @@ export default function TrustPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-white/80 bg-white px-5 py-4 shadow-sm"
+                className="flex items-center gap-3 rounded-xl border border-white/80 bg-app-surface px-5 py-4 shadow-sm"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#CCFBF1] text-[#115E59]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-wash text-app-accent-dark">
                   <item.icon className="h-4 w-4" />
                 </div>
-                <span className="text-[0.9375rem] font-medium text-[#0F172A]">{item.label}</span>
+                <span className="text-[0.9375rem] font-medium text-app-text">{item.label}</span>
               </div>
             ))}
           </div>
@@ -169,7 +169,7 @@ export default function TrustPage() {
         <div className="marketing-container">
 
           {/* Principles */}
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-app-border">
             {principles.map((p) => (
               <section key={p.title} className="marketing-section">
                 <div className="grid items-start gap-10 xl:grid-cols-[1fr_1fr]">
@@ -181,13 +181,13 @@ export default function TrustPage() {
                     <p className="marketing-lead mt-4">{p.body}</p>
                   </div>
                   <div className="landing-shell p-7">
-                    <p className="ds-eyebrow text-[#64748B]">
+                    <p className="ds-eyebrow text-app-text-muted">
                       What this means in practice
                     </p>
                     <ul className="mt-5 space-y-3">
                       {p.points.map((point) => (
                         <li key={point} className="marketing-body flex items-start gap-3">
-                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-wash text-app-accent-dark">
                             <Check className="h-3.5 w-3.5" />
                           </div>
                           {point}
@@ -201,8 +201,8 @@ export default function TrustPage() {
           </div>
 
           {/* Data note */}
-          <section className="marketing-section border-t border-[#E2E8F0]">
-            <div className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-8 sm:p-10">
+          <section className="marketing-section border-t border-app-border">
+            <div className="rounded-2xl border border-app-border bg-app-surface p-8 sm:p-10">
               <div className="max-w-3xl">
                 <div className="marketing-kicker mb-5">
                   <Eye className="h-3 w-3" />
@@ -228,16 +228,16 @@ export default function TrustPage() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
                     href="/privacy"
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F1F5F9]"
+                    className="inline-flex items-center gap-2 rounded-lg border border-app-border bg-app-surface-alt px-4 py-2.5 text-sm font-medium text-app-text transition-colors hover:bg-app-surface-alt"
                   >
-                    <FileText className="h-4 w-4 text-[#0F766E]" />
+                    <FileText className="h-4 w-4 text-app-primary" />
                     Privacy policy
                   </Link>
                   <Link
                     href="/terms"
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-[#F1F5F9]"
+                    className="inline-flex items-center gap-2 rounded-lg border border-app-border bg-app-surface-alt px-4 py-2.5 text-sm font-medium text-app-text transition-colors hover:bg-app-surface-alt"
                   >
-                    <FileText className="h-4 w-4 text-[#0F766E]" />
+                    <FileText className="h-4 w-4 text-app-primary" />
                     Terms of service
                   </Link>
                 </div>
@@ -250,10 +250,10 @@ export default function TrustPage() {
         {/* CTA */}
         <section className="marketing-final-act">
           <div className="marketing-container">
-            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
+            <div className="overflow-hidden rounded-3xl bg-app-primary px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
               <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-widest text-teal-100">
                     <Sparkles className="h-3.5 w-3.5" />
                     Start with confidence
                   </div>
@@ -267,7 +267,7 @@ export default function TrustPage() {
                 <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-surface px-8 py-4 text-[1rem] font-semibold text-app-primary shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />

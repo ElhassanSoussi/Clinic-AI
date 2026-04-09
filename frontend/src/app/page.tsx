@@ -207,208 +207,154 @@ export default function LandingPage() {
     <div className="public-marketing-root">
       <PublicNav />
 
-      <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-200/90">
-        <div className="marketing-container">
-          <div className="landing-shell overflow-hidden px-5 py-6 sm:px-7 sm:py-8 lg:px-9 lg:py-9">
-            <div className="grid gap-10 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:gap-14">
-              <div className="min-w-0">
-                <div className="marketing-kicker mb-6">
-                  <Sparkles className="h-3 w-3" />
-                  AI front-desk operating system
-                </div>
-                <h1 className="marketing-h1 max-w-3xl">
-                  The front desk your clinic wishes it had after hours.
-                </h1>
-                <p className="marketing-lead mt-6 max-w-2xl">
-                  Clinic AI answers patients, captures booking requests, and keeps staff working from one premium workspace for inbox, leads, appointments, training, billing, and go-live control.
-                </p>
+      {/* ═══ HERO — full-bleed depth stage ═══ */}
+      <section className="marketing-hero marketing-hero-wave marketing-hero-premium relative overflow-hidden border-b border-(--color-ds-frame-border-light)">
+        <div className="marketing-container relative z-1">
+          <div className="mx-auto max-w-4xl py-20 text-center sm:py-28 lg:py-32">
+            <div className="marketing-kicker mx-auto mb-8 w-fit">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI front-desk operating system
+            </div>
+            <h1 className="marketing-h1 mx-auto max-w-208 text-balance">
+              Run the front desk your clinic deserves — even after hours.
+            </h1>
+            <p className="marketing-lead mx-auto mt-7 max-w-2xl text-balance">
+              Clinic AI answers patients, captures booking requests, and keeps staff working from one premium workspace for inbox, leads, appointments, training, billing, and go-live control.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              <Link href="/register" className="marketing-cta-primary">
+                Start free trial
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/chat/demo" className="marketing-cta-secondary">
+                <MessageSquareMore className="h-4 w-4 text-app-primary" />
+                Try live demo
+              </Link>
+            </div>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              {systemPoints.map((item) => (
+                <span key={item} className="marketing-trust-chip">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-app-primary" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                <div className="mt-9 flex flex-wrap gap-3">
-                  <Link href="/register" className="marketing-cta-primary !rounded-full !px-6 !py-3.5">
-                    Start free trial
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full !px-6 !py-3.5">
-                    <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
-                    Try live demo
-                  </Link>
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-2.5">
-                  {systemPoints.map((item) => (
-                    <span key={item} className="marketing-trust-chip">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[#0F766E]" />
-                      {item}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {operatingPillars.map((pillar) => (
-                    <div key={pillar.title} className="marketing-showcase-card p-5">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ecfdfa] text-[#0F766E] shadow-[0_18px_34px_-24px_rgba(15,118,110,0.55)]">
-                        <pillar.icon className="h-5 w-5" />
-                      </div>
-                      <p className="mt-4 text-[1rem] font-semibold tracking-[-0.02em] text-[#0F172A]">
-                        {pillar.title}
-                      </p>
-                      <p className="mt-2 text-sm leading-relaxed text-[#5D6B7C]">
-                        {pillar.description}
-                      </p>
+        {/* Floating product preview — centered below hero text */}
+        <div className="marketing-container relative z-1 pb-16 lg:pb-20">
+          <MarketingProductWindow
+            pathLabel="/dashboard/inbox"
+            caption="Illustrative composition of the real signed-in routes: Dashboard, Inbox, Leads, Appointments, Training, Billing, and Settings."
+          >
+            <div className="marketing-hero-preview p-5 sm:p-6 lg:p-7">
+              <div className="grid gap-4 lg:grid-cols-[10rem_1fr_12rem]">
+                {/* Mini sidebar */}
+                <aside className="hidden rounded-xl border border-(--color-ds-frame-border-light) bg-linear-to-b from-teal-50 to-teal-50 p-3 shadow-(--ds-shadow-sm) lg:block">
+                  <div className="mb-4 flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-white shadow-(--ds-shadow-md)">
+                      <Bot className="h-3.5 w-3.5" />
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <MarketingProductWindow
-                pathLabel="/dashboard/inbox"
-                caption="Illustrative composition of the real signed-in routes: Dashboard, Inbox, Leads, Appointments, Training, Billing, and Settings."
-              >
-                <div className="marketing-hero-preview p-6 sm:p-7 lg:p-8">
-                  <div className="grid gap-4 xl:grid-cols-[12rem_1fr_14rem]">
-                    <aside className="rounded-[1.55rem] border border-white/80 bg-[linear-gradient(180deg,#f6fbfb_0%,#edf7f7_100%)] p-4 shadow-[0_24px_44px_-30px_rgba(15,23,42,0.22)]">
-                      <div className="mb-5 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-white shadow-[0_18px_30px_-20px_rgba(15,118,110,0.68)]">
-                          <Bot className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-[0.82rem] font-semibold text-[#0F172A]">Clinic AI</p>
-                          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#64748B]">
-                            Workspace
-                          </p>
-                        </div>
+                    <span className="text-[0.75rem] font-semibold text-app-text">Clinic AI</span>
+                  </div>
+                  <div className="space-y-1">
+                    {previewNav.map((item) => (
+                      <div
+                        key={item}
+                        className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[0.72rem] font-semibold ${
+                          item === "Inbox"
+                            ? "border border-white bg-white text-app-primary shadow-(--ds-shadow-sm)"
+                            : "text-app-text-muted"
+                        }`}
+                      >
+                        <div className={`h-2 w-2 rounded-full ${item === "Inbox" ? "bg-app-primary" : "bg-slate-300"}`} />
+                        {item}
                       </div>
-                      <div className="space-y-1.5">
-                        {previewNav.map((item) => (
-                          <div
-                            key={item}
-                            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-[0.8rem] font-semibold ${
-                              item === "Inbox"
-                                ? "border border-white bg-white text-[#0F766E] shadow-[0_20px_32px_-24px_rgba(15,118,110,0.45)]"
-                                : "text-[#526274]"
-                            }`}
-                          >
-                            <div className={`h-2.5 w-2.5 rounded-full ${item === "Inbox" ? "bg-[#14b8a6]" : "bg-[#CBD5E1]"}`} />
-                            {item}
+                    ))}
+                  </div>
+                </aside>
+
+                {/* Thread list */}
+                <div className="ds-card p-4">
+                  <div className="mb-3 flex items-center justify-between border-b border-app-border pb-3">
+                    <div>
+                      <p className="ds-eyebrow">Operator inbox</p>
+                      <p className="mt-0.5 text-[0.92rem] font-semibold text-app-text">Conversations &amp; next actions</p>
+                    </div>
+                    <span className="rounded-full border border-teal-200 bg-app-accent-wash px-2.5 py-1 text-[0.68rem] font-semibold text-app-primary">Live</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {[
+                      { name: "Marta Bell", preview: "Requested the earliest hygiene slot this week.", state: "Booked", note: "Confirmed 1:15 PM" },
+                      { name: "Jason Miller", preview: "Asked about financing before confirming treatment.", state: "Needs review", note: "Human review required" },
+                      { name: "Missed callback recovery", preview: "Follow-up thread reopened after a missed patient call.", state: "Queued", note: "Needs reply today" },
+                    ].map((item) => (
+                      <div key={item.name} className="app-list-row px-3.5 py-2.5">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-app-canvas text-app-primary">
+                            <ContactRound className="h-3.5 w-3.5" />
                           </div>
-                        ))}
-                      </div>
-                    </aside>
-
-                    <div className="rounded-[1.75rem] border border-white/85 bg-white/95 p-5 shadow-[0_34px_60px_-36px_rgba(12,18,32,0.34)]">
-                      <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3">
-                        <div>
-                          <p className="text-[0.76rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
-                            Operator inbox
-                          </p>
-                          <p className="mt-1 text-[1.05rem] font-semibold text-[#0F172A]">
-                            Conversations, bookings, and next actions
-                          </p>
-                        </div>
-                        <span className="rounded-full border border-[#99f6e4] bg-[#ecfdfa] px-3 py-1.5 text-[0.72rem] font-semibold text-[#0F766E]">
-                          Live queue
-                        </span>
-                      </div>
-                      <div className="mt-4 space-y-3">
-                        {[
-                          {
-                            name: "Marta Bell",
-                            preview: "Requested the earliest hygiene slot this week.",
-                            state: "Booked",
-                            note: "Confirmed 1:15 PM",
-                          },
-                          {
-                            name: "Jason Miller",
-                            preview: "Asked about financing before confirming treatment.",
-                            state: "Needs review",
-                            note: "Human review required",
-                          },
-                          {
-                            name: "Missed callback recovery",
-                            preview: "Follow-up thread reopened after a missed patient call.",
-                            state: "Queued",
-                            note: "Needs reply today",
-                          },
-                        ].map((item) => (
-                          <div key={item.name} className="rounded-2xl border border-[#E2E8F0] bg-[#FBFCFE] px-4 py-3">
-                            <div className="flex items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F1F5F9] text-[#0F766E]">
-                                <ContactRound className="h-4 w-4" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="truncate text-[0.87rem] font-semibold text-[#0F172A]">{item.name}</p>
-                                  <span
-                                    className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-semibold ${
-                                      item.state === "Booked"
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : item.state === "Needs review"
-                                          ? "bg-blue-50 text-blue-700"
-                                          : "bg-amber-50 text-amber-700"
-                                    }`}
-                                  >
-                                    {item.state}
-                                  </span>
-                                </div>
-                                <p className="mt-1 text-[0.76rem] text-[#526274]">{item.preview}</p>
-                                <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#0F766E]">
-                                  {item.note}
-                                </p>
-                              </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="truncate text-[0.82rem] font-semibold text-app-text">{item.name}</p>
+                              {(() => {
+                                const stateStyles: Record<string, string> = {
+                                  Booked: "bg-emerald-50 text-emerald-700",
+                                  "Needs review": "bg-blue-50 text-blue-700",
+                                };
+                                const cls = stateStyles[item.state] ?? "bg-amber-50 text-amber-700";
+                                return <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${cls}`}>{item.state}</span>;
+                              })()}
                             </div>
+                            <p className="mt-0.5 text-[0.72rem] text-app-text-muted">{item.preview}</p>
+                            <p className="mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest text-app-primary">{item.note}</p>
                           </div>
-                        ))}
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+                </div>
 
-                    <div className="space-y-3">
-                      <div className="workspace-rail-card p-4 shadow-sm">
-                        <p className="workspace-section-label">Today</p>
-                        <h3 className="mt-3 text-[1rem] font-semibold tracking-[-0.02em] text-slate-900">
-                          Pressure, throughput, and next action
-                        </h3>
-                        <div className="mt-3 space-y-2.5 text-[0.82rem] text-slate-600">
-                          <div className="app-card-muted px-3 py-2.5">
-                            <p className="font-semibold text-slate-900">6 open threads</p>
-                            <p className="mt-1">2 require human review before sending.</p>
-                          </div>
-                          <div className="app-card-muted px-3 py-2.5">
-                            <p className="font-semibold text-slate-900">4 appointments in motion</p>
-                            <p className="mt-1">Reminders and deposits remain tied to the same patient flow.</p>
-                          </div>
-                        </div>
+                {/* Stats rail */}
+                <div className="hidden space-y-3 lg:block">
+                  <div className="ds-rail-panel p-3.5">
+                    <p className="ds-eyebrow">Today</p>
+                    <div className="mt-2.5 space-y-2 text-[0.78rem] text-app-text-muted">
+                      <div className="app-card-muted px-2.5 py-2">
+                        <p className="font-semibold text-app-text">6 open threads</p>
+                        <p className="mt-0.5">2 need human review.</p>
                       </div>
-                      <div className="workspace-rail-card p-4 shadow-sm">
-                        <p className="workspace-section-label">Why it lands</p>
-                        <div className="mt-3 space-y-2">
-                          <div className="flex items-center gap-2 text-[0.82rem] text-slate-600">
-                            <Check className="h-4 w-4 shrink-0 text-teal-600" />
-                            AI answers using your clinic setup only
-                          </div>
-                          <div className="flex items-center gap-2 text-[0.82rem] text-slate-600">
-                            <Check className="h-4 w-4 shrink-0 text-teal-600" />
-                            Staff can review or take over at any moment
-                          </div>
-                          <div className="flex items-center gap-2 text-[0.82rem] text-slate-600">
-                            <Check className="h-4 w-4 shrink-0 text-teal-600" />
-                            Patients stay tied to the booking workflow
-                          </div>
-                        </div>
+                      <div className="app-card-muted px-2.5 py-2">
+                        <p className="font-semibold text-app-text">4 appointments</p>
+                        <p className="mt-0.5">Tied to the same patient flow.</p>
                       </div>
                     </div>
                   </div>
+                  <div className="ds-rail-panel p-3.5">
+                    <p className="ds-eyebrow">How it works</p>
+                    <div className="mt-2.5 space-y-1.5">
+                      {["Grounded in your clinic data", "Staff takeover built in", "Patients stay linked"].map((t) => (
+                        <div key={t} className="flex items-center gap-1.5 text-[0.75rem] text-app-text-muted">
+                          <Check className="h-3 w-3 shrink-0 text-app-primary" />
+                          {t}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </MarketingProductWindow>
+              </div>
             </div>
-          </div>
+          </MarketingProductWindow>
         </div>
       </section>
 
       <main>
-        <section className="marketing-section marketing-surface-warm">
+        {/* ═══ PILLARS — horizontal band ═══ */}
+        <section className="marketing-section marketing-surface-elevated">
           <div className="marketing-container">
-            <div className="mb-12 max-w-3xl">
-              <div className="marketing-kicker mb-5">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <div className="marketing-kicker mx-auto mb-5 w-fit">
                 <LayoutGrid className="h-3 w-3" />
                 More than a booking button
               </div>
@@ -417,10 +363,10 @@ export default function LandingPage() {
                 Clinic AI is not a widget that disappears after the first patient message. It is the full operating layer behind intake, follow-up, booking progress, reminder readiness, and staff control.
               </p>
             </div>
-            <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+            <div className="marketing-feature-grid">
               {operatingPillars.map((pillar) => (
                 <div key={pillar.title} className="marketing-card">
-                  <div className="marketing-icon-wrap h-12 w-12">
+                  <div className="marketing-icon-wrap h-13 w-13">
                     <pillar.icon className="h-5 w-5" />
                   </div>
                   <h3 className="marketing-h3 mt-5">{pillar.title}</h3>
@@ -431,50 +377,35 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ═══ TRUST — asymmetric two-column with inset panel ═══ */}
         <section className="marketing-section marketing-surface-slate">
           <div className="marketing-container">
-            <div className="grid gap-8 xl:grid-cols-[0.88fr_1.12fr] xl:items-center">
-              <div>
+            <div className="grid items-start gap-12 xl:grid-cols-[1fr_1.2fr]">
+              <div className="sticky top-8">
                 <div className="marketing-kicker mb-5">
                   <ShieldCheck className="h-3 w-3" />
                   Trust and oversight
                 </div>
                 <h2 className="marketing-h2">Clinic-controlled, staff-visible, and honest by design.</h2>
-                <div className="mt-5 space-y-4 text-[1rem] leading-relaxed text-slate-600">
+                <div className="mt-6 space-y-4 text-[1rem] leading-relaxed text-slate-600">
                   <p>The assistant only uses the services, hours, FAQs, and notes you configure.</p>
                   <p>When it cannot answer confidently, it holds the reply instead of fabricating one.</p>
                   <p>Every conversation stays visible to your staff, with takeover and review built in.</p>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-2">
                 {[
-                  {
-                    icon: ShieldCheck,
-                    title: "Clinic-controlled knowledge",
-                    body: "Services, hours, FAQs, and assistant copy all stay under your control.",
-                  },
-                  {
-                    icon: TriangleAlert,
-                    title: "Uncertain replies are held",
-                    body: "The system pauses instead of guessing when it lacks the right information.",
-                  },
-                  {
-                    icon: ContactRound,
-                    title: "Manual takeover is always available",
-                    body: "Staff can step in, review, edit, or resolve threads directly from the inbox.",
-                  },
-                  {
-                    icon: LayoutGrid,
-                    title: "Workflow stays visible",
-                    body: "Every patient thread, lead, booking, and reminder remains traceable.",
-                  },
+                  { icon: ShieldCheck, title: "Clinic-controlled knowledge", body: "Services, hours, FAQs, and assistant copy all stay under your control." },
+                  { icon: TriangleAlert, title: "Uncertain replies are held", body: "The system pauses instead of guessing when it lacks the right information." },
+                  { icon: ContactRound, title: "Manual takeover is always available", body: "Staff can step in, review, edit, or resolve threads directly from the inbox." },
+                  { icon: LayoutGrid, title: "Workflow stays visible", body: "Every patient thread, lead, booking, and reminder remains traceable." },
                 ].map((item) => (
                   <div key={item.title} className="marketing-showcase-card p-6">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ecfdfa] text-[#0F766E]">
+                    <div className="marketing-icon-wrap h-11 w-11">
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <p className="mt-4 text-[1rem] font-semibold text-[#0F172A]">{item.title}</p>
-                    <p className="mt-2 text-sm leading-relaxed text-[#5D6B7C]">{item.body}</p>
+                    <p className="mt-5 text-[1.05rem] font-semibold tracking-[-0.02em] text-app-text">{item.title}</p>
+                    <p className="mt-2.5 text-sm leading-relaxed text-app-text-muted">{item.body}</p>
                   </div>
                 ))}
               </div>
@@ -482,10 +413,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="after-signup" className="marketing-section marketing-surface-white border-y border-slate-200/80">
+        {/* ═══ JOURNEY — numbered timeline strip ═══ */}
+        <section id="after-signup" className="marketing-section marketing-surface-white border-y border-(--color-ds-frame-border-light)">
           <div className="marketing-container">
-            <div className="mb-12 max-w-3xl">
-              <div className="marketing-kicker mb-5">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <div className="marketing-kicker mx-auto mb-5 w-fit">
                 <Workflow className="h-3 w-3" />
                 After signup
               </div>
@@ -494,26 +426,31 @@ export default function LandingPage() {
                 Sign up, configure real clinic information, test the assistant, then decide when to go live. The routes your team uses after launch are already there during the trial.
               </p>
             </div>
-            <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
-              {afterSignupJourney.map((item) => (
-                <div key={item.step} className="rounded-[1.65rem] border border-slate-200/85 bg-white px-6 py-7 shadow-[0_20px_40px_-30px_rgba(12,18,32,0.22)]">
-                  <span className="text-[0.78rem] font-bold uppercase tracking-[0.14em] text-[#0F766E]">
-                    {item.step}
-                  </span>
-                  <h3 className="mt-4 text-[1.15rem] font-semibold tracking-[-0.03em] text-[#0F172A]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{item.description}</p>
-                </div>
-              ))}
+            <div className="relative">
+              {/* Connecting line */}
+              <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-linear-to-b from-app-primary/20 via-app-primary/40 to-app-primary/20 xl:block" aria-hidden />
+              <div className="grid gap-6 xl:grid-cols-4">
+                {afterSignupJourney.map((item) => (
+                  <div key={item.step} className="ds-card relative px-6 py-7">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-app-primary text-[0.82rem] font-bold text-white shadow-(--ds-shadow-lg)">
+                      {item.step}
+                    </div>
+                    <h3 className="mt-5 text-[1.1rem] font-semibold tracking-[-0.03em] text-app-text">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-app-text-muted">{item.description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
+        {/* ═══ PRICING — stacked comparison ═══ */}
         <section id="pricing" className="marketing-section marketing-surface-mist">
           <div className="marketing-container">
-            <div className="mb-12 max-w-3xl">
-              <div className="marketing-kicker mb-5">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <div className="marketing-kicker mx-auto mb-5 w-fit">
                 <Sparkles className="h-3 w-3" />
                 Pricing
               </div>
@@ -522,58 +459,50 @@ export default function LandingPage() {
                 Every plan starts with the same core workspace. The difference is request volume, SMS access, and the depth of operational features you need.
               </p>
             </div>
-            <div className="grid gap-6 xl:grid-cols-3">
+            <div className="mx-auto grid max-w-5xl gap-6 xl:grid-cols-3">
               {plans.map((plan) => {
                 const isPaid = plan.id !== "trial";
-                const loading = checkoutLoading === plan.id;
+                const isLoading = checkoutLoading === plan.id;
                 return (
                   <article
                     key={plan.id}
-                    className={`rounded-[1.9rem] border p-7 shadow-[0_28px_56px_-36px_rgba(12,18,32,0.26)] ${
-                      plan.featured
-                        ? "border-[#99f6e4] bg-[linear-gradient(180deg,#ffffff_0%,#f2fffb_100%)]"
-                        : "border-slate-200/90 bg-white"
-                    }`}
+                    className={`ds-card relative overflow-hidden px-7 py-8 ${plan.featured ? "ring-2 ring-app-primary/30" : ""}`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[1.15rem] font-semibold tracking-[-0.03em] text-[#0F172A]">{plan.name}</p>
-                        <p className="mt-2 text-sm leading-relaxed text-slate-600">{plan.description}</p>
-                      </div>
-                      {plan.badge ? (
-                        <span className="rounded-full border border-[#99f6e4] bg-[#ecfdfa] px-3 py-1.5 text-[0.72rem] font-semibold text-[#0F766E]">
+                    {plan.badge ? (
+                      <div className="absolute right-5 top-5">
+                        <span className="rounded-full border border-teal-200 bg-app-accent-wash px-3 py-1 text-[0.7rem] font-bold uppercase tracking-widest text-app-primary">
                           {plan.badge}
                         </span>
-                      ) : null}
+                      </div>
+                    ) : null}
+                    <p className="text-[1.15rem] font-semibold tracking-[-0.03em] text-app-text">{plan.name}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-app-text-muted">{plan.description}</p>
+                    <div className="mt-6 border-t border-app-border pt-6">
+                      <span className="text-[2.8rem] font-bold tracking-[-0.06em] text-app-text">{plan.price}</span>
+                      <span className="ml-1.5 text-sm font-semibold text-app-text-muted">{plan.period}</span>
                     </div>
-                    <div className="mt-6">
-                      <span className="text-[2.65rem] font-bold tracking-[-0.06em] text-[#0F172A]">{plan.price}</span>
-                      <span className="ml-2 text-sm font-semibold uppercase tracking-[0.08em] text-slate-500">
-                        {plan.period}
-                      </span>
-                    </div>
-                    <ul className="mt-6 space-y-3">
+                    <ul className="mt-7 space-y-3.5">
                       {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-slate-700">
-                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ecfdfa] text-[#0F766E]">
-                            <Check className="h-3.5 w-3.5" />
+                        <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-app-text-secondary">
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-wash text-app-primary">
+                            <Check className="h-3 w-3" />
                           </div>
                           {feature}
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-7">
+                    <div className="mt-8">
                       {isPaid ? (
                         <button
                           type="button"
                           onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
-                          disabled={loading}
-                          className="marketing-cta-primary !w-full !justify-center !rounded-full disabled:pointer-events-none disabled:opacity-60"
+                          disabled={isLoading}
+                          className={`app-btn w-full justify-center ${plan.featured ? "app-btn-primary" : "app-btn-secondary"} disabled:pointer-events-none disabled:opacity-60`}
                         >
-                          {loading ? "Starting checkout…" : plan.cta}
+                          {isLoading ? "Starting checkout…" : plan.cta}
                         </button>
                       ) : (
-                        <Link href="/register" className="marketing-cta-primary !w-full !justify-center !rounded-full">
+                        <Link href="/register" className="app-btn app-btn-secondary w-full justify-center">
                           {plan.cta}
                         </Link>
                       )}
@@ -583,60 +512,62 @@ export default function LandingPage() {
               })}
             </div>
             {checkoutError ? (
-              <p className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="mx-auto mt-6 max-w-xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">
                 {checkoutError}
               </p>
             ) : null}
           </div>
         </section>
 
-        <section id="faq" className="marketing-section marketing-surface-white border-t border-slate-200/85">
+        {/* ═══ FAQ — single-column accordion-style ═══ */}
+        <section id="faq" className="marketing-section marketing-surface-white border-t border-(--color-ds-frame-border-light)">
           <div className="marketing-container">
-            <div className="mb-12 max-w-3xl">
-              <div className="marketing-kicker mb-5">
-                <ShieldCheck className="h-3 w-3" />
-                FAQ
-              </div>
-              <h2 className="marketing-h2">Questions clinic owners ask before they trust the system.</h2>
-            </div>
-            <div className="grid gap-5 xl:grid-cols-2">
-              {faqs.map((item) => (
-                <div key={item.question} className="rounded-[1.7rem] border border-slate-200/85 bg-white px-6 py-6 shadow-[0_18px_38px_-28px_rgba(12,18,32,0.2)]">
-                  <h3 className="text-[1.05rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.question}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{item.answer}</p>
+            <div className="mx-auto max-w-3xl">
+              <div className="mb-12 text-center">
+                <div className="marketing-kicker mx-auto mb-5 w-fit">
+                  <ShieldCheck className="h-3 w-3" />
+                  FAQ
                 </div>
-              ))}
+                <h2 className="marketing-h2">Questions clinic owners ask before they trust the system.</h2>
+              </div>
+              <div className="space-y-4">
+                {faqs.map((item) => (
+                  <div key={item.question} className="ds-card px-7 py-6">
+                    <h3 className="text-[1.05rem] font-semibold tracking-[-0.02em] text-app-text">{item.question}</h3>
+                    <p className="mt-3 text-[0.9375rem] leading-relaxed text-app-text-muted">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
+        {/* ═══ FINAL CTA — immersive depth slab ═══ */}
         <section className="marketing-final-act">
           <div className="marketing-container">
-            <div className="overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,#0f766e_0%,#0b4f59_100%)] px-8 py-12 shadow-[0_34px_72px_-36px_rgba(15,118,110,0.55)] sm:px-12 sm:py-16">
-              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/30 bg-teal-900/25 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-teal-50">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Built for real clinics
-                  </div>
-                  <h2 className="mt-6 text-[clamp(1.95rem,2vw+1rem,3rem)] font-bold tracking-[-0.05em] text-white">
-                    Launch the assistant when your team is ready, not when a demo says so.
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-[1.05rem] leading-relaxed text-teal-50/88">
-                    Start free, configure your actual clinic information, test the patient experience, and go live on your own timing.
-                  </p>
+            <div className="overflow-hidden rounded-2xl bg-[linear-gradient(160deg,#0f766e_0%,#0a4a53_50%,#0f766e_100%)] px-8 py-14 shadow-(--ds-shadow-xl) sm:px-14 sm:py-20">
+              <div className="mx-auto max-w-3xl text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/25 bg-teal-900/30 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-widest text-teal-100">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Built for real clinics
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col">
+                <h2 className="mt-8 text-[clamp(2rem,2.5vw+1rem,3.2rem)] font-bold tracking-[-0.05em] text-white text-balance">
+                  Launch the assistant when your team is ready, not when a demo says so.
+                </h2>
+                <p className="mx-auto mt-5 max-w-xl text-[1.05rem] leading-relaxed text-teal-50/85">
+                  Start free, configure your actual clinic information, test the patient experience, and go live on your own timing.
+                </p>
+                <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-[0.96rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-[0.96rem] font-semibold text-app-primary shadow-(--ds-shadow-lg) transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/chat/demo"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-teal-300/40 bg-teal-900/20 px-7 py-3.5 text-[0.96rem] font-semibold text-white transition-colors hover:bg-teal-900/30"
+                    className="inline-flex items-center gap-2 rounded-xl border border-teal-300/30 bg-teal-900/20 px-8 py-4 text-[0.96rem] font-semibold text-white transition-colors hover:bg-teal-900/40"
                   >
                     <MessageSquareMore className="h-4 w-4" />
                     Try live demo

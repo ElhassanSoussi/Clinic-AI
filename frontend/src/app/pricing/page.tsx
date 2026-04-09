@@ -145,14 +145,14 @@ const pricingFaqs = [
 
 function CellValue({ value }: { value: boolean | string }) {
   if (typeof value === "string") {
-    return <span className="text-sm font-semibold text-[#0F172A]">{value}</span>;
+    return <span className="text-sm font-semibold text-app-text">{value}</span>;
   }
   return value ? (
-    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-app-accent-wash text-app-accent-dark">
       <Check className="h-3.5 w-3.5" />
     </div>
   ) : (
-    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F1F5F9] text-[#CBD5E1]">
+    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-app-surface-alt text-slate-300">
       <X className="h-3.5 w-3.5" />
     </div>
   );
@@ -202,23 +202,23 @@ export default function PricingPage() {
               <div className="mt-8 flex flex-wrap gap-2.5">
                 {["14-day free trial", "Upgrade any time", "No lock-in contract", "Real dashboard from day one"].map((item) => (
                   <span key={item} className="marketing-trust-chip">
-                    <Check className="h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <Check className="h-4 w-4 shrink-0 text-app-primary" />
                     {item}
                   </span>
                 ))}
               </div>
             </div>
             <div className="marketing-showcase-card p-6 sm:p-8">
-              <p className="text-[0.78rem] font-semibold uppercase tracking-[0.12em] text-[#7C63F3]">How clinics usually choose</p>
+              <p className="text-[0.78rem] font-semibold uppercase tracking-widest text-violet-500">How clinics usually choose</p>
               <div className="mt-5 space-y-4">
                 {[
                   { name: "Starter Trial", detail: "For evaluation and setup using your live clinic information." },
                   { name: "Professional", detail: "For daily front-desk operations with SMS, reminders, and exports." },
                   { name: "Premium", detail: "For higher-volume clinics that need unlimited requests and deposit workflows." },
                 ].map((item, index) => (
-                  <div key={item.name} className={`rounded-2xl border px-4 py-4 ${index === 1 ? "border-[#99f6e4] bg-[#f3fffb]" : "border-[#E2E8F0] bg-[#FBFCFE]"}`}>
-                    <p className="text-[1rem] font-semibold text-[#0F172A]">{item.name}</p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[#5C6C7D]">{item.detail}</p>
+                  <div key={item.name} className={`rounded-2xl border px-4 py-4 ${index === 1 ? "border-teal-200 bg-app-accent-wash" : "border-app-border bg-app-surface-alt"}`}>
+                    <p className="text-[1rem] font-semibold text-app-text">{item.name}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-app-text-muted">{item.detail}</p>
                   </div>
                 ))}
               </div>
@@ -228,9 +228,9 @@ export default function PricingPage() {
       </section>
 
       {/* Trial path — conversion confidence */}
-      <section className="border-b border-slate-200 bg-[#F8FAFC]">
+      <section className="border-b border-slate-200 bg-app-surface-alt">
         <div className="marketing-container py-10 sm:py-12">
-          <h2 className="text-center text-[clamp(1.25rem,1.5vw+1rem,1.75rem)] font-bold tracking-tight text-[#0F172A]">
+          <h2 className="text-center text-[clamp(1.25rem,1.5vw+1rem,1.75rem)] font-bold tracking-tight text-app-text">
             What happens when you start the trial?
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-[0.9375rem] leading-relaxed text-slate-600">
@@ -261,21 +261,21 @@ export default function PricingPage() {
             ].map((item) => (
               <div
                 key={item.step}
-                className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-slate-200/90 bg-app-surface p-6 shadow-sm"
               >
-                <span className="text-xs font-bold tabular-nums text-[#0F766E]">{item.step}</span>
-                <h3 className="mt-2 text-[1.0625rem] font-semibold text-[#0F172A]">{item.title}</h3>
+                <span className="text-xs font-bold tabular-nums text-app-primary">{item.step}</span>
+                <h3 className="mt-2 text-[1.0625rem] font-semibold text-app-text">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.body}</p>
               </div>
             ))}
           </div>
           <p className="mt-8 text-center text-sm text-slate-600">
             Questions on setup?{" "}
-            <Link href="/faq" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+            <Link href="/faq" className="font-semibold text-app-primary hover:text-app-accent-dark">
               Read the FAQ
             </Link>
             {" · "}
-            <Link href="/#after-signup" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+            <Link href="/#after-signup" className="font-semibold text-app-primary hover:text-app-accent-dark">
               First-week detail on the home page
             </Link>
           </p>
@@ -288,7 +288,7 @@ export default function PricingPage() {
           {/* Plan cards */}
           <section className="marketing-section marketing-surface-elevated border-b border-slate-200/80">
             {checkoutError ? (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-[#DC2626]">
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {checkoutError}
               </div>
             ) : null}
@@ -298,32 +298,32 @@ export default function PricingPage() {
                 <div
                   key={plan.id}
                   className={`relative flex flex-col overflow-hidden rounded-2xl border p-8 ${plan.highlighted
-                    ? "border-[#0F766E] bg-[#FFFFFF] shadow-xl shadow-teal-900/6"
-                    : "border-[#E2E8F0] bg-[#FFFFFF] shadow-sm"
+                    ? "border-app-primary bg-app-surface shadow-xl shadow-teal-900/6"
+                    : "border-app-border bg-app-surface shadow-sm"
                     }`}
                 >
                   {plan.badge ? (
-                    <div className="mb-5 inline-flex rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1 text-xs font-semibold text-[#115E59]">
+                    <div className="mb-5 inline-flex rounded-full border border-teal-200 bg-app-accent-wash px-3 py-1 text-xs font-semibold text-app-accent-dark">
                       {plan.badge}
                     </div>
                   ) : null}
 
                   <div>
-                    <h3 className="text-base font-semibold text-[#0F172A]">{plan.name}</h3>
-                    <p className="mt-1 text-xs text-[#64748B]">{plan.audience}</p>
+                    <h3 className="text-base font-semibold text-app-text">{plan.name}</h3>
+                    <p className="mt-1 text-xs text-app-text-muted">{plan.audience}</p>
                   </div>
 
                   <div className="mt-6 flex items-end gap-2">
-                    <span className="text-4xl font-bold text-[#0F172A]">{plan.price}</span>
-                    <span className="pb-1.5 text-sm font-medium text-[#64748B]">{plan.period}</span>
+                    <span className="text-4xl font-bold text-app-text">{plan.price}</span>
+                    <span className="pb-1.5 text-sm font-medium text-app-text-muted">{plan.period}</span>
                   </div>
 
-                  <p className="mt-4 text-sm leading-6 text-[#475569]">{plan.description}</p>
+                  <p className="mt-4 text-sm leading-6 text-app-text-muted">{plan.description}</p>
 
                   <div className="mt-7 flex-1 space-y-3">
                     {plan.features.map((feature) => (
-                      <div key={feature} className="flex items-start gap-3 text-sm text-[#475569]">
-                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CCFBF1] text-[#115E59]">
+                      <div key={feature} className="flex items-start gap-3 text-sm text-app-text-muted">
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-wash text-app-accent-dark">
                           <Check className="h-3.5 w-3.5" />
                         </div>
                         <span>{feature}</span>
@@ -335,7 +335,7 @@ export default function PricingPage() {
                     {plan.id === "trial" ? (
                       <Link
                         href="/register"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover"
                       >
                         {plan.cta}
                         <ArrowRight className="h-4 w-4" />
@@ -346,8 +346,8 @@ export default function PricingPage() {
                         onClick={() => handlePaidPlanClick(plan.id as PaidPlanId)}
                         disabled={checkoutLoading === plan.id}
                         className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:opacity-60 ${plan.highlighted
-                          ? "bg-[#0F766E] text-white hover:bg-[#115E59]"
-                          : "border border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] hover:bg-[#F8FAFC]"
+                          ? "bg-app-primary text-white hover:bg-app-primary-hover"
+                          : "border border-app-border bg-app-surface text-app-text hover:bg-app-surface-alt"
                           }`}
                       >
                         {checkoutLoading === plan.id ? "Loading..." : plan.cta}
@@ -359,9 +359,9 @@ export default function PricingPage() {
               ))}
             </div>
 
-            <p className="mt-6 text-center text-sm text-[#64748B]">
+            <p className="mt-6 text-center text-sm text-app-text-muted">
               All paid plans include a full refund if cancelled within 7 days. Questions?{" "}
-              <Link href="/contact" className="font-semibold text-[#0F766E] hover:text-[#115E59]">
+              <Link href="/contact" className="font-semibold text-app-primary hover:text-app-accent-dark">
                 Talk to us
               </Link>
               .
@@ -379,19 +379,19 @@ export default function PricingPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px] border-collapse">
+              <table className="w-full min-w-150 border-collapse">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0]">
-                    <th className="pb-4 pr-6 text-left text-sm font-medium text-[#64748B]">Feature</th>
-                    <th className="px-4 pb-4 text-center text-sm font-semibold text-[#0F172A]">Trial</th>
-                    <th className="px-4 pb-4 text-center text-sm font-semibold text-[#0F766E]">Professional</th>
-                    <th className="px-4 pb-4 text-center text-sm font-semibold text-[#0F172A]">Premium</th>
+                  <tr className="border-b border-app-border">
+                    <th className="pb-4 pr-6 text-left text-sm font-medium text-app-text-muted">Feature</th>
+                    <th className="px-4 pb-4 text-center text-sm font-semibold text-app-text">Trial</th>
+                    <th className="px-4 pb-4 text-center text-sm font-semibold text-app-primary">Professional</th>
+                    <th className="px-4 pb-4 text-center text-sm font-semibold text-app-text">Premium</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F1F5F9]">
+                <tbody className="divide-y divide-app-border">
                   {comparisonRows.map((row) => (
                     <tr key={row.label}>
-                      <td className="py-3 pr-6 text-sm text-[#475569]">{row.label}</td>
+                      <td className="py-3 pr-6 text-sm text-app-text-muted">{row.label}</td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex justify-center">
                           <CellValue value={row.trial} />
@@ -425,8 +425,8 @@ export default function PricingPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {pricingFaqs.map((item) => (
-                <div key={item.question} className="rounded-2xl border border-white/80 bg-white p-7 shadow-sm">
-                  <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                <div key={item.question} className="rounded-2xl border border-white/80 bg-app-surface p-7 shadow-sm">
+                  <h3 className="text-[1.0625rem] font-semibold text-app-text">{item.question}</h3>
                   <p className="marketing-body mt-3">{item.answer}</p>
                 </div>
               ))}
@@ -438,10 +438,10 @@ export default function PricingPage() {
         {/* CTA */}
         <section className="marketing-final-act">
           <div className="marketing-container">
-            <div className="overflow-hidden rounded-3xl bg-[#0F766E] px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
+            <div className="overflow-hidden rounded-3xl bg-app-primary px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
               <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.07em] text-teal-100">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-widest text-teal-100">
                     <Sparkles className="h-3.5 w-3.5" />
                     No credit card needed
                   </div>
@@ -455,7 +455,7 @@ export default function PricingPage() {
                 <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
                   <Link
                     href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-[1rem] font-semibold text-[#0F766E] shadow-lg transition-colors hover:bg-teal-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-surface px-8 py-4 text-[1rem] font-semibold text-app-primary shadow-lg transition-colors hover:bg-teal-50"
                   >
                     Start free trial
                     <ArrowRight className="h-4 w-4" />

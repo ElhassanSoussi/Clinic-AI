@@ -130,7 +130,7 @@ function sectionStatusLabel(status: SectionStatus): string {
 function sectionStatusClass(status: SectionStatus): string {
   if (status === "completed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (status === "incomplete") return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]";
+  return "bg-app-surface-alt text-app-text-muted border-app-border";
 }
 
 function availabilityValidationLabel(validation: SheetsValidation): string {
@@ -164,10 +164,10 @@ function SettingsSection({
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="ds-card-header flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-[var(--color-app-canvas)] sm:px-6"
+        className="ds-card-header flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-app-canvas sm:px-6"
       >
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--color-app-border)] bg-[var(--color-app-surface)] text-[var(--color-app-primary-hover)] shadow-sm">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-app-border bg-app-surface text-app-primary-hover shadow-sm">
             <Icon className="h-4 w-4" />
           </span>
           <span className="ds-section-title text-[1rem]">{label}</span>
@@ -175,7 +175,7 @@ function SettingsSection({
             {sectionStatusLabel(status)}
           </span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform shrink-0 ml-3 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-app-text-muted transition-transform shrink-0 ml-3 ${isOpen ? "rotate-180" : ""}`} />
       </button>
       {isOpen && children}
     </section>
@@ -202,14 +202,14 @@ function ClinicInformationSectionContent({
   setAddress: (value: string) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">
         Shown on the public chat page (contact strip) and used when the assistant references your clinic. Accurate phone
         and hours reduce wrong answers and unnecessary callbacks.
       </p>
       <div className="space-y-4">
         <div>
-          <label htmlFor="clinic-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <label htmlFor="clinic-name" className="block text-sm font-medium text-app-text mb-1.5">
             Clinic Name
           </label>
           <input
@@ -217,12 +217,12 @@ function ClinicInformationSectionContent({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+            className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="clinic-phone" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+            <label htmlFor="clinic-phone" className="block text-sm font-medium text-app-text mb-1.5">
               Phone
             </label>
             <input
@@ -230,12 +230,12 @@ function ClinicInformationSectionContent({
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+              className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
               placeholder="(555) 123-4567"
             />
           </div>
           <div>
-            <label htmlFor="clinic-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+            <label htmlFor="clinic-email" className="block text-sm font-medium text-app-text mb-1.5">
               Email
             </label>
             <input
@@ -243,13 +243,13 @@ function ClinicInformationSectionContent({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+              className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
               placeholder="contact@clinic.com"
             />
           </div>
         </div>
         <div>
-          <label htmlFor="clinic-address" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <label htmlFor="clinic-address" className="block text-sm font-medium text-app-text mb-1.5">
             Address
           </label>
           <input
@@ -257,7 +257,7 @@ function ClinicInformationSectionContent({
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+            className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
             placeholder="123 Main St, Suite 100, City, State, ZIP"
           />
         </div>
@@ -278,13 +278,13 @@ function AssistantMessagesSectionContent({
   setFallback: (value: string) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">
         These messages are injected by the assistant when patients send a simple greeting (including the first hidden handshake) and when the assistant has no confident answer. They are not a substitute for clinical advice.
       </p>
       <div className="space-y-4">
         <div>
-          <label htmlFor="greeting" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <label htmlFor="greeting" className="block text-sm font-medium text-app-text mb-1.5">
             Greeting Message
           </label>
           <p className="ds-help-text mb-1.5">
@@ -295,11 +295,11 @@ function AssistantMessagesSectionContent({
             value={greeting}
             onChange={(e) => setGreeting(e.target.value)}
             rows={2}
-            className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
+            className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash resize-none"
           />
         </div>
         <div>
-          <label htmlFor="fallback" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <label htmlFor="fallback" className="block text-sm font-medium text-app-text mb-1.5">
             Fallback Message
           </label>
           <p className="ds-help-text mb-1.5">
@@ -310,7 +310,7 @@ function AssistantMessagesSectionContent({
             value={fallback}
             onChange={(e) => setFallback(e.target.value)}
             rows={2}
-            className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
+            className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash resize-none"
           />
         </div>
       </div>
@@ -332,19 +332,19 @@ function ServicesSectionContent({
   removeService: (idx: number) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">The assistant uses this list to answer patient questions about what your clinic offers. Only services listed here will be mentioned.</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {services.map((service, index) => (
           <span
             key={`svc-${service}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#CCFBF1] text-[#115E59] rounded-full text-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-app-accent-wash text-app-accent-dark rounded-full text-sm"
           >
             {service}
             <button
               onClick={() => removeService(index)}
               aria-label={`Remove ${service}`}
-              className="text-teal-400 hover:text-[#115E59]"
+              className="text-teal-400 hover:text-app-accent-dark"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -362,13 +362,13 @@ function ServicesSectionContent({
               addService();
             }
           }}
-          className="flex-1 px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+          className="flex-1 px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
           placeholder="Add a service (e.g., General Checkup)"
         />
         <button
           onClick={addService}
           aria-label="Add service"
-          className="px-3 py-2.5 text-sm font-medium text-[#0F766E] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] transition-colors"
+          className="px-3 py-2.5 text-sm font-medium text-app-primary border border-teal-200 rounded-lg hover:bg-app-accent-wash transition-colors"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -385,12 +385,12 @@ function BusinessHoursSectionContent({
   setHours: Dispatch<SetStateAction<Record<string, string>>>;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">The assistant references these hours when patients ask about availability. Keep them current to avoid incorrect information.</p>
       <div className="space-y-3">
         {DAYS.map((day) => (
           <div key={day} className="flex items-center gap-3">
-            <span className="w-24 text-sm font-medium text-[#0F172A] capitalize">
+            <span className="w-24 text-sm font-medium text-app-text capitalize">
               {day}
             </span>
             <input
@@ -399,7 +399,7 @@ function BusinessHoursSectionContent({
               onChange={(e) =>
                 setHours({ ...hours, [day]: e.target.value })
               }
-              className="flex-1 px-3.5 py-2 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+              className="flex-1 px-3.5 py-2 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
               placeholder='e.g., 9:00 AM - 5:00 PM or "Closed"'
             />
           </div>
@@ -421,21 +421,21 @@ function FaqSectionContent({
   removeFaq: (idx: number) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <div className="flex items-center justify-between mb-4">
         <p className="ds-help-text min-w-0 flex-1 pr-3">
           Common questions the assistant can answer directly instead of holding for staff.
         </p>
         <button
           onClick={addFaq}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#0F766E] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] transition-colors shrink-0 ml-4"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-app-primary border border-teal-200 rounded-lg hover:bg-app-accent-wash transition-colors shrink-0 ml-4"
         >
           <Plus className="w-4 h-4" />
           Add FAQ
         </button>
       </div>
       {faq.length === 0 ? (
-        <p className="text-sm text-[#64748B] text-center py-6">
+        <p className="text-sm text-app-text-muted text-center py-6">
           No FAQs added yet. Add common questions so the assistant can answer them directly.
         </p>
       ) : (
@@ -443,16 +443,16 @@ function FaqSectionContent({
           {faq.map((item, index) => (
             <div
               key={`faq-${index}-${item.question.slice(0, 20)}`}
-              className="p-4 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC]"
+              className="p-4 border border-app-border rounded-lg bg-app-surface-alt"
             >
               <div className="flex justify-between items-start mb-3">
-                <span className="text-sm font-medium text-[#64748B]">
+                <span className="text-sm font-medium text-app-text-muted">
                   FAQ #{index + 1}
                 </span>
                 <button
                   onClick={() => removeFaq(index)}
                   aria-label={`Remove FAQ ${index + 1}`}
-                  className="text-[#64748B] hover:text-red-500 transition-colors"
+                  className="text-app-text-muted hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -462,14 +462,14 @@ function FaqSectionContent({
                   type="text"
                   value={item.question}
                   onChange={(e) => updateFaq(index, "question", e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                  className="w-full px-3.5 py-2 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                   placeholder="Question (e.g., Do you accept insurance?)"
                 />
                 <textarea
                   value={item.answer}
                   onChange={(e) => updateFaq(index, "answer", e.target.value)}
                   rows={2}
-                  className="w-full px-3.5 py-2 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1] resize-none"
+                  className="w-full px-3.5 py-2 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash resize-none"
                   placeholder="Answer"
                 />
               </div>
@@ -531,7 +531,7 @@ function GoogleSheetsSectionContent({
     : "";
 
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <div className="space-y-6">
         <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50">
           <div className="flex items-start justify-between gap-4">
@@ -562,7 +562,7 @@ function GoogleSheetsSectionContent({
             </p>
           ) : null}
           {googleSheetId ? (
-            <div className="mt-4 rounded-lg border border-emerald-200 bg-white p-3 text-sm text-emerald-800">
+            <div className="mt-4 rounded-lg border border-emerald-200 bg-app-surface p-3 text-sm text-emerald-800">
               Google Sheets is connected.
               <div className="mt-2 flex flex-wrap gap-3">
                 <code className="rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-900">{googleSheetId}</code>
@@ -579,34 +579,34 @@ function GoogleSheetsSectionContent({
           ) : null}
         </div>
 
-        <div className="p-4 rounded-xl border border-[#E2E8F0] bg-white">
+        <div className="p-4 rounded-xl border border-app-border bg-app-surface">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4 className="text-sm font-semibold text-[#0F172A] mb-1">Microsoft Excel</h4>
-              <p className="text-sm text-[#475569]">
+              <h4 className="text-sm font-semibold text-app-text mb-1">Microsoft Excel</h4>
+              <p className="text-sm text-app-text-muted">
                 Sign in with Microsoft and let Clinic AI create a starter Excel workbook in your OneDrive automatically.
               </p>
             </div>
-            <Sheet className="w-5 h-5 text-[#475569] shrink-0 mt-0.5" />
+            <Sheet className="w-5 h-5 text-app-text-muted shrink-0 mt-0.5" />
           </div>
           <button
             onClick={startMicrosoftConnect}
             disabled={connectingExcel}
-            className="mt-4 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-[#0F172A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#334155] disabled:opacity-50"
+            className="mt-4 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           >
             {connectingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             Connect with Microsoft
           </button>
           {excelConnectMessage ? (
             <p
-              className={`mt-3 text-sm ${excelConnectTone === "error" ? "text-red-700" : "text-[#0F172A]"
+              className={`mt-3 text-sm ${excelConnectTone === "error" ? "text-red-700" : "text-app-text"
                 }`}
             >
               {excelConnectMessage}
             </p>
           ) : null}
           {excelWorkbookId ? (
-            <div className="mt-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm text-[#0F172A]">
+            <div className="mt-4 rounded-lg border border-app-border bg-app-surface-alt p-3 text-sm text-app-text">
               Microsoft Excel is connected.
               {excelWorkbookUrl ? (
                 <div className="mt-2">
@@ -614,7 +614,7 @@ function GoogleSheetsSectionContent({
                     href={excelWorkbookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-[#0F172A] hover:text-[#0F172A]"
+                    className="font-medium text-app-text hover:text-app-text"
                   >
                     Open workbook
                   </a>
@@ -624,31 +624,31 @@ function GoogleSheetsSectionContent({
           ) : null}
         </div>
 
-        <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]">
+        <div className="rounded-xl border border-app-border bg-app-surface-alt">
           <button
             onClick={() => setShowManualSetup((current) => !current)}
             className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
             <div>
-              <h4 className="text-sm font-semibold text-[#0F172A]">Advanced manual setup</h4>
+              <h4 className="text-sm font-semibold text-app-text">Advanced manual setup</h4>
               <p className="ds-help-text mt-1">
                 Use your own spreadsheet ID if you do not want quick connect.
               </p>
             </div>
-            <ChevronRight className={`w-4 h-4 text-[#64748B] transition-transform ${showManualSetup ? "rotate-90" : ""}`} />
+            <ChevronRight className={`w-4 h-4 text-app-text-muted transition-transform ${showManualSetup ? "rotate-90" : ""}`} />
           </button>
 
           {showManualSetup ? (
-            <div className="border-t border-[#E2E8F0] px-3.5 py-3 space-y-4 bg-white rounded-b-xl">
+            <div className="border-t border-app-border px-3.5 py-3 space-y-4 bg-app-surface rounded-b-xl">
               <p className="ds-help-text">
                 If you prefer manual setup, share your sheet as <b>Editor</b> with{" "}
-                <code className="bg-[#F1F5F9] px-1 py-0.5 rounded text-[#0F172A] select-all">
+                <code className="bg-app-surface-alt px-1 py-0.5 rounded text-app-text select-all">
                   clinic-ai-bot@clinic-ai-491503.iam.gserviceaccount.com
                 </code>
                 {" "}and paste the sheet URL below.
               </p>
               <div>
-                <label htmlFor="google-sheet-id" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label htmlFor="google-sheet-id" className="block text-sm font-medium text-app-text mb-1.5">
                   Spreadsheet ID or URL
                 </label>
                 <input
@@ -656,12 +656,12 @@ function GoogleSheetsSectionContent({
                   type="text"
                   value={googleSheetId}
                   onChange={(e) => setGoogleSheetId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                  className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                   placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRYFa..."
                 />
               </div>
               <div>
-                <label htmlFor="google-sheet-tab" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                <label htmlFor="google-sheet-tab" className="block text-sm font-medium text-app-text mb-1.5">
                   Tab / Sheet Name
                 </label>
                 <input
@@ -669,7 +669,7 @@ function GoogleSheetsSectionContent({
                   type="text"
                   value={googleSheetTab}
                   onChange={(e) => setGoogleSheetTab(e.target.value)}
-                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                  className="w-full sm:max-w-xs px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                   placeholder="Sheet1"
                 />
               </div>
@@ -677,7 +677,7 @@ function GoogleSheetsSectionContent({
                 <button
                   onClick={handleValidateSheets}
                   disabled={validatingSheets}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-app-primary rounded-lg hover:bg-app-primary-hover disabled:opacity-50"
                 >
                   {validatingSheets ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -750,7 +750,7 @@ function EmailNotificationsSectionContent({
   testEmailResult: { success: boolean; message: string } | null;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">Receive an email alert each time the assistant captures a new patient request, so nothing is missed.</p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
@@ -761,15 +761,15 @@ function EmailNotificationsSectionContent({
               checked={notificationsEnabled}
               onChange={(e) => setNotificationsEnabled(e.target.checked)}
             />
-            <div className={`block w-10 h-6 rounded-full transition-colors ${notificationsEnabled ? "bg-[#0F766E]" : "bg-[#E2E8F0]"}`}></div>
-            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? "translate-x-4" : ""}`}></div>
+            <div className={`block w-10 h-6 rounded-full transition-colors ${notificationsEnabled ? "bg-app-primary" : "bg-app-border"}`}></div>
+            <div className={`dot absolute left-1 top-1 bg-app-surface w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? "translate-x-4" : ""}`}></div>
           </div>
-          <span className="text-sm font-medium text-[#0F172A]">Enable new lead notifications</span>
+          <span className="text-sm font-medium text-app-text">Enable new lead notifications</span>
         </label>
         {notificationsEnabled && (
           <div className="pt-2 space-y-3">
             <div>
-              <label htmlFor="notification-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+              <label htmlFor="notification-email" className="block text-sm font-medium text-app-text mb-1.5">
                 Notification Email Address
               </label>
               <input
@@ -777,7 +777,7 @@ function EmailNotificationsSectionContent({
                 type="email"
                 value={notificationEmail}
                 onChange={(e) => setNotificationEmail(e.target.value)}
-                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                 placeholder="doctor@clinic.com (defaults to your account email if empty)"
               />
             </div>
@@ -785,7 +785,7 @@ function EmailNotificationsSectionContent({
               <button
                 onClick={handleTestEmail}
                 disabled={testingEmail}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F766E] border border-[#99f6e4] rounded-lg hover:bg-[#CCFBF1] disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-app-primary border border-teal-200 rounded-lg hover:bg-app-accent-wash disabled:opacity-50 transition-colors"
               >
                 {testingEmail ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -819,9 +819,9 @@ function SchedulingSectionContent({
   setAvailabilitySheetTab: (value: string) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">
-        When enabled, the assistant can offer slots from an <span className="font-medium text-[#0F172A]">Availability</span> tab in the same spreadsheet you connected (Google Sheets or the workbook from Microsoft Excel quick connect).
+        When enabled, the assistant can offer slots from an <span className="font-medium text-app-text">Availability</span> tab in the same spreadsheet you connected (Google Sheets or the workbook from Microsoft Excel quick connect).
       </p>
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
@@ -832,15 +832,15 @@ function SchedulingSectionContent({
               checked={availabilityEnabled}
               onChange={(e) => setAvailabilityEnabled(e.target.checked)}
             />
-            <div className={`block w-10 h-6 rounded-full transition-colors ${availabilityEnabled ? "bg-[#0F766E]" : "bg-[#E2E8F0]"}`}></div>
-            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""}`}></div>
+            <div className={`block w-10 h-6 rounded-full transition-colors ${availabilityEnabled ? "bg-app-primary" : "bg-app-border"}`}></div>
+            <div className={`dot absolute left-1 top-1 bg-app-surface w-4 h-4 rounded-full transition-transform ${availabilityEnabled ? "translate-x-4" : ""}`}></div>
           </div>
-          <span className="text-sm font-medium text-[#0F172A]">Enable guided scheduling from spreadsheet availability</span>
+          <span className="text-sm font-medium text-app-text">Enable guided scheduling from spreadsheet availability</span>
         </label>
         {availabilityEnabled && (
           <div className="pt-2 space-y-4">
             <div>
-              <label htmlFor="availability-tab" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+              <label htmlFor="availability-tab" className="block text-sm font-medium text-app-text mb-1.5">
                 Availability tab name
               </label>
               <input
@@ -848,30 +848,30 @@ function SchedulingSectionContent({
                 type="text"
                 value={availabilitySheetTab}
                 onChange={(e) => setAvailabilitySheetTab(e.target.value)}
-                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                className="w-full sm:max-w-md px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                 placeholder="e.g., Availability"
               />
               <p className="ds-muted-text mt-1.5">
-                Default is <span className="font-medium text-[#475569]">Availability</span>. Use &ldquo;Test connection&rdquo; under Spreadsheets to verify headers when using Google Sheets.
+                Default is <span className="font-medium text-app-text-muted">Availability</span>. Use &ldquo;Test connection&rdquo; under Spreadsheets to verify headers when using Google Sheets.
               </p>
             </div>
-            <div className="p-4 bg-[#CCFBF1] rounded-lg border border-[#99f6e4]">
-              <h4 className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#115E59]">
+            <div className="p-4 bg-app-accent-wash rounded-lg border border-teal-200">
+              <h4 className="mb-2 text-sm font-semibold uppercase tracking-widest text-app-accent-dark">
                 Required sheet format
               </h4>
-              <p className="text-sm font-medium leading-relaxed text-[#115E59]">
+              <p className="text-sm font-medium leading-relaxed text-app-accent-dark">
                 Your tab must have these headers in the first row:
               </p>
-              <code className="block mt-2 font-mono text-xs bg-white/80 p-2 rounded border border-[#99f6e4]/50 text-[#115E59] select-all">
+              <code className="block mt-2 font-mono text-xs bg-app-surface/80 p-2 rounded border border-teal-200/50 text-app-accent-dark select-all">
                 Date | Time | Status | Patient Name | Lead ID
               </code>
               <div className="mt-3 flex items-start gap-2">
-                <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-1.5 shrink-0" />
-                <p className="text-sm text-[#0F766E]">Only rows with Status = <span className="font-bold">available</span> will be shown to patients.</p>
+                <div className="w-1 h-1 rounded-full bg-app-primary mt-1.5 shrink-0" />
+                <p className="text-sm text-app-primary">Only rows with Status = <span className="font-bold">available</span> will be shown to patients.</p>
               </div>
               <div className="mt-1 flex items-start gap-2">
-                <div className="w-1 h-1 rounded-full bg-[#0F766E] mt-1.5 shrink-0" />
-                <p className="text-sm text-[#0F766E]">
+                <div className="w-1 h-1 rounded-full bg-app-primary mt-1.5 shrink-0" />
+                <p className="text-sm text-app-primary">
                   The assistant walks patients through the booking steps; your team confirms details in the dashboard.
                 </p>
               </div>
@@ -895,13 +895,13 @@ function BrandingSectionContent({
   setPrimaryColor: (value: string) => void;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">
-        Applies to the public patient page and embed widget header (<span className="font-medium text-[#0F172A]">/chat/your-clinic-slug</span>). Your clinic name still appears in context when it differs from the assistant name.
+        Applies to the public patient page and embed widget header (<span className="font-medium text-app-text">/chat/your-clinic-slug</span>). Your clinic name still appears in context when it differs from the assistant name.
       </p>
       <div className="space-y-4 max-w-lg">
         <div>
-          <label htmlFor="assistant-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <label htmlFor="assistant-name" className="block text-sm font-medium text-app-text mb-1.5">
             Assistant Name
           </label>
           <input
@@ -909,7 +909,7 @@ function BrandingSectionContent({
             type="text"
             value={assistantName}
             onChange={(e) => setAssistantName(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+            className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
             placeholder='e.g., "Sarah from Smile Dental"'
           />
           <p className="ds-muted-text mt-1">
@@ -917,7 +917,7 @@ function BrandingSectionContent({
           </p>
         </div>
         <div>
-          <span className="block text-sm font-medium text-[#0F172A] mb-1.5">
+          <span className="block text-sm font-medium text-app-text mb-1.5">
             Primary Color
           </span>
           <div className="flex items-center gap-3">
@@ -926,14 +926,14 @@ function BrandingSectionContent({
               aria-label="Choose primary color"
               value={primaryColor}
               onChange={(e) => setPrimaryColor(e.target.value)}
-              className="w-10 h-10 rounded-lg border border-[#E2E8F0] cursor-pointer p-0.5"
+              className="w-10 h-10 rounded-lg border border-app-border cursor-pointer p-0.5"
             />
             <input
               type="text"
               aria-label="Primary color hex value"
               value={primaryColor}
               onChange={(e) => setPrimaryColor(e.target.value)}
-              className="w-28 px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg font-mono"
+              className="w-28 px-3 py-2 text-sm border border-app-border rounded-lg font-mono"
             />
             <div className="settings-color-preview h-10 flex-1 rounded-lg" />
           </div>
@@ -955,10 +955,10 @@ function EmbedSectionContent({
   isLive: boolean;
 }>) {
   return (
-    <div className="px-5 pb-5 border-t border-[#E2E8F0] pt-4">
+    <div className="px-5 pb-5 border-t border-app-border pt-4">
       <p className="ds-help-text mb-4">
         Add this snippet to your site to load the same patient experience as{" "}
-        <span className="font-medium text-[#0F172A]">/chat/{clinic.slug}</span>. The assistant only uses data you save
+        <span className="font-medium text-app-text">/chat/{clinic.slug}</span>. The assistant only uses data you save
         here. Until you go live, patients still see a clear &ldquo;not live&rdquo; state on the public page.
       </p>
       {!isLive ? (
@@ -967,7 +967,7 @@ function EmbedSectionContent({
         </div>
       ) : null}
       <div className="relative group">
-        <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-sm text-[#0F172A]">
+        <pre className="overflow-x-auto whitespace-pre-wrap rounded-lg border border-app-border bg-app-surface-alt p-4 text-sm text-app-text">
           {embedCode}
         </pre>
         <button
@@ -977,7 +977,7 @@ function EmbedSectionContent({
             setTimeout(() => setSaveMessage(""), 3000);
             globalThis.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="absolute top-3 right-3 p-2 text-[#64748B] hover:text-[#0F766E] bg-white border border-[#E2E8F0] rounded shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+          className="absolute top-3 right-3 p-2 text-app-text-muted hover:text-app-primary bg-app-surface border border-app-border rounded shadow-sm opacity-0 group-hover:opacity-100 transition-all"
           title="Copy to clipboard"
         >
           <Copy className="w-4 h-4" />
@@ -988,7 +988,7 @@ function EmbedSectionContent({
           href={`/chat/${clinic.slug}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#0F766E] hover:text-[#115E59] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-app-primary hover:text-app-accent-dark transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
           Open public patient chat (new tab)
@@ -1375,7 +1375,7 @@ export default function SettingsPage() {
   const embedCode = `<script src="${getPublicSiteUrl()}/widget.js" data-clinic="${clinic?.slug || ""}"></script>`;
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -1389,14 +1389,14 @@ export default function SettingsPage() {
       />
       <div className="wave-settings-deck settings-control-shell space-y-6">
         {clinic ? (
-          <div className="ds-control-hero-panel workspace-command-hero relative p-5 sm:p-6">
-            <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="ds-card relative p-5 sm:p-6">
+            <div className="relative z-1 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
-                <p className="workspace-section-label">Assistant visibility</p>
-                <h2 className="mt-2 text-lg font-semibold text-[#0F172A]">Patient chat &amp; embed</h2>
-                <p className="mt-1.5 text-sm leading-6 text-[#475569]">
+                <p className="ds-eyebrow">Assistant visibility</p>
+                <h2 className="mt-2 text-lg font-semibold text-app-text">Patient chat &amp; embed</h2>
+                <p className="mt-1.5 text-sm leading-6 text-app-text-muted">
                   Public page{" "}
-                  <span className="font-mono text-sm text-[#0F172A]">
+                  <span className="font-mono text-sm text-app-text">
                     /chat/{clinic.slug?.trim() ? clinic.slug : "your-clinic-slug"}
                   </span>
                   {" — "}matches your saved clinic name, assistant name, accent color, hours, and phone on the patient
@@ -1411,7 +1411,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={jumpToFirstSetupGap}
-                      className="font-semibold text-[#0F766E] hover:underline"
+                      className="font-semibold text-app-primary hover:underline"
                     >
                       Open the first incomplete section
                     </button>
@@ -1444,7 +1444,7 @@ export default function SettingsPage() {
                     href={`/chat/${clinic.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] hover:bg-[#F8FAFC]"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-border bg-app-surface px-4 py-2 text-sm font-medium text-app-text hover:bg-app-surface-alt"
                   >
                     <ExternalLink className="h-4 w-4 shrink-0" />
                     Preview patient chat
@@ -1453,7 +1453,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => setGoLiveModalOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59]"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-app-primary-hover"
                     >
                       <Rocket className="h-4 w-4 shrink-0" />
                       Go live
@@ -1463,7 +1463,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={jumpToFirstSetupGap}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm font-medium text-[#475569] hover:bg-[#F8FAFC]"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-border px-4 py-2 text-sm font-medium text-app-text-muted hover:bg-app-surface-alt"
                     >
                       Next setup section
                     </button>
@@ -1482,13 +1482,13 @@ export default function SettingsPage() {
                 key={group}
                 type="button"
                 onClick={() => focusSection(modules[0]?.key ?? "clinic-info")}
-                className="rounded-[1.35rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
+                className="rounded-[1.35rem] border border-app-border bg-app-surface/90 px-4 py-4 text-left shadow-sm transition-all hover:border-app-border hover:shadow-md"
               >
-                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">{group}</p>
-                <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-[#0F172A]">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">{group}</p>
+                <p className="mt-2 text-lg font-semibold tracking-tight text-app-text">
                   {completed}/{modules.length} configured
                 </p>
-                <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
                   {modules.map((module) => module.label).join(" · ")}
                 </p>
               </button>
@@ -1496,22 +1496,22 @@ export default function SettingsPage() {
           })}
         </div>
         <div className="workspace-stage">
-          <div className="workspace-side-rail order-2 xl:order-none">
+          <div className="space-y-3 order-2 xl:order-0">
             <div className="ds-rail-panel workspace-immersive-rail relative p-5 xl:sticky xl:top-6">
-              <p className="workspace-section-label">Configuration status</p>
-              <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0F172A]">{completedCount}/10</p>
-              <p className="mt-1 text-sm text-[#475569]">Sections configured</p>
-              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0]">
-                <div className="settings-progress h-full rounded-full bg-[#0F766E] transition-all" />
+              <p className="ds-eyebrow">Configuration status</p>
+              <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-app-text">{completedCount}/10</p>
+              <p className="mt-1 text-sm text-app-text-muted">Sections configured</p>
+              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-app-border">
+                <div className="settings-progress h-full rounded-full bg-app-primary transition-all" />
               </div>
-              <p className="mt-4 text-sm leading-6 text-[#475569]">
+              <p className="mt-4 text-sm leading-6 text-app-text-muted">
                 Save to update assistant behavior and the dashboard. The embed section stays &ldquo;incomplete&rdquo; until you
                 go live so this meter matches what patients see as active vs staging.
               </p>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0F766E] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-app-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-app-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -1521,12 +1521,12 @@ export default function SettingsPage() {
                 Save settings
               </button>
 
-              <div className="mt-5 border-t border-[var(--color-app-border)] pt-5">
-                <p className="workspace-section-label">Modules</p>
+              <div className="mt-5 border-t border-app-border pt-5">
+                <p className="ds-eyebrow">Modules</p>
                 <div className="mt-3 space-y-3">
                   {(["Foundation", "Knowledge", "Channels", "Go live"] as const).map((group) => (
                     <div key={group}>
-                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{group}</p>
+                      <p className="text-[0.7rem] font-semibold uppercase tracking-widest text-app-text-muted">{group}</p>
                       <div className="mt-2 space-y-1.5">
                         {SETTINGS_MODULES.filter((module) => module.group === group).map((module) => {
                           const status = getSectionStatus(module.key, statusState);
@@ -1537,16 +1537,16 @@ export default function SettingsPage() {
                               type="button"
                               onClick={() => focusSection(module.key)}
                               className={`flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all ${active
-                                ? "border-[#d8cdfd] bg-[#f5f1ff] shadow-[0_18px_24px_-24px_rgb(124_99_243/0.75)]"
-                                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"
+                                ? "border-violet-300 bg-violet-50 shadow-[0_18px_24px_-24px_rgb(124_99_243/0.75)]"
+                                : "border-app-border bg-app-surface hover:bg-app-surface-alt"
                                 }`}
                             >
-                              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? "bg-white text-[#7C63F3]" : "bg-[#F8FAFC] text-[#64748B]"}`}>
+                              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? "bg-app-surface text-violet-500" : "bg-app-surface-alt text-app-text-muted"}`}>
                                 <module.icon className="h-4 w-4" />
                               </span>
                               <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-semibold text-[#0F172A]">{module.label}</span>
-                                <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[#64748B]">
+                                <span className="block truncate text-sm font-semibold text-app-text">{module.label}</span>
+                                <span className="block text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">
                                   {sectionStatusLabel(status)}
                                 </span>
                               </span>
@@ -1561,24 +1561,24 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="order-1 min-w-0 space-y-6 xl:order-none">
-            <div className="wave-command-slab workspace-command-hero !py-5">
+          <div className="order-1 min-w-0 space-y-6 xl:order-0">
+            <div className="ds-card py-5!">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 max-w-2xl">
-                  <p className="workspace-section-label">Control center map</p>
-                  <h3 className="mt-2 text-[1.25rem] font-semibold tracking-[-0.03em] text-[#0F172A]">Configure the clinic in the same order patients experience it</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+                  <p className="ds-eyebrow">Control center map</p>
+                  <h3 className="mt-2 text-[1.25rem] font-semibold tracking-tight text-app-text">Configure the clinic in the same order patients experience it</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
                     Foundation first, then knowledge, then channels, then go-live. Each module feeds the public chat surface, the inbox, and the dashboard readiness state.
                   </p>
                 </div>
-                <div className="grid gap-2 sm:grid-cols-2 lg:w-[22rem]">
-                  <div className="rounded-xl border border-[#E2E8F0] bg-white px-4 py-3">
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Public surface</p>
-                    <p className="mt-1 text-sm font-semibold text-[#0F172A]">/chat/{clinic?.slug || "your-clinic"}</p>
+                <div className="grid gap-2 sm:grid-cols-2 lg:w-88">
+                  <div className="rounded-xl border border-app-border bg-app-surface px-4 py-3">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">Public surface</p>
+                    <p className="mt-1 text-sm font-semibold text-app-text">/chat/{clinic?.slug || "your-clinic"}</p>
                   </div>
-                  <div className="rounded-xl border border-[#d8cdfd] bg-[#f5f1ff] px-4 py-3">
-                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#6c58c9]">Readiness</p>
-                    <p className="mt-1 text-sm font-semibold text-[#3d2c84]">{systemStatusCfg?.label || "Needs setup"}</p>
+                  <div className="rounded-xl border border-violet-300 bg-violet-50 px-4 py-3">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-violet-600">Readiness</p>
+                    <p className="mt-1 text-sm font-semibold text-violet-900">{systemStatusCfg?.label || "Needs setup"}</p>
                   </div>
                 </div>
               </div>
@@ -1779,10 +1779,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="workspace-side-rail order-3 xl:order-none">
-            <div className="workspace-rail-card p-5">
-              <p className="workspace-section-label">Go-live guidance</p>
-              <div className="mt-4 space-y-3 text-sm leading-6 text-[#475569]">
+          <div className="space-y-3 order-3 xl:order-0">
+            <div className="ds-card p-5">
+              <p className="ds-eyebrow">Go-live guidance</p>
+              <div className="mt-4 space-y-3 text-sm leading-6 text-app-text-muted">
                 <p>
                   Foundation, services, hours, and FAQ control what the assistant can safely say. Spreadsheet and alert modules add workflow automation, but they do not replace the core clinic facts.
                 </p>
@@ -1791,23 +1791,23 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-            <div className="workspace-rail-card p-5">
-              <p className="workspace-section-label">Patient-facing output</p>
+            <div className="ds-card p-5">
+              <p className="ds-eyebrow">Patient-facing output</p>
               <div className="mt-3 space-y-3">
-                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Assistant name</p>
-                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">{assistantName || clinic?.assistant_name || "Clinic Assistant"}</p>
+                <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">Assistant name</p>
+                  <p className="mt-1 text-sm font-semibold text-app-text">{assistantName || clinic?.assistant_name || "Clinic Assistant"}</p>
                 </div>
-                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Primary color</p>
+                <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">Primary color</p>
                   <div className="mt-2 flex items-center gap-3">
                     <span className="h-8 w-8 rounded-xl border border-white shadow-sm" style={{ backgroundColor: primaryColor }} />
-                    <span className="text-sm font-semibold text-[#0F172A]">{primaryColor}</span>
+                    <span className="text-sm font-semibold text-app-text">{primaryColor}</span>
                   </div>
                 </div>
-                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">Public state</p>
-                  <p className="mt-1 text-sm font-semibold text-[#0F172A]">{clinic?.is_live ? "Live for patients" : "Staging only"}</p>
+                <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-3">
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-app-text-muted">Public state</p>
+                  <p className="mt-1 text-sm font-semibold text-app-text">{clinic?.is_live ? "Live for patients" : "Staging only"}</p>
                 </div>
               </div>
             </div>

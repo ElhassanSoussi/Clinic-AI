@@ -25,7 +25,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   trialing: { label: "Trial", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
   canceled: { label: "Canceled", color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
   past_due: { label: "Past due", color: "text-red-700", bg: "bg-red-50 border-red-200" },
-  inactive: { label: "Inactive", color: "text-[#0F172A]", bg: "bg-[#F8FAFC] border-[#E2E8F0]" },
+  inactive: { label: "Inactive", color: "text-app-text", bg: "bg-app-surface-alt border-app-border" },
 };
 
 const PLAN_ICONS: Record<string, React.ReactNode> = {
@@ -171,7 +171,7 @@ export default function BillingPage() {
       : "Usage limits will appear when your plan includes a monthly request cap.";
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -196,28 +196,28 @@ export default function BillingPage() {
         </div>
       )}
 
-      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+      <section className="ds-card p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-4">
             <div>
-              <p className="workspace-section-label">Billing command</p>
-              <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+              <p className="ds-eyebrow">Billing command</p>
+              <h2 className="mt-2 text-[1.95rem] font-bold tracking-tight text-app-text sm:text-[2.35rem]">
                 Keep plan, usage, and payment controls in one confident surface.
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
                 This is your entitlement layer for patient-request volume, paid features, and secure Stripe account management. Plans change here; Stripe still handles cards, invoices, and receipts.
               </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.3rem] border border-[#99f6e4] bg-white/90 px-4 py-4 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Current plan</p>
+              <div className="rounded-[1.3rem] border border-teal-200 bg-app-surface/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Current plan</p>
                 <div className="mt-3 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#CCFBF1] text-[#0F766E] shadow-sm">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-app-accent-wash text-app-primary shadow-sm">
                     {PLAN_ICONS[billing.plan] || PLAN_ICONS.trial}
                   </div>
                   <div>
-                    <p className="text-base font-semibold text-[#0F172A]">{billing.plan_name}</p>
+                    <p className="text-base font-semibold text-app-text">{billing.plan_name}</p>
                     <span className={`mt-1 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusInfo.bg} ${statusInfo.color}`}>
                       {statusInfo.label}
                     </span>
@@ -225,21 +225,21 @@ export default function BillingPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.3rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Usage this month</p>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">
+              <div className="rounded-[1.3rem] border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Usage this month</p>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-app-text">
                   {leadsUsed}
-                  {isUnlimited ? "" : <span className="text-lg font-semibold text-[#64748B]"> / {leadLimit}</span>}
+                  {isUnlimited ? "" : <span className="text-lg font-semibold text-app-text-muted"> / {leadLimit}</span>}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-[#475569]">{usageSummary}</p>
+                <p className="mt-2 text-xs leading-relaxed text-app-text-muted">{usageSummary}</p>
               </div>
 
-              <div className="rounded-[1.3rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Billing channel</p>
-                <p className="mt-3 text-base font-semibold text-[#0F172A]">
+              <div className="rounded-[1.3rem] border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Billing channel</p>
+                <p className="mt-3 text-base font-semibold text-app-text">
                   {billing.has_stripe_subscription ? "Stripe customer portal available" : "Trial without active Stripe subscription"}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-[#475569]">
+                <p className="mt-2 text-xs leading-relaxed text-app-text-muted">
                   {billing.has_stripe_subscription
                     ? "Open invoices, payment methods, and receipts securely through Stripe."
                     : "The portal appears automatically once a paid subscription is created through checkout."}
@@ -248,9 +248,9 @@ export default function BillingPage() {
             </div>
           </div>
 
-          <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
-            <p className="workspace-rail-title">Stripe controls</p>
-            <p className="mt-3 text-sm leading-relaxed text-[#475569]">
+          <div className="rounded-[1.45rem] border border-app-border bg-app-surface/94 p-5 shadow-(--ds-shadow-md)">
+            <p className="ds-eyebrow">Stripe controls</p>
+            <p className="mt-3 text-sm leading-relaxed text-app-text-muted">
               Use the customer portal for payment methods and invoices. Use the plan grid below when you want to move to a higher tier.
             </p>
 
@@ -260,30 +260,30 @@ export default function BillingPage() {
                   type="button"
                   onClick={() => void handleManageBilling()}
                   disabled={portalLoading}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#DDE5EE] bg-white px-4 py-2.5 text-sm font-semibold text-[#0F172A] shadow-sm transition-all hover:translate-y-[-1px] hover:bg-[#F8FAFC] disabled:opacity-50"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-app-text shadow-sm transition-all hover:-translate-y-px hover:bg-app-surface-alt disabled:opacity-50"
                 >
                   {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
                   Open Stripe portal
                 </button>
               ) : (
-                <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4 text-xs leading-relaxed text-[#64748B]">
+                <div className="rounded-xl border border-dashed border-app-border bg-app-surface-alt px-4 py-4 text-xs leading-relaxed text-app-text-muted">
                   No paid subscription is attached yet. Checkout below creates the Stripe customer relationship and unlocks the portal.
                 </div>
               )}
 
-              <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Billing posture</p>
-                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-[#475569]">
+              <div className="rounded-xl border border-app-border bg-app-surface-alt px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Billing posture</p>
+                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-app-text-muted">
                   <li className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-primary" />
                     Critical account control stays here.
                   </li>
                   <li className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-primary" />
                     Checkout and invoices stay in Stripe.
                   </li>
                   <li className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-primary" />
                     Usage is measured from real patient-request volume.
                   </li>
                 </ul>
@@ -294,21 +294,21 @@ export default function BillingPage() {
       </section>
 
       <div className="wave-billing-shell">
-        <div className="workspace-split items-start">
+        <div className="grid gap-6 lg:grid-cols-[1fr_18rem] items-start">
           <div className="min-w-0 space-y-4">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="workspace-main-frame border-[#99f6e4] bg-[#CCFBF1]/35 p-5">
+              <div className="workspace-main-frame border-teal-200 bg-app-accent-wash/35 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-[#115E59]">Plan status</p>
-                    <h3 className="mt-2 text-xl font-semibold tracking-tight text-[#0F172A]">{billing.plan_name}</h3>
-                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#475569]">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-app-accent-dark">Plan status</p>
+                    <h3 className="mt-2 text-xl font-semibold tracking-tight text-app-text">{billing.plan_name}</h3>
+                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-app-text-muted">
                       {isTrial
                         ? "Trial keeps the workspace live while you finish setup, validate chat, and decide when to unlock paid capacity."
                         : "Your workspace is on a paid plan. Use this area to understand current status before opening the Stripe portal or changing tiers."}
                     </p>
                     {isTrial && trialEndsStr && (
-                      <p className={`mt-3 text-sm ${isTrialExpired ? "font-medium text-red-600" : "text-[#475569]"}`}>
+                      <p className={`mt-3 text-sm ${isTrialExpired ? "font-medium text-red-600" : "text-app-text-muted"}`}>
                         {isTrialExpired ? "Trial expired on " : "Trial ends "}
                         {trialEndsStr}
                       </p>
@@ -332,13 +332,13 @@ export default function BillingPage() {
               </div>
 
               <div className="workspace-main-frame p-5">
-                <h3 className="text-sm font-semibold text-[#0F172A]">Usage meter</h3>
-                <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+                <h3 className="text-sm font-semibold text-app-text">Usage meter</h3>
+                <p className="mt-1 text-xs leading-relaxed text-app-text-muted">
                   Every captured patient request counts toward plan capacity. This keeps billing tied to real front-desk volume instead of vanity metrics.
                 </p>
                 <div className="mt-4 flex items-end justify-between">
-                  <span className="text-sm text-[#475569]">Patient requests</span>
-                  <span className="text-sm font-semibold tabular-nums text-[#0F172A]">
+                  <span className="text-sm text-app-text-muted">Patient requests</span>
+                  <span className="text-sm font-semibold tabular-nums text-app-text">
                     {leadsUsed}
                     {isUnlimited ? "" : ` / ${leadLimit}`}
                   </span>
@@ -352,7 +352,7 @@ export default function BillingPage() {
                     aria-label={`Patient requests used: ${leadsUsed} of ${leadLimit}`}
                   />
                 ) : null}
-                <p className="mt-3 text-xs leading-relaxed text-[#64748B]">{usageSummary}</p>
+                <p className="mt-3 text-xs leading-relaxed text-app-text-muted">{usageSummary}</p>
                 {isAtLimit && (
                   <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-3 text-sm text-red-700">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -368,10 +368,10 @@ export default function BillingPage() {
             </div>
           </div>
 
-          <aside className="workspace-side-rail">
-            <div className="workspace-rail-card p-5 xl:sticky xl:top-6">
-              <p className="workspace-rail-title">Decision guide</p>
-              <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+          <aside className="space-y-3">
+            <div className="ds-card p-5 xl:sticky xl:top-6">
+              <p className="ds-eyebrow">Decision guide</p>
+              <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
                 Trial is best while you finish setup. Professional adds real operating volume and SMS capability. Premium removes caps and adds deposits and priority support.
               </p>
               <div className="mt-4 space-y-2">
@@ -380,9 +380,9 @@ export default function BillingPage() {
                   { label: "Professional", detail: "Best for live clinics managing real intake volume." },
                   { label: "Premium", detail: "For teams running deposits, high throughput, and priority support." },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-3 shadow-sm">
-                    <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                  <div key={item.label} className="rounded-xl border border-app-border bg-app-surface px-3.5 py-3 shadow-sm">
+                    <p className="text-sm font-semibold text-app-text">{item.label}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                   </div>
                 ))}
               </div>
@@ -393,16 +393,16 @@ export default function BillingPage() {
 
       {/* Plans Comparison */}
       <div className="mt-6">
-        <div className="wave-command-slab mb-4 !py-4">
-          <p className="workspace-section-label">Upgrade path</p>
-          <p className="mt-1 text-sm text-[#475569]">
+        <div className="ds-card mb-4 py-4!">
+          <p className="ds-eyebrow">Upgrade path</p>
+          <p className="mt-1 text-sm text-app-text-muted">
             Trial stays free for 14 days with no card. Professional adds SMS and higher volume. Premium removes caps and adds deposits and priority support. Choose the tier that matches your real front-desk volume, then let Stripe handle billing details.
           </p>
         </div>
-        <h3 className="mt-1 text-sm font-semibold text-[#0F172A]">Compare plans</h3>
-        <p className="mb-3 mt-1 text-xs text-[#64748B]">Move up when you need higher patient-request volume or professional features like Sheets sync.</p>
+        <h3 className="mt-1 text-sm font-semibold text-app-text">Compare plans</h3>
+        <p className="mb-3 mt-1 text-xs text-app-text-muted">Move up when you need higher patient-request volume or professional features like Sheets sync.</p>
         {plans.length === 0 ? (
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 text-sm text-[#475569] shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-5 text-sm text-app-text-muted shadow-sm">
             Plan details are temporarily unavailable. Your current billing status is still accurate above.
           </div>
         ) : (
@@ -419,37 +419,37 @@ export default function BillingPage() {
                 <div
                   key={plan.id}
                   className={`relative flex flex-col overflow-hidden rounded-[1.45rem] border p-5 shadow-sm ${isCurrent
-                    ? "border-[#99f6e4] bg-[linear-gradient(180deg,rgba(236,253,250,0.96)_0%,rgba(255,255,255,0.96)_100%)] shadow-[0_24px_42px_-28px_rgba(15,118,110,0.45)]"
+                    ? "border-teal-200 bg-[linear-gradient(180deg,rgba(236,253,250,0.96)_0%,rgba(255,255,255,0.96)_100%)] shadow-[0_24px_42px_-28px_rgba(15,118,110,0.45)]"
                     : isFeatured
-                      ? "border-[#d8cdfd] bg-[linear-gradient(180deg,rgba(245,241,255,0.82)_0%,rgba(255,255,255,0.98)_100%)] shadow-[0_24px_42px_-28px_rgba(124,99,243,0.32)]"
-                      : "border-[#E2E8F0] bg-white shadow-[0_22px_38px_-30px_rgba(12,18,32,0.24)]"
+                      ? "border-violet-300 bg-[linear-gradient(180deg,rgba(245,241,255,0.82)_0%,rgba(255,255,255,0.98)_100%)] shadow-[0_24px_42px_-28px_rgba(124,99,243,0.32)]"
+                      : "border-app-border bg-app-surface shadow-[0_22px_38px_-30px_rgba(12,18,32,0.24)]"
                     }`}
                 >
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#14B8A6] via-[#0F8F83] to-[#7C63F3]" />
+                  <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-teal-400 via-teal-600 to-violet-500" />
                   <div className="flex items-center gap-2 mb-1">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-[#CCFBF1] text-[#0F766E]" : "bg-[#F1F5F9] text-[#475569]"}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-app-accent-wash text-app-primary" : "bg-app-surface-alt text-app-text-muted"}`}>
                       {PLAN_ICONS[plan.id] || PLAN_ICONS.trial}
                     </div>
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                      <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
+                      <h4 className="text-base font-semibold text-app-text">{plan.name}</h4>
                       {isCurrent ? (
-                        <span className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#115E59]">
+                        <span className="rounded-full border border-teal-200 bg-app-accent-wash px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-app-accent-dark">
                           Current
                         </span>
                       ) : isFeatured ? (
-                        <span className="rounded-full border border-[#d8cdfd] bg-[#f5f1ff] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6c58c9]">
+                        <span className="rounded-full border border-violet-300 bg-violet-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-violet-600">
                           Recommended
                         </span>
                       ) : null}
                     </div>
                   </div>
-                  <p className="text-sm text-[#475569] mb-3">{plan.description}</p>
-                  <p className="text-2xl font-bold text-[#0F172A] mb-4">
+                  <p className="text-sm text-app-text-muted mb-3">{plan.description}</p>
+                  <p className="text-2xl font-bold text-app-text mb-4">
                     {formatPrice(plan.monthly_price_cents)}
                   </p>
                   <ul className="space-y-2 mb-6 flex-1">
                     {plan.features.map((f) => (
-                      <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-[#475569]">
+                      <li key={`feat-${f.slice(0, 30)}`} className="flex items-start gap-2 text-sm text-app-text-muted">
                         <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
                         {f}
                       </li>
@@ -459,7 +459,7 @@ export default function BillingPage() {
                   {(() => {
                     if (isCurrent) {
                       return (
-                        <div className="w-full py-2.5 text-center text-sm font-medium text-[#115E59] bg-[#CCFBF1] rounded-lg">
+                        <div className="w-full py-2.5 text-center text-sm font-medium text-app-accent-dark bg-app-accent-wash rounded-lg">
                           Current plan
                         </div>
                       );
@@ -469,7 +469,7 @@ export default function BillingPage() {
                         <button
                           onClick={() => handleUpgrade(plan.id)}
                           disabled={checkoutLoading === plan.id}
-                          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-[#0F766E] rounded-lg hover:bg-[#115E59] disabled:opacity-50 transition-colors"
+                          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-app-primary rounded-lg hover:bg-app-primary-hover disabled:opacity-50 transition-colors"
                         >
                           {checkoutLoading === plan.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -482,7 +482,7 @@ export default function BillingPage() {
                       );
                     }
                     return (
-                      <div className="w-full py-2.5 text-center text-sm font-medium text-[#64748B] bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                      <div className="w-full py-2.5 text-center text-sm font-medium text-app-text-muted bg-app-surface-alt rounded-lg border border-app-border">
                         {isDowngrade ? "Current or lower tier" : "Free"}
                       </div>
                     );

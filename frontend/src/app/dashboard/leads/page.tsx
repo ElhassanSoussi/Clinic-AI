@@ -79,7 +79,7 @@ function buildUsageWarningBanner(clinic: Clinic | null): React.ReactNode {
       {clinic.plan !== "premium" && (
         <Link
           href="/dashboard/billing"
-          className="inline-flex shrink-0 items-center gap-1 rounded-md bg-[#0F766E] px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-[#115E59]"
+          className="inline-flex shrink-0 items-center gap-1 rounded-md bg-app-primary px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-app-primary-hover"
         >
           <Zap className="w-3 h-3" /> <span>Upgrade</span>
         </Link>
@@ -124,7 +124,7 @@ function buildEmptyStateConfig(
         <button
           type="button"
           onClick={() => router.push(settingsHref())}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#115E59]"
+          className="inline-flex items-center gap-2 rounded-lg bg-app-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover"
         >
           Open settings
         </button>
@@ -143,7 +143,7 @@ function buildEmptyStateConfig(
             href={`/chat/${clinic.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+            className="inline-flex items-center gap-2 rounded-lg bg-app-primary px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover"
           >
             <MessageSquare className="w-3.5 h-3.5" /> <span>Test assistant</span>
           </a>
@@ -154,14 +154,14 @@ function buildEmptyStateConfig(
               setEmbedCopied(true);
               setTimeout(() => setEmbedCopied(false), 2000);
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#CCFBF1] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+            className="inline-flex items-center gap-2 rounded-lg bg-app-accent-wash px-3.5 py-2 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
           >
             <Code2 className="w-3.5 h-3.5" /> <span>{embedCopied ? "Copied!" : "Copy embed"}</span>
           </button>
           <Link
             href={`/chat/${clinic.slug}`}
             target="_blank"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#F1F5F9] px-3.5 py-2 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+            className="inline-flex items-center gap-2 rounded-lg bg-app-surface-alt px-3.5 py-2 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
           >
             <ExternalLink className="w-3.5 h-3.5" /> <span>Chat page</span>
           </Link>
@@ -196,9 +196,9 @@ function renderLeadsContent({
 
   if (filtered.length === 0) {
     return (
-      <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+      <div className="rounded-xl border border-app-border bg-app-surface shadow-sm">
         <EmptyState
-          icon={<Users className="w-5 h-5 text-[#64748B]" />}
+          icon={<Users className="w-5 h-5 text-app-text-muted" />}
           title={emptyState.title}
           description={emptyState.description}
           action={emptyState.action}
@@ -210,37 +210,37 @@ function renderLeadsContent({
   return (
     <div className="space-y-2.5">
       {filtered.map((lead) => (
-        <div key={lead.id} className="reset-list-row relative transition-all hover:border-[#CBD5E1] hover:shadow-md">
+        <div key={lead.id} className="app-list-row relative transition-all hover:border-app-border hover:shadow-md">
           <button
             onClick={() => router.push(`/dashboard/leads/${lead.id}`)}
             className="w-full px-4 py-3.5 text-left"
           >
             <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
               <div className="flex min-w-0 flex-1 gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-[linear-gradient(180deg,#ecfeff,#f8fafc)] text-sm font-bold text-[#0F766E] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-b from-cyan-50 to-app-surface-alt text-sm font-bold text-app-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
                   {(lead.patient_name?.[0] || "P").toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <p className="text-[0.98rem] font-semibold tracking-[-0.03em] text-[#0F172A]">{lead.patient_name}</p>
-                  <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#475569]">
+                  <p className="text-[0.98rem] font-semibold tracking-tight text-app-text">{lead.patient_name}</p>
+                  <span className="rounded-md bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text-muted">
                     {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                   </span>
                   {lead.appointment_status ? (
-                    <span className="rounded-md bg-[#CCFBF1] px-2 py-0.5 text-xs font-semibold text-[#115E59]">
+                    <span className="rounded-md bg-app-accent-wash px-2 py-0.5 text-xs font-semibold text-app-accent-dark">
                       {lead.appointment_status.replaceAll("_", " ")}
                     </span>
                   ) : null}
                 </div>
-                <p className="text-sm leading-relaxed text-[#475569]">
+                <p className="text-sm leading-relaxed text-app-text-muted">
                   {lead.reason_for_visit || "No visit reason provided yet — patient may not have shared details."}
                 </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-app-text-muted">
                   <span>{lead.patient_phone || lead.patient_email || "No contact info saved"}</span>
                   <span>{lead.preferred_datetime_text || "No time preference"}</span>
                   <span>Received {timeAgo(lead.created_at)}</span>
                 </div>
-                <p className="mt-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-medium text-[#115E59]">
+                <p className="mt-2 rounded-md border border-app-border bg-app-surface-alt px-2.5 py-1.5 text-xs font-medium text-app-accent-dark">
                   {leadNextStepHint(lead.status)}
                 </p>
               </div>
@@ -249,15 +249,15 @@ function renderLeadsContent({
           </button>
           <div className="flex shrink-0 flex-col gap-2 px-4 pb-3 xl:absolute xl:right-4 xl:top-3 xl:min-w-40">
             {updatingId === lead.id ? (
-              <div className="flex h-8 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-[#64748B]" />
+              <div className="flex h-8 items-center justify-center rounded-lg border border-app-border bg-app-surface">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-app-text-muted" />
               </div>
             ) : (
               <select
                 aria-label="Change lead status"
                 value={lead.status}
                 onChange={(event) => handleInlineStatus(lead.id, event.target.value as LeadStatus)}
-                className="h-8 rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm font-semibold text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="h-8 rounded-lg border border-app-border bg-app-surface px-2.5 text-sm font-semibold text-app-text focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
               >
                 {INLINE_STATUSES.map((status) => (
                   <option key={status} value={status}>
@@ -353,7 +353,7 @@ export default function LeadsPage() {
   const content = renderLeadsContent({ loading, error, filtered, emptyState, loadLeads, router, updatingId, handleInlineStatus });
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -368,13 +368,13 @@ export default function LeadsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/dashboard/appointments"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+              className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted shadow-sm transition-colors hover:bg-app-surface-alt"
             >
               Appointments
             </Link>
             <Link
               href="/dashboard/settings"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+              className="inline-flex items-center gap-2 rounded-xl bg-app-primary px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover"
             >
               Settings
             </Link>
@@ -382,71 +382,41 @@ export default function LeadsPage() {
         }
       />
 
-      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
-        <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
-          <div>
-            <p className="workspace-section-label">Pipeline command surface</p>
-            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
-              Requests move from new to booked with stage, timing, and next action visible in one board.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
-              This is the handoff queue for your clinic, not a report. Staff can scan patient details, reason for visit, contact status, and suggested next step before opening a single record.
-            </p>
-          </div>
-          <div className="reset-kpi-grid">
-            {[
-              { label: "New", value: counts.new, tone: "bg-sky-50" },
-              { label: "Contacted", value: counts.contacted, tone: "bg-violet-50" },
-              { label: "Booked", value: counts.booked, tone: "bg-emerald-50" },
-              { label: "Closed", value: counts.closed, tone: "bg-white" },
-            ].map((item) => (
-              <div key={item.label} className={`rounded-[1.2rem] border border-[#DDE5EE] px-4 py-4 shadow-sm ${item.tone}`}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
-                <p className="mt-2 text-2xl font-bold tracking-[-0.05em] text-[#0F172A]">{item.value}</p>
-              </div>
-            ))}
-          </div>
+      <section className="ds-card p-5 sm:p-6">
+        <p className="ds-eyebrow">Pipeline overview</p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-app-text">
+          Requests move from new to booked with stage, timing, and next action visible in one board.
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
+          This is the handoff queue for your clinic, not a report. Staff can scan patient details, reason for visit, contact status, and suggested next step before opening a single record.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          {[
+            { label: "New", value: counts.new, tone: "bg-sky-50 border-sky-200" },
+            { label: "Contacted", value: counts.contacted, tone: "bg-violet-50 border-violet-200" },
+            { label: "Booked", value: counts.booked, tone: "bg-emerald-50 border-emerald-200" },
+            { label: "Closed", value: counts.closed, tone: "bg-app-surface border-app-border" },
+          ].map((item) => (
+            <div key={item.label} className={`ds-card min-w-21 flex-1 px-4 py-3 text-center sm:flex-none ${item.tone}`}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-app-text">{item.value}</p>
+            </div>
+          ))}
         </div>
-      </section>
-
-      <div className="wave-command-slab workspace-command-hero space-y-4">
-        <div>
-          <p className="workspace-section-label">Live pipeline</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {(
-              [
-                { label: "New", value: counts.new, box: "border-sky-200 bg-sky-50" },
-                { label: "Contacted", value: counts.contacted, box: "border-violet-200 bg-violet-50" },
-                { label: "Booked", value: counts.booked, box: "border-emerald-200 bg-emerald-50" },
-                { label: "Closed", value: counts.closed, box: "border-[#E2E8F0] bg-white" },
-              ] as const
-            ).map((row) => (
-              <div
-                key={row.label}
-                className="min-w-[5.25rem] flex-1 rounded-lg border border-transparent px-0 py-0 text-center sm:flex-none"
-              >
-                <div className={`rounded-lg border px-2.5 py-2 shadow-[0_1px_2px_rgb(15_23_42/0.05)] ${row.box}`}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
-                  <p className="mt-0.5 text-lg font-bold tabular-nums text-[#0F172A]">{row.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="workspace-section-label">How requests move</p>
-          <p className="mt-2 text-sm leading-relaxed text-[#475569]">
-            <span className="font-semibold text-[#0F172A]">New</span>
-            <span className="mx-1.5 text-[#94A3B8]">→</span>
-            <span className="font-semibold text-[#0F172A]">Contacted</span>
-            <span className="mx-1.5 text-[#94A3B8]">→</span>
-            <span className="font-semibold text-[#0F172A]">Booked</span>
-            <span className="mx-1.5 text-[#94A3B8]">→</span>
-            <span className="font-semibold text-[#0F172A]">Closed</span>
-            <span className="ml-2 text-[#64748B]">Advance with the inline status control; Appointments picks up timing, reminders, and deposits.</span>
+        <div className="mt-4 border-t border-app-border pt-4">
+          <p className="ds-eyebrow">How requests move</p>
+          <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
+            <span className="font-semibold text-app-text">New</span>
+            <span className="mx-1.5 text-app-text-muted">→</span>
+            <span className="font-semibold text-app-text">Contacted</span>
+            <span className="mx-1.5 text-app-text-muted">→</span>
+            <span className="font-semibold text-app-text">Booked</span>
+            <span className="mx-1.5 text-app-text-muted">→</span>
+            <span className="font-semibold text-app-text">Closed</span>
+            <span className="ml-2 text-app-text-muted">Advance with the inline status control; Appointments picks up timing, reminders, and deposits.</span>
           </p>
         </div>
-      </div>
+      </section>
 
       {usageWarningBanner}
 
@@ -457,30 +427,30 @@ export default function LeadsPage() {
         </div>
       )}
 
-      <div className="reset-workbench-shell">
-        <div className="wave-workbench-head">
+      <div className="ds-card overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-5 py-4">
           <div className="min-w-0">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#64748B]">Pipeline desk</p>
-            <p className="mt-0.5 text-sm font-semibold text-[#0F172A]">Request queue &amp; context</p>
+            <p className="ds-eyebrow">Pipeline desk</p>
+            <p className="mt-0.5 text-sm font-semibold text-app-text">Request queue &amp; context</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-[#475569]">
+            <span className="rounded-full border border-app-border bg-app-surface px-2.5 py-1 text-app-text-muted">
               {counts.new + counts.contacted} in flight
             </span>
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-900">
               {counts.booked} booked
             </span>
-            <span className="rounded-full border border-[#CBD5E1] bg-[#F8FAFC] px-2.5 py-1 text-[#475569]">
+            <span className="rounded-full border border-app-border bg-app-surface-alt px-2.5 py-1 text-app-text-muted">
               {filtered.length} in view
             </span>
           </div>
         </div>
-        <div className="wave-workbench-body">
-          <div className="workspace-column-layout">
+        <div className="p-5">
+          <div className="grid gap-6 xl:grid-cols-[13rem_1fr_15rem]-[13rem_1fr_15rem]">
             {/* Left rail — filters */}
             <aside className="hidden space-y-3 xl:block">
-              <div className="workspace-rail-card p-4">
-                <p className="workspace-section-label">Request mix</p>
+              <div className="ds-card p-4">
+                <p className="ds-eyebrow">Request mix</p>
                 <div className="mt-2.5 grid grid-cols-2 gap-2">
                   {(
                     [
@@ -490,16 +460,16 @@ export default function LeadsPage() {
                       { label: "Booked", value: counts.booked },
                     ] as const
                   ).map((row) => (
-                    <div key={row.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-2 text-center">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{row.label}</p>
-                      <p className="mt-0.5 text-base font-semibold tabular-nums text-[#0F172A]">{row.value}</p>
+                    <div key={row.label} className="rounded-lg border border-app-border bg-app-surface-alt px-2 py-2 text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-app-text-muted">{row.label}</p>
+                      <p className="mt-0.5 text-base font-semibold tabular-nums text-app-text">{row.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="workspace-rail-card p-4">
-                <p className="workspace-section-label">Filter by status</p>
+              <div className="ds-card p-4">
+                <p className="ds-eyebrow">Filter by status</p>
                 <div className="mt-2.5 space-y-1">
                   {STATUS_OPTIONS.map((opt) => {
                     const count = opt.value === "" ? counts.all : counts[opt.value as keyof typeof counts] ?? 0;
@@ -508,11 +478,11 @@ export default function LeadsPage() {
                       <button
                         key={opt.value}
                         onClick={() => setStatusFilter(opt.value)}
-                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${active ? "bg-app-accent-wash/90 text-app-accent-dark" : "text-app-text-muted hover:bg-app-surface-alt"
                           }`}
                       >
                         <span>{opt.label}</span>
-                        <span className={`text-xs ${active ? "text-teal-500" : "text-[#64748B]"}`}>{count}</span>
+                        <span className={`text-xs ${active ? "text-teal-500" : "text-app-text-muted"}`}>{count}</span>
                       </button>
                     );
                   })}
@@ -521,10 +491,10 @@ export default function LeadsPage() {
             </aside>
 
             {/* Center — list */}
-            <div className="order-1 min-w-0 space-y-3 xl:order-none">
+            <div className="order-1 min-w-0 space-y-3 xl:order-0">
               <div>
-                <p className="workspace-section-label">Open requests</p>
-                <p className="mt-1 text-sm text-[#475569]">Each row carries the suggested next step for that stage.</p>
+                <p className="ds-eyebrow">Open requests</p>
+                <p className="mt-1 text-sm text-app-text-muted">Each row carries the suggested next step for that stage.</p>
               </div>
               {/* Mobile filters */}
               <div className="flex flex-wrap gap-2 xl:hidden">
@@ -535,7 +505,7 @@ export default function LeadsPage() {
                       key={opt.value}
                       onClick={() => setStatusFilter(opt.value)}
                       type="button"
-                      className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? "bg-[#CCFBF1]/90 text-[#115E59]" : "text-[#475569] hover:bg-[#F8FAFC]"
+                      className={`min-h-10 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? "bg-app-accent-wash/90 text-app-accent-dark" : "text-app-text-muted hover:bg-app-surface-alt"
                         }`}
                     >
                       {opt.label}
@@ -545,38 +515,38 @@ export default function LeadsPage() {
               </div>
 
               {/* Search */}
-              <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 shadow-sm">
-                <Search className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
+              <div className="flex min-h-10 items-center gap-2.5 rounded-lg border border-app-border bg-app-surface px-3.5 py-2 shadow-sm">
+                <Search className="h-3.5 w-3.5 shrink-0 text-app-text-muted" />
                 <input
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search by name, phone, email, or visit reason..."
-                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-[#0F172A] placeholder:text-[#64748B] focus:outline-none"
+                  className="min-h-0 min-w-0 flex-1 bg-transparent text-sm text-app-text placeholder:text-app-text-muted focus:outline-none"
                 />
-                <span className="shrink-0 text-xs font-semibold text-[#64748B]">{filtered.length}</span>
+                <span className="shrink-0 text-xs font-semibold text-app-text-muted">{filtered.length}</span>
               </div>
 
               {content}
             </div>
 
             {/* Right rail — context */}
-            <aside className="workspace-side-rail order-2 xl:order-none">
-              <div className="workspace-rail-card p-4">
-                <p className="workspace-rail-title">Pipeline snapshot</p>
-                <p className="mt-1 text-xs leading-relaxed text-[#64748B]">
+            <aside className="space-y-3 order-2 xl:order-0">
+              <div className="ds-card p-4">
+                <p className="ds-eyebrow">Pipeline snapshot</p>
+                <p className="mt-1 text-xs leading-relaxed text-app-text-muted">
                   Open work is everything before a booking is confirmed or explicitly closed.
                 </p>
                 <div className="mt-2 space-y-1.5">
-                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Open work</p>
-                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.new + counts.contacted}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">Waiting on booking, follow-up, or closure.</p>
+                  <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Open work</p>
+                    <p className="mt-0.5 text-lg font-bold text-app-text">{counts.new + counts.contacted}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">Waiting on booking, follow-up, or closure.</p>
                   </div>
-                  <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Closed</p>
-                    <p className="mt-0.5 text-lg font-bold text-[#0F172A]">{counts.closed}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-[#475569]">No longer needing front-desk attention.</p>
+                  <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Closed</p>
+                    <p className="mt-0.5 text-lg font-bold text-app-text">{counts.closed}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">No longer needing front-desk attention.</p>
                   </div>
                 </div>
               </div>

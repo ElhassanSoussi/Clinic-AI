@@ -281,37 +281,92 @@ export default function DashboardLayout({
     return activeNavItem?.label ?? "Dashboard";
   })();
 
-  /* ═══════════════════════════════════════════════
-     RENDER — Premium SaaS workspace shell
-     ═══════════════════════════════════════════════ */
+  /* ═══ Shared sidebar content renderer ═══ */
+  const renderSidebarNav = (onNavigate?: () => void) => (
+    <>
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-3">
+        {sidebarGroups.map((group) => (
+          <div key={group.label}>
+            <p className="mb-1.5 px-2.5 text-[0.6875rem] font-semibold uppercase tracking-widest text-app-text-muted">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive =
+                  pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onNavigate}
+                    className="dashboard-nav-link group"
+                    data-active={isActive ? "true" : "false"}
+                  >
+                    <item.icon
+                      className={`h-4 w-4 shrink-0 transition-colors ${isActive ? "text-app-primary" : "text-app-text-muted group-hover:text-app-text"}`}
+                    />
+                    <span className="flex-1">{item.label}</span>
+                    {item.label === "Leads" && newLeadCount > 0 && (
+                      <span className="ml-auto min-w-5 rounded-full bg-blue-600 px-1.5 py-px text-center text-[0.6875rem] font-bold text-white">
+                        {newLeadCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* Channels */}
+      <div className="border-t border-app-border px-3 py-3">
+        <p className="mb-1.5 px-2.5 text-[0.6875rem] font-semibold uppercase tracking-widest text-app-text-muted">
+          Channels
+        </p>
+        {user?.clinic_slug && (
+          <Link
+            href={`/chat/${user.clinic_slug}`}
+            target="_blank"
+            className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-app-text-muted transition-colors hover:bg-app-surface-alt hover:text-app-text"
+          >
+            <MessageSquareMore className="h-4 w-4 text-app-text-muted group-hover:text-app-text" />
+            Patient Chat
+            <ExternalLink className="ml-auto h-3.5 w-3.5 text-app-text-muted" />
+          </Link>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="dashboard-shell flex h-screen max-md:overflow-x-hidden">
-      {/* ─── LEFT SIDEBAR (desktop) ─── */}
-      <aside className="dashboard-sidebar hidden flex-col lg:flex">
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 pb-4 pt-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] shadow-[0_20px_28px_-20px_rgb(15_118_110/0.8)]">
+      {/* ═══ Desktop sidebar ═══ */}
+      <aside className="dashboard-sidebar hidden w-60 flex-col border-r border-app-border bg-app-surface lg:flex">
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-4 pb-3 pt-4">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-b from-teal-400 to-teal-700 shadow-sm">
             <Bot className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="block text-[1rem] font-semibold tracking-[-0.03em] text-[#08111F]">Clinic AI</span>
-            <span className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">Front Desk OS</span>
+            <span className="block text-sm font-semibold tracking-tight text-app-text">Clinic AI</span>
+            <span className="text-[0.6875rem] font-semibold uppercase tracking-widest text-app-text-muted">Front Desk OS</span>
           </div>
         </div>
 
-        {/* Clinic status card */}
+        {/* Clinic context card */}
         {clinic && (
-          <div className="dashboard-side-card mx-3 mb-3 px-3.5 py-3">
-            <p className="truncate text-[0.8125rem] font-semibold text-[#0F172A]">{clinic.name}</p>
+          <div className="dashboard-side-card mx-3 mb-2 rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+            <p className="truncate text-[0.8125rem] font-semibold text-app-text">{clinic.name}</p>
             {statusCfg && systemStatus?.status !== "LIVE" && (
-              <span className={`mt-1 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium ${statusCfg.color}`}>
+              <span className={`mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium ${statusCfg.color}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                 {statusCfg.label}
               </span>
             )}
             {systemStatus?.status === "READY" && (
-              <p className="mt-2 text-[0.6875rem] leading-snug text-[#64748B]">
-                Use <span className="font-semibold text-[#0F172A]">Go live</span> in the header when patients should see an active assistant.
+              <p className="mt-1.5 text-[0.6875rem] leading-snug text-app-text-muted">
+                Use <span className="font-semibold text-app-text">Go live</span> when patients should see the assistant.
               </p>
             )}
             {systemStatus &&
@@ -320,7 +375,7 @@ export default function DashboardLayout({
               firstSetupGap && (
                 <Link
                   href={settingsHref(firstSetupGap.drawerSection)}
-                  className="mt-2 inline-flex max-w-full items-center gap-1 text-[0.6875rem] font-semibold text-[#0F766E] hover:underline"
+                  className="mt-1.5 inline-flex max-w-full items-center gap-1 text-[0.6875rem] font-semibold text-app-primary hover:underline"
                 >
                   <span className="truncate">Next: {firstSetupGap.label}</span>
                   <ArrowRight className="h-3 w-3 shrink-0" aria-hidden />
@@ -329,63 +384,15 @@ export default function DashboardLayout({
           </div>
         )}
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
-          {sidebarGroups.map((group) => (
-            <div key={group.label} className="workspace-sidebar-section">
-              <p className="workspace-section-label mb-2 px-2">{group.label}</p>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className="dashboard-nav-link group"
-                      data-active={isActive ? "true" : "false"}
-                    >
-                      <item.icon
-                        className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B] group-hover:text-[#475569]"}`}
-                      />
-                      {item.label}
-                      {item.label === "Leads" && newLeadCount > 0 && (
-                        <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
-                          {newLeadCount}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
+        {renderSidebarNav()}
 
-        {/* Channels section */}
-        <div className="border-t border-[#E2E8F0] px-3 py-3">
-          <p className="workspace-section-label mb-2 px-2">Channels</p>
-          {user?.clinic_slug && (
-            <Link
-              href={`/chat/${user.clinic_slug}`}
-              target="_blank"
-              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-[0.9375rem] font-medium text-[#475569] transition-colors hover:bg-[#f4f6f9] hover:text-[#0F172A]"
-            >
-              <MessageSquareMore className="h-[1.125rem] w-[1.125rem] text-[#64748B] group-hover:text-[#475569]" />
-              Patient Chat
-              <ExternalLink className="ml-auto h-3.5 w-3.5 text-[#64748B]" />
-            </Link>
-          )}
-        </div>
-
-        {/* Operator control card */}
-        <div className="dashboard-side-card mx-3 mb-3 px-3.5 py-3.5">
+        {/* Trust badge */}
+        <div className="mx-3 mb-3 rounded-lg border border-app-border bg-app-surface-alt px-3 py-3">
           <div className="flex items-start gap-2.5">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-primary" />
             <div>
-              <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-[#475569]">Operator control</p>
-              <p className="mt-1 text-[0.8125rem] leading-relaxed text-[#64748B]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-app-text-muted">Operator control</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">
                 Review, takeover, and visibility stay with your team.
               </p>
             </div>
@@ -393,118 +400,66 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* ─── MOBILE SIDEBAR ─── */}
+      {/* ═══ Mobile sidebar overlay ═══ */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity lg:hidden ${sidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-          }`}
+        className={`fixed inset-0 z-40 transition-opacity lg:hidden ${sidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
         {...(sidebarOpen ? {} : { "aria-hidden": true })}
       >
         <button
           onClick={() => setSidebarOpen(false)}
-          className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"
+          className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
           aria-label="Close navigation"
         />
         <aside
-          className={`dashboard-sidebar relative flex h-full w-[min(20rem,88vw)] max-w-[85vw] flex-col shadow-2xl transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`relative flex h-full w-[min(18rem,85vw)] flex-col border-r border-app-border bg-app-surface shadow-2xl transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F766E] shadow-md">
-                <Bot className="h-4 w-4 text-white" />
+          <div className="flex items-center justify-between border-b border-app-border px-4 py-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-primary shadow-sm">
+                <Bot className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-[0.9375rem] font-semibold text-[#0F172A]">Clinic AI</span>
+              <span className="text-sm font-semibold text-app-text">Clinic AI</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="rounded-lg p-1.5 text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+              className="rounded-lg p-1.5 text-app-text-muted hover:bg-app-surface-alt hover:text-app-text"
               aria-label="Close menu"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
-            {sidebarGroups.map((group) => (
-              <div key={group.label} className="workspace-sidebar-section">
-                <p className="workspace-section-label mb-2 px-2">{group.label}</p>
-                <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const isActive =
-                      pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className="dashboard-nav-link"
-                        data-active={isActive ? "true" : "false"}
-                      >
-                        <item.icon className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
-                        {item.label}
-                        {item.label === "Leads" && newLeadCount > 0 && (
-                          <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
-                            {newLeadCount}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
+          {renderSidebarNav(() => setSidebarOpen(false))}
         </aside>
       </div>
 
-      {/* ─── MAIN AREA ─── */}
+      {/* ═══ Main content area ═══ */}
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-        {/* ─── TOPBAR ─── */}
-        <header className="dashboard-topbar relative z-[2] flex min-h-[3.25rem] shrink-0 flex-wrap items-center gap-2 px-3 py-2 sm:flex-nowrap sm:gap-4 sm:px-4 lg:px-5">
+        {/* ─── Top bar ─── */}
+        <header className="dashboard-topbar relative z-2 flex min-h-14 shrink-0 items-center gap-3 border-b border-app-border bg-app-surface px-4 lg:px-5">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] lg:hidden"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-app-text-muted hover:bg-app-surface-alt hover:text-app-text lg:hidden"
             aria-label="Open navigation"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Page context */}
-          <div className="hidden min-w-0 lg:block">
-            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Workspace</p>
-            <p className="text-[1.25rem] font-bold tracking-[-0.04em] text-[var(--color-app-text)]">{topBarPageLabel}</p>
-          </div>
-
-          {/* Utility slab */}
-          <div className="flex min-w-0 flex-1 justify-center">
-            <div className="hidden min-w-[21rem] max-w-[34rem] flex-1 items-center justify-between gap-4 rounded-[1.35rem] border border-white/90 bg-white/92 px-4 py-2.5 shadow-[0_24px_40px_-30px_rgb(12_18_32/0.34)] md:flex">
-              <div className="min-w-0">
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Clinic status</p>
-                <p className="truncate text-sm font-semibold text-[#0F172A]">{clinic?.name || "Clinic workspace"}</p>
-              </div>
-              <div className="hidden min-w-0 flex-1 rounded-[1rem] border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 lg:block">
-                <p className="truncate text-[0.72rem] font-semibold uppercase tracking-[0.11em] text-[#64748B]">{topBarPageLabel}</p>
-                <p className="truncate text-sm font-semibold text-[#0F172A]">Operate from inbox, leads, bookings, and settings without leaving the workspace.</p>
-              </div>
-              <Link
-                href="/dashboard/inbox"
-                className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-[0.875rem] font-semibold text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white"
-              >
-                <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
-                Open inbox
-              </Link>
-            </div>
-            <Link
-              href="/dashboard/inbox"
-              className="inline-flex min-h-10 shrink items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/90 px-4 py-2 text-[0.9375rem] font-semibold text-[#475569] shadow-sm transition-colors hover:border-[#CBD5E1] hover:bg-white md:hidden"
-            >
-              <Inbox className="h-4 w-4 shrink-0 text-[#64748B]" />
-              <span>Inbox</span>
-            </Link>
+          {/* Page title */}
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-base font-semibold tracking-tight text-app-text">{topBarPageLabel}</h1>
           </div>
 
           {/* Right controls */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/inbox"
+              className="app-btn app-btn-secondary hidden gap-2 md:inline-flex"
+            >
+              <Inbox className="h-4 w-4" />
+              Inbox
+            </Link>
+
             <SystemStatusCTA
               systemStatus={systemStatus}
               statusCfg={statusCfg}
@@ -516,41 +471,40 @@ export default function DashboardLayout({
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex min-h-10 items-center gap-2.5 rounded-2xl border border-transparent bg-white/55 py-1.5 pl-1.5 pr-2 shadow-[0_10px_24px_-22px_rgb(12_18_32/0.5)] transition-colors hover:border-white/80 hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
+                className="flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-2 py-1.5 shadow-sm transition-colors hover:bg-app-surface-alt focus:outline-none focus-visible:ring-2 focus-visible:ring-app-primary"
                 aria-haspopup="true"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] text-xs font-bold text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-linear-to-b from-teal-400 to-teal-700 text-xs font-bold text-white">
                   {userInitial}
                 </div>
                 <div className="hidden text-left sm:block">
-                  <p className="max-w-32 truncate text-sm font-semibold text-[#0F172A]">
+                  <p className="max-w-28 truncate text-xs font-semibold text-app-text">
                     {user?.full_name || "Clinic user"}
                   </p>
-                  <p className="max-w-32 truncate text-xs text-[#64748B]">
+                  <p className="max-w-28 truncate text-[0.6875rem] text-app-text-muted">
                     {planLabel || "Workspace"}
                   </p>
                 </div>
               </button>
 
-              {/* Profile dropdown menu */}
+              {/* Dropdown menu */}
               <div
-                className={`absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-2.5 shadow-[0_24px_44px_-28px_rgb(12_18_32/0.4)] transition-all ${menuOpen ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
-                  }`}
+                className={`absolute right-0 mt-2 w-60 origin-top-right rounded-xl border border-app-border bg-app-surface p-1.5 shadow-lg transition-all ${menuOpen ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"}`}
                 role="menu"
               >
-                <div className="mb-2 rounded-xl bg-[#F8FAFC] px-3 py-3">
-                  <p className="truncate text-sm font-semibold text-[#0F172A]">{user?.full_name}</p>
-                  <p className="truncate text-sm text-[#64748B]">{user?.email}</p>
+                <div className="mb-1.5 rounded-lg bg-app-surface-alt px-3 py-2.5">
+                  <p className="truncate text-sm font-semibold text-app-text">{user?.full_name}</p>
+                  <p className="truncate text-xs text-app-text-muted">{user?.email}</p>
                   {planLabel && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="rounded-md bg-[#CCFBF1] px-2 py-0.5 text-xs font-semibold text-[#0F766E]">
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span className="rounded-md bg-teal-50 px-2 py-px text-xs font-semibold text-app-primary">
                         {planLabel}
                       </span>
                       {billing?.plan !== "premium" && (
                         <Link
                           href="/dashboard/billing"
                           onClick={() => setMenuOpen(false)}
-                          className="text-xs font-semibold text-[#0F766E] hover:text-[#115E59]"
+                          className="text-xs font-semibold text-app-primary hover:underline"
                         >
                           Upgrade
                         </Link>
@@ -562,21 +516,21 @@ export default function DashboardLayout({
                 <Link
                   href="/dashboard/account"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-[#475569] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-app-text-muted transition-colors hover:bg-app-surface-alt hover:text-app-text"
                   role="menuitem"
                 >
                   <UserCog className="h-4 w-4" />
                   Account
                 </Link>
 
-                <div className="my-1 border-t border-[#E2E8F0]" />
+                <div className="my-1 border-t border-app-border" />
 
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     logout().catch(() => { /* keep stable */ });
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-[#475569] transition-colors hover:bg-red-50 hover:text-[#DC2626]"
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-app-text-muted transition-colors hover:bg-red-50 hover:text-red-600"
                   role="menuitem"
                 >
                   <LogOut className="h-4 w-4" />
@@ -587,8 +541,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Mobile system status CTA */}
-        <div className="sm:hidden border-b border-[#E2E8F0] bg-white px-4 py-2.5">
+        {/* Mobile system status */}
+        <div className="border-b border-app-border bg-app-surface px-4 py-2.5 sm:hidden">
           <SystemStatusCTA
             systemStatus={systemStatus}
             statusCfg={statusCfg}
@@ -597,40 +551,12 @@ export default function DashboardLayout({
           />
         </div>
 
-        {/* ─── MAIN CANVAS (unified with sidebar — inset plane + tighter well) ─── */}
-        <main className="ds-workspace-main-area relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="dashboard-content-well relative z-[1] min-w-0">
+        {/* ─── Main canvas ─── */}
+        <main className="ds-workspace-main-area relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-app-bg">
+          <div className="dashboard-content-well relative z-1 min-w-0">
             {children}
           </div>
         </main>
       </div>
 
-      {/* ══════════════════════════
-         MODALS (unchanged logic)
-         ══════════════════════════ */}
-
-      <GoLiveModals
-        confirmOpen={goLiveModal && !goLiveSuccess}
-        successOpen={goLiveSuccess}
-        loading={goLiveLoading}
-        onCancel={() => setGoLiveModal(false)}
-        onConfirm={() => {
-          void (async () => {
-            setGoLiveLoading(true);
-            try {
-              await api.clinics.goLive();
-              await fetchClinic();
-              setGoLiveModal(false);
-              setGoLiveSuccess(true);
-              globalThis.setTimeout(() => setGoLiveSuccess(false), 4000);
-            } catch {
-              /* keep modal open on error */
-            }
-            setGoLiveLoading(false);
-          })();
-        }}
-        onDismissSuccess={() => setGoLiveSuccess(false)}
-      />
-    </div>
-  );
-}
+      {/* Modals */}

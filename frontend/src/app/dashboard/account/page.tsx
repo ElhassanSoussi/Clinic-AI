@@ -95,7 +95,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="workspace-page space-y-6">
+    <div className="ds-workspace-main-area space-y-6">
       <PageHeader
         showDivider
         eyebrow={
@@ -109,36 +109,36 @@ export default function AccountPage() {
       />
 
       <div className="workspace-stage">
-        <aside className="workspace-side-rail">
-          <div className="wave-command-slab workspace-command-hero space-y-4 !py-4 xl:sticky xl:top-6">
+        <aside className="space-y-3">
+          <div className="ds-card space-y-4 py-4! xl:sticky xl:top-6">
             <div>
-              <p className="workspace-section-label">Signed-in operator</p>
-              <p className="mt-2 text-2xl font-bold tracking-tight text-[#0F172A]">
+              <p className="ds-eyebrow">Signed-in operator</p>
+              <p className="mt-2 text-2xl font-bold tracking-tight text-app-text">
                 {fullName.trim() || "Workspace owner"}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+              <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
                 Manage your personal sign-in surface here. Clinic messaging, services, and embed settings stay in the main Settings control center.
               </p>
             </div>
 
             <div className="space-y-2">
-              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Email</p>
-                <p className="mt-1 break-all text-sm font-semibold text-[#0F172A]">{user?.email || "Unknown"}</p>
+              <div className="rounded-xl border border-app-border bg-app-surface/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Email</p>
+                <p className="mt-1 break-all text-sm font-semibold text-app-text">{user?.email || "Unknown"}</p>
               </div>
-              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Role</p>
-                <p className="mt-1 text-sm font-semibold text-[#0F172A]">Owner</p>
+              <div className="rounded-xl border border-app-border bg-app-surface/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Role</p>
+                <p className="mt-1 text-sm font-semibold text-app-text">Owner</p>
               </div>
-              <div className="rounded-xl border border-[#DDE5EE] bg-white/90 px-3.5 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Security model</p>
-                <p className="mt-1 text-sm font-semibold text-[#0F172A]">Profile + password only</p>
+              <div className="rounded-xl border border-app-border bg-app-surface/90 px-3.5 py-3 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Security model</p>
+                <p className="mt-1 text-sm font-semibold text-app-text">Profile + password only</p>
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#C7D2FE] bg-gradient-to-br from-white to-[#F5F3FF] px-4 py-4 shadow-sm">
-              <p className="workspace-rail-title">Account guide</p>
-              <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+            <div className="rounded-xl border border-indigo-200 bg-linear-to-br from-app-surface to-violet-50 px-4 py-4 shadow-sm">
+              <p className="ds-eyebrow">Account guide</p>
+              <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
                 Update your name here so the workspace header and ownership metadata stay accurate. Password changes affect only this sign-in identity.
               </p>
             </div>
@@ -146,51 +146,51 @@ export default function AccountPage() {
         </aside>
 
         <div className="min-w-0 space-y-5 xl:col-span-2">
-          <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+          <section className="ds-card p-5 sm:p-6">
             <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
               <div className="space-y-4">
                 <div>
-                  <p className="workspace-section-label">Identity overview</p>
-                  <h2 className="mt-2 text-[1.9rem] font-bold tracking-[-0.04em] text-[#0F172A] sm:text-[2.2rem]">
+                  <p className="ds-eyebrow">Identity overview</p>
+                  <h2 className="mt-2 text-[1.9rem] font-bold tracking-[-0.04em] text-app-text sm:text-[2.2rem]">
                     Keep owner access calm, clear, and recoverable.
                   </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
                     This surface only controls the operator identity behind the workspace. It does not change live clinic messaging, services, or patient-facing settings.
                   </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                    <div className="flex items-center gap-2 text-[#0F766E]">
+                  <div className="rounded-2xl border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-app-primary">
                       <UserCircle2 className="h-4 w-4" />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Display name</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Display name</p>
                     </div>
-                    <p className="mt-3 text-base font-semibold text-[#0F172A]">
+                    <p className="mt-3 text-base font-semibold text-app-text">
                       {fullName.trim() || "Not set yet"}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                    <div className="flex items-center gap-2 text-[#0F766E]">
+                  <div className="rounded-2xl border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-app-primary">
                       <Mail className="h-4 w-4" />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Login email</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Login email</p>
                     </div>
-                    <p className="mt-3 truncate text-base font-semibold text-[#0F172A]">
+                    <p className="mt-3 truncate text-base font-semibold text-app-text">
                       {user?.email || "Unknown"}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                    <div className="flex items-center gap-2 text-[#0F766E]">
+                  <div className="rounded-2xl border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-app-primary">
                       <ShieldCheck className="h-4 w-4" />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Access</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">Access</p>
                     </div>
-                    <p className="mt-3 text-base font-semibold text-[#0F172A]">Workspace owner</p>
+                    <p className="mt-3 text-base font-semibold text-app-text">Workspace owner</p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-[1.4rem] border border-[#DDE5EE] bg-white/92 p-5 shadow-[var(--ds-shadow-md)]">
-                <p className="workspace-rail-title">Account boundaries</p>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+              <div className="rounded-[1.4rem] border border-app-border bg-app-surface/92 p-5 shadow-(--ds-shadow-md)">
+                <p className="ds-eyebrow">Account boundaries</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-app-text-muted">
                   <p>Clinic services, hours, FAQs, branding, and embed settings live in the Settings control center.</p>
                   <p>This page is only for your owner identity and login safety.</p>
                 </div>
@@ -200,12 +200,12 @@ export default function AccountPage() {
 
           <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
             <section className="ds-card overflow-hidden">
-              <div className="border-b border-[#E2E8F0] px-5 py-4">
+              <div className="border-b border-app-border px-5 py-4">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-[#475569]" />
-                  <h2 className="text-base font-semibold text-[#0F172A]">Profile details</h2>
+                  <User className="h-4 w-4 text-app-text-muted" />
+                  <h2 className="text-base font-semibold text-app-text">Profile details</h2>
                 </div>
-                <p className="mt-2 text-sm text-[#475569]">
+                <p className="mt-2 text-sm text-app-text-muted">
                   Keep the display name accurate so the workspace header and activity metadata always identify the correct owner.
                 </p>
               </div>
@@ -213,7 +213,7 @@ export default function AccountPage() {
                 {profileFeedback && <Feedback state={profileFeedback} />}
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="full-name" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                    <label htmlFor="full-name" className="block text-sm font-medium text-app-text mb-1.5">
                       Full name
                     </label>
                     <input
@@ -221,12 +221,12 @@ export default function AccountPage() {
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full rounded-xl border border-[#DDE5EE] bg-white px-4 py-3 text-sm text-[#0F172A] shadow-sm focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full rounded-xl border border-app-border bg-app-surface px-4 py-3 text-sm text-app-text shadow-sm focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="account-email" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                      <label htmlFor="account-email" className="block text-sm font-medium text-app-text mb-1.5">
                         Email
                       </label>
                       <input
@@ -234,14 +234,14 @@ export default function AccountPage() {
                         type="email"
                         value={user?.email || ""}
                         disabled
-                        className="w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-sm text-[#475569] shadow-sm cursor-not-allowed"
+                        className="w-full rounded-xl border border-app-border bg-app-surface-alt px-4 py-3 text-sm text-app-text-muted shadow-sm cursor-not-allowed"
                       />
                     </div>
                     <div>
-                      <span className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                      <span className="block text-sm font-medium text-app-text mb-1.5">
                         Role
                       </span>
-                      <span className="inline-flex min-h-[3rem] w-full items-center rounded-xl border border-[#99f6e4] bg-[#ECFDF5] px-4 py-3 text-sm font-semibold text-[#115E59] shadow-sm">
+                      <span className="inline-flex min-h-12 w-full items-center rounded-xl border border-teal-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-app-accent-dark shadow-sm">
                         Workspace owner
                       </span>
                     </div>
@@ -254,7 +254,7 @@ export default function AccountPage() {
                       type="button"
                       onClick={handleSaveProfile}
                       disabled={savingProfile || !fullName.trim()}
-                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F8F83] via-[#0F8F83] to-[#14B8A6] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:translate-y-[-1px] hover:from-[#0F766E] hover:to-[#0F8F83] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-teal-600 via-teal-600 to-teal-400 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:-translate-y-px hover:from-teal-700 hover:to-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save profile"}
                     </button>
@@ -264,12 +264,12 @@ export default function AccountPage() {
             </section>
 
             <section className="ds-card overflow-hidden">
-              <div className="border-b border-[#E2E8F0] px-5 py-4">
+              <div className="border-b border-app-border px-5 py-4">
                 <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-[#475569]" />
-                  <h2 className="text-base font-semibold text-[#0F172A]">Password security</h2>
+                  <Lock className="h-4 w-4 text-app-text-muted" />
+                  <h2 className="text-base font-semibold text-app-text">Password security</h2>
                 </div>
-                <p className="mt-2 text-sm text-[#475569]">
+                <p className="mt-2 text-sm text-app-text-muted">
                   Change the owner password here without touching clinic setup. This action only affects how you sign in.
                 </p>
               </div>
@@ -279,7 +279,7 @@ export default function AccountPage() {
                 )}
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="current-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                    <label htmlFor="current-password" className="block text-sm font-medium text-app-text mb-1.5">
                       Current password
                     </label>
                     <input
@@ -287,12 +287,12 @@ export default function AccountPage() {
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                       autoComplete="current-password"
                     />
                   </div>
                   <div>
-                    <label htmlFor="new-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                    <label htmlFor="new-password" className="block text-sm font-medium text-app-text mb-1.5">
                       New password
                     </label>
                     <input
@@ -300,12 +300,12 @@ export default function AccountPage() {
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                       autoComplete="new-password"
                     />
                   </div>
                   <div>
-                    <label htmlFor="confirm-password" className="block text-sm font-medium text-[#0F172A] mb-1.5">
+                    <label htmlFor="confirm-password" className="block text-sm font-medium text-app-text mb-1.5">
                       Confirm new password
                     </label>
                     <input
@@ -313,7 +313,7 @@ export default function AccountPage() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm border border-[#E2E8F0] rounded-lg bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="w-full px-3.5 py-2.5 text-sm border border-app-border rounded-lg bg-app-surface focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
                       autoComplete="new-password"
                     />
                   </div>
@@ -322,7 +322,7 @@ export default function AccountPage() {
                       type="button"
                       onClick={handleChangePassword}
                       disabled={savingPassword}
-                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F8F83] via-[#0F8F83] to-[#14B8A6] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:translate-y-[-1px] hover:from-[#0F766E] hover:to-[#0F8F83] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-teal-600 via-teal-600 to-teal-400 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_34px_-22px_rgba(15,143,131,0.9)] transition-all hover:-translate-y-px hover:from-teal-700 hover:to-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {savingPassword ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

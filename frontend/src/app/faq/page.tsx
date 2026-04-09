@@ -208,9 +208,9 @@ export default function FaqPage() {
               <a
                 key={cat.label}
                 href={`#${cat.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-white px-4 py-2.5 text-[0.9375rem] font-medium text-[#475569] shadow-sm transition-colors hover:border-slate-300 hover:text-[#0F172A]"
+                className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-app-surface px-4 py-2.5 text-[0.9375rem] font-medium text-app-text-muted shadow-sm transition-colors hover:border-slate-300 hover:text-app-text"
               >
-                <cat.icon className="h-3.5 w-3.5 text-[#0F766E]" />
+                <cat.icon className="h-3.5 w-3.5 text-app-primary" />
                 {cat.label}
               </a>
             ))}
@@ -221,7 +221,7 @@ export default function FaqPage() {
       <main>
         <div className="marketing-container">
 
-          <div className="divide-y divide-[#E2E8F0]">
+          <div className="divide-y divide-app-border">
             {categories.map((cat) => (
               <section
                 key={cat.label}
@@ -238,9 +238,9 @@ export default function FaqPage() {
                   {cat.items.map((item) => (
                     <div
                       key={item.question}
-                      className="rounded-2xl border border-slate-200/90 bg-white p-7 shadow-sm sm:p-8"
+                      className="rounded-2xl border border-slate-200/90 bg-app-surface p-7 shadow-sm sm:p-8"
                     >
-                      <h3 className="text-[1.0625rem] font-semibold text-[#0F172A]">{item.question}</h3>
+                      <h3 className="text-[1.0625rem] font-semibold text-app-text">{item.question}</h3>
                       <p className="marketing-body mt-3">{item.answer}</p>
                     </div>
                   ))}
@@ -257,17 +257,17 @@ export default function FaqPage() {
                   <h2 className="marketing-h2 text-[clamp(1.5rem,1.5vw+1rem,2.25rem)]">
                     Still have a question?
                   </h2>
-                  <p className="marketing-lead mt-4 max-w-xl !text-lg">
+                  <p className="marketing-lead mt-4 max-w-xl text-lg!">
                     If you didn&apos;t find what you were looking for, book a short demo and we&apos;ll walk you through how Clinic AI works for your specific clinic type.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
-                  <Link href="/contact" className="marketing-cta-primary !justify-center">
+                  <Link href="/contact" className="marketing-cta-primary justify-center!">
                     Book a demo
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <Link href="/register" className="marketing-cta-secondary !justify-center">
-                    <Sparkles className="h-4 w-4 text-[#0F766E]" />
+                  <Link href="/register" className="marketing-cta-secondary justify-center!">
+                    <Sparkles className="h-4 w-4 text-app-primary" />
                     Start free trial
                   </Link>
                 </div>

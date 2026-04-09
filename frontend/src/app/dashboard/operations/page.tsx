@@ -53,7 +53,7 @@ function readinessStatusClass(status: SystemReadinessItem["status"]): string {
   if (status === "configured") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (status === "partially_configured") return "bg-amber-50 text-amber-700 border-amber-200";
   if (status === "blocked") return "bg-rose-50 text-rose-700 border-rose-200";
-  return "bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]";
+  return "bg-app-surface-alt text-app-text border-app-border";
 }
 
 function readinessScopeLabel(scope: SystemReadinessItem["scope"]): string {
@@ -411,7 +411,7 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="workspace-page">
+    <div className="ds-workspace-main-area space-y-6">
       {operationsLoadNotice ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
           <p className="font-semibold">Live operations data did not load</p>
@@ -422,7 +422,7 @@ export default function OperationsPage() {
           <button
             type="button"
             onClick={() => void loadData()}
-            className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#115E59]"
+            className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-app-primary px-4 py-2 text-sm font-semibold text-white hover:bg-app-primary-hover"
           >
             Retry
           </button>
@@ -442,13 +442,13 @@ export default function OperationsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/dashboard/appointments"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#475569] shadow-sm transition-colors hover:bg-[#F8FAFC]"
+              className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted shadow-sm transition-colors hover:bg-app-surface-alt"
             >
               Appointments
             </Link>
             <Link
               href="/dashboard/settings"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
+              className="inline-flex items-center gap-2 rounded-xl bg-app-primary px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover"
             >
               Settings
             </Link>
@@ -458,14 +458,14 @@ export default function OperationsPage() {
 
       <ActionErrorBanner message={error} onDismiss={() => setError("")} />
 
-      <section className="ds-control-hero-panel workspace-command-hero p-5 sm:p-6">
+      <section className="ds-card p-5 sm:p-6">
         <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <p className="workspace-section-label">Control center</p>
-            <h2 className="mt-2 text-[1.95rem] font-bold tracking-[-0.045em] text-[#0F172A] sm:text-[2.35rem]">
+            <p className="ds-eyebrow">Control center</p>
+            <h2 className="mt-2 text-[1.95rem] font-bold tracking-tight text-app-text sm:text-[2.35rem]">
               See readiness, queues, reminders, and recovery work in one operational command surface.
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#475569]">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
               Operations is where you check whether channels are configured, whether reminders are prepared, and whether communication recovery queues need human attention before anything slips.
             </p>
 
@@ -476,18 +476,18 @@ export default function OperationsPage() {
                 { label: "Review queue", value: reviewQueue.length, detail: "Threads or sends that still need staff judgment." },
                 { label: "Recovery items", value: communicationQueue.length + waitlistEntries.length, detail: "Missed calls, callback requests, and waitlist work." },
               ].map((item) => (
-                <div key={item.label} className="rounded-[1.25rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">{item.label}</p>
-                  <p className="mt-3 text-2xl font-bold tracking-tight text-[#0F172A]">{item.value}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                <div key={item.label} className="rounded-[1.25rem] border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
+                  <p className="mt-3 text-2xl font-bold tracking-tight text-app-text">{item.value}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-[1.45rem] border border-[#DDE5EE] bg-white/94 p-5 shadow-[var(--ds-shadow-md)]">
-            <p className="workspace-rail-title">Operational posture</p>
-            <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#475569]">
+          <div className="rounded-[1.45rem] border border-app-border bg-app-surface/94 p-5 shadow-(--ds-shadow-md)">
+            <p className="ds-eyebrow">Operational posture</p>
+            <div className="mt-3 space-y-3 text-sm leading-relaxed text-app-text-muted">
               <p>Readiness tells you whether the clinic can safely operate each channel and automation.</p>
               <p>Recovery queues show where missed calls, callbacks, reminders, and review workflows still need intervention.</p>
               <p>This page is intentionally honest: prepared does not mean fully automated unless the connected provider and settings actually support it.</p>
@@ -500,51 +500,51 @@ export default function OperationsPage() {
       {systemReadiness && (
         <div className="wave-ops-zone p-4 sm:p-5">
           <div className="mb-3 flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
+            <ShieldCheck className="h-4 w-4 text-app-primary" />
             <div>
-              <p className="workspace-section-label">Foundation</p>
-              <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">System readiness</h2>
-              <p className="mt-0.5 text-sm text-[#475569]">
+              <p className="ds-eyebrow">Foundation</p>
+              <h2 className="mt-1 text-sm font-semibold text-app-text">System readiness</h2>
+              <p className="mt-0.5 text-sm text-app-text-muted">
                 This shows which integrations and protected capabilities are ready, partial, missing, or blocked right now.
               </p>
             </div>
           </div>
 
           <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Configured</p>
-              <p className="mt-1 text-lg font-bold text-[#0F172A]">{systemReadiness.configured_count}</p>
+            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Configured</p>
+              <p className="mt-1 text-lg font-bold text-app-text">{systemReadiness.configured_count}</p>
             </div>
-            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Partial</p>
-              <p className="mt-1 text-lg font-bold text-[#0F172A]">{systemReadiness.partial_count}</p>
+            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Partial</p>
+              <p className="mt-1 text-lg font-bold text-app-text">{systemReadiness.partial_count}</p>
             </div>
-            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Missing</p>
-              <p className="mt-1 text-lg font-bold text-[#0F172A]">{systemReadiness.missing_count}</p>
+            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Missing</p>
+              <p className="mt-1 text-lg font-bold text-app-text">{systemReadiness.missing_count}</p>
             </div>
-            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Blocked</p>
-              <p className="mt-1 text-lg font-bold text-[#0F172A]">{systemReadiness.blocked_count}</p>
+            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Blocked</p>
+              <p className="mt-1 text-lg font-bold text-app-text">{systemReadiness.blocked_count}</p>
             </div>
           </div>
 
           <div className="space-y-2.5">
             {systemReadiness.items.map((item) => (
-              <div key={item.key} className="rounded-lg border border-[#E2E8F0] p-3">
+              <div key={item.key} className="rounded-lg border border-app-border p-3">
                 <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-[#0F172A]">{item.label}</p>
+                  <p className="text-sm font-semibold text-app-text">{item.label}</p>
                   <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-semibold ${readinessStatusClass(item.status)}`}>
                     {readinessStatusLabel(item.status)}
                   </span>
-                  <span className="inline-flex rounded-md border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+                  <span className="inline-flex rounded-md border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
                     {readinessScopeLabel(item.scope)}
                   </span>
                 </div>
-                <p className="text-sm text-[#0F172A]">{item.summary}</p>
-                <p className="mt-1 text-xs leading-relaxed text-[#475569]">{item.detail}</p>
+                <p className="text-sm text-app-text">{item.summary}</p>
+                <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
                 {item.action && (
-                  <p className="mt-2.5 text-xs text-[#475569]">{item.action}</p>
+                  <p className="mt-2.5 text-xs text-app-text-muted">{item.action}</p>
                 )}
               </div>
             ))}
@@ -555,11 +555,11 @@ export default function OperationsPage() {
       {/* Channel readiness */}
       <div className="wave-ops-zone p-4 sm:p-5">
         <div className="mb-3 flex items-center gap-2">
-          <PhoneMissed className="h-4 w-4 text-[#0F766E]" />
+          <PhoneMissed className="h-4 w-4 text-app-primary" />
           <div>
-            <p className="workspace-section-label">Surface area</p>
-            <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">Channel readiness</h2>
-            <p className="mt-0.5 text-sm text-[#475569]">
+            <p className="ds-eyebrow">Surface area</p>
+            <h2 className="mt-1 text-sm font-semibold text-app-text">Channel readiness</h2>
+            <p className="mt-0.5 text-sm text-app-text-muted">
               Web chat is live now. SMS can send when Twilio is configured, while the rest of the inbox stays ready for future channels without pretending they are connected.
             </p>
           </div>
@@ -567,19 +567,19 @@ export default function OperationsPage() {
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {channelReadiness.map((channel: ChannelReadiness) => (
-            <div key={channel.channel} className="rounded-lg border border-[#E2E8F0] p-3">
+            <div key={channel.channel} className="rounded-lg border border-app-border p-3">
               <div className="mb-2.5 flex items-center justify-between gap-3">
                 <ChannelBadge channel={channel.channel} withIcon />
                 <ChannelConnectionStatusBadge status={channel.connection_status} />
               </div>
-              <p className="text-sm font-medium text-[#0F172A]">{channel.display_name}</p>
-              <p className="mt-0.5 text-xs text-[#475569]">{channel.provider}</p>
+              <p className="text-sm font-medium text-app-text">{channel.display_name}</p>
+              <p className="mt-0.5 text-xs text-app-text-muted">{channel.provider}</p>
               {channel.contact_value && (
-                <p className="mt-1.5 text-xs text-[#475569]">Contact: {channel.contact_value}</p>
+                <p className="mt-1.5 text-xs text-app-text-muted">Contact: {channel.contact_value}</p>
               )}
-              <p className="mt-2.5 text-sm leading-relaxed text-[#475569]">{channel.detail}</p>
+              <p className="mt-2.5 text-sm leading-relaxed text-app-text-muted">{channel.detail}</p>
               {channel.channel === "sms" && channel.connection_status === "connected" && (
-                <p className="mt-2.5 break-words text-xs text-[#475569]">
+                <p className="mt-2.5 wrap-break-word text-xs text-app-text-muted">
                   Inbound webhook path:{" "}
                   <span className="break-all font-mono text-[0.7rem] sm:text-xs">
                     /api/frontdesk/communications/twilio/inbound
@@ -587,34 +587,34 @@ export default function OperationsPage() {
                 </p>
               )}
               {channel.notes && (
-                <p className="mt-2.5 text-xs text-[#475569]">{channel.notes}</p>
+                <p className="mt-2.5 text-xs text-app-text-muted">{channel.notes}</p>
               )}
               {channel.channel === "sms" && channel.connection_status === "connected" && (
-                <div className="mt-3 border-t border-[#E2E8F0] pt-3">
-                  <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                <div className="mt-3 border-t border-app-border pt-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-app-text">
                     <input
                       type="checkbox"
                       checked={channel.automation_enabled}
                       onChange={(event) => saveChannelAutomation(channel, event.target.checked)}
                       disabled={savingChannelId === channel.channel}
-                      className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                      className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                     />
                     <span>Enable AI SMS auto-reply</span>
                   </label>
-                  <p className="mt-1.5 text-xs text-[#475569]">
+                  <p className="mt-1.5 text-xs text-app-text-muted">
                     Incoming SMS can get a real assistant reply when the clinic is live and the thread is not under manual takeover.
                   </p>
                 </div>
               )}
               {channel.channel === "missed_call" && channel.connection_status === "connected" && (
-                <div className="mt-3 border-t border-[#E2E8F0] pt-3">
-                  <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                <div className="mt-3 border-t border-app-border pt-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-app-text">
                     <input
                       type="checkbox"
                       checked={channel.automation_enabled}
                       onChange={(event) => saveChannelAutomation(channel, event.target.checked)}
                       disabled={savingChannelId === channel.channel}
-                      className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                      className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                     />
                     <span>Enable automatic missed-call text-back</span>
                   </label>
@@ -627,9 +627,9 @@ export default function OperationsPage() {
 
       {/* Outbound activity metrics */}
       <div className="wave-ops-zone p-4 sm:p-5">
-        <p className="workspace-section-label">Signals</p>
-        <h2 className="mt-1 text-sm font-semibold text-[#0F172A]">Outbound &amp; SMS telemetry</h2>
-        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[#475569]">
+        <p className="ds-eyebrow">Signals</p>
+        <h2 className="mt-1 text-sm font-semibold text-app-text">Outbound &amp; SMS telemetry</h2>
+        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-app-text-muted">
           One board for delivery, review load, and failure modes—ground truth from the messaging layer, not decorative charts.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -685,43 +685,43 @@ export default function OperationsPage() {
               hint: "Held for policy or safety review.",
             },
           ].map((cell) => (
-            <div key={cell.label} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B]">{cell.label}</p>
-              <p className="mt-1 text-lg font-bold tabular-nums text-[#0F172A]">{cell.value}</p>
-              <p className="mt-1 text-xs leading-relaxed text-[#475569]">{cell.hint}</p>
+            <div key={cell.label} className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">{cell.label}</p>
+              <p className="mt-1 text-lg font-bold tabular-nums text-app-text">{cell.value}</p>
+              <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{cell.hint}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div className="wave-zone-panel mt-5">
-        <div className="border-b border-[var(--color-app-border)] px-4 py-3 sm:px-5">
-          <p className="workspace-section-label">Reminders &amp; scheduled touchpoints</p>
-          <p className="mt-1 text-sm text-[#475569]">
+        <div className="border-b border-app-border px-4 py-3 sm:px-5">
+          <p className="ds-eyebrow">Reminders &amp; scheduled touchpoints</p>
+          <p className="mt-1 text-sm text-app-text-muted">
             Configure prep, watch due sends, and keep the reminder calendar aligned with confirmed bookings.
           </p>
         </div>
         <div className="space-y-4 p-4 sm:p-5">
           {/* Reminder settings */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <div className="mb-1.5 flex items-center gap-2">
-                  <BellRing className="h-4 w-4 text-[#0F766E]" />
-                  <h2 className="text-sm font-semibold text-[#0F172A]">Reminder settings</h2>
+                  <BellRing className="h-4 w-4 text-app-primary" />
+                  <h2 className="text-sm font-semibold text-app-text">Reminder settings</h2>
                 </div>
-                <p className="text-sm text-[#475569]">
+                <p className="text-sm text-app-text-muted">
                   Reminder delivery is not automated yet. These settings prepare confirmed bookings and generate a real preview schedule for the next delivery pass.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 items-center gap-2.5 sm:grid-cols-[auto_9rem_auto]">
-                <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                <label className="inline-flex items-center gap-2 text-sm text-app-text">
                   <input
                     type="checkbox"
                     checked={reminderEnabled}
                     onChange={(event) => setReminderEnabled(event.target.checked)}
-                    className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                    className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                   />
                   <span>Enable reminder prep</span>
                 </label>
@@ -732,30 +732,30 @@ export default function OperationsPage() {
                   value={reminderLeadHours}
                   onChange={(event) => setReminderLeadHours(event.target.value)}
                   placeholder="Lead hours"
-                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                  className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                 />
                 <button
                   onClick={saveReminderSettings}
                   disabled={savingSettings}
-                  className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  className="rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                 >
                   {savingSettings ? "Saving..." : "Save settings"}
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-[#E2E8F0] pt-4 lg:grid-cols-[auto_10rem]">
-              <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-app-border pt-4 lg:grid-cols-[auto_10rem]">
+              <label className="inline-flex items-center gap-2 text-sm text-app-text">
                 <input
                   type="checkbox"
                   checked={followUpAutomationEnabled}
                   onChange={(event) => setFollowUpAutomationEnabled(event.target.checked)}
-                  className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                  className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                 />
                 <span>Enable auto follow-up</span>
               </label>
               <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-[#64748B]">Delay before task creation</p>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-app-text-muted">Delay before task creation</p>
                 <input
                   type="number"
                   min={5}
@@ -763,14 +763,14 @@ export default function OperationsPage() {
                   value={followUpDelayMinutes}
                   onChange={(event) => setFollowUpDelayMinutes(event.target.value)}
                   placeholder="Minutes"
-                  className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                  className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                 />
               </div>
               {followUpAutomationEnabled && (
                 <button
                   onClick={runAutoFollowUps}
                   disabled={savingSettings}
-                  className="mt-1 rounded-lg border border-[#99f6e4] bg-[#CCFBF1] px-3 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
+                  className="mt-1 rounded-lg border border-teal-200 bg-app-accent-wash px-3 py-1.5 text-sm font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash disabled:opacity-50"
                 >
                   {savingSettings ? "Running..." : "Run follow-ups now"}
                 </button>
@@ -779,11 +779,11 @@ export default function OperationsPage() {
           </div>
 
           {/* Reminder delivery */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#0F172A]">Reminder delivery</h2>
-                <p className="mt-0.5 text-xs text-[#475569]">
+                <h2 className="text-sm font-semibold text-app-text">Reminder delivery</h2>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   These reminders are scheduled from real booked requests and your reminder lead time. When SMS is connected, you can send due reminders from here.
                 </p>
               </div>
@@ -794,7 +794,7 @@ export default function OperationsPage() {
                 <button
                   onClick={sendDueReminders}
                   disabled={sendingReminderId === "batch" || dueReminders.length === 0}
-                  className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  className="rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                 >
                   {sendingReminderId === "batch" ? "Sending..." : "Send due reminders"}
                 </button>
@@ -804,14 +804,14 @@ export default function OperationsPage() {
             {dueReminders.length > 0 && (
               <div className="mb-4 space-y-2.5">
                 {dueReminders.map((item) => (
-                  <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                  <div key={item.lead_id} className="rounded-lg border border-app-border p-3">
                     <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
-                        <p className="mt-0.5 text-xs text-[#475569]">
+                        <p className="text-sm font-semibold text-app-text">{item.patient_name}</p>
+                        <p className="mt-0.5 text-xs text-app-text-muted">
                           Appointment {formatDateTime(item.appointment_starts_at)}
                         </p>
-                        <p className="mt-0.5 text-xs text-[#475569]">
+                        <p className="mt-0.5 text-xs text-app-text-muted">
                           Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
                         </p>
                         {item.blocked_reason && (
@@ -823,7 +823,7 @@ export default function OperationsPage() {
                         <button
                           onClick={() => sendReminder(item.lead_id)}
                           disabled={sendingReminderId === item.lead_id || !item.can_send}
-                          className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                          className="rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                         >
                           {sendingReminderId === item.lead_id ? "Sending..." : "Send now"}
                         </button>
@@ -836,21 +836,21 @@ export default function OperationsPage() {
 
             {upcomingReminders.length === 0 ? (
               <EmptyState
-                icon={<BellRing className="h-7 w-7 text-[#64748B]" />}
+                icon={<BellRing className="h-7 w-7 text-app-text-muted" />}
                 title="No upcoming reminders"
                 description="Reminders will appear here once booked appointments have confirmed timing and reminder prep is enabled."
               />
             ) : (
               <div className="space-y-2.5">
                 {upcomingReminders.map((item) => (
-                  <div key={item.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                  <div key={item.lead_id} className="rounded-lg border border-app-border p-3">
                     <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-[#0F172A]">{item.patient_name}</p>
-                        <p className="mt-0.5 text-xs text-[#475569]">
+                        <p className="text-sm font-semibold text-app-text">{item.patient_name}</p>
+                        <p className="mt-0.5 text-xs text-app-text-muted">
                           Appointment {formatDateTime(item.appointment_starts_at)}
                         </p>
-                        <p className="mt-0.5 text-xs text-[#475569]">
+                        <p className="mt-0.5 text-xs text-app-text-muted">
                           Reminder scheduled for {formatDateTime(item.reminder_scheduled_for)}
                         </p>
                       </div>
@@ -865,20 +865,20 @@ export default function OperationsPage() {
       </div>
 
       <div className="wave-zone-panel mt-5">
-        <div className="border-b border-[var(--color-app-border)] px-4 py-3 sm:px-5">
-          <p className="workspace-section-label">Recovery &amp; human follow-up</p>
-          <p className="mt-1 text-sm text-[#475569]">
+        <div className="border-b border-app-border px-4 py-3 sm:px-5">
+          <p className="ds-eyebrow">Recovery &amp; human follow-up</p>
+          <p className="mt-1 text-sm text-app-text-muted">
             Missed-call and callback queue next to the log form so intake work stays in one zone.
           </p>
         </div>
         <div className="p-4 sm:p-5">
           {/* Recovery queue + Log form */}
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-[#0F172A]">Recovery queue</h2>
-                  <p className="mt-0.5 text-xs text-[#475569]">
+                  <h2 className="text-sm font-semibold text-app-text">Recovery queue</h2>
+                  <p className="mt-0.5 text-xs text-app-text-muted">
                     Log missed calls and callback requests now. When SMS is connected, recovery texts can be sent from the same queue.
                   </p>
                 </div>
@@ -889,14 +889,14 @@ export default function OperationsPage() {
 
               {communicationQueue.length === 0 ? (
                 <EmptyState
-                  icon={<PhoneMissed className="h-7 w-7 text-[#64748B]" />}
+                  icon={<PhoneMissed className="h-7 w-7 text-app-text-muted" />}
                   title="No recovery items"
                   description="Missed calls and callback requests will appear here as they are logged."
                 />
               ) : (
                 <div className="space-y-3">
                   {communicationQueue.map((event) => (
-                    <div key={event.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div key={event.id} className="rounded-lg border border-app-border p-3">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-2 flex flex-wrap items-center gap-1.5">
@@ -927,30 +927,30 @@ export default function OperationsPage() {
                               </span>
                             )}
                             <CommunicationEventStatusBadge status={event.status} />
-                            <span className="text-xs text-[#475569]">{event.customer_name}</span>
+                            <span className="text-xs text-app-text-muted">{event.customer_name}</span>
                           </div>
-                          <p className="text-sm font-medium text-[#0F172A]">
+                          <p className="text-sm font-medium text-app-text">
                             {event.summary || "Recovery item logged"}
                           </p>
                           {event.content && (
-                            <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{event.content}</p>
+                            <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{event.content}</p>
                           )}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-[#475569]">
+                          <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-app-text-muted">
                             {event.customer_phone && <span>{event.customer_phone}</span>}
                             {event.customer_email && <span>{event.customer_email}</span>}
                             {event.occurred_at && <span>{timeAgo(event.occurred_at)}</span>}
                           </div>
                           {event.latest_outbound_status && (
-                            <div className="mt-2.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2.5">
+                            <div className="mt-2.5 rounded-lg border border-app-border bg-app-surface-alt px-2.5 py-2.5">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold text-[#475569]">Latest text-back</span>
+                                <span className="text-xs font-semibold text-app-text-muted">Latest text-back</span>
                                 <CommunicationEventStatusBadge status={event.latest_outbound_status as CommunicationEvent["status"]} />
                               </div>
                               {event.latest_outbound_summary && (
-                                <p className="mt-1.5 text-sm text-[#0F172A]">{event.latest_outbound_summary}</p>
+                                <p className="mt-1.5 text-sm text-app-text">{event.latest_outbound_summary}</p>
                               )}
                               {event.latest_outbound_reason && (
-                                <p className="mt-0.5 text-xs text-[#475569]">{event.latest_outbound_reason}</p>
+                                <p className="mt-0.5 text-xs text-app-text-muted">{event.latest_outbound_reason}</p>
                               )}
                             </div>
                           )}
@@ -970,7 +970,7 @@ export default function OperationsPage() {
                         <div className="flex shrink-0 flex-wrap gap-1.5">
                           <Link
                             href={`/dashboard/inbox/event:${event.thread_key || event.id}`}
-                            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
+                            className="rounded-lg border border-app-border px-2.5 py-1.5 text-sm font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
                           >
                             Open thread
                           </Link>
@@ -978,7 +978,7 @@ export default function OperationsPage() {
                             <button
                               onClick={() => sendTextBack(event.id)}
                               disabled={sendingTextBackId === event.id}
-                              className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1] disabled:opacity-50"
+                              className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-sm font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash disabled:opacity-50"
                             >
                               {sendingTextBackId === event.id ? "Sending..." : "Send text-back"}
                             </button>
@@ -1014,7 +1014,7 @@ export default function OperationsPage() {
                             <button
                               onClick={() => updateCommunicationEvent(event, "dismissed")}
                               disabled={savingCommunicationId === event.id}
-                              className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+                              className="rounded-lg border border-app-border px-2.5 py-1.5 text-sm font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
                             >
                               Dismiss
                             </button>
@@ -1027,20 +1027,20 @@ export default function OperationsPage() {
               )}
             </div>
 
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-bold text-[#0F172A]">Log a recovery item</h2>
-              <p className="mt-0.5 text-xs text-[#64748B]">
+            <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
+              <h2 className="text-sm font-bold text-app-text">Log a recovery item</h2>
+              <p className="mt-0.5 text-xs text-app-text-muted">
                 This records the recovery workflow immediately and can trigger live text-back when SMS is connected.
               </p>
 
               <div className="mt-3 space-y-2.5">
                 <div>
-                  <label htmlFor="comm-type" className="mb-1 block text-xs font-semibold text-[#475569]">Type</label>
+                  <label htmlFor="comm-type" className="mb-1 block text-xs font-semibold text-app-text-muted">Type</label>
                   <select
                     id="comm-type"
                     value={communicationForm.channel}
                     onChange={(event) => setCommunicationForm((current) => ({ ...current, channel: event.target.value as "missed_call" | "callback_request" }))}
-                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                   >
                     <option value="missed_call">Missed call</option>
                     <option value="callback_request">Callback request</option>
@@ -1048,62 +1048,62 @@ export default function OperationsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="comm-name" className="mb-1 block text-xs font-semibold text-[#475569]">Customer name</label>
+                  <label htmlFor="comm-name" className="mb-1 block text-xs font-semibold text-app-text-muted">Customer name</label>
                   <input
                     id="comm-name"
                     type="text"
                     value={communicationForm.customer_name}
                     onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_name: event.target.value }))}
-                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Patient name"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="comm-phone" className="mb-1 block text-xs font-semibold text-[#475569]">Phone</label>
+                    <label htmlFor="comm-phone" className="mb-1 block text-xs font-semibold text-app-text-muted">Phone</label>
                     <input
                       id="comm-phone"
                       type="tel"
                       value={communicationForm.customer_phone}
                       onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_phone: event.target.value }))}
-                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                       placeholder="(555) 123-4567"
                     />
                   </div>
                   <div>
-                    <label htmlFor="comm-email" className="mb-1 block text-xs font-semibold text-[#475569]">Email</label>
+                    <label htmlFor="comm-email" className="mb-1 block text-xs font-semibold text-app-text-muted">Email</label>
                     <input
                       id="comm-email"
                       type="email"
                       value={communicationForm.customer_email}
                       onChange={(event) => setCommunicationForm((current) => ({ ...current, customer_email: event.target.value }))}
-                      className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                      className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                       placeholder="patient@email.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="comm-summary" className="mb-1 block text-xs font-semibold text-[#475569]">Summary</label>
+                  <label htmlFor="comm-summary" className="mb-1 block text-xs font-semibold text-app-text-muted">Summary</label>
                   <input
                     id="comm-summary"
                     type="text"
                     value={communicationForm.summary}
                     onChange={(event) => setCommunicationForm((current) => ({ ...current, summary: event.target.value }))}
-                    className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Why this needs a call or text-back"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="comm-notes" className="mb-1 block text-xs font-semibold text-[#475569]">Notes</label>
+                  <label htmlFor="comm-notes" className="mb-1 block text-xs font-semibold text-app-text-muted">Notes</label>
                   <textarea
                     id="comm-notes"
                     rows={3}
                     value={communicationForm.content}
                     onChange={(event) => setCommunicationForm((current) => ({ ...current, content: event.target.value }))}
-                    className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                    className="w-full resize-none rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                     placeholder="Add context for the front desk team"
                   />
                 </div>
@@ -1112,7 +1112,7 @@ export default function OperationsPage() {
                   type="button"
                   onClick={createCommunicationEvent}
                   disabled={savingCommunicationId === "new"}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4" />
                   {savingCommunicationId === "new" ? "Saving..." : "Log recovery item"}
@@ -1124,11 +1124,11 @@ export default function OperationsPage() {
       </div>
 
       {/* SMS review queue */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-[#0F172A]">SMS review queue</h2>
-            <p className="mt-0.5 text-xs text-[#475569]">
+            <h2 className="text-sm font-semibold text-app-text">SMS review queue</h2>
+            <p className="mt-0.5 text-xs text-app-text-muted">
               Lower-confidence replies, blocked messages, and failed AI sends wait here for a team decision.
             </p>
           </div>
@@ -1139,14 +1139,14 @@ export default function OperationsPage() {
 
         {reviewQueue.length === 0 ? (
           <EmptyState
-            icon={<BellRing className="h-6 w-6 text-[#64748B]" />}
+            icon={<BellRing className="h-6 w-6 text-app-text-muted" />}
             title="No SMS reviews pending"
             description="When the assistant drafts a reply that needs staff approval, the thread will appear here."
           />
         ) : (
           <div className="space-y-2.5">
             {reviewQueue.map((event) => (
-              <div key={event.id} className="rounded-lg border border-[#E2E8F0] p-3">
+              <div key={event.id} className="rounded-lg border border-app-border p-3">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-1.5">
@@ -1161,26 +1161,26 @@ export default function OperationsPage() {
                         </span>
                       )}
                       {event.ai_confidence && (
-                        <span className="inline-flex rounded-md border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+                        <span className="inline-flex rounded-md border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
                           {event.ai_confidence} confidence
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-[#0F172A]">{event.customer_name}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{event.content || event.summary}</p>
-                    <p className="mt-1.5 text-xs text-[#475569]">
+                    <p className="text-sm font-semibold text-app-text">{event.customer_name}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{event.content || event.summary}</p>
+                    <p className="mt-1.5 text-xs text-app-text-muted">
                       {event.auto_reply_reason || "Review this thread before sending a reply."}
                     </p>
                     {event.suggested_reply_text && (
-                      <div className="mt-2.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2.5">
-                        <p className="text-xs font-semibold text-[#475569]">AI draft</p>
-                        <p className="mt-1.5 text-sm text-[#0F172A]">{event.suggested_reply_text}</p>
+                      <div className="mt-2.5 rounded-lg border border-app-border bg-app-surface-alt px-2.5 py-2.5">
+                        <p className="text-xs font-semibold text-app-text-muted">AI draft</p>
+                        <p className="mt-1.5 text-sm text-app-text">{event.suggested_reply_text}</p>
                       </div>
                     )}
                   </div>
                   <Link
                     href={`/dashboard/inbox/event:${event.thread_key || event.id}`}
-                    className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                    className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-sm font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
                   >
                     Review thread
                   </Link>
@@ -1195,22 +1195,22 @@ export default function OperationsPage() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-4">
           {/* Reminder-ready bookings */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#0F172A]">Reminder-ready bookings</h2>
-                <p className="mt-0.5 text-xs text-[#475569]">
+                <h2 className="text-sm font-semibold text-app-text">Reminder-ready bookings</h2>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   Confirm appointment timing, preview the reminder, and keep deposit requirements accurate before the patient arrives.
                 </p>
               </div>
-              <span className="inline-flex rounded-md border border-[#99f6e4] bg-[#CCFBF1] px-2 py-0.5 text-xs font-semibold text-[#115E59]">
+              <span className="inline-flex rounded-md border border-teal-200 bg-app-accent-wash px-2 py-0.5 text-xs font-semibold text-app-accent-dark">
                 {reminderCandidates.length} bookings
               </span>
             </div>
 
             {reminderCandidates.length === 0 ? (
               <EmptyState
-                icon={<CalendarClock className="h-7 w-7 text-[#64748B]" />}
+                icon={<CalendarClock className="h-7 w-7 text-app-text-muted" />}
                 title="No booked requests yet"
                 description="Booked appointments will appear here so you can manage reminders, timing, and deposit tracking."
               />
@@ -1220,22 +1220,22 @@ export default function OperationsPage() {
                   const draft = leadDrafts[lead.lead_id] ?? draftFromLead(lead);
 
                   return (
-                    <div key={lead.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                    <div key={lead.lead_id} className="rounded-lg border border-app-border p-3">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                         <div className="min-w-0 flex-1">
                           <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-[#0F172A]">{lead.patient_name}</p>
+                            <p className="text-sm font-semibold text-app-text">{lead.patient_name}</p>
                             <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-semibold ${appointmentStatusClass(lead.appointment_status)}`}>
                               {appointmentStatusLabel(lead.appointment_status)}
                             </span>
                           </div>
-                          <p className="text-sm text-[#475569]">{lead.reason_for_visit || "Booked request"}</p>
-                          <p className="mt-1.5 text-xs text-[#475569]">
+                          <p className="text-sm text-app-text-muted">{lead.reason_for_visit || "Booked request"}</p>
+                          <p className="mt-1.5 text-xs text-app-text-muted">
                             Last updated {lead.updated_at ? timeAgo(lead.updated_at) : "recently"}
                           </p>
                         </div>
 
-                        <div className="shrink-0 text-xs text-[#475569]">
+                        <div className="shrink-0 text-xs text-app-text-muted">
                           {lead.reminder_scheduled_for
                             ? `Reminder target: ${formatDateTime(lead.reminder_scheduled_for)}`
                             : "No reminder schedule yet"}
@@ -1244,7 +1244,7 @@ export default function OperationsPage() {
 
                       <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
                         <div>
-                          <label htmlFor={`appt-time-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+                          <label htmlFor={`appt-time-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-app-text-muted">
                             Appointment time
                           </label>
                           <input
@@ -1253,12 +1253,12 @@ export default function OperationsPage() {
                             value={draft.appointmentStartsAt}
                             onChange={(event) => updateLeadDraft(lead.lead_id, { appointmentStartsAt: event.target.value })}
                             title="Appointment date and time"
-                            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                           />
                         </div>
 
                         <div>
-                          <label htmlFor={`booking-state-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+                          <label htmlFor={`booking-state-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-app-text-muted">
                             Booking state
                           </label>
                           <select
@@ -1270,7 +1270,7 @@ export default function OperationsPage() {
                               })
                             }
                             title="Booking state"
-                            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
                           >
                             <option value="confirmed">Confirmed</option>
                             <option value="reschedule_requested">Reschedule requested</option>
@@ -1283,20 +1283,20 @@ export default function OperationsPage() {
                       </div>
 
                       <div className="mt-3 grid items-end gap-2.5 md:grid-cols-[auto_10rem_10rem]">
-                        <label className="inline-flex items-center gap-2 text-sm text-[#0F172A]">
+                        <label className="inline-flex items-center gap-2 text-sm text-app-text">
                           <input
                             type="checkbox"
                             checked={draft.depositRequired}
                             onChange={(event) =>
                               updateLeadDraft(lead.lead_id, { depositRequired: event.target.checked })
                             }
-                            className="rounded border-[#CBD5E1] text-[#0F766E] focus:ring-[#CCFBF1]"
+                            className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
                           />
                           <span>Require deposit later</span>
                         </label>
 
                         <div>
-                          <label htmlFor={`deposit-amt-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+                          <label htmlFor={`deposit-amt-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-app-text-muted">
                             Deposit amount
                           </label>
                           <input
@@ -1310,12 +1310,12 @@ export default function OperationsPage() {
                             }
                             disabled={!draft.depositRequired}
                             placeholder="e.g. 5000"
-                            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1] disabled:bg-[#F8FAFC]"
+                            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash disabled:bg-app-surface-alt"
                           />
                         </div>
 
                         <div>
-                          <label htmlFor={`deposit-state-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+                          <label htmlFor={`deposit-state-${lead.lead_id}`} className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-app-text-muted">
                             Deposit state
                           </label>
                           <select
@@ -1328,7 +1328,7 @@ export default function OperationsPage() {
                             }
                             disabled={!draft.depositRequired}
                             title="Deposit state"
-                            className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1] disabled:bg-[#F8FAFC]"
+                            className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash disabled:bg-app-surface-alt"
                           >
                             <option value="required">Required</option>
                             <option value="requested">Requested</option>
@@ -1340,11 +1340,11 @@ export default function OperationsPage() {
                         </div>
                       </div>
 
-                      <div className="mt-3 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">
+                      <div className="mt-3 rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">
                           Reminder preview
                         </p>
-                        <p className="mt-1 text-sm leading-relaxed text-[#0F172A]">
+                        <p className="mt-1 text-sm leading-relaxed text-app-text">
                           {lead.reminder_preview
                             ? lead.reminder_preview
                             : "Set a confirmed appointment time to generate a reminder preview."}
@@ -1355,7 +1355,7 @@ export default function OperationsPage() {
                         <button
                           onClick={() => saveLeadOperations(lead.lead_id)}
                           disabled={savingLeadId === lead.lead_id}
-                          className="rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+                          className="rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
                         >
                           {savingLeadId === lead.lead_id ? "Saving..." : "Save booking operations"}
                         </button>
@@ -1368,16 +1368,16 @@ export default function OperationsPage() {
           </div>
 
           {/* Waitlist */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#0F172A]">Waitlist</h2>
-                <p className="mt-0.5 text-xs text-[#475569]">
+                <h2 className="text-sm font-semibold text-app-text">Waitlist</h2>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   Capture patients you want to circle back to when availability opens up.
                 </p>
               </div>
               <div className="flex gap-1.5 text-sm">
-                <span className="inline-flex rounded-md border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+                <span className="inline-flex rounded-md border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
                   {waitlistSummary.waiting} waiting
                 </span>
                 <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
@@ -1392,49 +1392,49 @@ export default function OperationsPage() {
                 value={waitlistForm.patient_name}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, patient_name: event.target.value }))}
                 placeholder="Patient name"
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
               />
               <input
                 type="text"
                 value={waitlistForm.patient_phone}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, patient_phone: event.target.value }))}
                 placeholder="Phone"
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
               />
               <input
                 type="email"
                 value={waitlistForm.patient_email}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, patient_email: event.target.value }))}
                 placeholder="Email"
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
               />
               <input
                 type="text"
                 value={waitlistForm.service_requested}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, service_requested: event.target.value }))}
                 placeholder="Requested service"
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]"
+                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
               />
               <input
                 type="text"
                 value={waitlistForm.preferred_times}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, preferred_times: event.target.value }))}
                 placeholder="Preferred times"
-                className="h-8 w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1] md:col-span-2"
+                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash md:col-span-2"
               />
               <textarea
                 value={waitlistForm.notes}
                 onChange={(event) => setWaitlistForm((current) => ({ ...current, notes: event.target.value }))}
                 rows={3}
                 placeholder="Notes"
-                className="w-full resize-none rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-sm placeholder:text-[#64748B] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#CCFBF1] md:col-span-2"
+                className="w-full resize-none rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash md:col-span-2"
               />
             </div>
 
             <button
               onClick={createWaitlistEntry}
               disabled={savingWaitlistId === "new" || !waitlistForm.patient_name.trim()}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0F766E] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#115E59] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
             >
               {savingWaitlistId === "new" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Add to waitlist
@@ -1442,24 +1442,24 @@ export default function OperationsPage() {
 
             <div className="mt-4 space-y-2.5">
               {waitlistEntries.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-[#CBD5E1] px-4 py-5 text-center text-sm text-[#475569]">
+                <div className="rounded-lg border border-dashed border-app-border px-4 py-5 text-center text-sm text-app-text-muted">
                   No waitlist entries yet. Use the form above to add patients waiting for an opening.
                 </div>
               ) : (
                 waitlistEntries.map((entry) => (
-                  <div key={entry.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                  <div key={entry.id} className="rounded-lg border border-app-border p-3">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold text-[#0F172A]">{entry.patient_name}</p>
-                          <span className="inline-flex rounded-md border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+                          <p className="text-sm font-semibold text-app-text">{entry.patient_name}</p>
+                          <span className="inline-flex rounded-md border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
                             {entry.status}
                           </span>
                         </div>
-                        <p className="text-sm text-[#475569]">
+                        <p className="text-sm text-app-text-muted">
                           {entry.service_requested || "General waitlist request"}
                         </p>
-                        <p className="mt-0.5 text-xs text-[#475569]">
+                        <p className="mt-0.5 text-xs text-app-text-muted">
                           {entry.preferred_times || "No preferred times saved"}
                         </p>
                       </div>
@@ -1470,7 +1470,7 @@ export default function OperationsPage() {
                             key={status}
                             onClick={() => updateWaitlistEntry(entry, status)}
                             disabled={savingWaitlistId === entry.id || entry.status === status}
-                            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+                            className="rounded-lg border border-app-border px-2.5 py-1.5 text-sm font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt disabled:opacity-50"
                           >
                             {savingWaitlistId === entry.id ? "Saving..." : status}
                           </button>
@@ -1486,38 +1486,38 @@ export default function OperationsPage() {
 
         <div className="space-y-4">
           {/* Recent outbound SMS */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-[#0F172A]">Recent outbound SMS</h2>
-                <p className="mt-0.5 text-xs text-[#475569]">
+                <h2 className="text-sm font-semibold text-app-text">Recent outbound SMS</h2>
+                <p className="mt-0.5 text-xs text-app-text-muted">
                   Live send results appear here when Twilio is connected. Skipped and failed attempts keep their real reason.
                 </p>
               </div>
-              <span className="inline-flex rounded-md border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#0F172A]">
+              <span className="inline-flex rounded-md border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text">
                 {recentOutboundMessages.length} logged
               </span>
             </div>
 
             {recentOutboundMessages.length === 0 ? (
               <EmptyState
-                icon={<BellRing className="h-6 w-6 text-[#64748B]" />}
+                icon={<BellRing className="h-6 w-6 text-app-text-muted" />}
                 title="No outbound SMS yet"
                 description="Reminder sends, manual texts, and missed-call text-backs will appear here once they run."
               />
             ) : (
               <div className="space-y-2.5">
                 {recentOutboundMessages.map((event) => (
-                  <div key={event.id} className="rounded-lg border border-[#E2E8F0] p-3">
+                  <div key={event.id} className="rounded-lg border border-app-border p-3">
                     <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                       <ChannelBadge channel={event.channel} withIcon />
                       <CommunicationEventStatusBadge status={event.status} />
-                      <span className="text-xs text-[#475569]">{event.customer_name}</span>
+                      <span className="text-xs text-app-text-muted">{event.customer_name}</span>
                     </div>
-                    <p className="text-sm font-medium text-[#0F172A]">{event.summary || "Outbound SMS"}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-[#475569]">{event.content}</p>
+                    <p className="text-sm font-medium text-app-text">{event.summary || "Outbound SMS"}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{event.content}</p>
                     {(event.failure_reason || event.skipped_reason) && (
-                      <p className="mt-1.5 text-xs text-[#475569]">{event.failure_reason || event.skipped_reason}</p>
+                      <p className="mt-1.5 text-xs text-app-text-muted">{event.failure_reason || event.skipped_reason}</p>
                     )}
                   </div>
                 ))}
@@ -1526,29 +1526,29 @@ export default function OperationsPage() {
           </div>
 
           {/* Action required */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-amber-600" />
-              <h2 className="text-sm font-semibold text-[#0F172A]">Action required</h2>
+              <h2 className="text-sm font-semibold text-app-text">Action required</h2>
             </div>
 
             {actionRequiredRequests.length === 0 ? (
               <EmptyState
-                icon={<CalendarClock className="h-6 w-6 text-[#64748B]" />}
+                icon={<CalendarClock className="h-6 w-6 text-app-text-muted" />}
                 title="No cancel or reschedule requests"
                 description="Booked appointments flagged for cancellation, rescheduling, or no-show handling will appear here."
               />
             ) : (
               <div className="space-y-3">
                 {actionRequiredRequests.map((lead) => (
-                  <div key={lead.lead_id} className="rounded-lg border border-[#E2E8F0] p-3">
+                  <div key={lead.lead_id} className="rounded-lg border border-app-border p-3">
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-[#0F172A]">{lead.patient_name}</p>
+                      <p className="text-sm font-semibold text-app-text">{lead.patient_name}</p>
                       <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-semibold ${appointmentStatusClass(lead.appointment_status)}`}>
                         {appointmentStatusLabel(lead.appointment_status)}
                       </span>
                     </div>
-                    <p className="text-sm text-[#475569]">{lead.reason_for_visit || "Booked request"}</p>
+                    <p className="text-sm text-app-text-muted">{lead.reason_for_visit || "Booked request"}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       <button
                         onClick={() =>
@@ -1559,7 +1559,7 @@ export default function OperationsPage() {
                               setError(err instanceof Error ? err.message : "Failed to update request")
                             )
                         }
-                        className="rounded-lg border border-[#99f6e4] px-2.5 py-1.5 text-sm font-semibold text-[#115E59] transition-colors hover:bg-[#CCFBF1]"
+                        className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-sm font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
                       >
                         Mark confirmed
                       </button>
@@ -1584,30 +1584,30 @@ export default function OperationsPage() {
           </div>
 
           {/* Deposit tracking */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-[#0F766E]" />
-              <h2 className="text-sm font-semibold text-[#0F172A]">Deposit tracking</h2>
+              <Wallet className="h-4 w-4 text-app-primary" />
+              <h2 className="text-sm font-semibold text-app-text">Deposit tracking</h2>
             </div>
             <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Required</p>
-                <p className="mt-1 text-lg font-bold text-[#0F172A]">{operations.deposit_summary.required_count}</p>
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Required</p>
+                <p className="mt-1 text-lg font-bold text-app-text">{operations.deposit_summary.required_count}</p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Requested</p>
-                <p className="mt-1 text-lg font-bold text-[#0F172A]">{operations.deposit_summary.requested_count}</p>
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Requested</p>
+                <p className="mt-1 text-lg font-bold text-app-text">{operations.deposit_summary.requested_count}</p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Paid</p>
-                <p className="mt-1 text-lg font-bold text-[#0F172A]">{operations.deposit_summary.paid_count}</p>
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Paid</p>
+                <p className="mt-1 text-lg font-bold text-app-text">{operations.deposit_summary.paid_count}</p>
               </div>
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B]">Waiting</p>
-                <p className="mt-1 text-lg font-bold text-[#0F172A]">{operations.deposit_summary.waiting_count}</p>
+              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Waiting</p>
+                <p className="mt-1 text-lg font-bold text-app-text">{operations.deposit_summary.waiting_count}</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-[#475569]">
+            <p className="text-sm leading-relaxed text-app-text-muted">
               {operations.deposit_summary.note}
             </p>
           </div>
