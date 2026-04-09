@@ -1473,6 +1473,28 @@ export default function SettingsPage() {
             </div>
           </div>
         ) : null}
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {(["Foundation", "Knowledge", "Channels", "Go live"] as const).map((group) => {
+            const modules = SETTINGS_MODULES.filter((module) => module.group === group);
+            const completed = modules.filter((module) => getSectionStatus(module.key, statusState) === "completed").length;
+            return (
+              <button
+                key={group}
+                type="button"
+                onClick={() => focusSection(modules[0]?.key ?? "clinic-info")}
+                className="rounded-[1.35rem] border border-[#DDE5EE] bg-white/90 px-4 py-4 text-left shadow-sm transition-all hover:border-[#CBD5E1] hover:shadow-md"
+              >
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#64748B]">{group}</p>
+                <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-[#0F172A]">
+                  {completed}/{modules.length} configured
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-[#475569]">
+                  {modules.map((module) => module.label).join(" · ")}
+                </p>
+              </button>
+            );
+          })}
+        </div>
         <div className="workspace-stage">
           <div className="workspace-side-rail order-2 xl:order-none">
             <div className="ds-rail-panel workspace-immersive-rail relative p-5 xl:sticky xl:top-6">

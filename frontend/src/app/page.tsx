@@ -296,53 +296,61 @@ export default function LandingPage() {
 
       <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-300/80">
         <div className="marketing-container">
-          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:gap-14">
-            <div className="min-w-0">
-              <div className="marketing-kicker mb-6">
-                <Sparkles className="h-3 w-3" />
-                AI front-desk operating system
-              </div>
-              <h1 className="marketing-h1 max-w-3xl">
-                One calm workspace for your entire front desk.
-              </h1>
-              <p className="marketing-lead mt-7 max-w-2xl">
-                Clinic AI responds to patients, captures appointment requests, and keeps your team operating from one inbox, one booking workflow, and one visible system of record.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/register" className="marketing-cta-primary !rounded-full !px-5 !py-3.5">
-                  Start free trial
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full !px-5 !py-3.5">
-                  <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
-                  Try live demo
-                </Link>
-              </div>
-              <p className="mt-5 text-[1rem] font-medium text-slate-600">
-                Set up in under 15 minutes. No credit card required. Staff review and takeover included from day one.
-              </p>
+          <div className="landing-shell overflow-hidden px-5 py-5 sm:px-7 sm:py-7 lg:px-8 lg:py-8">
+            <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-14">
+              <div className="min-w-0">
+                <div className="marketing-kicker mb-6">
+                  <Sparkles className="h-3 w-3" />
+                  AI front-desk operating system
+                </div>
+                <h1 className="marketing-h1 max-w-3xl">
+                  One calm workspace for your entire front desk.
+                </h1>
+                <p className="marketing-lead mt-7 max-w-2xl">
+                  Clinic AI responds to patients, captures appointment requests, and keeps your team operating from one inbox, one booking workflow, and one visible system of record.
+                </p>
+                <div className="mt-10 flex flex-wrap gap-3">
+                  <Link href="/register" className="marketing-cta-primary !rounded-full !px-5 !py-3.5">
+                    Start free trial
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link href="/chat/demo" className="marketing-cta-secondary !rounded-full !px-5 !py-3.5">
+                    <MessageSquareMore className="h-4 w-4 text-[#0F766E]" />
+                    Try live demo
+                  </Link>
+                </div>
+                <div className="mt-6 flex flex-wrap items-center gap-2.5 text-[0.95rem] font-medium text-slate-600">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d7e5e4] bg-white/90 px-3 py-1.5 shadow-sm">
+                    <CheckCircle2 className="h-4 w-4 text-[#0F766E]" />
+                    Set up in under 15 minutes
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d7e5e4] bg-white/90 px-3 py-1.5 shadow-sm">
+                    <ShieldCheck className="h-4 w-4 text-[#0F766E]" />
+                    Human review and takeover included
+                  </span>
+                </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                {[
-                  { label: "Responds 24/7", detail: "Handles web chat and SMS with clinic-configured information." },
-                  { label: "One operator inbox", detail: "Review threads, notes, requests, and next actions together." },
-                  { label: "Human review built in", detail: "Staff can edit, pause, or take over any thread at any point." },
-                  { label: "Bookings stay connected", detail: "Appointments, reminders, and deposits stay linked to the original inquiry." },
-                ].map((item) => (
-                  <div key={item.label} className="marketing-showcase-card px-4 py-4">
-                    <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.label}</p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[#5D6B7C]">{item.detail}</p>
-                  </div>
-                ))}
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {[
+                    { label: "Responds 24/7", detail: "Handles web chat and SMS with clinic-configured information." },
+                    { label: "One operator inbox", detail: "Review threads, notes, requests, and next actions together." },
+                    { label: "Human review built in", detail: "Staff can edit, pause, or take over any thread at any point." },
+                    { label: "Bookings stay connected", detail: "Appointments, reminders, and deposits stay linked to the original inquiry." },
+                  ].map((item) => (
+                    <div key={item.label} className="marketing-showcase-card px-4 py-4">
+                      <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[#0F172A]">{item.label}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-[#5D6B7C]">{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="relative">
-              <MarketingProductWindow
-                pathLabel="/dashboard/inbox"
-                caption="Illustrative product composition — real routes include Inbox, Leads, Appointments, AI Training, Billing, and Settings after sign-in."
-              >
-                <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
+              <div className="relative">
+                <MarketingProductWindow
+                  pathLabel="/dashboard/inbox"
+                  caption="Illustrative product composition — real routes include Inbox, Leads, Appointments, AI Training, Billing, and Settings after sign-in."
+                >
+                  <div className="marketing-hero-preview relative overflow-hidden p-6 sm:p-7 lg:p-8">
                   <div className="grid gap-4 xl:grid-cols-[12.75rem_1fr_14rem]">
                     <aside className="rounded-[1.55rem] border border-white/90 bg-[linear-gradient(180deg,#f7f3ff_0%,#eff5fb_100%)] p-4 shadow-[0_30px_48px_-34px_rgb(124_99_243/0.42)]">
                       <div className="mb-5 flex items-center gap-3">
@@ -436,8 +444,21 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
+                  </div>
+                </MarketingProductWindow>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3 border-t border-[#d9e4ec] pt-5 sm:grid-cols-3">
+              {[
+                "Grounded in your real clinic settings",
+                "Same workspace in trial and paid plans",
+                "Inbox, leads, bookings, and billing all connected",
+              ].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/80 bg-white/85 px-4 py-3 text-sm font-semibold text-[#334155] shadow-[0_18px_36px_-28px_rgb(12_18_32/0.28)]">
+                  {item}
                 </div>
-              </MarketingProductWindow>
+              ))}
             </div>
           </div>
         </div>

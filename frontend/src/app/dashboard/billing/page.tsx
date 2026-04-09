@@ -406,27 +406,42 @@ export default function BillingPage() {
             Plan details are temporarily unavailable. Your current billing status is still accurate above.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
             {plans.map((plan) => {
               const isCurrent = plan.id === billing.plan;
               const isDowngrade =
                 (billing.plan === "premium" && plan.id !== "premium") ||
                 (billing.plan === "professional" && plan.id === "trial");
               const canUpgrade = !isCurrent && !isDowngrade && plan.id !== "trial";
+              const isFeatured = plan.id === "professional";
 
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-xl border p-5 flex flex-col ${isCurrent
-                    ? "border-[#99f6e4] bg-[#CCFBF1]/80 shadow-sm"
-                    : "border-[#E2E8F0] bg-white shadow-sm"
+                  className={`relative flex flex-col overflow-hidden rounded-[1.45rem] border p-5 shadow-sm ${isCurrent
+                    ? "border-[#99f6e4] bg-[linear-gradient(180deg,rgba(236,253,250,0.96)_0%,rgba(255,255,255,0.96)_100%)] shadow-[0_24px_42px_-28px_rgba(15,118,110,0.45)]"
+                    : isFeatured
+                      ? "border-[#d8cdfd] bg-[linear-gradient(180deg,rgba(245,241,255,0.82)_0%,rgba(255,255,255,0.98)_100%)] shadow-[0_24px_42px_-28px_rgba(124,99,243,0.32)]"
+                      : "border-[#E2E8F0] bg-white shadow-[0_22px_38px_-30px_rgba(12,18,32,0.24)]"
                     }`}
                 >
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#14B8A6] via-[#0F8F83] to-[#7C63F3]" />
                   <div className="flex items-center gap-2 mb-1">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCurrent ? "bg-[#CCFBF1] text-[#0F766E]" : "bg-[#F1F5F9] text-[#475569]"}`}>
                       {PLAN_ICONS[plan.id] || PLAN_ICONS.trial}
                     </div>
-                    <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                      <h4 className="text-base font-semibold text-[#0F172A]">{plan.name}</h4>
+                      {isCurrent ? (
+                        <span className="rounded-full border border-[#99f6e4] bg-[#CCFBF1] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#115E59]">
+                          Current
+                        </span>
+                      ) : isFeatured ? (
+                        <span className="rounded-full border border-[#d8cdfd] bg-[#f5f1ff] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6c58c9]">
+                          Recommended
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                   <p className="text-sm text-[#475569] mb-3">{plan.description}</p>
                   <p className="text-2xl font-bold text-[#0F172A] mb-4">

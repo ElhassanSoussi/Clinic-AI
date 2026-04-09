@@ -43,10 +43,10 @@ body {
 .dashboard-shell {
   --dash-sidebar-w: 16.25rem;
   background:
-    radial-gradient(ellipse 96% 118% at -6% -4%, rgb(124 99 243 / 0.18), transparent 40%),
-    radial-gradient(ellipse 88% 104% at 104% -2%, rgb(204 251 241 / 0.42), transparent 44%),
-    radial-gradient(ellipse 74% 90% at 50% 100%, rgb(148 163 184 / 0.12), transparent 52%),
-    linear-gradient(160deg, #e7edf4 0%, #e0e7ef 36%, #ecf2f8 100%);
+    radial-gradient(ellipse 102% 126% at -8% -6%, rgb(124 99 243 / 0.22), transparent 40%),
+    radial-gradient(ellipse 94% 112% at 106% -2%, rgb(20 184 166 / 0.2), transparent 40%),
+    radial-gradient(ellipse 78% 94% at 50% 100%, rgb(148 163 184 / 0.14), transparent 52%),
+    linear-gradient(160deg, #e6edf4 0%, #dde5ed 38%, #edf4fa 100%);
 }
 
 /* Full-page flows outside the dashboard chrome (onboarding, admin console) */
@@ -110,9 +110,12 @@ a {
   position: relative;
   overflow: hidden;
   border: 1px solid rgb(221 229 238 / 0.92);
-  border-radius: 1.65rem;
+  border-radius: 1.85rem;
   background: linear-gradient(160deg, rgb(255 255 255 / 0.98) 0%, rgb(250 252 255 / 0.96) 46%, rgb(244 249 252 / 0.94) 100%);
-  box-shadow: var(--ds-shadow-lg), var(--ds-shadow-inset);
+  box-shadow:
+    0 42px 84px -44px rgb(12 18 32 / 0.28),
+    0 20px 36px -24px rgb(13 148 136 / 0.12),
+    var(--ds-shadow-inset);
 }
 
 .workspace-main-frame::before {
@@ -144,6 +147,14 @@ a {
   border-right: 1px solid var(--color-app-border);
 }
 
+.workspace-sidebar-section {
+  border-radius: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.58);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.58) 0%, rgb(248 250 252 / 0.42) 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+  padding: 0.65rem 0.4rem 0.5rem;
+}
+
 .workspace-rail-card {
   position: relative;
   overflow: hidden;
@@ -173,12 +184,12 @@ a {
 /* Main column: pull content earlier — less dead air after sidebar */
 .dashboard-content-well {
   width: 100%;
-  max-width: min(100%, 100rem);
+  max-width: min(100%, 104rem);
   margin-left: 0;
   margin-right: auto;
-  padding-left: clamp(0.5rem, 0.9vw, 0.95rem);
-  padding-right: clamp(1rem, 1.8vw, 2rem);
-  padding-top: clamp(0.8rem, 1vw, 1.2rem);
+  padding-left: clamp(0.35rem, 0.7vw, 0.75rem);
+  padding-right: clamp(0.85rem, 1.4vw, 1.6rem);
+  padding-top: clamp(0.55rem, 0.8vw, 0.95rem);
   padding-bottom: clamp(2rem, 3vw, 3.25rem);
 }
 
@@ -197,13 +208,13 @@ a {
 }
 
 .dashboard-topbar {
-  min-height: 4rem;
+  min-height: 4.35rem;
   border-bottom: 1px solid rgb(221 229 238 / 0.95);
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(248 250 254 / 0.94) 100%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.99) 0%, rgb(246 249 254 / 0.97) 100%);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2);
   box-shadow:
-    var(--ds-shadow-sm),
+    0 10px 26px -22px rgb(12 18 32 / 0.42),
     0 1px 0 rgb(255 255 255 / 0.85) inset;
 }
 
@@ -212,11 +223,11 @@ a {
   flex-shrink: 0;
   border-right: 1px solid rgb(211 219 231 / 0.95);
   background:
-    radial-gradient(ellipse 120% 92% at 0% 0%, rgb(124 99 243 / 0.24), transparent 42%),
-    radial-gradient(ellipse 100% 72% at 0% 100%, rgb(204 251 241 / 0.18), transparent 60%),
-    linear-gradient(180deg, rgb(243 239 255 / 0.98) 0%, rgb(238 244 252 / 0.94) 52%, rgb(246 250 254 / 0.99) 100%);
+    radial-gradient(ellipse 124% 96% at 0% 0%, rgb(124 99 243 / 0.28), transparent 42%),
+    radial-gradient(ellipse 106% 74% at 0% 100%, rgb(20 184 166 / 0.14), transparent 60%),
+    linear-gradient(180deg, rgb(242 237 255 / 0.99) 0%, rgb(233 242 251 / 0.96) 52%, rgb(245 249 254 / 0.99) 100%);
   box-shadow:
-    16px 0 42px -30px rgb(12 18 32 / 0.22),
+    20px 0 48px -32px rgb(12 18 32 / 0.26),
     1px 0 0 rgb(255 255 255 / 0.8) inset;
 }
 
@@ -224,9 +235,9 @@ a {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  border-radius: 1.05rem;
+  border-radius: 1.1rem;
   border-left: 3px solid transparent;
-  padding: 0.78rem 0.95rem;
+  padding: 0.8rem 0.95rem;
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.25;
@@ -240,10 +251,10 @@ a {
 
 .dashboard-nav-link[data-active="true"] {
   border-left-color: var(--color-app-violet);
-  background: linear-gradient(92deg, rgb(255 255 255 / 0.92) 0%, rgb(241 237 255 / 1) 56%, rgb(255 255 255 / 0.74) 100%);
+  background: linear-gradient(92deg, rgb(255 255 255 / 0.96) 0%, rgb(241 237 255 / 1) 56%, rgb(255 255 255 / 0.8) 100%);
   color: #2e2162;
   box-shadow:
-    0 18px 34px -28px rgb(124 99 243 / 0.8),
+    0 20px 38px -28px rgb(124 99 243 / 0.8),
     0 1px 0 rgb(255 255 255 / 0.8) inset;
   transform: translateX(3px);
 }
@@ -374,10 +385,13 @@ a {
 .ds-control-hero-panel {
   position: relative;
   overflow: hidden;
-  border-radius: 1.55rem;
+  border-radius: 1.8rem;
   border: 1px solid var(--color-app-border);
   background: linear-gradient(138deg, rgb(255 255 255 / 0.985) 0%, rgb(249 251 255 / 0.96) 46%, rgb(236 253 245 / 0.58) 100%);
-  box-shadow: var(--ds-shadow-md), var(--ds-shadow-inset);
+  box-shadow:
+    0 36px 72px -40px rgb(12 18 32 / 0.3),
+    0 20px 38px -26px rgb(13 148 136 / 0.14),
+    var(--ds-shadow-inset);
 }
 
 .ds-control-hero-panel::after {
@@ -395,8 +409,8 @@ a {
 
 .workspace-command-hero {
   box-shadow:
-    0 34px 66px -42px rgb(12 18 32 / 0.34),
-    0 18px 34px -24px rgb(13 148 136 / 0.16),
+    0 40px 74px -44px rgb(12 18 32 / 0.34),
+    0 22px 38px -24px rgb(13 148 136 / 0.16),
     inset 0 1px 0 rgb(255 255 255 / 0.88);
 }
 
@@ -657,18 +671,18 @@ a {
 }
 
 .app-page-title {
-  font-size: clamp(2.25rem, 1.7vw + 1.5rem, 3.45rem);
+  font-size: clamp(2.5rem, 2vw + 1.6rem, 3.95rem);
   font-weight: 800;
-  letter-spacing: -0.065em;
-  line-height: 0.98;
+  letter-spacing: -0.072em;
+  line-height: 0.94;
   color: var(--color-app-text);
 }
 
 .app-page-description {
-  font-size: 1.07rem;
+  font-size: 1.12rem;
   line-height: 1.72;
   color: var(--color-app-text-secondary);
-  max-width: 56rem;
+  max-width: 60rem;
 }
 
 .app-page-kicker {
@@ -785,12 +799,12 @@ a {
 .public-marketing-root {
   min-height: 100vh;
   overflow-x: hidden;
-  background-color: #e8edf4;
+  background-color: #e7eef4;
   background-image:
-    radial-gradient(ellipse 112% 90% at 50% -36%, rgb(124 99 243 / 0.2), transparent 48%),
-    radial-gradient(ellipse 78% 62% at 100% 0%, rgb(20 184 166 / 0.18), transparent 45%),
-    radial-gradient(ellipse 72% 46% at 0% 100%, rgb(204 251 241 / 0.35), transparent 46%),
-    linear-gradient(162deg, #edf2f8 0%, #e3e9f1 40%, #eef4f8 100%);
+    radial-gradient(ellipse 116% 92% at 50% -34%, rgb(124 99 243 / 0.22), transparent 48%),
+    radial-gradient(ellipse 84% 64% at 100% 0%, rgb(20 184 166 / 0.22), transparent 45%),
+    radial-gradient(ellipse 78% 50% at 0% 100%, rgb(204 251 241 / 0.38), transparent 46%),
+    linear-gradient(162deg, #edf3f8 0%, #e2e9f0 40%, #eef5fa 100%);
 }
 
 .marketing-container {
@@ -821,8 +835,8 @@ a {
 
 .marketing-hero {
   position: relative;
-  padding-top: clamp(5rem, 11vw, 9rem);
-  padding-bottom: clamp(4.75rem, 9vw, 7.9rem);
+  padding-top: clamp(5.4rem, 11vw, 9.4rem);
+  padding-bottom: clamp(5.25rem, 9vw, 8.3rem);
 }
 
 .marketing-hero::before {
@@ -881,14 +895,14 @@ a {
 }
 
 .marketing-hero-preview {
-  border-radius: 2rem;
+  border-radius: 2.3rem;
   border: 1px solid rgb(197 205 218 / 0.75);
   background: linear-gradient(145deg, #fcfdff 0%, #f2f5fa 55%, #eef3f8 100%);
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.6) inset,
     0 2px 4px rgb(15 23 42 / 0.04),
-    0 46px 92px -36px rgb(15 23 42 / 0.2),
-    0 18px 38px -18px rgb(124 99 243 / 0.18);
+    0 58px 112px -44px rgb(15 23 42 / 0.24),
+    0 24px 42px -18px rgb(124 99 243 / 0.22);
 }
 
 .marketing-section-alt {
@@ -911,15 +925,15 @@ a {
 }
 
 .marketing-h1 {
-  font-size: clamp(3.7rem, 1.7rem + 6.2vw, 6.15rem);
+  font-size: clamp(4rem, 1.9rem + 6.5vw, 6.7rem);
   font-weight: 800;
-  line-height: 0.94;
-  letter-spacing: -0.075em;
+  line-height: 0.9;
+  letter-spacing: -0.082em;
   color: var(--color-app-text);
 }
 
 .marketing-h2 {
-  font-size: clamp(2.35rem, 1.15rem + 3.7vw, 4rem);
+  font-size: clamp(2.55rem, 1.2rem + 4vw, 4.35rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.05em;
@@ -935,10 +949,10 @@ a {
 }
 
 .marketing-lead {
-  font-size: clamp(1.08rem, 0.45vw + 1rem, 1.34rem);
-  line-height: 1.72;
+  font-size: clamp(1.12rem, 0.55vw + 1rem, 1.42rem);
+  line-height: 1.76;
   color: #334155;
-  max-width: 46rem;
+  max-width: 50rem;
 }
 
 .marketing-body {
@@ -1170,11 +1184,14 @@ a {
 }
 
 .wave-zone-panel {
-  border-radius: 1.35rem;
+  border-radius: 1.55rem;
   border: 1px solid var(--color-app-border);
   background: linear-gradient(180deg, var(--color-app-surface) 0%, var(--color-app-elevated) 100%);
-  box-shadow: var(--ds-shadow-md), var(--ds-shadow-inset);
-  padding: 1rem 1.125rem;
+  box-shadow:
+    0 30px 60px -42px rgb(12 18 32 / 0.26),
+    0 12px 24px -18px rgb(13 148 136 / 0.08),
+    var(--ds-shadow-inset);
+  padding: 1.1rem 1.2rem;
 }
 
 @media (min-width: 640px) {
@@ -1184,11 +1201,13 @@ a {
 }
 
 .wave-workbench {
-  border-radius: 1.6rem;
+  border-radius: 1.85rem;
   border: 1px solid var(--color-app-border);
   border-top: 4px solid var(--color-app-violet);
   background: linear-gradient(180deg, rgb(255 255 255 / 0.985) 0%, rgb(245 248 252 / 0.985) 55%, rgb(239 244 252 / 0.96) 100%);
-  box-shadow: var(--ds-shadow-lg);
+  box-shadow:
+    0 42px 84px -44px rgb(12 18 32 / 0.3),
+    0 22px 36px -22px rgb(124 99 243 / 0.14);
   overflow: hidden;
 }
 
@@ -1198,7 +1217,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
-  padding: 0.95rem 1.2rem;
+  padding: 1.1rem 1.35rem;
   border-bottom: 1px solid var(--color-app-border);
   background: linear-gradient(90deg,
       rgb(248 250 254 / 0.95) 0%,
@@ -1213,7 +1232,7 @@ a {
 }
 
 .wave-workbench-body {
-  padding: 0.75rem;
+  padding: 0.9rem;
 }
 
 @media (min-width: 1280px) {
@@ -1236,14 +1255,16 @@ a {
 }
 
 .wave-settings-deck {
-  border-radius: 1.7rem;
+  border-radius: 1.95rem;
   border: 1px solid var(--color-app-border);
   background: linear-gradient(165deg,
       rgb(255 255 255 / 0.985) 0%,
       rgb(245 248 252 / 0.985) 52%,
       rgb(241 237 255 / 0.5) 100%);
-  box-shadow: var(--ds-shadow-lg);
-  padding: 1rem;
+  box-shadow:
+    0 44px 88px -48px rgb(12 18 32 / 0.3),
+    0 24px 42px -26px rgb(124 99 243 / 0.14);
+  padding: 1.15rem;
 }
 
 @media (min-width: 640px) {
@@ -1253,10 +1274,12 @@ a {
 }
 
 .wave-billing-shell {
-  border-radius: 1.65rem;
+  border-radius: 1.9rem;
   border: 1px solid var(--color-app-border);
   background: linear-gradient(180deg, rgb(255 255 255 / 0.985) 0%, rgb(245 248 252 / 0.985) 100%);
-  box-shadow: var(--ds-shadow-lg);
+  box-shadow:
+    0 44px 88px -48px rgb(12 18 32 / 0.3),
+    0 24px 42px -26px rgb(13 148 136 / 0.14);
   padding: 1rem 1.125rem 1.25rem;
 }
 
@@ -1322,12 +1345,12 @@ a {
 .marketing-showcase-card {
   position: relative;
   overflow: hidden;
-  border-radius: 1.65rem;
+  border-radius: 1.9rem;
   border: 1px solid rgb(255 255 255 / 0.92);
   background: linear-gradient(180deg, rgb(255 255 255 / 0.96) 0%, rgb(247 250 254 / 0.94) 100%);
   box-shadow:
-    0 28px 58px -36px rgb(12 18 32 / 0.34),
-    0 18px 32px -24px rgb(13 148 136 / 0.18),
+    0 36px 74px -38px rgb(12 18 32 / 0.34),
+    0 22px 38px -24px rgb(13 148 136 / 0.18),
     inset 0 1px 0 rgb(255 255 255 / 0.78);
 }
 
@@ -1340,11 +1363,11 @@ a {
 }
 
 .workspace-workbench-premium {
-  border-radius: 1.6rem;
+  border-radius: 1.9rem;
   border-top-width: 5px;
   box-shadow:
-    0 38px 72px -42px rgb(12 18 32 / 0.32),
-    0 20px 34px -22px rgb(124 99 243 / 0.12);
+    0 44px 82px -42px rgb(12 18 32 / 0.32),
+    0 24px 40px -22px rgb(124 99 243 / 0.12);
 }
 
 .workspace-workbench-premium .wave-workbench-head {
@@ -1372,7 +1395,12 @@ a {
 }
 
 .chat-shell-premium--immersive {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(248 250 252 / 0.96) 100%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.985) 0%, rgb(248 250 252 / 0.97) 56%, rgb(237 253 250 / 0.72) 100%);
+  box-shadow:
+    0 40px 84px -40px rgb(12 18 32 / 0.34),
+    0 22px 40px -22px rgb(13 148 136 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.88);
 }
 
 .chat-header-premium {

@@ -34,18 +34,23 @@ import { GoLiveModals } from "@/components/shared/GoLiveModals";
 
 /* ─── Navigation config ─── */
 const sidebarNav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
-  { href: "/dashboard/leads", label: "Leads", icon: Users },
-  { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
-  { href: "/dashboard/customers", label: "Customers", icon: ContactRound },
-  { href: "/dashboard/opportunities", label: "Opportunities", icon: TriangleAlert },
-  { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical },
-  { href: "/dashboard/activity", label: "Activity", icon: Activity },
-  { href: "/dashboard/training", label: "AI Training", icon: Sparkles },
-  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, group: "Operate" },
+  { href: "/dashboard/inbox", label: "Inbox", icon: Inbox, group: "Operate" },
+  { href: "/dashboard/leads", label: "Leads", icon: Users, group: "Operate" },
+  { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays, group: "Operate" },
+  { href: "/dashboard/customers", label: "Customers", icon: ContactRound, group: "Operate" },
+  { href: "/dashboard/opportunities", label: "Opportunities", icon: TriangleAlert, group: "Operate" },
+  { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical, group: "Operate" },
+  { href: "/dashboard/activity", label: "Activity", icon: Activity, group: "Operate" },
+  { href: "/dashboard/training", label: "AI Training", icon: Sparkles, group: "Configure" },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard, group: "Configure" },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, group: "Configure" },
 ];
+
+const sidebarGroups = [
+  { label: "Operate", items: sidebarNav.filter((item) => item.group === "Operate") },
+  { label: "Configure", items: sidebarNav.filter((item) => item.group === "Configure") },
+] as const;
 
 function settingsHref(section?: string | null): string {
   if (!section) return "/dashboard/settings";
@@ -325,31 +330,37 @@ export default function DashboardLayout({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
-          <p className="workspace-section-label mb-2 px-2">Workspace</p>
-          {sidebarNav.map((item) => {
-            const isActive =
-              pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className="dashboard-nav-link group"
-                data-active={isActive ? "true" : "false"}
-              >
-                <item.icon
-                  className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B] group-hover:text-[#475569]"}`}
-                />
-                {item.label}
-                {item.label === "Leads" && newLeadCount > 0 && (
-                  <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
-                    {newLeadCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
+          {sidebarGroups.map((group) => (
+            <div key={group.label} className="workspace-sidebar-section">
+              <p className="workspace-section-label mb-2 px-2">{group.label}</p>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive =
+                    pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className="dashboard-nav-link group"
+                      data-active={isActive ? "true" : "false"}
+                    >
+                      <item.icon
+                        className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B] group-hover:text-[#475569]"}`}
+                      />
+                      {item.label}
+                      {item.label === "Leads" && newLeadCount > 0 && (
+                        <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
+                          {newLeadCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Channels section */}
@@ -412,28 +423,35 @@ export default function DashboardLayout({
               <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
-            {sidebarNav.map((item) => {
-              const isActive =
-                pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className="dashboard-nav-link"
-                  data-active={isActive ? "true" : "false"}
-                >
-                  <item.icon className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
-                  {item.label}
-                  {item.label === "Leads" && newLeadCount > 0 && (
-                    <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
-                      {newLeadCount}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
+            {sidebarGroups.map((group) => (
+              <div key={group.label} className="workspace-sidebar-section">
+                <p className="workspace-section-label mb-2 px-2">{group.label}</p>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive =
+                      pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className="dashboard-nav-link"
+                        data-active={isActive ? "true" : "false"}
+                      >
+                        <item.icon className={`h-[1.125rem] w-[1.125rem] shrink-0 ${isActive ? "text-[#0F766E]" : "text-[#64748B]"}`} />
+                        {item.label}
+                        {item.label === "Leads" && newLeadCount > 0 && (
+                          <span className="ml-auto min-w-[1.375rem] rounded-full bg-[#2563EB] px-1.5 py-0.5 text-center text-[0.6875rem] font-bold text-white">
+                            {newLeadCount}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </aside>
       </div>
@@ -459,10 +477,14 @@ export default function DashboardLayout({
 
           {/* Utility slab */}
           <div className="flex min-w-0 flex-1 justify-center">
-            <div className="hidden min-w-[18rem] max-w-[28rem] flex-1 items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/90 px-4 py-2 shadow-[0_16px_34px_-28px_rgb(12_18_32/0.34)] md:flex">
+            <div className="hidden min-w-[21rem] max-w-[34rem] flex-1 items-center justify-between gap-4 rounded-[1.35rem] border border-white/90 bg-white/92 px-4 py-2.5 shadow-[0_24px_40px_-30px_rgb(12_18_32/0.34)] md:flex">
               <div className="min-w-0">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[#64748B]">Clinic status</p>
                 <p className="truncate text-sm font-semibold text-[#0F172A]">{clinic?.name || "Clinic workspace"}</p>
+              </div>
+              <div className="hidden min-w-0 flex-1 rounded-[1rem] border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 lg:block">
+                <p className="truncate text-[0.72rem] font-semibold uppercase tracking-[0.11em] text-[#64748B]">{topBarPageLabel}</p>
+                <p className="truncate text-sm font-semibold text-[#0F172A]">Operate from inbox, leads, bookings, and settings without leaving the workspace.</p>
               </div>
               <Link
                 href="/dashboard/inbox"
