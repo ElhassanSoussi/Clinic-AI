@@ -5,9 +5,9 @@ export function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-900/20 bg-[radial-gradient(ellipse_at_top_left,rgba(124,99,243,0.2),transparent_34%),linear-gradient(180deg,#0b1220_0%,#0f172a_100%)] text-slate-300">
+    <footer className="border-t border-slate-900/20 bg-[radial-gradient(ellipse_at_top_left,rgba(20,184,166,0.18),transparent_34%),radial-gradient(ellipse_at_top_right,rgba(124,99,243,0.12),transparent_30%),linear-gradient(180deg,#09111f_0%,#0f172a_100%)] text-slate-300">
       <div className="marketing-container pt-14 pb-16 sm:pt-16 sm:pb-20">
-        <div className="mb-12 rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(22,163,148,0.18)_0%,rgba(124,99,243,0.15)_48%,rgba(15,23,42,0.05)_100%)] p-8 shadow-[0_30px_60px_-34px_rgb(8_15_28/0.8)] sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
+        <div className="mb-12 rounded-[2.2rem] border border-white/10 bg-[linear-gradient(145deg,rgba(20,184,166,0.2)_0%,rgba(124,99,243,0.12)_46%,rgba(15,23,42,0.06)_100%)] p-8 shadow-[0_36px_68px_-34px_rgb(8_15_28/0.82)] sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
           <div className="max-w-xl">
             <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-teal-200/90">Ready when you are</p>
             <p className="mt-3 text-[1.35rem] font-semibold leading-snug tracking-[-0.03em] text-white">
@@ -37,7 +37,7 @@ export function PublicFooter() {
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] shadow-lg shadow-teal-950/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(180deg,#14b8a6_0%,#0f766e_100%)] shadow-lg shadow-teal-950/40">
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <span className="text-[1.0625rem] font-semibold text-white">Clinic AI</span>
