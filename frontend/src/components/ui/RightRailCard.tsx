@@ -10,9 +10,11 @@ interface RightRailCardProps {
 
 export function RightRailCard({ title, children, className = "" }: RightRailCardProps) {
   return (
-    <div className={`workspace-rail-card workspace-immersive-rail right-rail-shell px-4 py-4 sm:px-5 sm:py-5 ${className}`.trim()}>
-      {title ? <h4 className="workspace-rail-title mb-3.5">{title}</h4> : null}
+    <aside className={`panel-surface rounded-[1.75rem] p-5 ${className}`.trim()}>
+      {title ? (
+        <h2 className="mb-4 text-base font-bold tracking-[-0.03em] text-app-text">{title}</h2>
+      ) : null}
       {children}
-    </div>
+    </aside>
   );
 }

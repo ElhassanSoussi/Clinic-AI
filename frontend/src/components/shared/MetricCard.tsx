@@ -27,27 +27,22 @@ export function MetricCard({
   tone = "slate",
   detail,
 }: Readonly<MetricCardProps>) {
-  const displayValue =
-    typeof value === "number" ? (Number.isFinite(value) ? value : "—") : value;
+  let displayValue: string | number = value;
+  if (typeof value === "number") {
+    displayValue = Number.isFinite(value) ? value : "—";
+  }
   return (
-    <div className="ds-card metric-card-shell px-4 py-4 sm:px-5 sm:py-5">
+    <div className="panel-surface rounded-[1.6rem] p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[var(--color-app-text-muted)]">{label}</p>
-          <p className="mt-2.5 text-[1.95rem] font-bold tracking-[-0.065em] text-[var(--color-app-text)] sm:text-[2.2rem]">
-            {displayValue}
-          </p>
-          {detail ? (
-            <p className="ds-muted-text mt-2.5 max-w-[18rem] text-[0.9rem]">{detail}</p>
-          ) : null}
+          <p className="panel-section-head">{label}</p>
+          <p className="mt-3 text-[2rem] font-bold tracking-[-0.055em] text-app-text">{displayValue}</p>
+          {detail ? <p className="mt-2 text-xs leading-5 text-app-text-muted">{detail}</p> : null}
         </div>
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/70 shadow-[0_16px_28px_-16px_rgba(15,23,42,0.58)] ${TONE_STYLES[tone]}`}
-        >
-          <Icon className="h-[1.2rem] w-[1.2rem]" />
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${TONE_STYLES[tone]}`}>
+          <Icon className="h-5 w-5" />
         </div>
       </div>
-      <div className="mt-4 h-px w-full bg-[linear-gradient(90deg,rgba(148,163,184,0.08)_0%,rgba(148,163,184,0.45)_50%,rgba(148,163,184,0.08)_100%)]" />
     </div>
   );
 }

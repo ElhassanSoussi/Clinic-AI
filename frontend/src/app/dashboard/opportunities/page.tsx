@@ -1,479 +1,118 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Clock, Loader2 } from "lucide-react";
-
+import { useCallback, useEffect, useState } from "react";
+import { Sparkles, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api";
-import { formatDateTime, timeAgo } from "@/lib/utils";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
-import type { Clinic, FollowUpTask, Opportunity } from "@/types";
-
-function opportunityHref(opportunity: Opportunity): string | null {
-  if (opportunity.conversation_id) return `/dashboard/inbox/${opportunity.conversation_id}`;
-  if (opportunity.lead_id) return `/dashboard/leads/${opportunity.lead_id}`;
-  if (opportunity.customer_key) return `/dashboard/customers/${opportunity.customer_key}`;
-  return null;
-}
-
-function followUpHref(task: FollowUpTask): string | null {
-  if (task.conversation_id) return `/dashboard/inbox/${task.conversation_id}`;
-  if (task.lead_id) return `/dashboard/leads/${task.lead_id}`;
-  if (task.customer_key) return `/dashboard/customers/${task.customer_key}`;
-  return null;
-}
-
-function priorityClass(priority: "high" | "medium" | "low"): string {
-  if (priority === "high") return "bg-rose-50 text-rose-700 border-rose-200";
-  if (priority === "medium") return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-app-surface-alt text-app-text border-app-border";
-}
-
-function taskStatusClass(status: FollowUpTask["status"]): string {
-  if (status === "snoozed") return "bg-blue-50 text-blue-700 border-blue-200";
-  if (status === "completed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-app-accent-wash text-app-accent-dark border-teal-200";
-}
-
-function recoveryCardClass(isHigh: boolean): string {
-  if (isHigh) return "border border-rose-200 bg-rose-50/30 shadow-sm ring-1 ring-rose-100";
-  return "border border-app-border bg-app-surface shadow-sm";
-}
+import type { FollowUpTask, Opportunity } from "@/types";
 
 export default function OpportunitiesPage() {
-  const [clinic, setClinic] = useState<Clinic | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [followUps, setFollowUps] = useState<FollowUpTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [savingId, setSavingId] = useState("");
-  const [savingAutomation, setSavingAutomation] = useState(false);
 
-  const loadData = useCallback(async () => {
+  const loadOpportunities = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const clinicData = await api.clinics.getMyClinic();
-      setClinic(clinicData);
-      if (clinicData.follow_up_automation_enabled) {
-        await api.frontdesk.runAutoFollowUps();
-      }
       const [opportunityData, followUpData] = await Promise.all([
         api.frontdesk.listOpportunities(),
         api.frontdesk.listFollowUps(),
       ]);
-      setOpportunities(opportunityData);
-      setFollowUps(followUpData);
+      setOpportunities(Array.isArray(opportunityData) ? opportunityData : []);
+      setFollowUps(Array.isArray(followUpData) ? followUpData : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load opportunities");
+      setError(err instanceof Error ? err.message : "Failed to load opportunities.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    void loadOpportunities();
+  }, [loadOpportunities]);
 
-  const queuedOpportunityIds = useMemo(
-    () => new Set(followUps.map((task) => task.source_key)),
-    [followUps]
-  );
-
-  const triageItems = useMemo(
-    () => opportunities.filter((opportunity) => !queuedOpportunityIds.has(opportunity.id)),
-    [opportunities, queuedOpportunityIds]
-  );
-
-  const triageHigh = useMemo(
-    () => triageItems.filter((opportunity) => opportunity.priority === "high"),
-    [triageItems]
-  );
-
-  const triageRest = useMemo(
-    () => triageItems.filter((opportunity) => opportunity.priority !== "high"),
-    [triageItems]
-  );
-
-  const sortedFollowUps = useMemo(() => {
-    const copy = [...followUps];
-    copy.sort((a, b) => {
-      if (a.priority === "high" && b.priority !== "high") return -1;
-      if (a.priority !== "high" && b.priority === "high") return 1;
-      return 0;
-    });
-    return copy;
-  }, [followUps]);
-
-  const queueFollowUp = async (
-    opportunity: Opportunity,
-    status: FollowUpTask["status"] = "open"
-  ) => {
-    setSavingId(opportunity.id);
-    try {
-      await api.frontdesk.createFollowUp({
-        source_key: opportunity.id,
-        task_type: opportunity.type,
-        priority: opportunity.priority,
-        title: opportunity.title,
-        detail: opportunity.detail,
-        customer_key: opportunity.customer_key ?? null,
-        customer_name: opportunity.customer_name,
-        lead_id: opportunity.lead_id ?? null,
-        conversation_id: opportunity.conversation_id ?? null,
-        status,
-      });
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to queue follow-up");
-    } finally {
-      setSavingId("");
-    }
-  };
-
-  const updateFollowUp = async (
-    task: FollowUpTask,
-    updates: Parameters<typeof api.frontdesk.updateFollowUp>[1]
-  ) => {
-    setSavingId(task.id);
-    try {
-      await api.frontdesk.updateFollowUp(task.id, updates);
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update follow-up");
-    } finally {
-      setSavingId("");
-    }
-  };
-
-  const toggleAutomation = async (enabled: boolean) => {
-    setSavingAutomation(true);
-    try {
-      const updatedClinic = await api.clinics.updateMyClinic({
-        follow_up_automation_enabled: enabled,
-      });
-      setClinic(updatedClinic);
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update automation settings");
-    } finally {
-      setSavingAutomation(false);
-    }
-  };
-
-  if (loading) return <LoadingState message="Loading follow-ups..." detail="Loading triage and queue" />;
-  if (error && opportunities.length === 0 && followUps.length === 0) {
-    return <ErrorState variant="calm" message={error} onRetry={loadData} />;
-  }
+  if (loading) return <LoadingState message="Loading opportunities..." detail="Gathering follow-up and recovery signals" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={() => void loadOpportunities()} />;
 
   return (
-    <div className="ds-workspace-main-area space-y-6">
+    <div className="workspace-grid">
       <PageHeader
-        showDivider
-        eyebrow={
-          <>
-            <AlertTriangle className="h-3.5 w-3.5" />
-            Follow-ups
-          </>
-        }
-        title="Follow-up & recovery"
-        description="Triage stalled requests before they go cold, then commit work to the queue. High urgency surfaces first in both columns."
+        eyebrow="Opportunities"
+        title="Recovery and follow-up"
+        description="A clearer surface for opportunities, open follow-up work, and threads that might otherwise slip through."
       />
 
-      {error && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
-          <p className="font-semibold">Partial update issue</p>
-          <p className="mt-0.5 text-amber-800/95">{error}</p>
-          <button
-            type="button"
-            onClick={() => void loadData()}
-            className="mt-2 text-xs font-semibold text-app-primary hover:underline"
-          >
-            Refresh data
-          </button>
-        </div>
-      )}
-
-      <WorkspaceBand>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <p className="ds-eyebrow">Work in flight</p>
-            <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
-              Queue = committed follow-ups. Triage = candidates still waiting for a decision.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: "Queued", value: followUps.length, tone: "bg-app-accent-wash/90 text-app-accent-dark border-teal-200" },
-              { label: "Triage", value: triageItems.length, tone: "bg-amber-50 text-amber-800 border-amber-200" },
-              { label: "High urgency", value: triageHigh.length, tone: "bg-rose-50 text-rose-800 border-rose-200" },
-            ].map((chip) => (
-              <div
-                key={chip.label}
-                className={`min-w-[6.5rem] rounded-lg border px-3 py-2 text-center ${chip.tone}`}
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-wide opacity-90">{chip.label}</p>
-                <p className="mt-0.5 text-lg font-semibold tabular-nums">{chip.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </WorkspaceBand>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
-        <div className="order-1 min-w-0 space-y-4 xl:order-0">
-          {/* Follow-up queue */}
-          <div className="workspace-main-frame p-4 sm:p-5">
-            <div className="mb-3 flex items-center justify-between gap-4 border-b border-app-border pb-3">
-              <div>
-                <p className="text-sm font-semibold text-app-text">Active recovery queue</p>
-                <p className="mt-0.5 text-xs text-app-text-muted">Committed follow-ups—high urgency sorted to the top.</p>
-              </div>
-              <span className="rounded-md bg-app-accent-wash/90 px-2 py-0.5 text-xs font-semibold text-app-accent-dark">{followUps.length} active</span>
-            </div>
-
-            {followUps.length === 0 ? (
-              <EmptyState
-                icon={<CheckCircle2 className="w-5 h-5 text-app-text-muted" />}
-                title="Queue is clear"
-                description="When you queue an item from triage below, it lands here with due context. An empty queue either means nothing is committed yet or the team has cleared recent work."
-              />
-            ) : (
-              <div className="space-y-2.5">
-                {sortedFollowUps.map((task) => {
-                  const href = followUpHref(task);
-                  const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-                  return (
-                    <div key={task.id} className={`rounded-lg p-3 ${recoveryCardClass(task.priority === "high")}`}>
-                      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(task.priority)}`}>
-                              {task.priority === "high" ? "High" : "Follow-up"}
-                            </span>
-                            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${taskStatusClass(task.status)}`}>
-                              {task.status === "snoozed" ? "Snoozed" : "Queued"}
-                            </span>
-                            {task.auto_generated && (
-                              <span className="rounded-md bg-app-surface-alt px-2 py-0.5 text-xs font-semibold text-app-text-muted">Auto</span>
-                            )}
-                            <span className="text-xs text-app-text-muted">{task.customer_name}</span>
-                          </div>
-                          <p className="text-sm font-semibold text-app-text">{task.title}</p>
-                          <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{task.detail}</p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs text-app-text-muted">
-                            {task.due_at && <span>Due {formatDateTime(task.due_at)}</span>}
-                            {task.note && <span>{task.note}</span>}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 flex-wrap gap-1.5">
-                          {href && (
-                            <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
-                              Open
-                            </Link>
-                          )}
-                          {task.lead_id && (
-                            <button
-                              onClick={() => updateFollowUp(task, { status: "completed", lead_status: "contacted" })}
-                              disabled={savingId === task.id}
-                              className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash disabled:opacity-50"
-                            >
-                              {savingId === task.id ? "..." : "Contacted"}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => updateFollowUp(task, { status: "snoozed", due_at: snoozeUntil })}
-                            disabled={savingId === task.id}
-                            className="rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50"
-                          >
-                            {savingId === task.id ? "..." : "Snooze"}
-                          </button>
-                          <button
-                            onClick={() => updateFollowUp(task, { status: "completed" })}
-                            disabled={savingId === task.id}
-                            className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
-                          >
-                            {savingId === task.id ? "..." : "Done"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="panel-surface rounded-4xl p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <TriangleAlert className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-bold text-app-text">Opportunities</span>
+            {opportunities.length > 0 && (
+              <span className="ml-auto rounded-full bg-app-accent-wash px-2.5 py-0.5 text-xs font-bold text-app-primary-deep">
+                {opportunities.length}
+              </span>
             )}
           </div>
-
-          {/* Triage */}
-          <div className="workspace-main-frame p-4 sm:p-5">
-            <div className="mb-2.5 flex items-center justify-between gap-3 border-b border-app-border pb-3">
-              <div>
-                <p className="text-sm font-semibold text-app-text">Needs triage</p>
-                <p className="mt-0.5 text-xs text-app-text-muted">Rules-based risk items—review high urgency first.</p>
-              </div>
-              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">{triageItems.length} pending</span>
-            </div>
-
-            {triageItems.length === 0 ? (
-              <EmptyState
-                icon={<AlertTriangle className="w-5 h-5 text-app-text-muted" />}
-                title="Nothing waiting in triage"
-                description="New recovery items appear when conversations stall or requests age. If inbox and leads are quiet, this staying empty is expected."
-              />
+          <div className="grid gap-2">
+            {opportunities.length > 0 ? (
+              opportunities.map((item) => (
+                <article key={item.id} className="row-card">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-app-text">{item.title}</p>
+                    <span className="shrink-0 rounded-full bg-app-accent-wash px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-primary-deep">
+                      {item.priority}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs text-app-text-muted">{item.detail}</p>
+                </article>
+              ))
             ) : (
-              <div className="space-y-4">
-                {triageHigh.length > 0 ? (
-                  <div>
-                    <p className="ds-eyebrow">High urgency</p>
-                    <div className="mt-2 space-y-2.5">
-                      {triageHigh.map((opportunity) => {
-                        const href = opportunityHref(opportunity);
-                        const busy = savingId === opportunity.id;
-                        return (
-                          <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(true)}`}>
-                            <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
-                              <div className="min-w-0 flex-1">
-                                <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
-                                    High
-                                  </span>
-                                  <span className="text-xs text-app-text-muted">{opportunity.customer_name}</span>
-                                  {opportunity.occurred_at && (
-                                    <span className="inline-flex items-center gap-1 text-xs text-app-text-muted">
-                                      <Clock className="w-3 h-3" />
-                                      <span>{timeAgo(opportunity.occurred_at)}</span>
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-sm font-semibold text-app-text">{opportunity.title}</p>
-                                <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{opportunity.detail}</p>
-                              </div>
-                              <div className="flex shrink-0 flex-wrap gap-1.5">
-                                {href && (
-                                  <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
-                                    Open
-                                  </Link>
-                                )}
-                                <button
-                                  onClick={() => queueFollowUp(opportunity, "open")}
-                                  disabled={busy}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                                >
-                                  {busy && <Loader2 className="w-3 h-3 animate-spin" />}
-                                  <span>Queue</span>
-                                </button>
-                                <button
-                                  onClick={() => queueFollowUp(opportunity, "completed")}
-                                  disabled={busy}
-                                  className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
-                                >
-                                  Handled
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
-
-                {triageRest.length > 0 ? (
-                  <div>
-                    <p className="ds-eyebrow">{triageHigh.length > 0 ? "Other triage" : "Triage"}</p>
-                    <div className="mt-2 space-y-2.5">
-                      {triageRest.map((opportunity) => {
-                        const href = opportunityHref(opportunity);
-                        const busy = savingId === opportunity.id;
-                        return (
-                          <div key={opportunity.id} className={`rounded-lg p-3 ${recoveryCardClass(false)}`}>
-                            <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start">
-                              <div className="min-w-0 flex-1">
-                                <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${priorityClass(opportunity.priority)}`}>
-                                    Follow-up
-                                  </span>
-                                  <span className="text-xs text-app-text-muted">{opportunity.customer_name}</span>
-                                  {opportunity.occurred_at && (
-                                    <span className="inline-flex items-center gap-1 text-xs text-app-text-muted">
-                                      <Clock className="w-3 h-3" />
-                                      <span>{timeAgo(opportunity.occurred_at)}</span>
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-sm font-semibold text-app-text">{opportunity.title}</p>
-                                <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{opportunity.detail}</p>
-                              </div>
-                              <div className="flex shrink-0 flex-wrap gap-1.5">
-                                {href && (
-                                  <Link href={href} className="rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt">
-                                    Open
-                                  </Link>
-                                )}
-                                <button
-                                  onClick={() => queueFollowUp(opportunity, "open")}
-                                  disabled={busy}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                                >
-                                  {busy && <Loader2 className="w-3 h-3 animate-spin" />}
-                                  <span>Queue</span>
-                                </button>
-                                <button
-                                  onClick={() => queueFollowUp(opportunity, "completed")}
-                                  disabled={busy}
-                                  className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
-                                >
-                                  Handled
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
+              <EmptyState
+                icon={<Sparkles className="h-6 w-6" />}
+                title="No open opportunities"
+                description="Opportunity recovery will appear here when the front desk has threads worth revisiting."
+              />
             )}
           </div>
-        </div>
+        </section>
 
-        {/* Right rail */}
-        <aside className="space-y-3 order-2 xl:order-0">
-          <div className="ds-card p-4 xl:sticky xl:top-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Automation</p>
-            <div className="mt-2 rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
-              <p className="text-xs font-semibold text-app-text">Auto follow-up</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">
-                Creates tasks from stalled conversations and aging requests.
-              </p>
-              <label className="mt-2 inline-flex items-center gap-2 text-xs text-app-text">
-                <input
-                  type="checkbox"
-                  checked={Boolean(clinic?.follow_up_automation_enabled)}
-                  onChange={(event) => toggleAutomation(event.target.checked)}
-                  disabled={savingAutomation}
-                  className="rounded border-app-border text-app-primary focus:ring-app-accent-wash"
-                />
-                {savingAutomation ? "Saving..." : "Enabled"}
-              </label>
-            </div>
-            <div className="mt-2 space-y-1.5">
-              <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
-                <p className="text-xs text-app-text-muted">Queued</p>
-                <p className="mt-0.5 text-lg font-bold text-app-text">{followUps.length}</p>
-              </div>
-              <div className="rounded-md border border-app-border bg-app-surface-alt px-2.5 py-2">
-                <p className="text-xs text-app-text-muted">Needs triage</p>
-                <p className="mt-0.5 text-lg font-bold text-app-text">{triageItems.length}</p>
-              </div>
-            </div>
+        <section className="panel-surface rounded-4xl p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-app-primary" />
+            <span className="text-sm font-bold text-app-text">Follow-up tasks</span>
+            {followUps.length > 0 && (
+              <span className="ml-auto rounded-full bg-app-accent-wash px-2.5 py-0.5 text-xs font-bold text-app-primary-deep">
+                {followUps.length}
+              </span>
+            )}
           </div>
-        </aside>
+          <div className="grid gap-2">
+            {followUps.length > 0 ? (
+              followUps.map((task) => (
+                <article key={task.id} className="row-card">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-app-text">{task.title}</p>
+                    <span className="shrink-0 rounded-full border border-app-border bg-white/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-app-text-muted">
+                      {task.status}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs text-app-text-muted">{task.detail || "No follow-up note provided."}</p>
+                </article>
+              ))
+            ) : (
+              <EmptyState
+                icon={<TriangleAlert className="h-6 w-6" />}
+                title="No follow-up tasks"
+                description="Open follow-up tasks will appear here as recovery workflows accumulate."
+              />
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

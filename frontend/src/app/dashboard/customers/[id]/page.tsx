@@ -1,9 +1,7 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { Mail, Phone, UserRound } from "lucide-react";
-
+import { Mail, MessageSquareMore, Phone, UserRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatDateTime, timeAgo } from "@/lib/utils";
 import { LoadingState } from "@/components/shared/LoadingState";
@@ -12,64 +10,11 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ChannelBadge, CommunicationEventStatusBadge, FrontdeskStatusBadge } from "@/components/shared/FrontdeskBadges";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
 import type { CommunicationEvent, CustomerProfileDetail } from "@/types";
-import { depositStatusClass as depositBadgeClass, depositStatusLabel as depositBadgeLabel } from "@/lib/format-helpers";
 import { ActionErrorBanner } from "@/components/shared/ActionErrorBanner";
-import { WorkspaceBand } from "@/components/shared/WorkspaceBand";
 import { DetailSection } from "@/components/shared/detail/DetailSection";
-import { OperationalCallout } from "@/components/shared/detail/OperationalCallout";
 import { DetailBackLink } from "@/components/shared/detail/DetailBackLink";
-import { customerOperationalHint } from "@/lib/operational-hints";
 
-function timelineHref(profile: CustomerProfileDetail, item: CustomerProfileDetail["timeline"][number]): string | null {
-  if (item.thread_id) {
-    return `/dashboard/inbox/${item.thread_id}`;
-  }
-  if (item.lead_id) {
-    return `/dashboard/leads/${item.lead_id}`;
-  }
-  if (item.waitlist_entry_id) {
-    return "/dashboard/operations";
-  }
-  if (item.follow_up_task_id) {
-    return "/dashboard/opportunities";
-  }
-  return profile.key ? `/dashboard/customers/${profile.key}` : null;
-}
-
-function lastOutcomeLabel(outcome: CustomerProfileDetail["last_outcome"]): string {
-  if (outcome === "booked") return "Booked";
-  if (outcome === "lost") return "Lost";
-  return "Open";
-}
-
-function lastOutcomeClass(outcome: CustomerProfileDetail["last_outcome"]): string {
-  if (outcome === "booked") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (outcome === "lost") return "bg-app-surface-alt text-app-text border-app-border";
-  return "bg-amber-50 text-amber-700 border-amber-200";
-}
-
-function smsStatusClass(profile: CustomerProfileDetail): string {
-  if (profile.latest_sms_pending_review) return "bg-blue-50 text-blue-700 border-blue-200";
-  if (profile.latest_sms_manual_takeover) return "bg-amber-50 text-amber-700 border-amber-200";
-  if (profile.latest_sms_ai_auto_reply_enabled) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  return "bg-app-surface-alt text-app-text border-app-border";
-}
-
-function smsStatusLabel(profile: CustomerProfileDetail): string {
-  if (profile.latest_sms_pending_review) return "Pending human review";
-  if (profile.latest_sms_manual_takeover) return "Staff handling SMS";
-  if (profile.latest_sms_ai_auto_reply_enabled) return "AI handling SMS";
-  return "SMS auto-reply off";
-}
-
-function smsStatusDescription(profile: CustomerProfileDetail): string {
-  if (profile.latest_sms_pending_review) return "The latest SMS needs staff review before Clinic AI sends anything.";
-  if (profile.latest_sms_manual_takeover) return "Staff is currently handling this thread.";
-  if (profile.latest_sms_ai_auto_reply_enabled) return "Clinic AI can still reply automatically on this thread.";
-  return "SMS auto-reply is currently unavailable on this thread.";
-}
-
-function TimelineItemBadge({ item }: Readonly<{ item: CustomerProfileDetail["timeline"][number] }>) {
+function timelineBadge(item: CustomerProfileDetail["timeline"][number]) {
   if (item.item_type === "communication_event" && item.status) {
     return <CommunicationEventStatusBadge status={item.status as CommunicationEvent["status"]} />;
   }
@@ -102,19 +47,20 @@ export default function CustomerProfilePage({
       const data = await api.frontdesk.getCustomer(id);
       setProfile(data);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load customer profile");
+      setLoadError(err instanceof Error ? err.message : "Failed to load customer profile.");
     } finally {
       setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    loadProfile();
+    void loadProfile();
   }, [loadProfile]);
 
   const sendSms = async () => {
     if (!profile?.phone || !smsBody.trim()) return;
     setSendingSms(true);
+    setActionError("");
     try {
       await api.frontdesk.sendSms({
         customer_name: profile.name,
@@ -125,303 +71,115 @@ export default function CustomerProfilePage({
       setSmsBody("");
       await loadProfile();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to send SMS");
+      setActionError(err instanceof Error ? err.message : "Failed to send SMS.");
     } finally {
       setSendingSms(false);
     }
   };
 
   if (loading) return <LoadingState message="Loading customer profile..." />;
-  if (loadError) return <ErrorState variant="calm" message={loadError} onRetry={loadProfile} />;
-  if (!profile) {
-    return <ErrorState title="Not found" message="This customer profile could not be found." />;
-  }
-
-  const latestInboundSms = profile.timeline.find(
-    (item) => item.item_type === "communication_event" && item.title === "Inbound SMS"
-  );
-
-  const op = customerOperationalHint(profile);
-  const calloutTone =
-    profile.latest_sms_pending_review || profile.follow_up_needed
-      ? "attention"
-      : profile.last_outcome === "booked"
-        ? "information"
-        : "neutral";
+  if (loadError) return <ErrorState variant="calm" message={loadError} onRetry={() => void loadProfile()} />;
+  if (!profile) return <ErrorState title="Not found" message="This customer profile could not be found." />;
 
   return (
-    <div className="ds-workspace-main-area space-y-6 min-w-0">
-      <DetailBackLink href="/dashboard/customers">Back to Customers</DetailBackLink>
+    <div className="workspace-grid">
+      <DetailBackLink href="/dashboard/customers">Back to customers</DetailBackLink>
 
       <PageHeader
-        eyebrow={
-          <>
-            <UserRound className="h-3.5 w-3.5" />
-            Customer profile
-          </>
-        }
-        title={profile.name}
-        description={
-          profile.last_interaction_at
-            ? `Last interaction ${timeAgo(profile.last_interaction_at)} · ${formatDateTime(profile.last_interaction_at)}`
-            : "No recent interaction timestamp on file."
-        }
-        showDivider
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${lastOutcomeClass(profile.last_outcome)}`}>
-              {lastOutcomeLabel(profile.last_outcome)}
-            </span>
-            {profile.follow_up_needed ? (
-              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                Follow-up
-              </span>
-            ) : null}
-          </div>
-        }
+        eyebrow="Customer detail"
+        title={profile.name || "Customer profile"}
+        description="A professional casework surface with recent conversations, requests, and timeline context."
       />
 
       <ActionErrorBanner message={actionError} onDismiss={() => setActionError("")} />
 
-      <WorkspaceBand>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,17.5rem)] lg:items-stretch">
-          <OperationalCallout title="Operational focus" headline={op.title} tone={calloutTone}>
-            {op.body}
-          </OperationalCallout>
-          <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
-            <p className="ds-eyebrow mb-3">Activity</p>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-xs text-app-text-muted">Conversations</dt>
-                <dd className="text-lg font-semibold text-app-text">{profile.conversation_count}</dd>
+      <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="workspace-grid">
+          <DetailSection label="Profile" description="High-level relationship context for the clinic team.">
+            <dl className="grid gap-4 text-sm">
+              <div className="flex items-start gap-3">
+                <UserRound className="mt-0.5 h-4 w-4 text-app-primary" />
+                <div>
+                  <dt className="font-semibold text-app-text-muted">Name</dt>
+                  <dd className="mt-1 text-app-text">{profile.name}</dd>
+                </div>
               </div>
-              <div>
-                <dt className="text-xs text-app-text-muted">Requests</dt>
-                <dd className="text-lg font-semibold text-app-text">{profile.lead_count}</dd>
+              <div className="flex items-start gap-3">
+                <Phone className="mt-0.5 h-4 w-4 text-app-primary" />
+                <div>
+                  <dt className="font-semibold text-app-text-muted">Phone</dt>
+                  <dd className="mt-1 text-app-text">{profile.phone || "Unavailable"}</dd>
+                </div>
               </div>
-              <div>
-                <dt className="text-xs text-app-text-muted">Interactions</dt>
-                <dd className="text-lg font-semibold text-app-text">{profile.total_interactions}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-app-text-muted">SMS</dt>
-                <dd className="text-xs font-semibold leading-snug text-app-text">
-                  {profile.latest_sms_thread_id ? smsStatusLabel(profile) : "No active thread"}
-                </dd>
+              <div className="flex items-start gap-3">
+                <Mail className="mt-0.5 h-4 w-4 text-app-primary" />
+                <div>
+                  <dt className="font-semibold text-app-text-muted">Email</dt>
+                  <dd className="mt-1 text-app-text">{profile.email || "Unavailable"}</dd>
+                </div>
               </div>
             </dl>
-          </div>
-        </div>
-      </WorkspaceBand>
+          </DetailSection>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
-        <div className="min-w-0 space-y-6">
-          <div className="app-card p-5 sm:p-6">
-            <DetailSection
-              label="Identity & reachability"
-              description="Primary contact points your team already has on file."
-            >
-              <div className="flex flex-wrap gap-2">
-                <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${lastOutcomeClass(profile.last_outcome)}`}>
-                  Outcome: {lastOutcomeLabel(profile.last_outcome)}
-                </span>
-                {profile.latest_sms_thread_id ? (
-                  <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${smsStatusClass(profile)}`}>
-                    {smsStatusLabel(profile)}
-                  </span>
-                ) : null}
-              </div>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
-                    <UserRound className="h-4 w-4 text-app-text-muted" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-app-text-muted">Name</p>
-                    <p className="text-sm font-medium text-app-text">{profile.name}</p>
-                  </div>
-                </div>
-                {profile.phone ? (
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
-                      <Phone className="h-4 w-4 text-app-text-muted" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-app-text-muted">Phone</p>
-                      <p className="text-sm font-medium text-app-text">{profile.phone}</p>
-                    </div>
-                  </div>
-                ) : null}
-                {profile.email ? (
-                  <div className="flex items-center gap-2.5 sm:col-span-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface-alt">
-                      <Mail className="h-4 w-4 text-app-text-muted" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-app-text-muted">Email</p>
-                      <p className="text-sm font-medium text-app-text">{profile.email}</p>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              {profile.latest_note ? (
-                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">Latest staff note</p>
-                  <p className="mt-1 text-sm text-amber-950">{profile.latest_note}</p>
-                </div>
-              ) : null}
-
-              {latestInboundSms ? (
-                <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-800">Latest inbound SMS</p>
-                  <p className="mt-1 text-sm text-blue-950">{latestInboundSms.detail}</p>
-                  {latestInboundSms.occurred_at ? (
-                    <p className="mt-1 text-xs text-blue-800/90">{formatDateTime(latestInboundSms.occurred_at)}</p>
-                  ) : null}
-                  {profile.latest_sms_thread_id ? (
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/dashboard/inbox/${profile.latest_sms_thread_id}`}
-                        className="text-sm font-semibold text-blue-800 hover:text-blue-900"
-                      >
-                        Open SMS thread
-                      </Link>
-                      <span className="text-xs text-blue-800/85">{smsStatusDescription(profile)}</span>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </DetailSection>
-          </div>
-
-          <div className="app-card p-5 sm:p-6">
-            <DetailSection label="Recent requests" description="Booking requests tied to this contact, newest first in the list.">
-              <div className="space-y-2">
-                {profile.recent_requests.map((lead) => (
-                  <Link
-                    key={lead.id}
-                    href={`/dashboard/leads/${lead.id}`}
-                    className="block rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-app-text">{lead.reason_for_visit || "Appointment request"}</p>
-                        <p className="mt-0.5 text-xs text-app-text-muted">{lead.preferred_datetime_text || "Preferred time not captured"}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-                        <LeadStatusBadge status={lead.status} />
-                        {lead.deposit_status && lead.deposit_status !== "not_required" ? (
-                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${depositBadgeClass(lead.deposit_status)}`}>
-                            {depositBadgeLabel(lead.deposit_status)}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </DetailSection>
-          </div>
-        </div>
-
-        <aside className="flex min-w-0 flex-col gap-6">
-          <div className="app-card p-5 sm:p-6">
-            <DetailSection label="Recent conversations" description="Latest threads across channels.">
-              <div className="space-y-2">
-                {profile.recent_conversations.map((conversation) => (
-                  <Link
-                    key={conversation.id}
-                    href={`/dashboard/inbox/${conversation.id}`}
-                    className="block rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt"
-                  >
-                    <div className="mb-1.5 flex items-center justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <ChannelBadge channel={conversation.channel} withIcon />
-                        <FrontdeskStatusBadge status={conversation.derived_status} />
-                      </div>
-                      <span className="text-xs text-app-text-muted">
-                        {conversation.last_message_at ? timeAgo(conversation.last_message_at) : "—"}
-                      </span>
-                    </div>
-                    <p className="text-sm leading-relaxed text-app-text">{conversation.last_message_preview}</p>
-                  </Link>
-                ))}
-              </div>
-            </DetailSection>
-          </div>
-
-          {profile.phone ? (
-            <div className="app-card p-5 sm:p-6">
-              <DetailSection
-                label="Send SMS"
-                description="Outbound text logged to this customer — delivery appears in the timeline."
-              >
-                <textarea
-                  rows={4}
-                  value={smsBody}
-                  onChange={(event) => setSmsBody(event.target.value)}
-                  className="app-input min-h-28 w-full resize-none"
-                  placeholder="Write your message"
-                />
-                <button
-                  type="button"
-                  onClick={sendSms}
-                  disabled={sendingSms || !smsBody.trim()}
-                  className="mt-3 rounded-lg bg-app-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                >
-                  {sendingSms ? "Sending…" : "Send SMS"}
-                </button>
-              </DetailSection>
-            </div>
-          ) : null}
-        </aside>
-      </div>
-
-      <div className="app-card p-5 sm:p-6">
-        <DetailSection
-          label="Full timeline"
-          description="Cross-channel activity: conversations, requests, SMS events, and operational touchpoints."
-        >
-          <div className="space-y-2">
-            {profile.timeline.map((item) => {
-              const href = timelineHref(profile, item);
-              const content = (
-                <div className="rounded-xl border border-app-border px-3.5 py-3 transition-colors hover:border-teal-200 hover:bg-app-surface-alt">
-                  <div className="mb-1.5 flex items-center justify-between gap-3">
+          <DetailSection label="Recent conversations">
+            <div className="grid gap-3">
+              {profile.recent_conversations.length > 0 ? (
+                profile.recent_conversations.map((conversation) => (
+                  <article key={conversation.id} className="rounded-[1.4rem] border border-app-border/70 bg-white/75 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      {item.channel ? <ChannelBadge channel={item.channel} withIcon /> : null}
-                      <TimelineItemBadge item={item} />
+                      <ChannelBadge channel={conversation.channel} withIcon />
+                      <FrontdeskStatusBadge status={conversation.derived_status} />
                     </div>
-                    <span className="text-xs text-app-text-muted">{item.occurred_at ? timeAgo(item.occurred_at) : "—"}</span>
-                  </div>
-                  <p className="text-sm font-medium text-app-text">{item.title}</p>
-                  <p className="mt-0.5 text-sm leading-relaxed text-app-text-muted">{item.detail}</p>
-                </div>
-              );
-
-              if (!href) {
-                return <div key={item.id}>{content}</div>;
-              }
-
-              return (
-                <Link key={item.id} href={href}>
-                  {content}
-                </Link>
-              );
-            })}
-          </div>
-
-          {profile.timeline.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-app-border bg-app-surface-alt px-4 py-3.5 text-sm text-app-text-muted">
-              No cross-channel activity has been recorded for this customer yet.
+                    <p className="mt-3 text-sm text-app-text-secondary">{conversation.last_message_preview}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-app-text-muted">
+                      {conversation.updated_at ? timeAgo(conversation.updated_at) : "Just now"}
+                    </p>
+                  </article>
+                ))
+              ) : (
+                <p className="text-sm text-app-text-muted">No recent conversations are available.</p>
+              )}
             </div>
-          ) : null}
+          </DetailSection>
+        </div>
 
-          {profile.last_interaction_at ? (
-            <p className="mt-4 text-xs text-app-text-muted">Most recent activity: {formatDateTime(profile.last_interaction_at)}</p>
-          ) : null}
-        </DetailSection>
+        <div className="workspace-grid">
+          <DetailSection label="SMS outreach" description="Send a manual follow-up when a patient needs a direct touch.">
+            <div className="grid gap-4">
+              <textarea
+                className="app-textarea"
+                value={smsBody}
+                onChange={(e) => setSmsBody(e.target.value)}
+                placeholder="Write a follow-up message"
+              />
+              <button type="button" className="app-btn app-btn-primary" onClick={() => void sendSms()} disabled={sendingSms || !profile.phone || !smsBody.trim()}>
+                <MessageSquareMore className="h-4 w-4" />
+                {sendingSms ? "Sending..." : "Send SMS"}
+              </button>
+            </div>
+          </DetailSection>
+
+          <DetailSection label="Timeline" description="Cross-workspace context for requests, conversations, and communications.">
+            <div className="grid gap-3">
+              {profile.timeline.length > 0 ? (
+                profile.timeline.map((item) => (
+                  <article key={item.id} className="rounded-[1.4rem] border border-app-border/70 bg-white/75 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-app-text">{item.title}</p>
+                      {timelineBadge(item)}
+                    </div>
+                    <p className="mt-2 text-sm text-app-text-secondary">{item.detail}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-app-text-muted">
+                      {item.occurred_at ? formatDateTime(item.occurred_at) : "No timestamp"}
+                    </p>
+                  </article>
+                ))
+              ) : (
+                <p className="text-sm text-app-text-muted">No timeline items are available yet.</p>
+              )}
+            </div>
+          </DetailSection>
+        </div>
       </div>
     </div>
   );

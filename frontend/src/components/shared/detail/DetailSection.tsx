@@ -9,7 +9,6 @@ type DetailSectionProps = {
   readonly className?: string;
 };
 
-/** Grouped block with platform section label and readable support copy. */
 export function DetailSection({
   label,
   description,
@@ -17,9 +16,11 @@ export function DetailSection({
   className = "",
 }: DetailSectionProps) {
   return (
-    <section className={`min-w-0 ${className}`.trim()}>
-      <h2 className="workspace-section-label mb-2">{label}</h2>
-      {description ? <p className="ds-help-text mb-3 max-w-2xl">{description}</p> : null}
+    <section className={`panel-surface rounded-[1.75rem] p-5 ${className}`.trim()}>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold tracking-[-0.03em] text-app-text">{label}</h2>
+        {description ? <p className="mt-2 text-sm leading-7 text-app-text-muted">{description}</p> : null}
+      </div>
       {children}
     </section>
   );

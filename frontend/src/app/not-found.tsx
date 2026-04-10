@@ -1,23 +1,31 @@
 import Link from "next/link";
-import { Bot } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
-          <Bot className="w-8 h-8 text-slate-400" />
+    <div className="flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="panel-surface w-full max-w-xl rounded-[2rem] p-10 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-app-primary/12 text-app-primary">
+          <Compass className="h-6 w-6" />
         </div>
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
-        <p className="text-lg text-slate-500 mb-6">
-          The page you&apos;re looking for doesn&apos;t exist.
+        <p className="mt-6 text-sm font-semibold uppercase tracking-[0.24em] text-app-text-muted">
+          Page not found
         </p>
-        <Link
-          href="/"
-          className="inline-flex px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-        >
-          Back to Home
-        </Link>
+        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-app-text">
+          This route no longer exists in the old layout.
+        </h1>
+        <p className="mt-4 text-base leading-7 text-app-text-secondary">
+          The frontend is on a new foundation. Use the main routes below to continue.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/" className="app-btn app-btn-secondary">
+            <ArrowLeft className="h-4 w-4" />
+            Back home
+          </Link>
+          <Link href="/dashboard" className="app-btn app-btn-primary">
+            Open dashboard
+          </Link>
+        </div>
       </div>
     </div>
   );

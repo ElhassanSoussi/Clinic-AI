@@ -1,179 +1,27 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  ArrowRight,
-  BrainCircuit,
-  CalendarDays,
-  CreditCard,
-  MessageSquareMore,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { CheckCircle2, HelpCircle } from "lucide-react";
 import { PublicNav } from "@/components/marketing/PublicNav";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-export const metadata: Metadata = {
-  title: "FAQ — Clinic AI",
-  description:
-    "Frequently asked questions about Clinic AI: setup, AI behavior, staff control, patient experience, booking, and billing.",
-};
-
-type FaqItem = { question: string; answer: string };
-type FaqCategory = { icon: React.ComponentType<{ className?: string }>; label: string; items: FaqItem[] };
-
-const categories: FaqCategory[] = [
+const faqs = [
   {
-    icon: Settings,
-    label: "Setup & onboarding",
-    items: [
-      {
-        question: "What happens right after I create an account?",
-        answer:
-          "You sign in to the real dashboard — the same routes trial and paid workspaces use. Guided onboarding starts immediately: clinic profile, services, hours, and FAQs. You can open Inbox, Leads, Appointments, AI Training, and Settings right away; lists and previews fill in as you save configuration. Nothing is a separate “marketing demo” build.",
-      },
-      {
-        question: "How long does setup take?",
-        answer:
-          "Most clinics finish initial setup in under 15 minutes. You enter your clinic details, add your services and business hours, write a few common FAQs, and test the assistant with a live preview — all before going live. The guided onboarding flow walks you through each step.",
-      },
-      {
-        question: "What information does the assistant need to work?",
-        answer:
-          "The assistant needs your clinic name, services with basic descriptions, business hours, and a short FAQ list to start. The more context you add, the more accurately it can answer patient questions. You can start minimal and add detail over time.",
-      },
-      {
-        question: "Can I test the assistant before going live with patients?",
-        answer:
-          "Yes. During and after onboarding, you have access to a live assistant preview that behaves exactly as it would for patients. You can test any question and see how the assistant responds based on your configured information before adding it to your website or SMS.",
-      },
-      {
-        question: "How do I add the assistant to my website?",
-        answer:
-          "After setup, you will receive an embed snippet — a small block of code — that you or a developer can paste into your website. The chat widget appears as a floating button. No external platform or plugin required.",
-      },
-    ],
+    question: "How is Clinic AI different from a simple website chatbot?",
+    answer:
+      "The product is built around the clinic workspace, not just the patient chat. Inbox, leads, appointments, activity, settings, and training all share one operating layer.",
   },
   {
-    icon: BrainCircuit,
-    label: "AI behavior",
-    items: [
-      {
-        question: "What does the assistant do when it does not know the answer?",
-        answer:
-          "It holds the reply and flags the thread for staff review. The assistant does not guess, improvise, or generate a response it is not confident about. Your team sees the conversation and decides how to respond.",
-      },
-      {
-        question: "Can the assistant provide medical advice?",
-        answer:
-          "No. Clinic AI is an administrative front-desk tool. It handles appointment requests, service questions, business hours, and general clinic information — not clinical advice, diagnoses, or treatment recommendations. Conversations that require clinical judgment are routed to staff.",
-      },
-      {
-        question: "Where does the assistant get its information?",
-        answer:
-          "Exclusively from what you configure in your clinic workspace. The assistant does not draw on general internet knowledge, other clinics' setups, or any external sources. Responses are grounded only in your services, hours, FAQs, and internal notes.",
-      },
-      {
-        question: "Can patients interact in languages other than English?",
-        answer:
-          "The assistant can respond to common conversational inputs in multiple languages, but the quality and accuracy of responses depends on the language of your clinic configuration. If your patients primarily speak another language, you should configure your clinic information in that language.",
-      },
-    ],
+    question: "Can our staff take over conversations?",
+    answer:
+      "Yes. The workspace is designed around visibility and control, so teams can review, take over, or follow up from the same environment.",
   },
   {
-    icon: Users,
-    label: "Staff control",
-    items: [
-      {
-        question: "Can staff review and override AI responses?",
-        answer:
-          "Yes. Every conversation is visible in the operator inbox. Staff can review any thread, read the full message history, edit a suggested reply before it sends, take over a conversation entirely, or pause AI replies for any specific thread. Nothing is hidden from your team.",
-      },
-      {
-        question: "How does staff takeover work?",
-        answer:
-          "When a staff member opens a thread and switches to takeover mode, the AI stops sending automated replies for that conversation. The staff member handles the exchange directly. When resolved, AI handling can be re-enabled for that thread.",
-      },
-      {
-        question: "Can I pause the assistant entirely?",
-        answer:
-          "Yes. You can pause AI replies for an individual thread, for all new conversations, or disable the assistant entirely from your workspace settings. Pausing and resuming does not require a support ticket — it is self-serve.",
-      },
-      {
-        question: "How many staff members can access the workspace?",
-        answer:
-          "Current plans support a single workspace login per clinic account. Multi-user access with role-based permissions is on the product roadmap. If this is a requirement for your clinic, contact us to discuss your specific needs.",
-      },
-    ],
+    question: "What do we configure before going live?",
+    answer:
+      "Core clinic information, services, hours, FAQs, notifications, and any workflow settings the assistant should rely on.",
   },
   {
-    icon: MessageSquareMore,
-    label: "Patient experience",
-    items: [
-      {
-        question: "Do patients know they are talking to an AI assistant?",
-        answer:
-          "You decide. You control the assistant's name, the greeting message, and how handoff to a real person is presented. Many clinics choose a transparent disclosure — e.g., 'You are chatting with our automated assistant' — while others prefer a more neutral presentation. Transparent communication is the default behavior we recommend.",
-      },
-      {
-        question: "What happens if a patient has a sensitive or urgent issue?",
-        answer:
-          "The assistant is designed to recognize when a conversation should not continue automatically. Sensitive topics, clinical concerns, and anything that falls outside the assistant's configured scope are flagged for immediate staff review. We always recommend that your contact information is visible to patients if they need direct human assistance.",
-      },
-      {
-        question: "Is patient data visible to other clinics?",
-        answer:
-          "No. Patient conversations, contact details, and appointment records in your workspace are completely separate from other clinics. Your data is not shared, cross-referenced, or visible to anyone outside your account.",
-      },
-    ],
-  },
-  {
-    icon: CalendarDays,
-    label: "Booking & follow-up",
-    items: [
-      {
-        question: "Does Clinic AI integrate with my scheduling system?",
-        answer:
-          "Clinic AI manages the communication and capture side of the booking workflow — taking requests, collecting patient details, and tracking appointment status. Direct calendar integration with external booking systems is not available in the current version. Appointment requests are tracked in the Clinic AI workspace and actioned by your staff.",
-      },
-      {
-        question: "How do appointment reminders work?",
-        answer:
-          "The Professional and Premium plans include reminder readiness tracking in the appointments workspace. Your team can see which upcoming appointments have had reminder communication sent and which have not, making it easy to manage follow-up without a separate tool.",
-      },
-      {
-        question: "What is the follow-up visibility feature?",
-        answer:
-          "The follow-up queue surfaces patient conversations that have gone quiet — requests that came in but were not progressed, missed callbacks, or booking discussions that stalled. Your team can see these from the dashboard and act before the patient moves on.",
-      },
-    ],
-  },
-  {
-    icon: CreditCard,
-    label: "Billing & account",
-    items: [
-      {
-        question: "How does billing work?",
-        answer:
-          "Paid plans are billed monthly through Stripe. You can upgrade, downgrade, or cancel at any time from your billing settings. Cancellation takes effect at the end of your current billing period — you retain access until then.",
-      },
-      {
-        question: "What happens at the end of my trial?",
-        answer:
-          "Your workspace and all configured data remain intact. You can upgrade to a paid plan at any time to continue operations. If you choose not to upgrade, your workspace moves to a read-only state but your data is not immediately deleted.",
-      },
-      {
-        question: "Are there refunds?",
-        answer:
-          "If you cancel a paid plan within 7 days of your initial charge, contact us and we will process a full refund. After that period, refunds are handled case by case. We do not charge for months you have fully cancelled.",
-      },
-      {
-        question: "Do you offer custom or enterprise pricing?",
-        answer:
-          "For multi-location clinics or organizations with specific requirements, contact us through the demo booking page. We can discuss custom arrangements that fit your scale.",
-      },
-    ],
+    question: "Do we have to change our back-end systems?",
+    answer:
+      "No. This reset preserves the existing routes, auth behavior, and product contracts while rebuilding the frontend presentation layer.",
   },
 ];
 
@@ -181,103 +29,29 @@ export default function FaqPage() {
   return (
     <div className="public-marketing-root">
       <PublicNav />
-
-      {/* Hero */}
-      <section className="marketing-hero marketing-surface-white border-b border-slate-200">
-        <div className="marketing-container">
-          <div className="max-w-3xl">
-            <div className="marketing-kicker mb-6">
-              <ShieldCheck className="h-3 w-3" />
-              Frequently asked questions
-            </div>
-            <h1 className="marketing-h1">
-              Clear answers about how Clinic AI works.
-            </h1>
-            <p className="marketing-lead mt-6 max-w-2xl">
-              Questions about setup, AI behavior, staff control, patient experience, and billing — answered directly, without marketing fluff.
-            </p>
+      <main className="marketing-container py-16 lg:py-20">
+        <div className="max-w-3xl">
+          <div className="marketing-kicker">
+            <HelpCircle className="h-3.5 w-3.5" />
+            FAQ
           </div>
+          <h1 className="mt-6 text-[clamp(2.4rem,3vw,4rem)] font-bold tracking-[-0.055em] text-app-text">
+            Practical answers about launch, workflow, and team control.
+          </h1>
         </div>
-      </section>
 
-      {/* Category jump nav */}
-      <section className="marketing-section-tight marketing-surface-slate">
-        <div className="marketing-container">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <a
-                key={cat.label}
-                href={`#${cat.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/90 bg-app-surface px-4 py-2.5 text-[0.9375rem] font-medium text-app-text-muted shadow-sm transition-colors hover:border-slate-300 hover:text-app-text"
-              >
-                <cat.icon className="h-3.5 w-3.5 text-app-primary" />
-                {cat.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <main>
-        <div className="marketing-container">
-
-          <div className="divide-y divide-app-border">
-            {categories.map((cat) => (
-              <section
-                key={cat.label}
-                id={cat.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
-                className="marketing-section"
-              >
-                <div className="mb-10 flex items-center gap-4">
-                  <div className="marketing-icon-wrap h-12 w-12">
-                    <cat.icon className="h-6 w-6" />
-                  </div>
-                  <h2 className="marketing-h3 text-2xl font-bold sm:text-[1.75rem]">{cat.label}</h2>
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  {cat.items.map((item) => (
-                    <div
-                      key={item.question}
-                      className="rounded-2xl border border-slate-200/90 bg-app-surface p-7 shadow-sm sm:p-8"
-                    >
-                      <h3 className="text-[1.0625rem] font-semibold text-app-text">{item.question}</h3>
-                      <p className="marketing-body mt-3">{item.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-
-          {/* Still have questions */}
-          <section className="pb-16 sm:pb-24">
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 px-8 py-12 shadow-md sm:px-12 sm:py-14 lg:px-14">
-              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
-                <div>
-                  <h2 className="marketing-h2 text-[clamp(1.5rem,1.5vw+1rem,2.25rem)]">
-                    Still have a question?
-                  </h2>
-                  <p className="marketing-lead mt-4 max-w-xl text-lg!">
-                    If you didn&apos;t find what you were looking for, book a short demo and we&apos;ll walk you through how Clinic AI works for your specific clinic type.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
-                  <Link href="/contact" className="marketing-cta-primary justify-center!">
-                    Book a demo
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link href="/register" className="marketing-cta-secondary justify-center!">
-                    <Sparkles className="h-4 w-4 text-app-primary" />
-                    Start free trial
-                  </Link>
-                </div>
+        <div className="mt-10 grid gap-4">
+          {faqs.map((item) => (
+            <article key={item.question} className="panel-surface rounded-4xl p-6">
+              <div className="inline-flex items-center gap-2 text-sm font-bold text-app-text">
+                <CheckCircle2 className="h-4 w-4 text-app-primary" />
+                {item.question}
               </div>
-            </div>
-          </section>
-
+              <p className="mt-3 text-sm leading-7 text-app-text-muted">{item.answer}</p>
+            </article>
+          ))}
         </div>
       </main>
-
       <PublicFooter />
     </div>
   );

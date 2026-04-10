@@ -3,12 +3,9 @@
 import type { ReactNode } from "react";
 
 type OperationalCalloutProps = {
-  /** Small caps label (e.g. “Operational focus”). */
   readonly title: string;
-  /** Optional bold line under the label. */
   readonly headline?: string;
   readonly children: ReactNode;
-  /** neutral = slate, attention = amber, information = sky */
   readonly tone?: "neutral" | "attention" | "information";
   readonly className?: string;
 };
@@ -27,14 +24,10 @@ export function OperationalCallout({
   className = "",
 }: OperationalCalloutProps) {
   return (
-    <div
-      className={`min-w-0 rounded-xl border px-4 py-4 sm:px-5 sm:py-5 ${toneClass[tone]} ${className}`.trim()}
-    >
-      <p className="workspace-section-label">{title}</p>
-      {headline ? (
-        <p className="mt-2 text-base font-semibold leading-snug text-[var(--color-app-text)]">{headline}</p>
-      ) : null}
-      <div className="ds-help-text mt-2">{children}</div>
-    </div>
+    <aside className={`rounded-[1.5rem] border p-4 ${toneClass[tone]} ${className}`.trim()}>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-app-text-muted">{title}</p>
+      {headline ? <p className="mt-2 text-base font-semibold text-app-text">{headline}</p> : null}
+      <div className="mt-2 text-sm leading-7 text-app-text-secondary">{children}</div>
+    </aside>
   );
 }

@@ -7,16 +7,10 @@ type PageHeaderProps = {
   title: string;
   description?: string;
   actions?: ReactNode;
-  /** Extra classes on the header wrapper */
   className?: string;
-  /** Subtle separator under the title block for page→workspace transition */
   showDivider?: boolean;
 };
 
-/**
- * Standard page chrome for authenticated (and similar) routes.
- * Uses app-page-* tokens from globals.css for platform-wide hierarchy.
- */
 export function PageHeader({
   eyebrow,
   title,
@@ -26,21 +20,22 @@ export function PageHeader({
   showDivider = false,
 }: Readonly<PageHeaderProps>) {
   return (
-    <header
-      className={`app-page-header page-header-shell ${showDivider ? "border-b border-[var(--color-app-border)]/80 pb-8" : ""} ${className}`.trim()}
-    >
+    <header className={`panel-surface rounded-[1.9rem] px-6 py-6 ${className}`.trim()}>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
           {eyebrow ? (
-            <div className="app-page-kicker mb-3 inline-flex flex-wrap items-center gap-2">{eyebrow}</div>
+            <div className="panel-section-head mb-3">{eyebrow}</div>
           ) : null}
-          <h1 className="app-page-title max-w-4xl break-words">{title}</h1>
+          <h1 className="text-[clamp(1.85rem,2.1vw,2.75rem)] font-bold tracking-[-0.055em] text-app-text">
+            {title}
+          </h1>
           {description ? (
-            <p className="app-page-description mt-4 break-words">{description}</p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-app-text-secondary">{description}</p>
           ) : null}
         </div>
-        {actions ? <div className="flex flex-wrap items-center gap-3 lg:shrink-0 lg:justify-end lg:self-start">{actions}</div> : null}
+        {actions ? <div className="flex shrink-0 flex-wrap gap-3">{actions}</div> : null}
       </div>
+      {showDivider ? <div className="mt-5 border-t border-app-border/70" /> : null}
     </header>
   );
 }

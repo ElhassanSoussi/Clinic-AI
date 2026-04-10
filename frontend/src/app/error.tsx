@@ -3,7 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useEffect } from "react";
-import { Bot } from "lucide-react";
+import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 
 export default function Error({
   error,
@@ -21,30 +21,28 @@ export default function Error({
   }
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4 py-16 bg-slate-50">
-      <div className="text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50">
-          <Bot className="h-8 w-8 text-red-400" aria-hidden />
+    <div className="flex min-h-[60vh] items-center justify-center px-6 py-16">
+      <div className="panel-surface w-full max-w-2xl rounded-[2rem] p-10">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+          <AlertTriangle className="h-6 w-6" />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-slate-900">
+        <p className="mt-6 text-sm font-semibold uppercase tracking-[0.22em] text-app-text-muted">
           Something went wrong
-        </h1>
-        <p className="mx-auto mb-6 max-w-sm text-slate-500">
-          An unexpected error occurred. Please try again.
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={reset}
-            className="inline-flex rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
-          >
-            Try again
+        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-app-text">
+          This view couldn’t finish loading.
+        </h1>
+        <p className="mt-4 max-w-xl text-base leading-7 text-app-text-secondary">
+          The product logic is still intact, but this route hit an error while rendering. Try the view again or move to a nearby workspace page.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <button type="button" className="app-btn app-btn-primary" onClick={() => reset()}>
+            <RefreshCw className="h-4 w-4" />
+            Retry view
           </button>
-          <Link
-            href="/"
-            className="inline-flex rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            Back to home
+          <Link href="/dashboard" className="app-btn app-btn-secondary">
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
           </Link>
         </div>
       </div>

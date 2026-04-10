@@ -11,14 +11,9 @@ function settingsHref(section: string): string {
 
 export type ActivationSetupBandProps = {
   clinic: Clinic;
-  /** From dashboard analytics; when live and zero, nudge first traffic */
   conversationsTotal?: number;
 };
 
-/**
- * Contextual activation banner driven only by `computeSystemStatus` + real counts.
- * Shown on the dashboard (not a fake checklist — items mirror Settings sections).
- */
 export function ActivationSetupBand({
   clinic,
   conversationsTotal = 0,
@@ -30,75 +25,31 @@ export function ActivationSetupBand({
   if (status === "LIVE") {
     if (conversationsTotal > 0) return null;
     return (
-      <div className="rounded-xl border border-teal-100 bg-[#F0FDFA]/80 px-4 py-3.5" role="status">
-        <div className="flex flex-wrap items-start gap-3">
-          <Rocket className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]" aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-[#0F172A]">You&apos;re live — waiting on first patient traffic</p>
-            <p className="mt-1 text-sm leading-relaxed text-[#475569]">
-              New messages land in{" "}
-              <Link href="/dashboard/inbox" className="font-semibold text-[#115E59] hover:underline">
-                Inbox
-              </Link>
-              ; captured booking requests in{" "}
-              <Link href="/dashboard/leads" className="font-semibold text-[#115E59] hover:underline">
-                Leads
-              </Link>
-              . Send a test from your public chat page to confirm the loop end-to-end.
-            </p>
-            {clinic.slug ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <a
-                  href={`/chat/${clinic.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                >
-                  Open patient chat
-                  <ArrowRight className="h-3 w-3" />
-                </a>
-              </div>
-            ) : null}
-          </div>
-        </div>
+      <div className="panel-surface rounded-[1.9rem] p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-app-text-muted">Activation</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-app-text">The assistant is live. Time to create first traffic.</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-app-text-secondary">
+          Share the widget or direct chat link with your team and test a first patient journey. No conversation volume yet is normal right after launch.
+        </p>
       </div>
     );
   }
 
   if (status === "READY") {
     return (
-      <div
-        className={`rounded-xl border px-4 py-3.5 ${cfg.border} ${cfg.bg}`}
-        role="status"
-      >
-        <div className="flex flex-wrap items-start gap-3">
-          <ClipboardList className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.color}`} aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className={`text-sm font-semibold ${cfg.color}`}>Setup checklist complete — ready to go live</p>
-            <p className="mt-1 text-sm leading-relaxed text-[#475569]">
-              Preview your public chat, then use <span className="font-semibold text-[#0F172A]">Go live</span> in the top
-              bar when you want patients to see an active assistant. Until then, the chat page stays in a clear not-live
-              state.
+      <div className="panel-surface rounded-[1.9rem] p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-app-text-muted">Ready to launch</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-app-text">Configuration is complete. Publish when the clinic is ready.</h2>
+            <p className="mt-3 text-sm leading-7 text-app-text-secondary">
+              Every required setup section is complete. Review branding, preview chat, and go live from Settings.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {clinic.slug ? (
-                <a
-                  href={`/chat/${clinic.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-                >
-                  Preview patient chat
-                </a>
-              ) : null}
-              <Link
-                href="/dashboard/settings"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-              >
-                Review settings
-              </Link>
-            </div>
           </div>
+          <Link href="/dashboard/settings?section=embed" className="app-btn app-btn-primary">
+            <Rocket className="h-4 w-4" />
+            Review go-live controls
+          </Link>
         </div>
       </div>
     );
@@ -108,45 +59,35 @@ export function ActivationSetupBand({
   const section = firstIncomplete?.drawerSection ?? "clinic-info";
 
   return (
-    <div
-      className={`rounded-xl border px-4 py-3.5 ${cfg.border} ${cfg.bg}`}
-      role="status"
-    >
-      <div className="flex flex-wrap items-start gap-3">
-        <ClipboardList className={`mt-0.5 h-4 w-4 shrink-0 ${cfg.color}`} aria-hidden />
-        <div className="min-w-0 flex-1">
-          <p className={`text-sm font-semibold ${cfg.color}`}>
-            {status === "NOT_READY" ? "Finish setup to unlock go-live" : "Almost there — finish remaining setup"}
+    <div className="panel-surface rounded-[1.9rem] p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${cfg.bg} ${cfg.color} ${cfg.border}`}>
+            <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+            {cfg.label}
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-[#475569]">
-            <span className="font-medium tabular-nums text-[#0F172A]">{completedCount}</span>
-            <span className="text-[#64748B]">
-              {" "}
-              / {totalCount} checklist items complete in Settings (matches clinic info, services, spreadsheet,
-              scheduling, embed).
-            </span>
-            {blockers.length > 0 ? (
-              <>
-                {" "}
-                <span className="font-medium text-[#0F172A]">Next:</span> {blockers.join("; ")}.
-              </>
-            ) : null}
+          <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-app-text">
+            {completedCount}/{totalCount} setup areas complete
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-app-text-secondary">
+            Complete the next section to move the clinic closer to a stable launch.
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link
-              href={settingsHref(section)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#115E59]"
-            >
-              Open Settings — {firstIncomplete?.label ?? "Clinic"}
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-            <Link
-              href="/dashboard/training"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#475569] transition-colors hover:bg-[#F8FAFC]"
-            >
-              AI Training
-            </Link>
-          </div>
+          {blockers.length > 0 ? (
+            <ul className="mt-4 grid gap-2 text-sm text-app-text-muted">
+              {blockers.map((item) => (
+                <li key={item} className="inline-flex items-center gap-2">
+                  <ClipboardList className="h-4 w-4 text-app-primary" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href={settingsHref(section)} className="app-btn app-btn-primary">
+            <ArrowRight className="h-4 w-4" />
+            Finish next section
+          </Link>
         </div>
       </div>
     </div>

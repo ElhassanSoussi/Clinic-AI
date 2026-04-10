@@ -1,19 +1,12 @@
 import type { ReactNode } from "react";
 
 type MarketingProductWindowProps = {
-  /** Real app route (e.g. /dashboard/inbox) — shown in the chrome, not a fake domain. */
   pathLabel: string;
   children: ReactNode;
-  /** Optional caption below the frame for proof / illustration context. */
   caption?: string;
-  /** Optional class on the root figure (e.g. grid column placement). */
   className?: string;
 };
 
-/**
- * Browser-style frame around marketing previews so reads as “in-app” without
- * implying a literal screenshot.
- */
 export function MarketingProductWindow({
   pathLabel,
   children,
@@ -21,26 +14,24 @@ export function MarketingProductWindow({
   className = "",
 }: MarketingProductWindowProps) {
   return (
-    <figure className={`m-0 ${className}`.trim()}>
-      <div className="marketing-showcase-card p-3 sm:p-4">
-        <div className="overflow-hidden rounded-[1.85rem] border border-slate-300/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(242,247,250,0.92)_100%)] shadow-[0_36px_70px_-40px_rgba(15,23,42,0.34)] ring-1 ring-black/5">
-          <div className="flex items-center gap-3 border-b border-slate-300/60 bg-slate-100/95 px-3 py-3 sm:px-4">
-            <div className="flex gap-1.5" aria-hidden>
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-400/90" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-400/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-400/50" />
-            </div>
-            <div className="min-w-0 flex-1 rounded-xl border border-slate-300/70 bg-white px-3 py-2 text-center shadow-inner">
-              <span className="font-mono text-[0.6875rem] font-medium tracking-tight text-[#475569] sm:text-xs">
-                {pathLabel}
-              </span>
-            </div>
+    <figure className={`panel-surface rounded-4xl p-3 ${className}`.trim()}>
+      <div className="rounded-[1.65rem] border border-app-border/70 bg-[#f8fbfc] p-3 shadow-inner">
+        <div className="mb-3 flex items-center gap-3 rounded-[1.15rem] border border-app-border/70 bg-white/92 px-4 py-3">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-rose-300" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
           </div>
-          <div className="bg-[var(--color-app-bg)]">{children}</div>
+          <div className="rounded-full bg-app-surface-alt px-3 py-1 text-xs font-semibold text-app-text-muted">
+            {pathLabel}
+          </div>
+        </div>
+        <div className="rounded-[1.35rem] border border-app-border/70 bg-white/86 p-4">
+          {children}
         </div>
       </div>
       {caption ? (
-        <figcaption className="mt-3 text-[0.8125rem] leading-relaxed text-slate-500">{caption}</figcaption>
+        <figcaption className="px-2 pt-4 text-sm leading-7 text-app-text-muted">{caption}</figcaption>
       ) : null}
     </figure>
   );

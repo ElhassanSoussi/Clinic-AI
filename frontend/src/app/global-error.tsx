@@ -1,7 +1,9 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
+import Link from "next/link";
 import { useEffect } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -17,17 +19,30 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "system-ui, sans-serif" }}>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 600, color: "#1e293b" }}>Something went wrong</h2>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "#64748b" }}>
-            An unexpected error occurred. Our team has been notified.
-          </p>
-          <button
-            onClick={reset}
-            style={{ marginTop: "1rem", padding: "0.5rem 1.5rem", fontSize: "0.875rem", fontWeight: 500, color: "#fff", backgroundColor: "#0d9488", border: "none", borderRadius: "0.5rem", cursor: "pointer" }}
-          >
-            Try again
-          </button>
+        <div className="flex min-h-screen items-center justify-center px-6 py-16">
+          <div className="panel-surface w-full max-w-xl rounded-[2rem] p-10 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <p className="mt-6 text-sm font-semibold uppercase tracking-[0.24em] text-app-text-muted">
+              Global error
+            </p>
+            <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-app-text">
+              The app shell needs a reset.
+            </h1>
+            <p className="mt-4 text-base leading-7 text-app-text-secondary">
+              We captured the failure. Try reloading the route, or head back to a stable entry point.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <button type="button" className="app-btn app-btn-primary" onClick={() => reset()}>
+                <RefreshCw className="h-4 w-4" />
+                Try again
+              </button>
+              <Link href="/" className="app-btn app-btn-secondary">
+                Home
+              </Link>
+            </div>
+          </div>
         </div>
       </body>
     </html>

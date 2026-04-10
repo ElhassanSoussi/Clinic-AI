@@ -6,7 +6,6 @@ interface ErrorStateProps {
   readonly title?: string;
   readonly message?: string;
   readonly onRetry?: () => void;
-  /** Calmer styling for recoverable / network issues — default uses stronger alert styling. */
   readonly variant?: "default" | "calm";
 }
 
@@ -21,25 +20,16 @@ export function ErrorState({
     title ?? (calm ? "Couldn’t load this view" : "Something went wrong");
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-      <div
-        className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl border ${calm ? "border-amber-100 bg-amber-50" : "border-red-100 bg-red-50"
-          }`}
-      >
-        {calm ? (
-          <AlertCircle className="h-5 w-5 text-amber-700" />
-        ) : (
-          <AlertTriangle className="h-5 w-5 text-[#DC2626]" />
-        )}
-      </div>
-      <h3 className="text-base font-semibold text-[var(--color-app-text)]">{resolvedTitle}</h3>
-      <p className="ds-help-text mt-3 max-w-md">{message}</p>
+    <div className={`panel-surface flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] px-6 py-10 text-center ${calm ? "" : "ring-1 ring-rose-100"}`.trim()}>
+      {calm ? (
+        <AlertCircle className="h-8 w-8 text-app-text-muted" />
+      ) : (
+        <AlertTriangle className="h-8 w-8 text-rose-500" />
+      )}
+      <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-app-text">{resolvedTitle}</h2>
+      <p className="mt-3 max-w-xl text-sm leading-7 text-app-text-secondary">{message}</p>
       {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-6 rounded-xl bg-[#0F766E] px-5 py-2.5 text-[0.9375rem] font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-[#115E59]"
-        >
+        <button type="button" onClick={onRetry} className="app-btn app-btn-secondary mt-6">
           Try again
         </button>
       ) : null}

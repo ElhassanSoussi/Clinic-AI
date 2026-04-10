@@ -8,7 +8,6 @@ import {
   PhoneMissed,
   Smartphone,
 } from "lucide-react";
-
 import type { ChannelType, CommunicationEvent, InboxConversation } from "@/types";
 
 const STATUS_CONFIG = {
@@ -137,7 +136,7 @@ export function FrontdeskStatusBadge({
 }>) {
   const config = STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full border ${config.className}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
       {config.label}
     </span>
   );
@@ -150,7 +149,7 @@ export function CommunicationEventStatusBadge({
 }>) {
   const config = EVENT_STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full border ${config.className}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
       {config.label}
     </span>
   );
@@ -163,7 +162,7 @@ export function ChannelConnectionStatusBadge({
 }>) {
   const config = CONNECTION_STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full border ${config.className}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
       {config.label}
     </span>
   );
@@ -180,8 +179,8 @@ export function ChannelBadge({
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border ${config.className}`}>
-      {withIcon && <Icon className="w-3.5 h-3.5" />}
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}>
+      {withIcon ? <Icon className="h-3.5 w-3.5" /> : null}
       {config.label}
     </span>
   );

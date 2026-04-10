@@ -35,10 +35,8 @@ const statusConfig: Record<
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {
   const config = statusConfig[status] || statusConfig.new;
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+    <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold ${config.bg} ${config.text}`}>
+      <span className={`h-2 w-2 rounded-full ${config.dot}`} />
       {config.label}
     </span>
   );

@@ -1,110 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  AlertTriangle,
-  Bot,
-  CheckCircle2,
-  FileText,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Send,
-  Sparkles,
-  Trash2,
-  Upload,
-  XCircle,
-} from "lucide-react";
-
+import { BookOpenText, Plus, Sparkles, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { clampPercentInt } from "@/lib/utils";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { PageHeader } from "@/components/shared/PageHeader";
-import type {
-  ChatResponse,
-  Clinic,
-  KnowledgeDocument,
-  TrainingKnowledgeSource,
-  TrainingOverview,
-} from "@/types";
-
-function settingsHref(section?: string): string {
-  if (!section) return "/dashboard/settings";
-  return `/dashboard/settings?section=${encodeURIComponent(section)}`;
-}
-
-function knowledgeStatusClass(status: string): string {
-  if (status === "strong") return "bg-emerald-50 text-emerald-700";
-  if (status === "partial") return "bg-amber-50 text-amber-700";
-  return "bg-rose-50 text-rose-700";
-}
-
-function knowledgeStatusLabel(status: string): string {
-  if (status === "strong") return "Strong";
-  if (status === "partial") return "Partial";
-  return "Needs work";
-}
-
-function generatePreviewSessionId(): string {
-  return `training_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function formatFileSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return "—";
-  if (bytes < 1024) return `${Math.round(bytes)} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function docStatusIcon(status: KnowledgeDocument["status"]) {
-  switch (status) {
-    case "ready":
-      return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />;
-    case "processing":
-      return <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />;
-    case "failed":
-      return <XCircle className="h-3.5 w-3.5 text-rose-500" />;
-    default:
-      return <Loader2 className="h-3.5 w-3.5 animate-spin text-app-text-muted" />;
-  }
-}
-
-function docStatusLabel(status: KnowledgeDocument["status"]): string {
-  switch (status) {
-    case "ready":
-      return "Ready";
-    case "processing":
-      return "Processing...";
-    case "failed":
-      return "Failed";
-    case "uploaded":
-      return "Uploaded";
-    default:
-      return status;
-  }
-}
+import { EmptyState } from "@/components/shared/EmptyState";
+import type { Clinic, TrainingKnowledgeSource, TrainingOverview } from "@/types";
 
 export default function TrainingPage() {
   const [training, setTraining] = useState<TrainingOverview | null>(null);
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [newContent, setNewContent] = useState("");
   const [saving, setSaving] = useState(false);
-  const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
-  const [editingContent, setEditingContent] = useState("");
-  const [previewInput, setPreviewInput] = useState("");
-  const [previewMessages, setPreviewMessages] = useState<
-    { id: string; role: "user" | "assistant"; content: string }[]
-  >([]);
-  const [previewSending, setPreviewSending] = useState(false);
-  const [previewSessionId] = useState(() => generatePreviewSessionId());
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const loadTraining = useCallback(async () => {
     setLoading(true);
@@ -117,685 +30,149 @@ export default function TrainingPage() {
       setTraining(trainingData);
       setClinic(clinicData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load training data");
+      setError(err instanceof Error ? err.message : "Failed to load training.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadTraining();
+    void loadTraining();
   }, [loadTraining]);
 
-  const hasProcessingDocs = training?.documents?.some(
-    (d) => d.status === "processing" || d.status === "uploaded"
-  ) ?? false;
-
-  useEffect(() => {
-    if (!hasProcessingDocs) return;
-    let cancelled = false;
-    const interval = setInterval(() => {
-      if (cancelled) return;
-      api.frontdesk.getTraining().then((data) => {
-        if (!cancelled) setTraining(data);
-      }).catch(() => { });
-    }, 5000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, [hasProcessingDocs]);
-
-  const createSource = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return;
+  const addSource = async () => {
+    if (!title.trim() || !content.trim()) return;
     setSaving(true);
-    try {
-      const created = await api.frontdesk.createKnowledgeSource({
-        title: newTitle,
-        content: newContent,
-      });
-      setTraining((current) =>
-        current
-          ? { ...current, custom_sources: [created, ...current.custom_sources] }
-          : current
-      );
-      setNewTitle("");
-      setNewContent("");
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save knowledge note");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const deleteSource = async (source: TrainingKnowledgeSource) => {
-    try {
-      await api.frontdesk.deleteKnowledgeSource(source.id);
-      if (editingSourceId === source.id) {
-        setEditingSourceId(null);
-        setEditingTitle("");
-        setEditingContent("");
-      }
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete knowledge note");
-    }
-  };
-
-  const startEditingSource = (source: TrainingKnowledgeSource) => {
-    setEditingSourceId(source.id);
-    setEditingTitle(source.title);
-    setEditingContent(source.content);
-  };
-
-  const cancelEditingSource = () => {
-    setEditingSourceId(null);
-    setEditingTitle("");
-    setEditingContent("");
-  };
-
-  const saveEditedSource = async () => {
-    if (!editingSourceId || !editingTitle.trim() || !editingContent.trim()) return;
-    setSaving(true);
-    try {
-      await api.frontdesk.updateKnowledgeSource(editingSourceId, {
-        title: editingTitle,
-        content: editingContent,
-      });
-      cancelEditingSource();
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update knowledge note");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
     setError("");
     try {
-      await api.frontdesk.uploadDocument(file);
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upload document");
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDeleteDocument = async (doc: KnowledgeDocument) => {
-    try {
-      await api.frontdesk.deleteDocument(doc.id);
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete document");
-    }
-  };
-
-  const handleReprocessDocument = async (doc: KnowledgeDocument) => {
-    try {
-      await api.frontdesk.reprocessDocument(doc.id);
-      await loadTraining();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reprocess document");
-    }
-  };
-
-  const previewDisabled = !clinic?.slug || !clinic?.is_live;
-
-  const sendPreview = async () => {
-    if (!previewInput.trim() || previewSending || !clinic?.slug) return;
-    const userMessage = {
-      id: `user_${Date.now()}`,
-      role: "user" as const,
-      content: previewInput.trim(),
-    };
-    setPreviewMessages((current) => [...current, userMessage]);
-    setPreviewInput("");
-    setPreviewSending(true);
-
-    try {
-      const response: ChatResponse = await api.chat.send({
-        clinic_slug: clinic.slug,
-        session_id: previewSessionId,
-        message: userMessage.content,
+      const source = await api.frontdesk.createKnowledgeSource({
+        title: title.trim(),
+        content: content.trim(),
       });
-      setPreviewMessages((current) => [
-        ...current,
-        {
-          id: `assistant_${Date.now()}`,
-          role: "assistant",
-          content: response.reply,
-        },
-      ]);
+      setTraining((prev) =>
+        prev
+          ? { ...prev, custom_sources: [source, ...prev.custom_sources] }
+          : prev
+      );
+      setTitle("");
+      setContent("");
     } catch (err) {
-      setPreviewMessages((current) => [
-        ...current,
-        {
-          id: `assistant_error_${Date.now()}`,
-          role: "assistant",
-          content:
-            err instanceof Error
-              ? err.message
-              : "The assistant preview could not send that message.",
-        },
-      ]);
+      setError(err instanceof Error ? err.message : "Failed to add knowledge source.");
     } finally {
-      setPreviewSending(false);
+      setSaving(false);
     }
   };
 
-  const structuredKnowledge = useMemo(() => {
-    if (!clinic) return [];
-    return [
-      {
-        label: "Services",
-        detail:
-          Array.isArray(clinic.services) && clinic.services.length > 0
-            ? clinic.services.join(", ")
-            : "No services configured yet",
-      },
-      {
-        label: "FAQ",
-        detail:
-          Array.isArray(clinic.faq) && clinic.faq.length > 0
-            ? `${clinic.faq.length} FAQ entries configured`
-            : "No FAQ entries configured yet",
-      },
-      {
-        label: "Business hours",
-        detail:
-          clinic.business_hours && Object.keys(clinic.business_hours).length > 0
-            ? "Weekly hours are configured"
-            : "Business hours are not configured yet",
-      },
-      {
-        label: "Assistant messages",
-        detail:
-          clinic.greeting_message || clinic.fallback_message
-            ? "Greeting and fallback messaging are available"
-            : "Greeting and fallback messaging are missing",
-      },
-    ];
-  }, [clinic]);
+  const removeSource = async (source: TrainingKnowledgeSource) => {
+    try {
+      await api.frontdesk.deleteKnowledgeSource(source.id);
+      setTraining((prev) =>
+        prev
+          ? {
+              ...prev,
+              custom_sources: prev.custom_sources.filter((item) => item.id !== source.id),
+            }
+          : prev
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete knowledge source.");
+    }
+  };
 
-  if (loading) return <LoadingState message="Loading training workspace..." detail="Knowledge score and uploads" />;
-  if (error && !training) return <ErrorState variant="calm" message={error} onRetry={loadTraining} />;
-  if (!training || !clinic) {
-    return (
-      <ErrorState
-        variant="calm"
-        title="Training data not available"
-        message="We could not load the knowledge workspace. Refresh or try again in a moment."
-        onRetry={loadTraining}
-      />
-    );
-  }
-
-  const documents = training.documents || [];
-  const docStats = training.document_stats || { total: 0, ready: 0, processing: 0, failed: 0, total_chunks: 0 };
-  const hasRealKnowledge = (training.custom_sources?.length ?? 0) > 0 || docStats.ready > 0;
+  if (loading) return <LoadingState message="Loading AI training..." detail="Gathering readiness and knowledge sources" />;
+  if (error && !training) return <ErrorState variant="calm" message={error} onRetry={() => void loadTraining()} />;
+  if (!training) return <LoadingState message="Loading AI training..." />;
 
   return (
-    <div className="ds-workspace-main-area space-y-6">
+    <div className="workspace-grid">
       <PageHeader
-        showDivider
-        eyebrow={
-          <>
-            <Sparkles className="h-3.5 w-3.5" />
-            AI training
-          </>
-        }
-        title="Knowledge & training"
-        description="The control room for answer quality: structured knowledge, uploads, readiness scoring, and a safe preview before patients ever see a response."
+        eyebrow="AI Training"
+        title="Knowledge control center"
+        description="Shape the assistant with clinic-specific knowledge sources while keeping the workspace calm and readable."
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/dashboard/settings"
-              className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3.5 py-2 text-xs font-semibold text-app-text-muted shadow-sm transition-colors hover:bg-app-surface-alt"
-            >
-              Settings
+          clinic?.slug ? (
+            <Link href={`/chat/${clinic.slug}`} className="app-btn app-btn-secondary">
+              Preview assistant
             </Link>
-          </div>
+          ) : undefined
         }
       />
 
-      {error && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-2.5 text-sm text-amber-900">
-          <span className="font-semibold">Update issue: </span>
+      {error ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error}
         </div>
-      )}
+      ) : null}
 
-      <div className="workspace-stage">
-        <aside className="space-y-3">
-          <div className="ds-card border-teal-200 bg-app-accent-wash/40 xl:sticky xl:top-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="mb-1 flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-app-primary" />
-                  <span className="ds-eyebrow text-app-accent-dark">Readiness</span>
-                </div>
-                <p className="text-3xl font-bold tracking-tight text-app-text">
-                  {clampPercentInt(training.knowledge_score)}%
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-app-text-muted">
-                  {training.assistant_name} only performs well when the clinic has supplied real context. This score summarizes coverage before you trust it in production.
-                </p>
-              </div>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${knowledgeStatusClass(training.knowledge_status)}`}>
-                {knowledgeStatusLabel(training.knowledge_status)}
-              </span>
-            </div>
-
-            <div className="mt-4 grid gap-2">
-              {training.readiness_items.map((item) => (
-                <div
-                  key={item.key}
-                  className={`rounded-xl border px-3 py-3 ${item.configured ? "border-emerald-100 bg-emerald-50/50" : "border-app-border bg-app-surface/75"}`}
-                >
-                  <p className="text-sm font-semibold text-app-text">{item.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
-                </div>
-              ))}
-            </div>
-
-            {training.knowledge_gaps.length > 0 && (
-              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/60 p-3">
-                <p className="text-sm font-semibold text-amber-800">Coverage gaps</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {training.knowledge_gaps.map((gap) => (
-                    <span key={gap} className="rounded-full bg-app-surface px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
-                      {gap}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mt-4 rounded-xl border border-app-border bg-app-surface/90 p-4 shadow-sm">
-              <p className="ds-eyebrow">Document pulse</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {[
-                  { label: "Files", value: docStats.total },
-                  { label: "Ready", value: docStats.ready },
-                  { label: "Processing", value: docStats.processing },
-                  { label: "Chunks", value: docStats.total_chunks },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-xl border border-app-border bg-app-surface-alt px-3 py-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
-                    <p className="mt-1 text-lg font-bold tabular-nums text-app-text">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={`mt-4 rounded-xl px-4 py-4 shadow-sm ${hasRealKnowledge ? "border border-emerald-100 bg-emerald-50/60" : "border border-app-border bg-app-surface-alt"}`}>
-              <div className="flex items-center gap-1.5">
-                {hasRealKnowledge ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                ) : (
-                  <AlertTriangle className="h-3.5 w-3.5 text-app-text-muted" />
-                )}
-                <p className={`text-xs font-semibold ${hasRealKnowledge ? "text-emerald-700" : "text-app-text-muted"}`}>
-                  {hasRealKnowledge ? "Retrieval active" : "Basic mode"}
-                </p>
-              </div>
-              <p className={`mt-1 text-xs leading-relaxed ${hasRealKnowledge ? "text-emerald-600" : "text-app-text-muted"}`}>
-                {hasRealKnowledge
-                  ? "The assistant now pulls from your notes and uploaded documents in addition to clinic settings."
-                  : "The assistant is still answering mostly from clinic settings only. Add notes or upload documents to deepen it."}
-              </p>
-            </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Knowledge score", `${training.knowledge_score || 0}%`],
+          ["Knowledge gaps", training.knowledge_gaps.length],
+          ["Custom sources", training.custom_sources.length],
+          ["Documents", training.documents.length],
+        ].map(([label, value]) => (
+          <div key={label} className="panel-surface rounded-[1.6rem] p-5">
+            <p className="panel-section-head">{label}</p>
+            <p className="mt-2.5 text-[1.9rem] font-bold tracking-[-0.055em] text-app-text">{value}</p>
           </div>
-        </aside>
+        ))}
+      </div>
 
-        <div className="min-w-0 space-y-6 xl:col-span-2">
-          <section className="ds-card p-5 sm:p-6">
-            <div className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
-              <div>
-                <p className="ds-eyebrow">Knowledge control room</p>
-                <h2 className="mt-2 text-[1.95rem] font-bold tracking-tight text-app-text sm:text-[2.35rem]">
-                  Ground the assistant before it ever speaks for the clinic.
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-app-text-muted">
-                  Use Settings for baseline facts, notes for nuance, and uploads for long-form guidance. This page is where you harden answer quality before patient traffic depends on it.
-                </p>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  {[
-                    { label: "Settings facts", value: structuredKnowledge.length, detail: "Hours, services, FAQs, and assistant messages." },
-                    { label: "Custom notes", value: training.custom_sources.length, detail: "Exceptions and nuances your team wants preserved." },
-                    { label: "Uploads ready", value: docStats.ready, detail: "Processed files available to retrieval." },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-[1.25rem] border border-app-border bg-app-surface/90 px-4 py-4 shadow-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-widest text-app-text-muted">{item.label}</p>
-                      <p className="mt-3 text-2xl font-bold tracking-tight text-app-text">{item.value}</p>
-                      <p className="mt-2 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[1.45rem] border border-app-border bg-app-surface/94 p-5 shadow-(--ds-shadow-md)">
-                <p className="ds-eyebrow">Training posture</p>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-app-text-muted">
-                  <p>Use Settings when the clinic’s baseline facts change.</p>
-                  <p>Use custom notes for exceptions, special rules, and wording your staff wants preserved.</p>
-                  <p>Use uploads for longer documents like policies, procedures, and service guides.</p>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {[
-                    { label: "Services", section: "services" },
-                    { label: "FAQ", section: "faq" },
-                    { label: "Assistant tone", section: "assistant-messages" },
-                  ].map((link) => (
-                    <Link
-                      key={link.section}
-                      href={settingsHref(link.section)}
-                      className="rounded-full border border-teal-200 bg-app-accent-wash px-3 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-teal-100"
-                    >
-                      Edit {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="panel-surface rounded-4xl p-5">
+          <div className="mb-5 flex items-center gap-2">
+            <Plus className="h-4 w-4 text-app-primary" />
+            <span className="text-sm font-bold text-app-text">Add custom knowledge</span>
+          </div>
+          <div className="grid gap-4">
+            <div>
+              <label className="app-label">Title</label>
+              <input className="app-field" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
-          </section>
-
-          <div className="wave-zone-panel shadow-(--ds-shadow-lg)!">
-            <div className="mb-4 border-b border-app-border pb-3">
-              <p className="ds-eyebrow">Knowledge desk</p>
-              <p className="mt-1 text-sm text-app-text-muted">Structured sources, file uploads, custom notes, and live preview—one composed training desk instead of separate utility panels.</p>
+            <div>
+              <label className="app-label">Content</label>
+              <textarea className="app-textarea" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="space-y-4">
-                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
-                  <div className="mb-2.5 flex items-center gap-2">
-                    <Bot className="w-3.5 h-3.5 text-app-primary" />
-                    <p className="text-sm font-semibold text-app-text">Current sources</p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    {structuredKnowledge.map((item) => (
-                      <div key={item.label} className="rounded-lg border border-app-border p-2.5">
-                        <p className="text-sm font-semibold text-app-text">{item.label}</p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-app-text-muted">{item.detail}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <button type="button" className="app-btn app-btn-primary w-full" onClick={() => void addSource()} disabled={saving}>
+              <Plus className="h-4 w-4" />
+              {saving ? "Saving source..." : "Add source"}
+            </button>
+          </div>
+        </section>
 
-                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
-                  <div className="mb-2.5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Upload className="w-3.5 h-3.5 text-app-primary" />
-                      <p className="text-sm font-semibold text-app-text">Document uploads</p>
+        <section className="panel-surface rounded-4xl p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <BookOpenText className="h-4 w-4 text-app-primary" />
+            <span className="text-sm font-bold text-app-text">Custom sources</span>
+          </div>
+          <div className="grid gap-2">
+            {training.custom_sources.length > 0 ? (
+              training.custom_sources.map((source) => (
+                <article key={source.id} className="row-card">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-app-text">{source.title}</p>
+                      <p className="mt-1.5 text-xs text-app-text-muted">{source.content}</p>
                     </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.txt"
-                      onChange={handleFileUpload}
-                      aria-label="Upload training document"
-                      className="hidden"
-                    />
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                    >
-                      {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                      <span>Upload PDF or TXT</span>
-                    </button>
-                  </div>
-
-                  <p className="mb-2.5 text-xs leading-relaxed text-app-text-muted">
-                    Upload clinic documents like policies, procedures, or service guides. Files are processed into searchable knowledge chunks for retrieval.
-                  </p>
-
-                  {documents.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-app-border px-4 py-5 text-center text-xs leading-relaxed text-app-text-muted">
-                      <p>Documents are optional. Clinic settings already supply baseline answers.</p>
-                      <p className="mt-2">Upload PDF or TXT when you need policy detail or longer service guidance in retrieval.</p>
-                      <div className="mt-4 flex flex-wrap justify-center gap-2">
-                        <Link
-                          href={settingsHref("services")}
-                          className="inline-flex items-center rounded-lg border border-teal-200 bg-app-accent-wash px-2.5 py-1.5 text-xs font-semibold text-app-accent-dark transition-colors hover:bg-app-accent-wash"
-                        >
-                          Services &amp; FAQ in Settings
-                        </Link>
-                        <Link
-                          href="/dashboard/settings"
-                          className="inline-flex items-center rounded-lg border border-app-border bg-app-surface px-2.5 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
-                        >
-                          Full setup checklist
-                        </Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg border border-app-border px-2.5 py-2">
-                          <div className="flex min-w-0 items-center gap-2">
-                            {docStatusIcon(doc.status)}
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-app-text">{doc.filename}</p>
-                              <p className="text-xs text-app-text-muted">
-                                {formatFileSize(doc.file_size_bytes)} · {doc.file_type.toUpperCase()} · {docStatusLabel(doc.status)}
-                                {doc.status === "ready" && doc.chunk_count > 0 && ` · ${doc.chunk_count} chunks`}
-                              </p>
-                              {doc.status === "failed" && doc.error_message && (
-                                <p className="mt-0.5 text-xs text-rose-500">{doc.error_message}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-1.5">
-                            {doc.status === "failed" && (
-                              <button
-                                onClick={() => handleReprocessDocument(doc)}
-                                className="text-amber-600 hover:text-amber-700"
-                                title="Reprocess"
-                              >
-                                <RefreshCw className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteDocument(doc)}
-                              className="text-app-text-muted hover:text-rose-600"
-                              aria-label={`Delete ${doc.filename}`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
-                  <div className="mb-2.5 flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-app-text-muted" />
-                    <p className="text-sm font-semibold text-app-text">Custom notes</p>
-                  </div>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={newTitle}
-                      onChange={(event) => setNewTitle(event.target.value)}
-                      placeholder="Title, e.g. Insurance exceptions"
-                      className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
-                    />
-                    <textarea
-                      value={newContent}
-                      onChange={(event) => setNewContent(event.target.value)}
-                      rows={3}
-                      placeholder="Details your assistant should know..."
-                      className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
-                    />
-                    <button
-                      onClick={createSource}
-                      disabled={saving || !newTitle.trim() || !newContent.trim()}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                    >
-                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                      <span>Save note</span>
-                    </button>
-                  </div>
-
-                  <div className="mt-3 space-y-2">
-                    {training.custom_sources.length === 0 ? (
-                      <div className="rounded-lg border border-dashed border-app-border px-4 py-4 text-center text-xs text-app-text-muted">
-                        <p>No custom notes yet. Use them for exceptions, nuance, and language your assistant should preserve.</p>
-                        <p className="mt-2">
-                          Baseline facts still come from{" "}
-                          <Link href={settingsHref("clinic-info")} className="font-semibold text-app-accent-dark hover:underline">
-                            Settings
-                          </Link>
-                          .
-                        </p>
-                      </div>
-                    ) : (
-                      training.custom_sources.map((source) => (
-                        <div key={source.id} className="rounded-lg border border-app-border p-2.5">
-                          {editingSourceId === source.id ? (
-                            <div className="space-y-2">
-                              <input
-                                type="text"
-                                value={editingTitle}
-                                onChange={(event) => setEditingTitle(event.target.value)}
-                                placeholder="Note title"
-                                className="h-8 w-full rounded-lg border border-app-border bg-app-surface px-2.5 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
-                              />
-                              <textarea
-                                value={editingContent}
-                                onChange={(event) => setEditingContent(event.target.value)}
-                                rows={3}
-                                placeholder="Note content"
-                                className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
-                              />
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={saveEditedSource}
-                                  disabled={saving || !editingTitle.trim() || !editingContent.trim()}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-app-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
-                                >
-                                  {saving && <Loader2 className="w-3 h-3 animate-spin" />}
-                                  <span>Save</span>
-                                </button>
-                                <button
-                                  onClick={cancelEditingSource}
-                                  className="rounded-lg border border-app-border px-3 py-1.5 text-xs font-semibold text-app-text-muted transition-colors hover:bg-app-surface-alt"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-app-text">{source.title}</p>
-                                <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed text-app-text-muted">{source.content}</p>
-                              </div>
-                              <div className="flex shrink-0 items-center gap-1.5">
-                                <button
-                                  onClick={() => startEditingSource(source)}
-                                  className="text-xs font-semibold text-app-accent-dark hover:text-app-accent-dark"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => deleteSource(source)}
-                                  className="text-app-text-muted hover:text-rose-600"
-                                  aria-label={`Delete ${source.title}`}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4 xl:sticky xl:top-20">
-                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
-                  <p className="ds-eyebrow">Grounding summary</p>
-                  <p className="mt-3 text-sm leading-relaxed text-app-text-muted">
-                    {hasRealKnowledge
-                      ? "The assistant now has real clinic context to preview more realistic responses. Keep tightening weak areas before relying on it for public chat."
-                      : "Start by adding baseline facts or one focused note. Training works best when the assistant has concrete clinic-specific material."}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-app-border bg-app-surface p-4 shadow-sm">
-                  <div className="mb-2.5 flex items-center gap-2">
-                    <Send className="w-3.5 h-3.5 text-app-primary" />
-                    <p className="text-sm font-semibold text-app-text">Live preview</p>
-                  </div>
-
-                  {!clinic.is_live && (
-                    <div className="mb-2.5 rounded-lg border border-amber-100 bg-amber-50/50 px-2.5 py-1.5 text-xs text-amber-700">
-                      Go live before using preview. This test uses the real chat flow.
-                    </div>
-                  )}
-
-                  <div className="h-80 space-y-2 overflow-y-auto rounded-lg border border-app-border bg-app-surface-alt p-2.5">
-                    {previewMessages.length === 0 ? (
-                      <div className="flex h-full min-h-48 flex-col items-center justify-center rounded-md border border-dashed border-app-border bg-app-surface/60 px-4 py-6 text-center">
-                        <Bot className="mb-2 h-8 w-8 text-app-text-muted" aria-hidden />
-                        <p className="text-sm font-medium text-app-text-muted">Test against your live configuration</p>
-                        <p className="mt-1 max-w-60 text-xs leading-relaxed text-app-text-muted">
-                          Questions here use the same path as patient chat — services, hours, FAQ, notes, and processed documents.
-                        </p>
-                      </div>
-                    ) : (
-                      previewMessages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed ${message.role === "user"
-                              ? "rounded-br-sm bg-app-primary text-white"
-                              : "rounded-bl-sm border border-app-border bg-app-surface text-app-text"
-                              }`}
-                          >
-                            {message.content}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="mt-2.5 space-y-2">
-                    <textarea
-                      value={previewInput}
-                      onChange={(event) => setPreviewInput(event.target.value)}
-                      rows={2}
-                      placeholder="Try: Do you offer same-day appointments?"
-                      className="w-full rounded-lg border border-app-border bg-app-surface px-2.5 py-2 text-sm text-app-text placeholder:text-app-text-muted focus:border-app-primary focus:outline-none focus:ring-2 focus:ring-app-accent-wash"
-                    />
-                    <button
-                      onClick={sendPreview}
-                      disabled={previewSending || previewDisabled || !previewInput.trim()}
                       type="button"
-                      className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-app-primary px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-primary-hover disabled:opacity-50"
+                      className="shrink-0 rounded-full bg-rose-50 p-2 text-rose-600 transition-colors hover:bg-rose-100"
+                      onClick={() => void removeSource(source)}
                     >
-                      {previewSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                      <span>Send test</span>
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
+                </article>
+              ))
+            ) : (
+              <EmptyState
+                icon={<Sparkles className="h-6 w-6" />}
+                title="No custom sources yet"
+                description="Add clinic-specific facts, policy guidance, or service nuance for the assistant to reference."
+              />
+            )}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

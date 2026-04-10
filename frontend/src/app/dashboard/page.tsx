@@ -1,41 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  AlertTriangle,
-  ArrowRight,
-  ArrowRightLeft,
-  BrainCircuit,
+  Activity,
   CalendarDays,
-  CheckCircle2,
-  Clock,
-  Inbox,
-  LayoutGrid,
+  Clock3,
   MessageSquareMore,
-  Rocket,
-  Settings,
-  TrendingUp,
+  Sparkles,
+  TriangleAlert,
   Users,
-  Zap,
 } from "lucide-react";
-
 import { api } from "@/lib/api";
+import { safeCount, timeAgo } from "@/lib/utils";
+import { normalizeLeadUsage } from "@/lib/billing-usage";
+import { formatMoney } from "@/lib/format-helpers";
+import { ActivationSetupBand } from "@/components/shared/ActivationSetupBand";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SurfaceCard } from "@/components/shared/SurfaceCard";
-import { ActivationSetupBand } from "@/components/shared/ActivationSetupBand";
 import { RightRailCard } from "@/components/ui";
-import { clampPercentInt, safeCount, timeAgo } from "@/lib/utils";
-import { normalizeLeadUsage } from "@/lib/billing-usage";
-import { computeSystemStatus } from "@/lib/system-status";
-import { EVENT_CONFIG } from "@/lib/activity-config";
-import { formatMoney } from "@/lib/format-helpers";
-import { DEGRADED_FRONTDESK_ANALYTICS } from "@/lib/degraded-analytics";
 import type {
   ActivityEvent,
   AppointmentRecord,
@@ -45,18 +32,7 @@ import type {
   Opportunity,
 } from "@/types";
 
-function settingsHref(section?: string | null): string {
-  if (!section) return "/dashboard/settings";
-  return `/dashboard/settings?section=${encodeURIComponent(section)}`;
-}
-
 export default function DashboardPage() {
-  const router = useRouter();
-  const [firstLead] = useState(
-    () =>
-      globalThis.window !== undefined &&
-      new URLSearchParams(globalThis.location.search).get("first_lead") === "true"
-  );
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
@@ -66,14 +42,10 @@ export default function DashboardPage() {
   const [attentionAppointments, setAttentionAppointments] = useState<AppointmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showFirstLeadSuccess, setShowFirstLeadSuccess] = useState(false);
-  const [showWelcomeFromOnboarding, setShowWelcomeFromOnboarding] = useState(false);
-  const [analyticsDegraded, setAnalyticsDegraded] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     setError("");
-    setAnalyticsDegraded(false);
     try {
       const optional = async <T,>(loader: Promise<T>, fallback: T): Promise<T> => {
         try {
@@ -102,649 +74,162 @@ export default function DashboardPage() {
       ]);
 
       setClinic(clinicData);
-      const safeAnalytics =
-        analyticsData && typeof analyticsData.conversations_total === "number"
-          ? analyticsData
-          : null;
-      setAnalyticsDegraded(!safeAnalytics);
-      setAnalytics(safeAnalytics ?? DEGRADED_FRONTDESK_ANALYTICS);
+      setAnalytics(analyticsData);
       setBilling(billingData);
       setActivity(activityData);
       setOpportunities(opportunitiesData);
       setUpcomingAppointments(upcomingAppointmentsData);
       setAttentionAppointments(attentionAppointmentsData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dashboard");
+      setError(err instanceof Error ? err.message : "Failed to load dashboard.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadDashboard();
+    void loadDashboard();
   }, [loadDashboard]);
 
-  useEffect(() => {
-    if (globalThis.window === undefined) return;
-    const params = new URLSearchParams(globalThis.location.search);
-    if (params.get("welcome") === "true") {
-      setShowWelcomeFromOnboarding(true);
-      params.delete("welcome");
-      const qs = params.toString();
-      const nextUrl = qs ? `${globalThis.location.pathname}?${qs}` : globalThis.location.pathname;
-      globalThis.history.replaceState(null, "", nextUrl);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (firstLead && !loading) {
-      setShowFirstLeadSuccess(true);
-    }
-  }, [firstLead, loading]);
-
-  if (loading) return <LoadingState message="Loading dashboard..." detail="Gathering clinic and workspace summaries" />;
-  if (error) return <ErrorState variant="calm" message={error} onRetry={loadDashboard} />;
-  if (!analytics) return <LoadingState message="Loading dashboard..." />;
-
-  const systemStatus = clinic ? computeSystemStatus(clinic).status : null;
-  const leadUsage = billing ? normalizeLeadUsage(billing) : null;
-
-  function buildEmptyActivityState() {
-    if (clinic && systemStatus === "LIVE") {
-      return (
-        <EmptyState
-          icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
-          title="No activity yet"
-          description="Your assistant is live. Activity appears as patients use web chat (and SMS when configured). No volume yet is normal right after go-live."
-          action={
-            clinic.slug ? (
-              <a
-                href={`/chat/${clinic.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="app-btn app-btn-primary gap-2 text-xs"
-              >
-                <MessageSquareMore className="h-3.5 w-3.5" />
-                Test assistant
-              </a>
-            ) : undefined
-          }
-        />
-      );
-    }
-    if (clinic && systemStatus === "READY") {
-      return (
-        <EmptyState
-          icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
-          title="Ready to go live"
-          description="Setup is complete. Use Go live in the top bar when you want patients to see an active assistant on your public chat page."
-          action={
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href={settingsHref()}
-                className="app-btn app-btn-secondary gap-2 text-sm"
-              >
-                <Settings className="h-4 w-4" />
-                Review settings
-              </Link>
-              {clinic.slug ? (
-                <a
-                  href={`/chat/${clinic.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="app-btn app-btn-primary gap-2 text-sm"
-                >
-                  <MessageSquareMore className="h-4 w-4" />
-                  Preview patient chat
-                </a>
-              ) : null}
-            </div>
-          }
-        />
-      );
-    }
-    return (
-      <EmptyState
-        icon={<MessageSquareMore className="h-5 w-5 text-app-text-muted" />}
-        title="Setup not complete"
-        description="Complete your clinic details in settings so the assistant knows how to respond accurately."
-        action={
-          <button
-            onClick={() => router.push(settingsHref())}
-            className="app-btn app-btn-primary gap-2 text-xs"
-          >
-            <Settings className="h-3.5 w-3.5" />
-            Open settings
-          </button>
-        }
-      />
-    );
-  }
-
-  const emptyActivityState = buildEmptyActivityState();
-
-  const statCards = [
-    { label: "Conversations", value: safeCount(analytics.conversations_total), icon: Inbox, tone: "slate" as const },
-    { label: "Booked requests", value: safeCount(analytics.booked_requests), icon: CheckCircle2, tone: "emerald" as const },
-    { label: "Potential lost patients", value: safeCount(analytics.potential_lost_patients), icon: Clock, tone: "amber" as const },
-    { label: "Recovered opportunities", value: safeCount(analytics.recovered_opportunities), icon: Users, tone: "blue" as const },
-  ];
-
-  const performanceCards = [
-    {
-      label: "Estimated value recovered",
-      value: formatMoney(analytics.estimated_value_recovered_cents),
-      icon: TrendingUp,
-      tone: "teal" as const,
-    },
-    { label: "AI auto-handled", value: safeCount(analytics.ai_auto_handled_count), icon: BrainCircuit, tone: "violet" as const },
-    { label: "Human review required", value: safeCount(analytics.human_review_required_count), icon: AlertTriangle, tone: "amber" as const },
-    { label: "Suggested replies sent", value: safeCount(analytics.suggested_replies_sent_count), icon: MessageSquareMore, tone: "blue" as const },
-    { label: "Deposits requested", value: safeCount(analytics.deposits_requested_count), icon: ArrowRightLeft, tone: "amber" as const },
-    { label: "Deposits paid", value: safeCount(analytics.deposits_paid_count), icon: CheckCircle2, tone: "emerald" as const },
-    { label: "Waiting on deposit", value: safeCount(analytics.appointments_waiting_on_deposit_count), icon: AlertTriangle, tone: "rose" as const },
-  ];
-
-  const busiestHourMaxCount = Math.max(
-    1,
-    ...(analytics.busiest_contact_hours?.map((item) =>
-      typeof item.count === "number" && Number.isFinite(item.count) ? item.count : 0,
-    ) ?? [0]),
+  const leadUsage = useMemo(
+    () => (billing ? normalizeLeadUsage(billing) : null),
+    [billing]
   );
 
-  const quickRoutes = [
-    { href: "/dashboard/inbox", label: "Inbox" },
-    { href: "/dashboard/leads", label: "Leads" },
-    { href: "/dashboard/appointments", label: "Appointments" },
-    { href: "/dashboard/operations", label: "Operations" },
-  ] as const;
+  if (loading) return <LoadingState message="Loading dashboard..." detail="Gathering clinic and workspace summaries" />;
+  if (error) return <ErrorState variant="calm" message={error} onRetry={() => void loadDashboard()} />;
+  if (!clinic) return <LoadingState message="Loading dashboard..." />;
 
   return (
-    <div className="ds-workspace-main-area space-y-5">
+    <div className="workspace-grid">
       <PageHeader
-        showDivider
-        eyebrow={
-          <>
-            <LayoutGrid className="h-3.5 w-3.5" />
-            Overview
-          </>
-        }
-        title="Command center"
-        description="Pressure, pipeline, bookings, and what your team should do next."
+        eyebrow="Command center"
+        title="Front-desk command center"
+        description="A calmer operational overview of conversations, requests, appointments, billing pressure, and launch state."
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard/inbox" className="app-btn app-btn-secondary gap-2">
-              <Inbox className="h-3.5 w-3.5" />
-              Open inbox
+          clinic.slug ? (
+            <Link href={`/chat/${clinic.slug}`} className="app-btn app-btn-secondary">
+              Test assistant
             </Link>
-            {billing && billing.plan !== "premium" ? (
-              <Link href="/dashboard/billing" className="app-btn app-btn-primary gap-2">
-                <Zap className="h-3.5 w-3.5" />
-                Upgrade plan
-              </Link>
-            ) : null}
-          </div>
+          ) : undefined
         }
       />
 
-      {clinic ? (
-        <ActivationSetupBand clinic={clinic} conversationsTotal={analytics.conversations_total} />
-      ) : null}
+      <ActivationSetupBand clinic={clinic} conversationsTotal={analytics?.conversations_total ?? 0} />
 
-      {/* Degraded analytics warning */}
-      {analyticsDegraded ? (
-        <div className="ds-card flex flex-wrap items-start gap-3 border-amber-200 bg-amber-50/80 px-4 py-3">
-          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-amber-900">Front-desk metrics did not load</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-amber-800/90">
-              Counts below may show zero until the metrics service responds.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => void loadDashboard()}
-            className="app-btn app-btn-secondary shrink-0 text-xs"
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="Conversations" value={safeCount(analytics?.conversations_total)} icon={MessageSquareMore} tone="teal" detail="Patient-facing chat volume" />
+        <MetricCard label="Booking requests" value={safeCount(analytics?.leads_created)} icon={Users} tone="blue" detail="Requests captured from the assistant" />
+        <MetricCard label="Appointments needing care" value={attentionAppointments.length} icon={TriangleAlert} tone="amber" detail="Follow-up, reminder, or deposit attention" />
+        <MetricCard label="Upcoming appointments" value={upcomingAppointments.length} icon={CalendarDays} tone="emerald" detail="Confirmed work already on the books" />
+      </div>
+
+      <div className="workspace-grid workspace-grid--two">
+        <div className="workspace-grid">
+          <SurfaceCard
+            title="Operational pressure"
+            description="Where the front desk feels load right now."
           >
-            Retry metrics
-          </button>
-        </div>
-      ) : null}
-
-      {/* Welcome from onboarding */}
-      {showWelcomeFromOnboarding && (
-        <div className="ds-card border-teal-200 bg-teal-50/50 px-4 py-4">
-          <div className="flex flex-wrap items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
-              <Rocket className="h-4 w-4 text-app-primary" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-teal-900">Setup complete — you&apos;re on the dashboard</p>
-              <p className="mt-1 text-sm leading-relaxed text-app-text-muted">
-                Confirm details in Settings, preview your assistant via{" "}
-                <span className="font-semibold text-app-text">Patient Chat</span>, then{" "}
-                <span className="font-semibold text-app-text">Go live</span> when ready.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowWelcomeFromOnboarding(false)}
-              className="shrink-0 rounded-lg p-1 text-teal-400 hover:text-teal-600"
-              aria-label="Dismiss"
-            >
-              ×
-            </button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2 border-t border-teal-200/60 pt-3">
-            <Link href={settingsHref()} className="app-btn app-btn-secondary gap-2 text-sm">
-              <Settings className="h-3.5 w-3.5" />
-              Open settings
-            </Link>
-            <Link href="/dashboard/inbox" className="app-btn app-btn-secondary gap-2 text-sm">
-              <Inbox className="h-3.5 w-3.5" />
-              Inbox
-            </Link>
-            {clinic?.slug ? (
-              <a
-                href={`/chat/${clinic.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="app-btn app-btn-primary gap-2 text-sm"
-              >
-                <MessageSquareMore className="h-3.5 w-3.5" />
-                Preview chat
-              </a>
-            ) : null}
-          </div>
-        </div>
-      )}
-
-      {/* First lead success */}
-      {showFirstLeadSuccess && (
-        <div className="ds-card border-emerald-200 bg-emerald-50/40 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-emerald-900">First lead captured</p>
-              <p className="mt-0.5 text-xs text-emerald-700/80">
-                Patient requests are now flowing into the workspace automatically.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowFirstLeadSuccess(false)}
-              className="text-emerald-300 hover:text-emerald-500"
-            >
-              &times;
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Billing alerts */}
-      {billing && (
-        <div className="space-y-3">
-          {leadUsage?.isAtLimit && billing.plan !== "trial" && (
-            <div className="ds-card border-rose-200 bg-rose-50/60 px-4 py-3">
-              <div className="flex flex-wrap items-start gap-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-rose-900">Monthly lead limit reached</p>
-                  <p className="mt-0.5 text-xs text-rose-700">New conversations are paused. Upgrade to continue.</p>
-                </div>
-                <Link href="/dashboard/billing" className="app-btn app-btn-primary shrink-0 gap-1.5 text-xs">
-                  <Zap className="h-3 w-3" />
-                  Upgrade
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {billing.subscription_status === "past_due" && (
-            <div className="ds-card border-rose-200 bg-rose-50/60 px-4 py-3">
-              <div className="flex flex-wrap items-start gap-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-rose-900">Payment failed</p>
-                  <p className="mt-0.5 text-xs text-rose-700">Update your payment method to keep your subscription active.</p>
-                </div>
-                <Link
-                  href="/dashboard/billing"
-                  className="app-btn app-btn-secondary shrink-0 border-rose-200 text-xs text-rose-700 hover:bg-rose-100"
-                >
-                  Fix payment
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ═══ Main grid: canvas + right rail ═══ */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_17rem]">
-        {/* ── Canvas ── */}
-        <div className="order-1 min-w-0 space-y-5 xl:order-0">
-
-          {/* Pressure hero slab */}
-          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
-            <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
-              <div className="min-w-0">
-                <p className="ds-eyebrow text-app-text-muted">Front-desk pressure</p>
-                <h2 className="mt-2 text-lg font-semibold tracking-tight text-app-text">
-                  Scan what needs attention, then move straight into the workbench pages.
-                </h2>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {quickRoutes.map((r) => (
-                    <Link
-                      key={r.href}
-                      href={r.href}
-                      className="app-btn app-btn-secondary gap-1.5 text-xs"
-                    >
-                      {r.label}
-                      <ArrowRight className="h-3 w-3 text-app-text-muted" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pressure counters */}
-              <div className="flex gap-2">
-                <div className="ds-card flex w-24 flex-col items-center justify-center border-app-border bg-app-surface-alt py-3">
-                  <p className="ds-eyebrow text-app-text-muted">Unresolved</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-app-text">{safeCount(analytics.unresolved_count)}</p>
-                </div>
-                <div className="ds-card flex w-24 flex-col items-center justify-center border-amber-200 bg-amber-50/60 py-3">
-                  <p className="ds-eyebrow text-amber-700">Follow-up</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-amber-900">{safeCount(analytics.follow_up_needed_count)}</p>
-                </div>
-                <div className="ds-card flex w-24 flex-col items-center justify-center border-violet-200 bg-violet-50/60 py-3">
-                  <p className="ds-eyebrow text-violet-700">Review</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-violet-900">{safeCount(analytics.human_review_required_count)}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Pipeline & bookings */}
-          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
-            <div>
-              <p className="ds-eyebrow text-app-text-muted">Pipeline &amp; bookings</p>
-              <p className="mt-1 text-sm text-app-text-muted">Volume and booking posture — pair with appointments for timing and deposits.</p>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-              {statCards.map((card) => (
-                <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
-              ))}
-            </div>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              <MetricCard label="Upcoming appointments" value={upcomingAppointments.length} icon={CalendarDays} tone="teal" detail="Confirmed bookings scheduled." />
-              <MetricCard label="Needs attention" value={attentionAppointments.length} icon={AlertTriangle} tone="amber" detail="Reschedules, cancellations, deposit follow-ups." />
-              <Link
-                href="/dashboard/appointments"
-                className="ds-card flex items-start justify-between border-app-border bg-app-surface px-4 py-3.5 transition-all hover:bg-app-surface-alt"
-              >
-                <div>
-                  <p className="ds-eyebrow text-app-text-muted">Appointments</p>
-                  <p className="mt-1.5 text-sm font-semibold text-app-text">Manage bookings, reminders, and deposits</p>
-                </div>
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-teal-50 text-app-primary">
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
-            </div>
-          </section>
-
-          {/* Throughput & motion */}
-          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="ds-eyebrow text-app-text-muted">Throughput &amp; motion</p>
-                <p className="mt-1 text-sm text-app-text-muted">How work moved — value, automation, deposits, and review load.</p>
-              </div>
-              <Link href="/dashboard/inbox" className="text-xs font-semibold text-app-primary hover:underline">
-                Open inbox →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {performanceCards.map((card) => (
-                <MetricCard key={card.label} label={card.label} value={card.value} icon={card.icon} tone={card.tone} />
-              ))}
-            </div>
-            <div className="rounded-lg border border-app-border bg-app-surface-alt px-3.5 py-2.5">
-              <p className="ds-eyebrow text-app-text-muted">Performance note</p>
-              <p className="mt-0.5 text-sm text-app-text-muted">{analytics.estimated_value_recovered_label}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-app-text-muted">
-                <span>Manual takeovers: {safeCount(analytics.manual_takeover_threads)}</span>
-                <span>Blocked for review: {safeCount(analytics.blocked_for_review_count)}</span>
-                <span>AI resolution: {clampPercentInt(analytics.ai_resolution_estimate)}%</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Contact rhythm */}
-          <section className="ds-card space-y-3 border-app-border bg-app-surface px-5 py-5">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="ds-eyebrow text-app-text-muted">Contact rhythm</p>
-                <p className="mt-1 text-sm text-app-text-muted">When patients reach out most, from live message timestamps.</p>
-              </div>
-              <Clock className="h-3.5 w-3.5 shrink-0 text-app-text-muted" aria-hidden />
-            </div>
-            {!analytics.busiest_contact_hours || analytics.busiest_contact_hours.length === 0 ? (
-              <EmptyState
-                icon={<Clock className="h-5 w-5 text-app-text-muted" />}
-                title="Not enough data yet"
-                description="Contact-hour patterns will appear after patients begin interacting with the assistant."
-              />
-            ) : (
-              <div className="space-y-2.5">
-                {analytics.busiest_contact_hours.map((bucket) => {
-                  const count = typeof bucket.count === "number" && Number.isFinite(bucket.count) ? bucket.count : 0;
-                  const ratio = busiestHourMaxCount > 0 ? count / busiestHourMaxCount : 0;
-                  const barUnits = Number.isFinite(ratio) ? Math.max(20, Math.min(100, ratio * 100)) : 20;
-                  return (
-                    <div key={bucket.hour} className="flex items-center gap-3">
-                      <div className="w-20 text-xs font-medium text-app-text-muted">{bucket.label}</div>
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-app-surface-alt">
-                        <svg className="block h-full w-full text-app-primary" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
-                          <rect width={barUnits} height="100" fill="currentColor" />
-                        </svg>
-                      </div>
-                      <span className="text-xs font-medium tabular-nums text-app-text-muted">{count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Opportunities + Activity */}
-          <section className="ds-card space-y-4 border-app-border bg-app-surface px-5 py-5">
-            <div>
-              <p className="ds-eyebrow text-app-text-muted">Next moves</p>
-              <p className="mt-1 text-sm text-app-text-muted">Follow-up pressure and the latest audit trail.</p>
-            </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <SurfaceCard
-                title="Opportunities"
-                description="Stalled requests and follow-up items that may need action."
-                action={
-                  <Link href="/dashboard/opportunities" className="text-xs font-semibold text-app-primary hover:underline">
-                    View all →
-                  </Link>
-                }
-              >
-                {opportunities.length === 0 ? (
-                  <EmptyState
-                    icon={<AlertTriangle className="h-5 w-5 text-app-text-muted" />}
-                    title="No follow-up items"
-                    description="Stalled or at-risk booking requests will surface here when they need attention."
-                  />
-                ) : (
-                  <div className="space-y-1.5">
-                    {opportunities.slice(0, 5).map((opportunity) => {
-                      let href = "/dashboard/opportunities";
-                      if (opportunity.conversation_id) {
-                        href = `/dashboard/inbox/${opportunity.conversation_id}`;
-                      } else if (opportunity.lead_id) {
-                        href = `/dashboard/leads/${opportunity.lead_id}`;
-                      } else if (opportunity.customer_key) {
-                        href = `/dashboard/customers/${opportunity.customer_key}`;
-                      }
-                      return (
-                        <Link
-                          key={opportunity.id}
-                          href={href}
-                          className="app-list-row flex items-center gap-3"
-                        >
-                          <div
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${opportunity.priority === "high"
-                              ? "bg-rose-50 text-rose-600"
-                              : "bg-amber-50 text-amber-600"
-                              }`}
-                          >
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-app-text">{opportunity.title}</p>
-                            <p className="mt-0.5 truncate text-xs text-app-text-muted">
-                              {opportunity.customer_name} · {opportunity.detail}
-                            </p>
-                          </div>
-                          <span className="shrink-0 text-xs text-app-text-muted">
-                            {opportunity.occurred_at ? timeAgo(opportunity.occurred_at) : "Recently"}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </SurfaceCard>
-
-              <SurfaceCard
-                title="Recent activity"
-                description="Latest events across the clinic."
-                action={
-                  <Link href="/dashboard/activity" className="text-xs font-semibold text-app-primary hover:underline">
-                    View all →
-                  </Link>
-                }
-              >
-                {activity.length === 0 ? (
-                  emptyActivityState
-                ) : (
-                  <div className="space-y-1.5">
-                    {activity.slice(0, 8).map((event, index) => {
-                      const config = EVENT_CONFIG[event.type] ?? EVENT_CONFIG.lead_created;
-                      const Icon = config.icon;
-                      const isLead =
-                        event.type === "lead_created" || event.type === "lead_status_changed";
-                      return (
-                        <div
-                          key={`${event.type}-${event.resource_id}-${index}`}
-                          className="app-list-row flex items-center gap-3"
-                        >
-                          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${config.bg}`}>
-                            <Icon className={`h-3.5 w-3.5 ${config.color}`} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            {isLead ? (
-                              <Link
-                                href={`/dashboard/leads/${event.resource_id}`}
-                                className="block truncate text-sm font-medium text-app-text hover:text-app-primary"
-                              >
-                                {event.title}
-                              </Link>
-                            ) : (
-                              <p className="truncate text-sm font-medium text-app-text">{event.title}</p>
-                            )}
-                            <p className="mt-0.5 truncate text-xs text-app-text-muted">{event.detail}</p>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${config.bg} ${config.color}`}>
-                              {config.label}
-                            </span>
-                            <span className="text-xs text-app-text-muted">{timeAgo(event.timestamp)}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </SurfaceCard>
-            </div>
-          </section>
-
-          {/* All caught up */}
-          {safeCount(analytics.conversations_total) > 0 &&
-            safeCount(analytics.follow_up_needed_count) === 0 &&
-            safeCount(analytics.unresolved_count) === 0 && (
-              <div className="flex items-center justify-center gap-2 py-3 text-xs font-semibold text-emerald-600">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                All caught up — no unresolved requests need attention.
-              </div>
-            )}
-        </div>
-
-        {/* ── Right rail ── */}
-        <div className="order-2 space-y-3 xl:order-0">
-          <RightRailCard title="Workspace state">
-            <div className="space-y-1.5">
-              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
-                <p className="text-xs text-app-text-muted">System</p>
-                <p className="mt-0.5 text-sm font-semibold text-app-text">{systemStatus ?? "Not ready"}</p>
-              </div>
-              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
-                <p className="text-xs text-app-text-muted">Current plan</p>
-                <p className="mt-0.5 text-sm font-semibold text-app-text">
-                  {billing?.plan
-                    ? billing.plan.charAt(0).toUpperCase() + billing.plan.slice(1)
-                    : "Unavailable"}
-                </p>
-              </div>
-            </div>
-          </RightRailCard>
-
-          <RightRailCard title="Quick routes">
-            <div className="space-y-1">
+            <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { href: "/dashboard/inbox", label: "Inbox", detail: "Review active conversations." },
-                { href: "/dashboard/appointments", label: "Appointments", detail: "Bookings, reminders, and deposits." },
-                { href: "/dashboard/opportunities", label: "Opportunities", detail: "Stalled requests and follow-up pressure." },
-                { href: "/dashboard/training", label: "AI Training", detail: "Knowledge coverage and preview quality." },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="app-list-row block"
-                >
-                  <p className="text-sm font-medium text-app-text">{item.label}</p>
-                  <p className="mt-0.5 text-xs text-app-text-muted">{item.detail}</p>
-                </Link>
+                { label: "Review queue", value: safeCount(analytics?.human_review_required_count), detail: "Threads needing staff review or intervention." },
+                { label: "Manual takeover", value: safeCount(analytics?.manual_takeover_threads), detail: "Conversations where staff took direct control." },
+                { label: "Booked requests", value: safeCount(analytics?.booked_requests), detail: "Conversations converted into confirmed bookings." },
+                { label: "Recovered value", value: formatMoney(analytics?.estimated_value_recovered_cents), detail: "Opportunity recovery tracked in follow-up flows." },
+              ].map(({ label, value, detail }) => (
+                <div key={label} className="metric-mini">
+                  <p className="panel-section-head">{label}</p>
+                  <p className="mt-2.5 text-[1.85rem] font-bold tracking-[-0.055em] text-app-text">{value}</p>
+                  <p className="mt-1.5 text-xs leading-5 text-app-text-muted">{detail}</p>
+                </div>
               ))}
             </div>
+          </SurfaceCard>
+
+          <SurfaceCard title="Activity and opportunity flow" description="Recent signals that matter operationally.">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-app-border/60 bg-white/70 p-5">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-app-primary" />
+                  <span className="text-sm font-bold text-app-text">Recent activity</span>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  {activity.length > 0 ? activity.map((item) => (
+                    <div key={`${item.resource_id}-${item.timestamp}`} className="rounded-2xl border border-app-border/50 bg-white/90 px-4 py-3">
+                      <p className="text-sm font-semibold text-app-text">{item.title}</p>
+                      <p className="mt-1 text-xs text-app-text-muted">{item.detail}</p>
+                      <p className="mt-1.5 panel-section-head text-[0.65rem]">{timeAgo(item.timestamp)}</p>
+                    </div>
+                  )) : (
+                    <EmptyState title="No activity yet" description="New assistant activity will appear here as soon as patients start using the workspace." />
+                  )}
+                </div>
+              </div>
+              <div className="rounded-[1.5rem] border border-app-border/60 bg-white/70 p-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-app-primary" />
+                  <span className="text-sm font-bold text-app-text">Opportunities</span>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  {opportunities.length > 0 ? opportunities.slice(0, 4).map((item) => (
+                    <div key={item.id} className="rounded-2xl border border-app-border/50 bg-white/90 px-4 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-app-text">{item.title}</p>
+                        <span className="rounded-full bg-app-accent-wash px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-app-primary-deep">
+                          {item.priority}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-app-text-muted">{item.detail}</p>
+                    </div>
+                  )) : (
+                    <EmptyState title="No opportunities queued" description="When follow-up opportunities are detected, they’ll appear here." />
+                  )}
+                </div>
+              </div>
+            </div>
+          </SurfaceCard>
+        </div>
+
+        <div className="workspace-grid">
+          <RightRailCard title="Billing">
+            <div className="metric-mini">
+              <p className="panel-section-head">Current plan</p>
+              <p className="mt-2 text-lg font-bold tracking-tight text-app-text">
+                {billing?.plan_name || "Starter Trial"}
+              </p>
+              <p className="mt-1 text-sm text-app-text-muted">
+                {leadUsage
+                  ? `${leadUsage.leadsUsed}/${leadUsage.isUnlimited ? "unlimited" : leadUsage.leadLimit} requests used`
+                  : "Usage details update from billing."}
+              </p>
+            </div>
+            <Link href="/dashboard/billing" className="app-btn app-btn-secondary mt-4 w-full">
+              Open billing
+            </Link>
           </RightRailCard>
 
-          <RightRailCard title="Daily focus">
-            <div className="space-y-1.5">
-              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
-                <p className="text-sm font-medium text-app-text">Human review</p>
-                <p className="mt-0.5 text-xs text-app-text-muted">
-                  {safeCount(analytics.human_review_required_count)} conversations waiting for a staff decision.
+          <RightRailCard title="Today’s focus">
+            <div className="grid gap-2.5">
+              <div className="metric-mini">
+                <div className="flex items-center gap-2">
+                  <Clock3 className="h-4 w-4 text-app-primary" />
+                  <span className="text-sm font-bold text-app-text">Upcoming</span>
+                </div>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  {upcomingAppointments.length > 0
+                    ? `${upcomingAppointments.length} confirmed appointment(s) on the books.`
+                    : "No confirmed appointments right now."}
                 </p>
               </div>
-              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
-                <p className="text-sm font-medium text-app-text">Attention required</p>
-                <p className="mt-0.5 text-xs text-app-text-muted">
-                  {attentionAppointments.length} bookings blocked by prep, reschedule, or deposit needs.
-                </p>
-              </div>
-              <div className="rounded-lg border border-app-border bg-app-surface-alt px-3 py-2.5">
-                <p className="text-sm font-medium text-app-text">Opportunity pressure</p>
-                <p className="mt-0.5 text-xs text-app-text-muted">
-                  {safeCount(analytics.follow_up_needed_count)} follow-ups and {safeCount(analytics.unresolved_count)}{" "}
-                  unresolved requests.
+              <div className="metric-mini">
+                <div className="flex items-center gap-2">
+                  <TriangleAlert className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-bold text-app-text">Attention queue</span>
+                </div>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  {attentionAppointments.length > 0
+                    ? `${attentionAppointments.length} appointment(s) need follow-up or reminder action.`
+                    : "Attention queue is clear."}
                 </p>
               </div>
             </div>

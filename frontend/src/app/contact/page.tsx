@@ -1,16 +1,10 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
-import Link from "next/link";
-import { ArrowLeft, Send, CheckCircle2 } from "lucide-react";
-import { getPublicApiUrl } from "@/lib/api-url";
-import { isValidEmail } from "@/lib/utils";
+import { useState } from "react";
+import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 import { PublicNav } from "@/components/marketing/PublicNav";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
-
-type ContactFormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<"form">["onSubmit"]>
->[0];
+import { api } from "@/lib/api";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -21,218 +15,126 @@ export default function ContactPage() {
     message: "",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: ContactFormSubmitEvent) => {
+  const updateField = (field: keyof typeof form, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (!form.name.trim() || !form.email.trim()) {
-      setError("Name and email are required.");
-      return;
-    }
-
-    if (!isValidEmail(form.email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
     setSubmitting(true);
+    setFeedback("");
+    setError("");
     try {
-      const apiUrl = getPublicApiUrl();
-      const res = await fetch(`${apiUrl}/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || "Something went wrong. Please try again.");
-      }
-
-      setSubmitted(true);
+      const result = await api.contact.submit(form);
+      setFeedback(result.message || "Thanks, we’ll get back to you shortly.");
+      setForm({ name: "", clinic_name: "", email: "", phone: "", message: "" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : "Failed to send message.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const update = (field: string, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
-
   return (
-    <div className="public-marketing-root flex min-h-screen flex-col">
+    <div className="public-marketing-root">
       <PublicNav />
-
-      <main className="flex-1 marketing-section-tight">
-        <div className="marketing-container marketing-container--narrow mx-auto max-w-xl py-12 sm:py-16">
-          {submitted ? (
-            <div className="ds-card px-8 py-14 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-app-accent-wash text-app-primary">
-                <CheckCircle2 className="h-8 w-8" aria-hidden />
-              </div>
-              <h1 className="text-[clamp(1.5rem,2vw,1.875rem)] font-bold tracking-tight text-app-text">
-                Thank you
-              </h1>
-              <p className="marketing-body mx-auto mt-3 max-w-md text-app-text-muted">
-                We&apos;ll be in touch within one business day with next steps tailored to your practice.
-              </p>
-              <Link
-                href="/"
-                className="mt-8 inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-5 py-3 text-[0.9375rem] font-semibold text-app-text shadow-sm transition-colors hover:bg-app-surface-alt"
-              >
-                <ArrowLeft className="h-4 w-4" aria-hidden />
-                Back to home
-              </Link>
+      <main>
+        <section className="marketing-container grid gap-10 py-16 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:py-20">
+          <div className="space-y-6">
+            <div className="marketing-kicker">
+              <Mail className="h-3.5 w-3.5" />
+              Contact
             </div>
-          ) : (
-            <>
-              <div className="mb-10 text-center sm:text-left">
-                <div className="mb-4 flex justify-center sm:justify-start">
-                  <div className="marketing-kicker">
-                    <Send className="h-3 w-3" aria-hidden />
-                    Talk to us
-                  </div>
-                </div>
-                <h1 className="marketing-h2 text-balance">
-                  Book a walkthrough or ask us anything
-                </h1>
-                <p className="marketing-lead mx-auto mt-4 max-w-xl text-balance sm:mx-0">
-                  We&apos;ll show you how Clinic AI fits your front desk — setup, inbox, and go-live — without pressure.
-                </p>
-                <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mx-0">
-                  Want to poke around the product first?{" "}
-                  <Link href="/register" className="font-semibold text-app-primary hover:text-app-accent-dark">
-                    Start the free trial
-                  </Link>
-                  {" · "}
-                  <Link href="/product" className="font-semibold text-app-primary hover:text-app-accent-dark">
-                    Module map &amp; routes
-                  </Link>
-                  .
+            <h1 className="text-[clamp(2.4rem,3vw,4.2rem)] font-semibold tracking-[-0.055em] text-app-text">
+              Talk to us about your clinic workflow, launch plan, or rollout questions.
+            </h1>
+            <p className="text-base leading-8 text-app-text-secondary">
+              We’re happy to help you evaluate fit, understand how the workspace maps to your front-desk flow, and answer trust or implementation questions.
+            </p>
+
+            <div className="grid gap-4">
+              <div className="panel-surface rounded-[1.75rem] p-5">
+                <p className="text-sm font-semibold text-app-text">Email</p>
+                <p className="mt-2 text-sm text-app-text-muted">support@clinicai.example</p>
+              </div>
+              <div className="panel-surface rounded-[1.75rem] p-5">
+                <p className="text-sm font-semibold text-app-text">Response style</p>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  Clear answers, product walkthroughs, and implementation guidance without sales-pressure theater.
                 </p>
               </div>
-
-              <form onSubmit={handleSubmit} className="ds-card space-y-5 p-6 sm:p-8">
-                <div>
-                  <label htmlFor="name" className="ds-field-label">
-                    Your name <span className="font-normal text-red-600">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => update("name", e.target.value)}
-                    maxLength={100}
-                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
-                    placeholder="Dr. Jane Smith"
-                  />
+              <div className="panel-surface rounded-[1.75rem] p-5">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-app-text">
+                  <ShieldCheck className="h-4 w-4 text-app-primary" />
+                  Trust-first conversations
                 </div>
-
-                <div>
-                  <label htmlFor="clinic_name" className="ds-field-label">
-                    Clinic name
-                  </label>
-                  <input
-                    id="clinic_name"
-                    type="text"
-                    value={form.clinic_name}
-                    onChange={(e) => update("clinic_name", e.target.value)}
-                    maxLength={200}
-                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
-                    placeholder="Bright Smile Dental"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="ds-field-label">
-                    Email <span className="font-normal text-red-600">*</span>
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
-                    maxLength={200}
-                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
-                    placeholder="jane@clinic.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="ds-field-label">
-                    Phone
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                    maxLength={30}
-                    className="w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="ds-field-label">
-                    Anything we should know?
-                  </label>
-                  <textarea
-                    id="message"
-                    value={form.message}
-                    onChange={(e) => update("message", e.target.value)}
-                    maxLength={2000}
-                    rows={3}
-                    className="w-full resize-none rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm transition-colors focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
-                    placeholder="Tell us about your clinic, current workflow, or what you're looking for..."
-                  />
-                </div>
-
-                {error && (
-                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-                    {error}
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="marketing-cta-primary w-full! disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {submitting ? "Sending…" : "Request a conversation"}
-                  {!submitting && <Send className="h-4 w-4" aria-hidden />}
-                </button>
-              </form>
-
-              <p className="mt-6 text-center text-[0.9375rem] leading-relaxed text-app-text-muted">
-                Prefer to explore on your own?{" "}
-                <Link href="/register" className="font-semibold text-app-primary hover:text-app-accent-dark">
-                  Start a free trial
-                </Link>{" "}
-                or{" "}
-                <Link href="/chat/demo" className="font-semibold text-app-primary hover:text-app-accent-dark">
-                  try the live demo
-                </Link>
-                .
-              </p>
-              <div className="mt-6 flex justify-center sm:justify-start">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 text-[0.9375rem] font-medium text-app-text-muted transition-colors hover:text-app-text"
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden />
-                  Back to home
-                </Link>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  If your questions are about patient-facing behavior, safety, or launch readiness, say so in the message and we’ll route accordingly.
+                </p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+
+          <section className="panel-surface rounded-[2rem] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-app-text">Send a note</h2>
+            <p className="mt-3 text-sm leading-7 text-app-text-muted">
+              Share a little context and we’ll follow up with the most relevant answer.
+            </p>
+
+            {feedback ? (
+              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {feedback}
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
+              </div>
+            ) : null}
+
+            <form className="mt-6 grid gap-5" onSubmit={(e) => void handleSubmit(e)}>
+              <div>
+                <label className="app-label" htmlFor="contact-name">
+                  Name
+                </label>
+                <input id="contact-name" className="app-field" value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
+              </div>
+              <div>
+                <label className="app-label" htmlFor="contact-clinic">
+                  Clinic
+                </label>
+                <input id="contact-clinic" className="app-field" value={form.clinic_name} onChange={(e) => updateField("clinic_name", e.target.value)} />
+              </div>
+              <div>
+                <label className="app-label" htmlFor="contact-email">
+                  Email
+                </label>
+                <input id="contact-email" type="email" className="app-field" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+              </div>
+              <div>
+                <label className="app-label" htmlFor="contact-phone">
+                  Phone
+                </label>
+                <input id="contact-phone" className="app-field" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
+              </div>
+              <div>
+                <label className="app-label" htmlFor="contact-message">
+                  Message
+                </label>
+                <textarea id="contact-message" className="app-textarea" value={form.message} onChange={(e) => updateField("message", e.target.value)} required />
+              </div>
+              <button type="submit" className="app-btn app-btn-primary w-full" disabled={submitting}>
+                Send message
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </section>
+        </section>
       </main>
-
       <PublicFooter />
     </div>
   );

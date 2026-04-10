@@ -1,133 +1,24 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BrainCircuit,
-  CalendarDays,
-  Check,
-  ContactRound,
-  Inbox,
-  LayoutGrid,
-  MessageSquareMore,
-  ShieldCheck,
-  Sparkles,
-  TriangleAlert,
-  Workflow,
-} from "lucide-react";
+import { ArrowRight, Inbox, LayoutGrid, Settings2, Sparkles } from "lucide-react";
 import { PublicNav } from "@/components/marketing/PublicNav";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { MarketingProductWindow } from "@/components/marketing/MarketingProductWindow";
 
-/** Maps each marketing module to the primary in-app route (see dashboard sidebar). */
-function modulePreviewPath(moduleName: string): string {
-  switch (moduleName) {
-    case "Operator inbox":
-      return "/dashboard/inbox";
-    case "Appointments workspace":
-      return "/dashboard/appointments";
-    case "AI training":
-      return "/dashboard/training";
-    case "Follow-up visibility":
-      return "/dashboard/opportunities";
-    case "Staff review & takeover":
-      return "/dashboard/inbox";
-    case "Operational visibility":
-      return "/dashboard";
-    default:
-      return "/dashboard";
-  }
-}
-
-export const metadata: Metadata = {
-  title: "Product — Clinic AI",
-  description:
-    "How Clinic AI works: inbox, appointments, AI training, follow-up, staff review, and operational visibility — all in one platform.",
-};
-
-const modules = [
+const sections = [
   {
-    icon: Inbox,
-    name: "Operator inbox",
-    tagline: "One inbox for every patient thread",
-    description:
-      "Web chat messages, SMS threads, staff notes, and manual takeovers all live in a single inbox. Every conversation has a complete history so your team never needs to reconstruct context from other tools.",
-    details: [
-      "Web chat and SMS conversations in one view",
-      "AI-handled and staff-reviewed threads side by side",
-      "Full message history with timestamps and author labels",
-      "Manual takeover from any conversation at any point",
-      "Filter and search by status, date, or patient name",
-    ],
-  },
-  {
-    icon: CalendarDays,
-    name: "Appointments workspace",
-    tagline: "Track every booking from request to confirmed",
-    description:
-      "Every appointment request that comes through chat or SMS is tracked from first message to confirmed booking. Reminder readiness, deposit status, reschedule history, and staff notes stay connected to the original inquiry.",
-    details: [
-      "Appointment requests created from patient conversations",
-      "Booking status: pending, confirmed, cancelled, rescheduled",
-      "Reminder readiness view for upcoming appointments",
-      "Deposit tracking for practices that require it",
-      "Staff notes attached to each appointment record",
-    ],
-  },
-  {
-    icon: BrainCircuit,
-    name: "AI training",
-    tagline: "Teach the assistant exactly what your clinic does",
-    description:
-      "The assistant learns from what you configure — not from the internet, not from other clinics. Add your services, business hours, common FAQs, and internal notes. Update them anytime from the workspace.",
-    details: [
-      "Services list with descriptions and pricing if needed",
-      "Business hours with location or provider-specific overrides",
-      "Clinic FAQs the assistant draws on to answer patients",
-      "Internal notes for edge cases and special handling",
-      "Live preview to test the assistant before going live",
-    ],
-  },
-  {
-    icon: TriangleAlert,
-    name: "Follow-up visibility",
-    tagline: "Surface every stalled request before it falls through",
-    description:
-      "Stalled conversations, missed callbacks, and blocked patient journeys are surfaced automatically so your team can act before patients move on. You decide what counts as a follow-up risk.",
-    details: [
-      "Stalled conversations flagged after configurable timeout",
-      "Missed callback recovery queue for unanswered requests",
-      "Booking gap detection for high-priority follow-up",
-      "Operator view distinguishes handled vs. pending threads",
-      "Team visibility into who last touched each request",
-    ],
-  },
-  {
-    icon: ContactRound,
-    name: "Staff review & takeover",
-    tagline: "Human control at every step",
-    description:
-      "Your team is never locked out. Staff can review any AI-handled conversation, edit a suggested reply before it sends, step in live to take over, or pause AI replies for a specific thread entirely.",
-    details: [
-      "Review AI-suggested replies before they are sent",
-      "Edit and send from the same inbox view",
-      "Take over any thread — AI pauses automatically",
-      "Resume AI handling when staff has resolved the issue",
-      "Lower-confidence threads flagged for proactive review",
-    ],
-  },
-  {
+    title: "Dashboard as command center",
+    body: "Clinic AI starts with an operational overview instead of a wallpaper of cards. Status, bookings, follow-up load, and launch readiness are grouped intentionally.",
     icon: LayoutGrid,
-    name: "Operational visibility",
-    tagline: "A complete view of your front-desk operations",
-    description:
-      "The dashboard gives your team a live picture of patient requests, appointment activity, follow-up queues, and communication history — everything needed to run the front desk without switching between tools.",
-    details: [
-      "Daily summary of patient requests and status",
-      "Appointment pipeline across all active bookings",
-      "Follow-up queue with time-since-last-contact",
-      "Lead capture log for new patient inquiries",
-      "Audit trail — every conversation, action, and reply",
-    ],
+  },
+  {
+    title: "Inbox and workbench surfaces",
+    body: "Conversation work lives in a dedicated workspace that balances list scanning, context, and next actions without wasted layout space.",
+    icon: Inbox,
+  },
+  {
+    title: "Settings that lead",
+    body: "Configuration is structured like a premium control center instead of a long generic form stack.",
+    icon: Settings2,
   },
 ];
 
@@ -135,242 +26,87 @@ export default function ProductPage() {
   return (
     <div className="public-marketing-root">
       <PublicNav />
-
-      {/* Hero */}
-      <section className="marketing-hero marketing-hero-wave marketing-hero-premium marketing-surface-white border-b border-slate-200">
-        <div className="marketing-container">
-          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-            <div className="max-w-3xl">
-              <div className="marketing-kicker mb-6">
-                <LayoutGrid className="h-3 w-3" />
-                The complete system
-              </div>
-              <h1 className="marketing-h1">
-                Every operational surface your clinic front desk actually needs.
-              </h1>
-              <p className="marketing-lead mt-6 max-w-2xl">
-                Clinic AI is a connected workspace for conversations, booking state, follow-up, AI training, and operational control. The modules below are real product surfaces, not a roadmap deck.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-2.5">
-                {[
-                  "Inbox and takeover",
-                  "Appointments and reminders",
-                  "Follow-up visibility",
-                  "AI training and setup",
-                ].map((chip) => (
-                  <span key={chip} className="marketing-trust-chip">
-                    <Check className="h-4 w-4 shrink-0 text-app-primary" />
-                    {chip}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/register" className="marketing-cta-primary rounded-full!">
-                  Start free trial
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/chat/demo" className="marketing-cta-secondary rounded-full!">
-                  <MessageSquareMore className="h-4 w-4 text-app-primary" />
-                  Try live demo
-                </Link>
-              </div>
-              <p className="mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-slate-600">
-                After signup, you go straight into the real workspace and onboarding flow. Nothing below relies on a separate product tier or hidden enterprise version.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {modules.slice(0, 4).map((module) => (
-                <div key={module.name} className="marketing-showcase-card p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-500 shadow-[0_16px_24px_-20px_rgb(124_99_243/0.65)]">
-                    <module.icon className="h-5 w-5" />
-                  </div>
-                  <p className="mt-5 text-[1.05rem] font-semibold tracking-[-0.02em] text-app-text">{module.name}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-app-text-muted">{module.tagline}</p>
-                  <p className="mt-4 text-[0.76rem] font-semibold uppercase tracking-widest text-violet-500">
-                    {module.details[0]}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform overview strip */}
-      <section className="marketing-section-tight marketing-surface-slate">
-        <div className="marketing-container">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {[
-              { icon: Inbox, label: "Operator inbox" },
-              { icon: CalendarDays, label: "Appointments" },
-              { icon: BrainCircuit, label: "AI training" },
-              { icon: TriangleAlert, label: "Follow-up queue" },
-              { icon: ContactRound, label: "Staff takeover" },
-              { icon: LayoutGrid, label: "Operations view" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-white/80 bg-app-surface px-4 py-4 shadow-sm"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-wash text-app-accent-dark">
-                  <item.icon className="h-4 w-4" />
-                </div>
-                <span className="text-[0.9375rem] font-medium text-app-text">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <main>
-        <div className="marketing-container">
-
-          {/* Module deep-dives */}
-          <div className="space-y-8">
-            {modules.map((mod, i) => (
-              <section
-                key={mod.name}
-                className={`marketing-section ${i % 2 === 1 ? "marketing-section-elevated" : ""}`}
-              >
-                <div className={`grid items-center gap-10 xl:grid-cols-2 ${i % 2 === 1 ? "xl:grid-flow-dense" : ""}`}>
-                  <div className={i % 2 === 1 ? "xl:col-start-2" : ""}>
-                    <div className="marketing-kicker mb-5">
-                      <mod.icon className="h-3 w-3" />
-                      {mod.name}
-                    </div>
-                    <h2 className="marketing-h2">{mod.tagline}</h2>
-                    <p className="marketing-lead mt-4">{mod.description}</p>
-                    <ul className="mt-6 space-y-3">
-                      {mod.details.map((detail) => (
-                        <li key={detail} className="marketing-body flex items-start gap-3">
-                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-wash text-app-accent-dark">
-                            <Check className="h-3.5 w-3.5" />
-                          </div>
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <MarketingProductWindow
-                    pathLabel={modulePreviewPath(mod.name)}
-                    caption="Illustrative summary of this module — the live UI is at the route above once you are signed in (same build as trial and paid)."
-                    className={i % 2 === 1 ? "xl:col-start-1 xl:row-start-1" : undefined}
-                  >
-                    <div className="landing-shell border-0 p-7 shadow-none">
-                      <div className="marketing-icon-wrap mb-5 h-12 w-12">
-                        <mod.icon className="h-6 w-6" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-app-text">{mod.name}</h3>
-                      <p className="mt-2 text-sm text-app-text-muted">{mod.tagline}</p>
-                      <div className="mt-6 space-y-2.5">
-                        {mod.details.slice(0, 3).map((detail) => (
-                          <div
-                            key={detail}
-                            className="flex items-center gap-3 rounded-lg border border-app-border bg-app-surface-alt px-4 py-3 text-sm font-medium text-app-text"
-                          >
-                            <Check className="h-4 w-4 shrink-0 text-app-primary" />
-                            {detail}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </MarketingProductWindow>
-                </div>
-              </section>
-            ))}
+        <section className="marketing-container py-16 lg:py-20">
+          <div className="max-w-3xl">
+            <div className="marketing-kicker">
+              <Sparkles className="h-3.5 w-3.5" />
+              Product architecture
+            </div>
+            <h1 className="mt-6 text-[clamp(2.5rem,3vw,4.4rem)] font-bold tracking-[-0.055em] text-app-text">
+              Rebuilt from the page layer up for clinic operations.
+            </h1>
+            <p className="mt-5 text-base leading-8 text-app-text-secondary">
+              The new frontend is calmer, clearer, and more disciplined: one family across marketing, auth, onboarding, dashboard, chat, and control surfaces.
+            </p>
           </div>
 
-          {/* How it fits together */}
-          <section className="marketing-section border-t border-app-border">
-            <div className="mb-12 max-w-2xl">
-              <div className="marketing-kicker mb-5">
-                <Workflow className="h-3 w-3" />
-                The complete picture
-              </div>
-              <h2 className="marketing-h2">
-                How everything works together.
-              </h2>
-              <p className="marketing-lead mt-4">
-                Every module connects. A patient conversation in the inbox can become an
-                appointment, trigger a follow-up, surface a reminder, and be reviewed by
-                staff — all without leaving the workspace.
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {[
-                {
-                  step: "01",
-                  title: "Patient reaches out",
-                  body: "Chat or SMS message arrives in the operator inbox with full context.",
-                },
-                {
-                  step: "02",
-                  title: "AI handles the response",
-                  body: "The assistant answers using your clinic setup and captures the patient's details.",
-                },
-                {
-                  step: "03",
-                  title: "Staff reviews if needed",
-                  body: "Uncertain or sensitive threads are flagged. Staff can edit, reply, or take over.",
-                },
-                {
-                  step: "04",
-                  title: "Appointment is tracked",
-                  body: "Booking status, reminders, and follow-up risk are all visible from the dashboard.",
-                },
-              ].map((item) => (
-                <div key={item.step} className="marketing-card p-6">
-                  <span className="text-3xl font-bold text-app-border">{item.step}</span>
-                  <h3 className="mt-4 text-base font-semibold text-app-text">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-app-text-muted">{item.body}</p>
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {sections.map((section) => (
+              <article key={section.title} className="panel-surface rounded-4xl p-7">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-app-primary/10 text-app-primary">
+                  <section.icon className="h-5 w-5" />
                 </div>
-              ))}
-            </div>
-          </section>
+                <h2 className="mt-5 text-xl font-bold tracking-[-0.04em] text-app-text">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-app-text-muted">{section.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
-        </div>
-
-        {/* CTA */}
-        <section className="marketing-final-act">
-          <div className="marketing-container">
-            <div className="overflow-hidden rounded-3xl bg-app-primary px-8 py-12 shadow-2xl shadow-teal-950/25 sm:px-12 sm:py-16 lg:px-14">
-              <div className="grid gap-10 xl:grid-cols-[1fr_auto] xl:items-center">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/35 bg-teal-800/40 px-4 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-widest text-teal-100">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Ready to see it live?
-                  </div>
-                  <h2 className="mt-6 text-[clamp(1.875rem,2vw+1rem,2.75rem)] font-bold tracking-tight text-white">
-                    Start your free trial today.
-                  </h2>
-                  <p className="mt-4 max-w-xl text-[1.125rem] leading-relaxed text-teal-100">
-                    Set up in under 15 minutes. Test the assistant with your real clinic info. No credit card required.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch">
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-app-surface px-8 py-4 text-[1rem] font-semibold text-app-primary shadow-lg transition-colors hover:bg-teal-50"
-                  >
-                    Start free — 14 days
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    href="/trust"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-teal-300/50 bg-teal-800/40 px-8 py-4 text-[1rem] font-semibold text-white transition-colors hover:bg-teal-800/60"
-                  >
-                    <ShieldCheck className="h-4 w-4" />
-                    Read our trust approach
-                  </Link>
-                </div>
+        <section className="marketing-container grid gap-8 pb-16 lg:grid-cols-2 lg:pb-20">
+          <MarketingProductWindow pathLabel="/dashboard/inbox" caption="Operational pages are framed like workbenches, not disconnected templates.">
+            <div className="grid gap-4">
+              <div className="panel-surface rounded-3xl p-4">
+                <p className="text-sm font-bold text-app-text">Inbox hierarchy</p>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  Status bands, channel context, and staff actions are visible without collapsing into tiny gray text or dead space.
+                </p>
               </div>
+              <div className="panel-surface rounded-3xl p-4">
+                <p className="text-sm font-bold text-app-text">Clear detail surfaces</p>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  Related request context, message timeline, and action state stay organized around the same conversation.
+                </p>
+              </div>
+            </div>
+          </MarketingProductWindow>
+
+          <MarketingProductWindow pathLabel="/dashboard/settings" caption="Settings, billing, and training share the same premium control-center family.">
+            <div className="grid gap-4">
+              <div className="panel-surface rounded-3xl p-4">
+                <p className="text-sm font-bold text-app-text">Configuration leadership</p>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  Sections lead with what matters most, then keep supporting controls nearby instead of buried.
+                </p>
+              </div>
+              <div className="panel-surface rounded-3xl p-4">
+                <p className="text-sm font-bold text-app-text">Consistent surface language</p>
+                <p className="mt-2 text-sm text-app-text-muted">
+                  Marketing, app, and patient-facing routes all feel related without becoming sterile or generic.
+                </p>
+              </div>
+            </div>
+          </MarketingProductWindow>
+        </section>
+
+        <section className="marketing-container pb-16 lg:pb-20">
+          <div className="panel-surface rounded-[2.3rem] px-8 py-10 text-center">
+            <h2 className="text-[clamp(2rem,2.5vw,3.2rem)] font-bold tracking-[-0.05em] text-app-text">
+              See the product with a live preview or open your workspace.
+            </h2>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/chat/demo" className="app-btn app-btn-secondary">
+                Try live demo
+              </Link>
+              <Link href="/register" className="app-btn app-btn-primary">
+                Start free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>
       </main>
-
       <PublicFooter />
     </div>
   );
