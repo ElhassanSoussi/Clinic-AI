@@ -176,7 +176,7 @@ function RightRailActions({
   return (
     <>
       {conversation.customer_phone && (
-        <div className="app-card p-4 sm:p-5">
+        <div className="panel-surface rounded-3xl p-4 sm:p-5">
           {isEventThread && conversation.channel === "sms" && (
             <SmsAutoReplySection
               conversation={conversation}
@@ -202,7 +202,7 @@ function RightRailActions({
             rows={4}
             value={smsBody}
             onChange={(event) => onSmsBodyChange(event.target.value)}
-            className="app-input min-h-28 resize-none"
+            className="app-textarea min-h-28 resize-none"
             placeholder="Write your message"
           />
           <button
@@ -216,7 +216,7 @@ function RightRailActions({
       )}
 
       {!isEventThread && relatedEvents.length > 0 && (
-        <div className="app-card p-4 sm:p-5">
+        <div className="panel-surface rounded-3xl p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-app-text mb-4">
             SMS activity
           </h2>
@@ -370,7 +370,7 @@ function SmsAutoReplySection({
             rows={4}
             value={reviewReplyBody}
             onChange={(event) => onReviewReplyBodyChange(event.target.value)}
-            className="app-input min-h-28 resize-none"
+            className="app-textarea min-h-28 resize-none"
             placeholder="Review the drafted reply before sending"
           />
           <div className="flex flex-wrap gap-2 mt-3">
@@ -515,7 +515,7 @@ function FrontDeskActionsSection({
   onAddInternalNote,
 }: FrontDeskActionsSectionProps) {
   return (
-    <div className="app-card p-4 sm:p-5">
+    <div className="panel-surface rounded-3xl p-4 sm:p-5">
       <h2 className="text-sm font-semibold text-app-text mb-4">
         Actions
       </h2>
@@ -1019,7 +1019,7 @@ export default function InboxThreadPage({
   const channelLabel = getChannelConfig(conversation.channel ?? "manual").label;
 
   return (
-    <div className="ds-workspace-main-area space-y-6 min-w-0">
+    <div className="workspace-grid space-y-6 min-w-0">
       <PageHeader
         eyebrow={
           <>
@@ -1060,7 +1060,7 @@ export default function InboxThreadPage({
             {nextStep.body}
           </OperationalCallout>
           <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
-            <p className="ds-eyebrow mb-2">At a glance</p>
+            <p className="panel-section-head mb-2">At a glance</p>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-3">
                 <dt className="text-app-text-muted">Channel</dt>
@@ -1102,8 +1102,8 @@ export default function InboxThreadPage({
         <aside className="space-y-3 order-3 xl:order-0">
           <DetailBackLink href="/dashboard/inbox">Back to Inbox</DetailBackLink>
 
-          <div className="app-card p-4 sm:p-5">
-            <h2 className="ds-eyebrow mb-3">Participant</h2>
+          <div className="panel-surface rounded-3xl p-4 sm:p-5">
+            <h2 className="panel-section-head mb-3">Participant</h2>
             <div className="space-y-2.5 text-sm min-w-0">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-surface-alt">
@@ -1152,8 +1152,8 @@ export default function InboxThreadPage({
           </div>
 
           {internalNotes.length > 0 && (
-            <div className="app-card p-5">
-              <h2 className="ds-eyebrow mb-4">Internal notes</h2>
+            <div className="panel-surface rounded-3xl p-5">
+              <h2 className="panel-section-head mb-4">Internal notes</h2>
               <div className="space-y-3">
                 {internalNotes.slice(0, 5).map((event) => (
                   <div key={event.id} className="rounded-xl border border-app-border px-4 py-3">
@@ -1169,9 +1169,9 @@ export default function InboxThreadPage({
         </aside>
 
         <div className="order-1 min-w-0 flex-1 xl:order-0">
-          <div className="app-card overflow-hidden">
+          <div className="panel-surface rounded-3xl overflow-hidden">
             <div className="border-b border-app-border px-5 py-5 sm:px-6">
-              <p className="ds-eyebrow mb-2">Conversation workspace</p>
+              <p className="panel-section-head mb-2">Conversation workspace</p>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-lg font-semibold text-app-text">Thread overview</span>
                 <ChannelBadge channel={conversation.channel ?? "manual"} withIcon />
@@ -1186,18 +1186,18 @@ export default function InboxThreadPage({
                 {conversation.conversation_started_at ? formatDateTime(conversation.conversation_started_at) : "recently"}
                 {conversation.summary ? ` · ${conversation.summary}` : ""}
               </p>
-              <div className="mt-4 detail-hero-meta">
-                <div className="app-card-muted px-3.5 py-2.5">
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-3.5 py-2.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Thread type</p>
                   <p className="mt-1 text-sm font-semibold text-app-text">
                     {isEventThread ? "Operational event" : "Live conversation"}
                   </p>
                 </div>
-                <div className="app-card-muted px-3.5 py-2.5">
+                <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-3.5 py-2.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Channel</p>
                   <p className="mt-1 text-sm font-semibold text-app-text">{channelLabel}</p>
                 </div>
-                <div className="app-card-muted px-3.5 py-2.5">
+                <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-3.5 py-2.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-app-text-muted">Booking snapshot</p>
                   <p className="mt-1 text-sm font-semibold text-app-text">
                     {bookingSummary || "Not booked on this thread"}
@@ -1226,7 +1226,7 @@ export default function InboxThreadPage({
               )}
               {!isEventThread && messages.length === 0 && (
                 <DetailSection label="Transcript" description="No stored messages yet — summary from the session if available.">
-                  <div className="detail-transcript-frame border-dashed text-sm text-app-text-muted">
+                  <div className="rounded-2xl border border-dashed border-app-border/70 bg-app-surface-alt px-4 py-4 text-sm text-app-text-muted">
                     {conversation.summary || "No message transcript is stored for this conversation yet."}
                   </div>
                 </DetailSection>
@@ -1236,7 +1236,7 @@ export default function InboxThreadPage({
                   label="Transcript"
                   description="Chronological messages for this conversation. Actions and SMS tooling stay in the right column."
                 >
-                  <div className="detail-transcript-frame space-y-3">
+                  <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-4 py-4 space-y-3">
                     <MessageList messages={messages} />
                   </div>
                 </DetailSection>
@@ -1246,7 +1246,7 @@ export default function InboxThreadPage({
         </div>
 
         <aside className="space-y-3 order-2 xl:order-0">
-          <p className="ds-eyebrow">Respond &amp; pipeline</p>
+          <p className="panel-section-head">Respond &amp; pipeline</p>
           <RightRailActions
             detail={detail}
             isEventThread={isEventThread}

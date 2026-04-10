@@ -90,9 +90,9 @@ function sourceLabel(source: string, slotSource?: string): string {
 
 export default function LeadDetailPage({
   params,
-}: {
+}: Readonly<{
   params: Promise<{ id: string }>;
-}) {
+}>) {
   const { id } = use(params);
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -173,16 +173,19 @@ export default function LeadDetailPage({
       ? formatDateTime(lead.appointment_starts_at)
       : null;
 
-  const reminderLine =
-    lead.reminder_status && lead.reminder_status !== "not_ready"
-      ? `${humanizeSnakeCase(lead.reminder_status)}${lead.reminder_scheduled_for ? ` · ${formatDateTime(lead.reminder_scheduled_for)}` : ""}`
-      : null;
+  let reminderLine: string | null = null;
+  if (lead.reminder_status && lead.reminder_status !== "not_ready") {
+    const reminderBase = humanizeSnakeCase(lead.reminder_status);
+    const reminderSuffix = lead.reminder_scheduled_for ? " · " + formatDateTime(lead.reminder_scheduled_for) : "";
+    reminderLine = reminderBase + reminderSuffix;
+  }
 
-  const calloutTone =
-    lead.status === "closed" ? "neutral" : lead.status === "booked" ? "information" : "attention";
+  let calloutTone: "neutral" | "information" | "attention" = "attention";
+  if (lead.status === "closed") calloutTone = "neutral";
+  else if (lead.status === "booked") calloutTone = "information";
 
   return (
-    <div className="ds-workspace-main-area space-y-6 min-w-0">
+    <div className="workspace-grid space-y-6 min-w-0">
       <DetailBackLink href="/dashboard/leads">Back to Leads</DetailBackLink>
 
       <PageHeader
@@ -206,7 +209,7 @@ export default function LeadDetailPage({
             {leadNextStepHint(lead.status as LeadStatus)}
           </OperationalCallout>
           <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
-            <p className="ds-eyebrow mb-2">Request snapshot</p>
+            <p className="panel-section-head mb-2">Request snapshot</p>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-3">
                 <dt className="text-app-text-muted">Source</dt>
@@ -261,7 +264,7 @@ export default function LeadDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
-          <div className="app-card p-5 sm:p-6">
+          <div className="panel-surface rounded-3xl p-5 sm:p-6">
             <DetailSection
               label="Contact"
               description="Verified contact paths on this request."
@@ -307,7 +310,7 @@ export default function LeadDetailPage({
             </DetailSection>
           </div>
 
-          <div className="app-card p-5 sm:p-6">
+          <div className="panel-surface rounded-3xl p-5 sm:p-6">
             <DetailSection
               label="Visit & scheduling"
               description="Patient intent and preferences. Confirmed visits remain tied to this lead — use the calendar you already rely on for real slot management."
@@ -342,12 +345,12 @@ export default function LeadDetailPage({
           </div>
 
           {chatMessages.length > 0 ? (
-            <div className="app-card p-5 sm:p-6">
+            <div className="panel-surface rounded-3xl p-5 sm:p-6">
               <DetailSection
                 label="Related conversation"
                 description="Latest lines from the AI chat tied to this request when one exists."
               >
-                <div className="detail-transcript-frame space-y-3">
+                <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-4 py-4 space-y-3">
                   {chatMessages.slice(-8).map((msg) => (
                     <div
                       key={msg.id}
@@ -380,7 +383,7 @@ export default function LeadDetailPage({
 
         <aside className="flex min-w-0 flex-col gap-4">
           <div>
-            <p className="ds-eyebrow mb-2">Pipeline actions</p>
+            <p className="panel-section-head mb-2">Pipeline actions</p>
             <div className="flex flex-wrap gap-2">
               {QUICK_ACTIONS.filter((a) => a.target !== lead.status).map((action) => (
                 <button
@@ -401,7 +404,7 @@ export default function LeadDetailPage({
             </div>
           </div>
 
-          <div className="app-card p-4 sm:p-5">
+          <div className="panel-surface rounded-3xl p-4 sm:p-5">
             <DetailSection label="Record & notes">
               <div className="space-y-4">
                 <div>

@@ -125,7 +125,7 @@ function deliveryStateCaption(autoReplyStatus?: string): string {
 
 export function DeliveryStateCard({ communicationEvent }: Readonly<{ communicationEvent: CommunicationEvent | null }>) {
   return (
-    <div className="app-card-muted border-dashed px-4 py-4">
+    <div className="rounded-2xl border border-dashed border-app-border/70 bg-app-surface-alt px-4 py-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
         Delivery state
       </p>
