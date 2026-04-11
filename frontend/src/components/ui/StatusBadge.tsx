@@ -9,7 +9,7 @@ const TONE_MAP: Record<StatusBadgeTone, { bg: string; text: string; dot: string;
   amber: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-100" },
   emerald: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-100" },
   rose: { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500", border: "border-rose-100" },
-  slate: { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400", border: "border-slate-200" },
+  slate: { bg: "bg-muted", text: "text-slate-600", dot: "bg-slate-400", border: "border-slate-200" },
 };
 
 interface StatusBadgeProps {

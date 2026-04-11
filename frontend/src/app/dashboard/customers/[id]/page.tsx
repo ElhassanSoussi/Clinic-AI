@@ -98,24 +98,24 @@ export default function CustomerProfilePage({
           <DetailSection label="Profile" description="High-level relationship context for the clinic team.">
             <dl className="grid gap-4 text-sm">
               <div className="flex items-start gap-3">
-                <UserRound className="mt-0.5 h-4 w-4 text-app-primary" />
+                <UserRound className="mt-0.5 h-4 w-4 text-primary" />
                 <div>
-                  <dt className="font-semibold text-app-text-muted">Name</dt>
-                  <dd className="mt-1 text-app-text">{profile.name}</dd>
+                  <dt className="font-semibold text-muted-foreground">Name</dt>
+                  <dd className="mt-1 text-foreground">{profile.name}</dd>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Phone className="mt-0.5 h-4 w-4 text-app-primary" />
+                <Phone className="mt-0.5 h-4 w-4 text-primary" />
                 <div>
-                  <dt className="font-semibold text-app-text-muted">Phone</dt>
-                  <dd className="mt-1 text-app-text">{profile.phone || "Unavailable"}</dd>
+                  <dt className="font-semibold text-muted-foreground">Phone</dt>
+                  <dd className="mt-1 text-foreground">{profile.phone || "Unavailable"}</dd>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Mail className="mt-0.5 h-4 w-4 text-app-primary" />
+                <Mail className="mt-0.5 h-4 w-4 text-primary" />
                 <div>
-                  <dt className="font-semibold text-app-text-muted">Email</dt>
-                  <dd className="mt-1 text-app-text">{profile.email || "Unavailable"}</dd>
+                  <dt className="font-semibold text-muted-foreground">Email</dt>
+                  <dd className="mt-1 text-foreground">{profile.email || "Unavailable"}</dd>
                 </div>
               </div>
             </dl>
@@ -125,19 +125,19 @@ export default function CustomerProfilePage({
             <div className="grid gap-3">
               {profile.recent_conversations.length > 0 ? (
                 profile.recent_conversations.map((conversation) => (
-                  <article key={conversation.id} className="rounded-[1.4rem] border border-app-border/70 bg-white/75 p-4">
+                  <article key={conversation.id} className="rounded-[1.4rem] border border-border/70 bg-card/75 p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <ChannelBadge channel={conversation.channel} withIcon />
                       <FrontdeskStatusBadge status={conversation.derived_status} />
                     </div>
-                    <p className="mt-3 text-sm text-app-text-secondary">{conversation.last_message_preview}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-app-text-muted">
+                    <p className="mt-3 text-sm text-muted-foreground">{conversation.last_message_preview}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                       {conversation.updated_at ? timeAgo(conversation.updated_at) : "Just now"}
                     </p>
                   </article>
                 ))
               ) : (
-                <p className="text-sm text-app-text-muted">No recent conversations are available.</p>
+                <p className="text-sm text-muted-foreground">No recent conversations are available.</p>
               )}
             </div>
           </DetailSection>
@@ -163,19 +163,19 @@ export default function CustomerProfilePage({
             <div className="grid gap-3">
               {profile.timeline.length > 0 ? (
                 profile.timeline.map((item) => (
-                  <article key={item.id} className="rounded-[1.4rem] border border-app-border/70 bg-white/75 p-4">
+                  <article key={item.id} className="rounded-[1.4rem] border border-border/70 bg-card/75 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-app-text">{item.title}</p>
+                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
                       {timelineBadge(item)}
                     </div>
-                    <p className="mt-2 text-sm text-app-text-secondary">{item.detail}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-app-text-muted">
+                    <p className="mt-2 text-sm text-muted-foreground">{item.detail}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                       {item.occurred_at ? formatDateTime(item.occurred_at) : "No timestamp"}
                     </p>
                   </article>
                 ))
               ) : (
-                <p className="text-sm text-app-text-muted">No timeline items are available yet.</p>
+                <p className="text-sm text-muted-foreground">No timeline items are available yet.</p>
               )}
             </div>
           </DetailSection>

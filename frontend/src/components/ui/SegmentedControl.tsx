@@ -8,7 +8,7 @@ interface SegmentedControlProps<T extends string> {
 
 export function SegmentedControl<T extends string>({ options, value, onChange }: SegmentedControlProps<T>) {
   return (
-    <div className="inline-flex flex-wrap gap-2 rounded-[1.25rem] border border-app-border/70 bg-white/78 p-2">
+    <div className="inline-flex flex-wrap gap-2 rounded-lg border border-border/90 bg-card p-2 shadow-[var(--shadow-soft)]">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -16,7 +16,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange }:
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors ${active ? "bg-app-accent-wash text-app-primary-deep" : "text-app-text-secondary hover:text-app-text"}`}
+            className={`rounded-[0.8rem] px-3.5 py-2 text-sm font-medium transition-colors ${active ? "bg-accent text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
           >
             {option.label}
             {typeof option.count === "number" ? ` (${option.count})` : ""}

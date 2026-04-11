@@ -93,10 +93,10 @@ export default function PricingPage() {
               <ShieldCheck className="h-3.5 w-3.5" />
               Pricing
             </div>
-            <h1 className="mt-6 text-[clamp(2.5rem,3vw,4.4rem)] font-bold tracking-[-0.055em] text-app-text">
+            <h1 className="mt-6 text-[clamp(2.5rem,3vw,4.4rem)] font-bold tracking-[-0.055em] text-foreground">
               Clear pricing for teams that want a serious front-desk product, not a throwaway pilot.
             </h1>
-            <p className="mt-5 text-base leading-8 text-app-text-secondary">
+            <p className="mt-5 text-base leading-8 text-muted-foreground">
               Start with the real workspace for free, then move into the plan that matches your clinic’s operational load.
             </p>
           </div>
@@ -111,20 +111,20 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <article
                 key={plan.id}
-                className={`panel-surface rounded-4xl p-7 ${plan.highlighted ? "ring-1 ring-app-primary/30 shadow-[0_28px_60px_-34px_rgba(15,143,131,0.45)]" : ""}`}
+                className={`bg-card rounded-4xl p-7 ${plan.highlighted ? "ring-1 ring-app-primary/30 shadow-[0_28px_60px_-34px_rgba(15,143,131,0.45)]" : ""}`}
               >
                 <p className="panel-section-head">
                   {plan.name}
                 </p>
                 <div className="mt-5 flex items-end gap-2">
-                  <span className="text-5xl font-bold tracking-[-0.07em] text-app-text">{plan.price}</span>
-                  <span className="pb-1 text-sm text-app-text-muted">{plan.detail}</span>
+                  <span className="text-5xl font-bold tracking-[-0.07em] text-foreground">{plan.price}</span>
+                  <span className="pb-1 text-sm text-muted-foreground">{plan.detail}</span>
                 </div>
-                <p className="mt-5 text-sm leading-7 text-app-text-secondary">{plan.description}</p>
-                <ul className="mt-6 grid gap-3 text-sm text-app-text-secondary">
+                <p className="mt-5 text-sm leading-7 text-muted-foreground">{plan.description}</p>
+                <ul className="mt-6 grid gap-3 text-sm text-muted-foreground">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-primary" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                       <span>{feature}</span>
                     </li>
                   ))}

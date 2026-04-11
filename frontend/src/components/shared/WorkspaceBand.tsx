@@ -9,7 +9,7 @@ type WorkspaceBandProps = {
 
 export function WorkspaceBand({ children, className = "" }: WorkspaceBandProps) {
   return (
-    <div className={`panel-surface rounded-[1.9rem] p-5 ${className}`.trim()}>
+    <div className={`bg-card rounded-[1.9rem] p-5 ${className}`.trim()}>
       {children}
     </div>
   );

@@ -14,7 +14,7 @@ import {
   LogOut,
   Settings,
   Sparkles,
-  TriangleAlert,
+  Target,
   UserCog,
   Users,
 } from "lucide-react";
@@ -30,7 +30,7 @@ const navItems = [
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/dashboard/customers", label: "Customers", icon: Users },
-  { href: "/dashboard/opportunities", label: "Opportunities", icon: TriangleAlert },
+  { href: "/dashboard/opportunities", label: "Opportunities", icon: Target },
   { href: "/dashboard/operations", label: "Operations", icon: BriefcaseMedical },
   { href: "/dashboard/activity", label: "Activity", icon: Activity },
   { href: "/dashboard/training", label: "AI Training", icon: Sparkles },
@@ -104,37 +104,34 @@ export default function DashboardLayout({
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
-        {/* Brand */}
-        <div className="panel-surface rounded-[1.8rem] px-4 py-4">
+        <div className="rounded-lg border border-border/90 bg-card px-4 py-4 shadow-[var(--shadow-soft)]">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-app-primary text-white shadow-[0_14px_32px_-18px_rgba(17,133,121,0.72)]">
-              <Bot className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+              <Bot className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-app-text">Clinic AI</p>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-app-text-muted">
-                Operating shell
+              <p className="text-sm font-bold text-foreground">Clinic AI</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Workspace
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Clinic card */}
-        <div className="panel-surface mt-3 rounded-[1.8rem] p-4">
+        <div className="rounded-lg border border-border/90 bg-muted/90 p-4">
           <p className="panel-section-head">Clinic</p>
-          <p className="mt-2.5 text-base font-bold tracking-[-0.03em] text-app-text">
+          <p className="mt-2 text-base font-semibold tracking-[-0.03em] text-foreground">
             {clinic?.name || user?.clinic_slug || "Workspace"}
           </p>
-          <p className="mt-1 truncate text-sm text-app-text-muted">{user?.email}</p>
+          <p className="mt-1 truncate text-sm text-muted-foreground">{user?.email}</p>
           {systemStatus ? (
-            <p className="mt-3 inline-flex rounded-full bg-app-accent-wash px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-app-primary-deep">
+            <p className="mt-3 inline-flex rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
               {systemStatus}
             </p>
           ) : null}
         </div>
 
-        {/* Nav */}
-        <nav className="mt-3 grid gap-1">
+        <nav className="grid gap-1">
           {navItems.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -152,8 +149,7 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Account / logout */}
-        <div className="panel-surface mt-3 rounded-[1.8rem] p-3">
+        <div className="mt-auto rounded-lg border border-border/90 bg-card p-3 shadow-[var(--shadow-soft)]">
           <Link
             href="/dashboard/account"
             className="sidebar-link"
@@ -178,7 +174,7 @@ export default function DashboardLayout({
         <div className="dashboard-topbar">
           <div>
             <p className="panel-section-head">Clinic workspace</p>
-            <p className="mt-1 text-lg font-bold tracking-[-0.04em] text-app-text">
+            <p className="mt-1 text-lg font-semibold tracking-[-0.04em] text-foreground">
               {pathToTitle(pathname)}
             </p>
           </div>

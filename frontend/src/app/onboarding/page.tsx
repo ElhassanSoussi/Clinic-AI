@@ -76,17 +76,17 @@ export default function OnboardingPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="panel-surface rounded-[2.2rem] px-6 py-8 sm:px-8">
+      <div className="bg-card rounded-[2.2rem] px-6 py-8 sm:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="marketing-kicker">
               <Sparkles className="h-3.5 w-3.5" />
               Guided activation
             </div>
-            <h1 className="mt-6 text-[clamp(2.2rem,3vw,3.8rem)] font-semibold tracking-[-0.055em] text-app-text">
+            <h1 className="mt-6 text-[clamp(2.2rem,3vw,3.8rem)] font-semibold tracking-[-0.055em] text-foreground">
               Finish the clinic setup with clear launch steps.
             </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-app-text-secondary">
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">
               Onboarding now shares the same premium control-center family as the rest of the app. Configure the essentials here, then continue in Settings for the deeper controls.
             </p>
           </div>
@@ -96,8 +96,8 @@ export default function OnboardingPage() {
         </div>
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="panel-surface rounded-[1.8rem] p-6">
-            <h2 className="text-xl font-semibold tracking-[-0.04em] text-app-text">Clinic essentials</h2>
+          <section className="bg-card rounded-[1.8rem] p-6">
+            <h2 className="text-xl font-semibold tracking-[-0.04em] text-foreground">Clinic essentials</h2>
             {notice ? (
               <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {notice}
@@ -142,27 +142,27 @@ export default function OnboardingPage() {
           </section>
 
           <section className="grid gap-5">
-            <div className="panel-surface rounded-[1.8rem] p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-app-text-muted">Readiness</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-app-text">{status.status.replaceAll("_", " ")}</h2>
-              <p className="mt-3 text-sm text-app-text-muted">
+            <div className="bg-card rounded-[1.8rem] p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Readiness</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-foreground">{status.status.replaceAll("_", " ")}</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
                 {status.completedCount} of {status.totalCount} core launch areas complete.
               </p>
             </div>
-            <div className="panel-surface rounded-[1.8rem] p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-app-text-muted">Next steps</p>
-              <ul className="mt-4 grid gap-3 text-sm text-app-text-secondary">
+            <div className="bg-card rounded-[1.8rem] p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Next steps</p>
+              <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
                 {status.items.map((item) => (
                   <li key={item.key} className="flex items-start gap-3">
-                    <CheckCircle2 className={`mt-0.5 h-4 w-4 shrink-0 ${item.completed ? "text-emerald-500" : "text-app-text-muted"}`} />
+                    <CheckCircle2 className={`mt-0.5 h-4 w-4 shrink-0 ${item.completed ? "text-emerald-500" : "text-muted-foreground"}`} />
                     <span>{item.label}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="panel-surface rounded-[1.8rem] p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-app-text-muted">Launch</p>
-              <p className="mt-3 text-sm leading-7 text-app-text-secondary">
+            <div className="bg-card rounded-[1.8rem] p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Launch</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
                 When the clinic is configured, use the Settings go-live controls to publish the assistant intentionally.
               </p>
               <Link href="/dashboard/settings" className="app-btn app-btn-primary mt-4">

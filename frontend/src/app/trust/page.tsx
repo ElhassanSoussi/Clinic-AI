@@ -12,10 +12,10 @@ export default function TrustPage() {
             <ShieldCheck className="h-3.5 w-3.5" />
             Trust
           </div>
-          <h1 className="mt-6 text-[clamp(2.4rem,3vw,4rem)] font-bold tracking-[-0.055em] text-app-text">
+          <h1 className="mt-6 text-[clamp(2.4rem,3vw,4rem)] font-bold tracking-[-0.055em] text-foreground">
             Calm patient-facing AI starts with explicit team visibility and grounded clinic context.
           </h1>
-          <p className="mt-5 text-base leading-8 text-app-text-secondary">
+          <p className="mt-5 text-base leading-8 text-muted-foreground">
             Trust in Clinic AI comes from product structure: clear go-live controls, reviewable workflows, and an operating system designed for clinic teams instead of black-box automation theater.
           </p>
         </div>
@@ -35,12 +35,12 @@ export default function TrustPage() {
               body: "The clinic chooses when to go live. Configuration, previewing, and publishing are separate on purpose.",
             },
           ].map((item) => (
-            <article key={item.title} className="panel-surface rounded-4xl p-6">
-              <div className="inline-flex items-center gap-2 text-sm font-bold text-app-text">
-                <UserRoundCheck className="h-4 w-4 text-app-primary" />
+            <article key={item.title} className="bg-card rounded-4xl p-6">
+              <div className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
+                <UserRoundCheck className="h-4 w-4 text-primary" />
                 {item.title}
               </div>
-              <p className="mt-3 text-sm leading-7 text-app-text-muted">{item.body}</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.body}</p>
             </article>
           ))}
         </div>

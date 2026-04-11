@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { CreditCard, ExternalLink } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CheckCircle2, CreditCard, ExternalLink } from "lucide-react";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { LoadingState } from "@/components/shared/LoadingState";
@@ -32,6 +32,11 @@ export default function BillingPage() {
   const [plans, setPlans] = useState<PlanInfo[]>(fallbackPlans);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const usagePercent = useMemo(() => {
+    if (!billing?.monthly_lead_limit) return 0;
+    return Math.min(100, (billing.monthly_leads_used / billing.monthly_lead_limit) * 100);
+  }, [billing?.monthly_leads_used, billing?.monthly_lead_limit]);
 
   const loadBilling = useCallback(async () => {
     setLoading(true);
@@ -78,42 +83,52 @@ export default function BillingPage() {
         }
       />
 
-      <div className="panel-surface rounded-4xl p-6">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="panel-section-head">Current plan</p>
-            <h2 className="mt-2.5 text-[2rem] font-bold tracking-[-0.055em] text-app-text">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground">Current plan</p>
+            <h2 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-foreground">
               {billing?.plan_name || "Starter Trial"}
             </h2>
-            <p className="mt-2 text-sm text-app-text-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               {billing
                 ? `${billing.monthly_leads_used}/${billing.monthly_lead_limit || "unlimited"} requests used`
                 : "Usage details are unavailable."}
             </p>
+            {billing?.monthly_lead_limit ? (
+              <div className="mt-4">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
-          <div className="metric-mini shrink-0">
+          <div className="flex shrink-0 flex-col items-start gap-2">
             <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-app-primary" />
-              <span className="panel-section-head">Subscription status</span>
+              <CreditCard className="h-5 w-5 text-primary" />
+              <span className="text-sm font-semibold text-foreground">Subscription</span>
             </div>
-            <p className="mt-2 text-sm font-semibold text-app-text">{billing?.subscription_status || "trialing"}</p>
+            <p className="text-sm font-medium text-muted-foreground">{billing?.subscription_status || "trialing"}</p>
           </div>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {plans.map((plan) => (
-          <article key={plan.id} className="panel-surface rounded-4xl p-6">
-            <p className="panel-section-head">{plan.name}</p>
-            <p className="mt-2.5 text-[2rem] font-bold tracking-[-0.055em] text-app-text">
+          <article key={plan.id} className="rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+            <p className="text-sm font-medium text-muted-foreground">{plan.name}</p>
+            <p className="mt-2 text-xl font-bold tracking-[-0.04em] text-foreground">
               ${(plan.monthly_price_cents / 100).toFixed(0)}
-              <span className="ml-2 text-base font-semibold text-app-text-muted">/ mo</span>
+              <span className="ml-2 text-sm font-semibold text-muted-foreground">/ mo</span>
             </p>
-            <p className="mt-3 text-sm leading-6 text-app-text-secondary">{plan.description}</p>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">{plan.description}</p>
             <ul className="mt-4 grid gap-2">
               {plan.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-app-text-secondary">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-app-primary" />
+                <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                   {feature}
                 </li>
               ))}

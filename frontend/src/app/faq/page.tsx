@@ -35,19 +35,19 @@ export default function FaqPage() {
             <HelpCircle className="h-3.5 w-3.5" />
             FAQ
           </div>
-          <h1 className="mt-6 text-[clamp(2.4rem,3vw,4rem)] font-bold tracking-[-0.055em] text-app-text">
+          <h1 className="mt-6 text-[clamp(2.4rem,3vw,4rem)] font-bold tracking-[-0.055em] text-foreground">
             Practical answers about launch, workflow, and team control.
           </h1>
         </div>
 
         <div className="mt-10 grid gap-4">
           {faqs.map((item) => (
-            <article key={item.question} className="panel-surface rounded-4xl p-6">
-              <div className="inline-flex items-center gap-2 text-sm font-bold text-app-text">
-                <CheckCircle2 className="h-4 w-4 text-app-primary" />
+            <article key={item.question} className="bg-card rounded-4xl p-6">
+              <div className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 {item.question}
               </div>
-              <p className="mt-3 text-sm leading-7 text-app-text-muted">{item.answer}</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.answer}</p>
             </article>
           ))}
         </div>

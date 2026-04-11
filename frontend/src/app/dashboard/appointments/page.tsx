@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Clock, CreditCard } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/utils";
 import { appointmentStatusLabel, depositStatusLabel } from "@/lib/format-helpers";
@@ -20,6 +20,19 @@ const VIEW_OPTIONS: readonly { value: AppointmentView; label: string }[] = [
   { value: "attention", label: "Attention" },
   { value: "past", label: "Past" },
 ];
+
+function StatusPill({ label, variant = "default" }: { readonly label: string; readonly variant?: "default" | "warn" | "ok" }) {
+  const base = "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]";
+  if (variant === "warn") return <span className={`${base} bg-amber-50 text-amber-700`}>{label}</span>;
+  if (variant === "ok") return <span className={`${base} bg-emerald-50 text-emerald-700`}>{label}</span>;
+  return <span className={`${base} bg-accent text-primary`}>{label}</span>;
+}
+
+function appointmentVariant(status: string): "default" | "warn" | "ok" {
+  if (status === "confirmed") return "ok";
+  if (status === "pending" || status === "no_show" || status === "cancelled") return "warn";
+  return "default";
+}
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
@@ -48,11 +61,18 @@ export default function AppointmentsPage() {
     () => ({
       all: appointments.length,
       upcoming: appointments.filter((item) => item.appointment_status === "confirmed").length,
-      attention: appointments.filter((item) => item.appointment_status !== "confirmed").length,
+      attention: appointments.filter((item) => item.appointment_status !== "confirmed" && item.appointment_status !== "completed").length,
       past: appointments.filter((item) => item.appointment_status === "completed").length,
     }),
     [appointments]
   );
+
+  const summaryStats = useMemo(() => [
+    { label: "Total", value: appointments.length },
+    { label: "Confirmed", value: counts.upcoming },
+    { label: "Need attention", value: counts.attention },
+    { label: "Completed", value: counts.past },
+  ], [appointments.length, counts]);
 
   if (loading) return <LoadingState message="Loading appointments..." detail="Gathering booking operations" />;
   if (error) return <ErrorState variant="calm" message={error} onRetry={() => void loadAppointments()} />;
@@ -61,9 +81,18 @@ export default function AppointmentsPage() {
     <div className="workspace-grid">
       <PageHeader
         eyebrow="Appointments"
-        title="Appointment operations"
-        description="Confirmed bookings, attention cases, reminder posture, and deposit visibility in one composed surface."
+        title="Scheduling operations"
+        description="Confirmed bookings, attention cases, deposit posture, and upcoming schedule in one composed surface."
       />
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {summaryStats.map(({ label, value }) => (
+          <div key={label} className="rounded-lg border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
+            <p className="mt-3 text-3xl font-bold tracking-[-0.04em] text-foreground">{value}</p>
+          </div>
+        ))}
+      </div>
 
       <SegmentedControl
         options={VIEW_OPTIONS.map((option) => ({ ...option, count: counts[option.value] }))}
@@ -71,41 +100,51 @@ export default function AppointmentsPage() {
         onChange={setView}
       />
 
-      <section className="panel-surface rounded-[2rem] p-5">
-        <div className="grid gap-2">
-          {appointments.length > 0 ? (
-            appointments.map((appointment) => (
+      <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+        {appointments.length > 0 ? (
+          <div className="grid gap-2">
+            {appointments.map((appointment) => (
               <article key={appointment.lead_id} className="row-card">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold tracking-tight text-app-text">
-                      {appointment.patient_name || "Unknown patient"}
-                    </p>
-                    <p className="mt-1 text-sm text-app-text-secondary">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <p className="text-sm font-bold tracking-tight text-foreground">
+                        {appointment.patient_name || "Unknown patient"}
+                      </p>
+                      <StatusPill
+                        label={appointmentStatusLabel(appointment.appointment_status)}
+                        variant={appointmentVariant(appointment.appointment_status)}
+                      />
+                    </div>
+                    <p className="mt-1.5 text-sm text-muted-foreground leading-6">
                       {appointment.reason_for_visit || "No reason captured."}
                     </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="panel-section-head text-[0.68rem]">{appointmentStatusLabel(appointment.appointment_status)}</span>
-                      <span className="panel-section-head text-[0.68rem]">·</span>
-                      <span className="panel-section-head text-[0.68rem]">{depositStatusLabel(appointment.deposit_status)}</span>
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <CreditCard className="h-3 w-3" />
+                        Deposit: {depositStatusLabel(appointment.deposit_status)}
+                      </span>
                     </div>
                   </div>
-                  <p className="shrink-0 text-xs text-app-text-muted">
-                    {appointment.appointment_starts_at
-                      ? formatDateTime(appointment.appointment_starts_at)
-                      : appointment.preferred_datetime_text || "Time pending"}
-                  </p>
+                  <div className="shrink-0 text-right">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {appointment.appointment_starts_at
+                        ? formatDateTime(appointment.appointment_starts_at)
+                        : appointment.preferred_datetime_text || "Time pending"}
+                    </span>
+                  </div>
                 </div>
               </article>
-            ))
-          ) : (
-            <EmptyState
-              icon={<CalendarDays className="h-6 w-6" />}
-              title="No appointments in this view"
-              description="Appointments and booking status will appear here as requests move forward."
-            />
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={<CalendarDays className="h-6 w-6" />}
+            title="No appointments in this view"
+            description="Appointments and booking status will appear here as requests move forward."
+          />
+        )}
       </section>
     </div>
   );

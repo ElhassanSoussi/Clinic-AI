@@ -28,7 +28,7 @@ export function EventTimeline({
 }>) {
   if (relatedEvents.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+      <div className="rounded-xl border border-slate-200 bg-muted px-4 py-4">
         <div className="flex items-center gap-2 mb-3">
           <Clock3 className="w-4 h-4 text-slate-400" />
           <p className="text-sm font-semibold text-slate-900">
@@ -52,7 +52,7 @@ export function EventTimeline({
     const isInbound = event.direction === "inbound";
     if (!isSmsMessage) {
       return (
-        <div key={event.id} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+        <div key={event.id} className="rounded-xl border border-slate-200 bg-muted px-4 py-4">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <ChannelBadge channel={event.channel} withIcon />
             <CommunicationEventStatusBadge status={event.status} />
@@ -125,7 +125,7 @@ function deliveryStateCaption(autoReplyStatus?: string): string {
 
 export function DeliveryStateCard({ communicationEvent }: Readonly<{ communicationEvent: CommunicationEvent | null }>) {
   return (
-    <div className="rounded-2xl border border-dashed border-app-border/70 bg-app-surface-alt px-4 py-4">
+    <div className="rounded-2xl border border-dashed border-border/70 bg-card-alt px-4 py-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
         Delivery state
       </p>

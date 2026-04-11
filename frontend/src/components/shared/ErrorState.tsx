@@ -20,14 +20,14 @@ export function ErrorState({
     title ?? (calm ? "Couldn’t load this view" : "Something went wrong");
 
   return (
-    <div className={`panel-surface flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] px-6 py-10 text-center ${calm ? "" : "ring-1 ring-rose-100"}`.trim()}>
+    <div className={`flex min-h-[18rem] flex-col items-center justify-center rounded-xl border border-border/90 bg-card px-6 py-10 text-center shadow-[var(--shadow-soft)] ${calm ? "" : "ring-1 ring-rose-100"}`.trim()}>
       {calm ? (
-        <AlertCircle className="h-8 w-8 text-app-text-muted" />
+        <AlertCircle className="h-8 w-8 text-muted-foreground" />
       ) : (
         <AlertTriangle className="h-8 w-8 text-rose-500" />
       )}
-      <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-app-text">{resolvedTitle}</h2>
-      <p className="mt-3 max-w-xl text-sm leading-7 text-app-text-secondary">{message}</p>
+      <h2 className="mt-4 text-xl font-semibold tracking-[-0.04em] text-foreground">{resolvedTitle}</h2>
+      <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground">{message}</p>
       {onRetry ? (
         <button type="button" onClick={onRetry} className="app-btn app-btn-secondary mt-6">
           Try again

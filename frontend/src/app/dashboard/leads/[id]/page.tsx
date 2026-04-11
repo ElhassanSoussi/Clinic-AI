@@ -71,9 +71,9 @@ const QUICK_ACTIONS: {
       target: "closed",
       label: "Mark closed",
       icon: XCircle,
-      bg: "bg-app-surface-alt",
-      hover: "hover:bg-app-surface-alt",
-      text: "text-app-text-muted",
+      bg: "bg-card-alt",
+      hover: "hover:bg-card-alt",
+      text: "text-muted-foreground",
     },
   ];
 
@@ -208,28 +208,28 @@ export default function LeadDetailPage({
           <OperationalCallout title="Operational focus" tone={calloutTone}>
             {leadNextStepHint(lead.status as LeadStatus)}
           </OperationalCallout>
-          <div className="flex flex-col justify-center rounded-xl border border-app-border bg-app-surface/90 px-4 py-3.5 sm:px-5">
+          <div className="flex flex-col justify-center rounded-xl border border-border bg-card/90 px-4 py-3.5 sm:px-5">
             <p className="panel-section-head mb-2">Request snapshot</p>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-3">
-                <dt className="text-app-text-muted">Source</dt>
-                <dd className="text-right font-medium text-app-text">{sourceLabel(lead.source, lead.slot_source)}</dd>
+                <dt className="text-muted-foreground">Source</dt>
+                <dd className="text-right font-medium text-foreground">{sourceLabel(lead.source, lead.slot_source)}</dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-app-text-muted">Preferred time</dt>
-                <dd className="max-w-56 text-right font-medium text-app-text">
+                <dt className="text-muted-foreground">Preferred time</dt>
+                <dd className="max-w-56 text-right font-medium text-foreground">
                   {lead.preferred_datetime_text || "—"}
                 </dd>
               </div>
               {appointmentSummary ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-app-text-muted">Confirmed time</dt>
-                  <dd className="text-right font-medium text-app-text">{appointmentSummary}</dd>
+                  <dt className="text-muted-foreground">Confirmed time</dt>
+                  <dd className="text-right font-medium text-foreground">{appointmentSummary}</dd>
                 </div>
               ) : null}
               {lead.appointment_status ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-app-text-muted">Booking state</dt>
+                  <dt className="text-muted-foreground">Booking state</dt>
                   <dd className="text-right">
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${appointmentStatusClass(lead.appointment_status)}`}
@@ -241,13 +241,13 @@ export default function LeadDetailPage({
               ) : null}
               {reminderLine ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-app-text-muted">Reminder</dt>
-                  <dd className="max-w-56 text-right text-sm font-medium text-app-text">{reminderLine}</dd>
+                  <dt className="text-muted-foreground">Reminder</dt>
+                  <dd className="max-w-56 text-right text-sm font-medium text-foreground">{reminderLine}</dd>
                 </div>
               ) : null}
               {lead.deposit_status && lead.deposit_status !== "not_required" ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-app-text-muted">Deposit</dt>
+                  <dt className="text-muted-foreground">Deposit</dt>
                   <dd className="text-right">
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${depositStatusClass(lead.deposit_status)}`}
@@ -264,68 +264,68 @@ export default function LeadDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
-          <div className="panel-surface rounded-3xl p-5 sm:p-6">
+          <div className="bg-card rounded-3xl p-5 sm:p-6">
             <DetailSection
               label="Contact"
               description="Verified contact paths on this request."
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
-                    <User className="h-4 w-4 text-app-text-muted" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card-alt">
+                    <User className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-app-text-muted">Name</p>
-                    <p className="text-sm font-medium text-app-text">{lead.patient_name}</p>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="text-sm font-medium text-foreground">{lead.patient_name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
-                    <Phone className="h-4 w-4 text-app-text-muted" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card-alt">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-app-text-muted">Phone</p>
-                    <p className="text-sm font-medium text-app-text">{lead.patient_phone || "—"}</p>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="text-sm font-medium text-foreground">{lead.patient_phone || "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
-                    <Mail className="h-4 w-4 text-app-text-muted" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card-alt">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-app-text-muted">Email</p>
-                    <p className="text-sm font-medium text-app-text">{lead.patient_email || "—"}</p>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm font-medium text-foreground">{lead.patient_email || "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-surface-alt">
-                    <Calendar className="h-4 w-4 text-app-text-muted" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card-alt">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-app-text-muted">Inbound source</p>
-                    <p className="text-sm font-medium text-app-text">{sourceLabel(lead.source, lead.slot_source)}</p>
+                    <p className="text-sm text-muted-foreground">Inbound source</p>
+                    <p className="text-sm font-medium text-foreground">{sourceLabel(lead.source, lead.slot_source)}</p>
                   </div>
                 </div>
               </div>
             </DetailSection>
           </div>
 
-          <div className="panel-surface rounded-3xl p-5 sm:p-6">
+          <div className="bg-card rounded-3xl p-5 sm:p-6">
             <DetailSection
               label="Visit & scheduling"
               description="Patient intent and preferences. Confirmed visits remain tied to this lead — use the calendar you already rely on for real slot management."
             >
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-app-text-muted">Reason for visit</p>
-                  <p className="mt-1 text-sm text-app-text">{lead.reason_for_visit || "Not specified"}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Reason for visit</p>
+                  <p className="mt-1 text-sm text-foreground">{lead.reason_for_visit || "Not specified"}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-app-text-muted" />
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium text-app-text-muted">Preferred date / time</p>
-                    <p className="mt-1 text-sm text-app-text">{lead.preferred_datetime_text || "Not specified"}</p>
-                    <p className="mt-1 text-sm text-app-text-muted">
+                    <p className="text-sm font-medium text-muted-foreground">Preferred date / time</p>
+                    <p className="mt-1 text-sm text-foreground">{lead.preferred_datetime_text || "Not specified"}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {lead.slot_source === "availability" || lead.slot_row_index
                         ? "Captured from an availability slot when the patient chose one."
                         : "Free-text preference from the patient or staff."}
@@ -333,9 +333,9 @@ export default function LeadDetailPage({
                   </div>
                 </div>
                 {lead.slot_row_index ? (
-                  <div className="rounded-xl border border-teal-200 bg-app-accent-wash px-4 py-3">
-                    <p className="text-sm font-semibold uppercase tracking-wider text-app-accent-dark">Availability row</p>
-                    <p className="mt-1 text-sm text-app-accent-dark">
+                  <div className="rounded-xl border border-teal-200 bg-accent px-4 py-3">
+                    <p className="text-sm font-semibold uppercase tracking-wider text-primary">Availability row</p>
+                    <p className="mt-1 text-sm text-primary">
                       Linked to row <strong>{lead.slot_row_index}</strong> in your Availability sheet — not a separate scheduling product.
                     </p>
                   </div>
@@ -345,12 +345,12 @@ export default function LeadDetailPage({
           </div>
 
           {chatMessages.length > 0 ? (
-            <div className="panel-surface rounded-3xl p-5 sm:p-6">
+            <div className="bg-card rounded-3xl p-5 sm:p-6">
               <DetailSection
                 label="Related conversation"
                 description="Latest lines from the AI chat tied to this request when one exists."
               >
-                <div className="rounded-2xl border border-app-border/60 bg-app-surface-alt px-4 py-4 space-y-3">
+                <div className="rounded-2xl border border-border/60 bg-card-alt px-4 py-4 space-y-3">
                   {chatMessages.slice(-8).map((msg) => (
                     <div
                       key={msg.id}
@@ -358,8 +358,8 @@ export default function LeadDetailPage({
                     >
                       <div
                         className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm ${msg.role === "user"
-                          ? "bg-app-primary text-white"
-                          : "bg-app-surface text-app-text ring-1 ring-app-border"
+                          ? "bg-primary text-white"
+                          : "bg-card text-foreground ring-1 ring-app-border"
                           }`}
                       >
                         {msg.content}
@@ -370,7 +370,7 @@ export default function LeadDetailPage({
                 {conversationId ? (
                   <Link
                     href={`/dashboard/inbox/${conversationId}`}
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-app-accent-dark hover:text-app-primary"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary"
                   >
                     <Inbox className="h-4 w-4" />
                     Open full thread in inbox
@@ -404,18 +404,18 @@ export default function LeadDetailPage({
             </div>
           </div>
 
-          <div className="panel-surface rounded-3xl p-4 sm:p-5">
+          <div className="bg-card rounded-3xl p-4 sm:p-5">
             <DetailSection label="Record & notes">
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="lead-status" className="block text-sm font-medium text-app-text">
+                  <label htmlFor="lead-status" className="block text-sm font-medium text-foreground">
                     Status
                   </label>
                   <select
                     id="lead-status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value as LeadStatus)}
-                    className="mt-1.5 w-full rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
+                    className="mt-1.5 w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-accent"
                   >
                     {STATUS_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -426,7 +426,7 @@ export default function LeadDetailPage({
                 </div>
 
                 <div>
-                  <label htmlFor="lead-notes" className="block text-sm font-medium text-app-text">
+                  <label htmlFor="lead-notes" className="block text-sm font-medium text-foreground">
                     Internal notes
                   </label>
                   <textarea
@@ -434,7 +434,7 @@ export default function LeadDetailPage({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={5}
-                    className="mt-1.5 w-full resize-none rounded-lg border border-app-border bg-app-surface px-3.5 py-2.5 text-sm placeholder:text-app-text-muted focus:border-app-primary focus:ring-2 focus:ring-app-accent-wash"
+                    className="mt-1.5 w-full resize-none rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-accent"
                     placeholder="Operational context for your team only…"
                   />
                 </div>
@@ -445,7 +445,7 @@ export default function LeadDetailPage({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 rounded-lg bg-app-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-app-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

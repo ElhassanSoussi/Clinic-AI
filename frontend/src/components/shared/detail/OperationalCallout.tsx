@@ -25,9 +25,9 @@ export function OperationalCallout({
 }: OperationalCalloutProps) {
   return (
     <aside className={`rounded-[1.5rem] border p-4 ${toneClass[tone]} ${className}`.trim()}>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-app-text-muted">{title}</p>
-      {headline ? <p className="mt-2 text-base font-semibold text-app-text">{headline}</p> : null}
-      <div className="mt-2 text-sm leading-7 text-app-text-secondary">{children}</div>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
+      {headline ? <p className="mt-2 text-base font-semibold text-foreground">{headline}</p> : null}
+      <div className="mt-2 text-sm leading-7 text-muted-foreground">{children}</div>
     </aside>
   );
 }

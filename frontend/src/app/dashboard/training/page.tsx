@@ -111,18 +111,18 @@ export default function TrainingPage() {
           ["Custom sources", training.custom_sources.length],
           ["Documents", training.documents.length],
         ].map(([label, value]) => (
-          <div key={label} className="panel-surface rounded-[1.6rem] p-5">
+          <div key={label} className="bg-card rounded-[1.6rem] p-5">
             <p className="panel-section-head">{label}</p>
-            <p className="mt-2.5 text-[1.9rem] font-bold tracking-[-0.055em] text-app-text">{value}</p>
+            <p className="mt-2.5 text-[1.9rem] font-bold tracking-[-0.055em] text-foreground">{value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="panel-surface rounded-4xl p-5">
+        <section className="bg-card rounded-4xl p-5">
           <div className="mb-5 flex items-center gap-2">
-            <Plus className="h-4 w-4 text-app-primary" />
-            <span className="text-sm font-bold text-app-text">Add custom knowledge</span>
+            <Plus className="h-4 w-4 text-primary" />
+            <span className="text-sm font-bold text-foreground">Add custom knowledge</span>
           </div>
           <div className="grid gap-4">
             <div>
@@ -140,10 +140,10 @@ export default function TrainingPage() {
           </div>
         </section>
 
-        <section className="panel-surface rounded-4xl p-5">
+        <section className="bg-card rounded-4xl p-5">
           <div className="mb-4 flex items-center gap-2">
-            <BookOpenText className="h-4 w-4 text-app-primary" />
-            <span className="text-sm font-bold text-app-text">Custom sources</span>
+            <BookOpenText className="h-4 w-4 text-primary" />
+            <span className="text-sm font-bold text-foreground">Custom sources</span>
           </div>
           <div className="grid gap-2">
             {training.custom_sources.length > 0 ? (
@@ -151,8 +151,8 @@ export default function TrainingPage() {
                 <article key={source.id} className="row-card">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-app-text">{source.title}</p>
-                      <p className="mt-1.5 text-xs text-app-text-muted">{source.content}</p>
+                      <p className="text-sm font-semibold text-foreground">{source.title}</p>
+                      <p className="mt-1.5 text-xs text-muted-foreground">{source.content}</p>
                     </div>
                     <button
                       type="button"

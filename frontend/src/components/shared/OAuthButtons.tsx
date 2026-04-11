@@ -127,7 +127,7 @@ export default function OAuthButtons({
           <div className="w-full border-t border-slate-200" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-3 text-slate-400">or</span>
+          <span className="bg-card px-3 text-slate-400">or</span>
         </div>
       </div>
 
@@ -144,13 +144,13 @@ export default function OAuthButtons({
                 type="button"
                 disabled={providerDisabled}
                 onClick={() => void handleOAuth(provider)}
-                className="flex w-full items-center justify-center gap-3 rounded-2xl border border-app-border/80 bg-white/92 px-4 py-3 text-sm font-semibold text-app-text shadow-sm transition-colors hover:border-app-primary/20 hover:text-app-primary disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-3 rounded-2xl border border-border/80 bg-card/92 px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/20 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {providerIcon}
                 {isLoading ? `Connecting ${provider.label.replace(/^Continue with /, "")}...` : provider.label}
               </button>
               {provider.helpText ? (
-                <p className="text-xs leading-5 text-app-text-muted">{provider.helpText}</p>
+                <p className="text-xs leading-5 text-muted-foreground">{provider.helpText}</p>
               ) : null}
             </div>
           );

@@ -167,8 +167,8 @@ export default function SettingsPage() {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="panel-surface rounded-4xl p-6">
-          <h2 className="mb-5 text-base font-bold tracking-tight text-app-text">Foundation</h2>
+        <section className="rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Foundation</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="app-label" htmlFor="s-name">Clinic name</label>
@@ -192,13 +192,13 @@ export default function SettingsPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="app-label" htmlFor="s-services">
-                Services <span className="font-normal text-app-text-muted">(comma-separated)</span>
+                Services <span className="font-normal text-muted-foreground">(comma-separated)</span>
               </label>
               <textarea id="s-services" className="app-textarea" value={form.services} onChange={(e) => setForm((prev) => ({ ...prev, services: e.target.value }))} />
             </div>
             <div className="sm:col-span-2">
               <label className="app-label" htmlFor="s-faq">
-                FAQ lines <span className="font-normal text-app-text-muted">(one per line: Q: A)</span>
+                FAQ lines <span className="font-normal text-muted-foreground">(one per line: Q: A)</span>
               </label>
               <textarea id="s-faq" className="app-textarea" value={form.faq} onChange={(e) => setForm((prev) => ({ ...prev, faq: e.target.value }))} />
             </div>
@@ -206,19 +206,19 @@ export default function SettingsPage() {
         </section>
 
         <section className="grid gap-4">
-          <div className="panel-surface rounded-4xl p-5">
-            <h2 className="mb-4 text-base font-bold tracking-tight text-app-text">Automation and notifications</h2>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">Automation and notifications</h2>
             <div className="grid gap-2.5">
               <label className="row-card flex cursor-pointer items-center justify-between" htmlFor="s-notif">
-                <span className="text-sm font-semibold text-app-text">Notifications enabled</span>
+                <span className="text-sm font-medium text-foreground">Notifications enabled</span>
                 <input id="s-notif" type="checkbox" title="Notifications enabled" checked={form.notifications_enabled} onChange={(e) => setForm((prev) => ({ ...prev, notifications_enabled: e.target.checked }))} />
               </label>
               <label className="row-card flex cursor-pointer items-center justify-between" htmlFor="s-avail">
-                <span className="text-sm font-semibold text-app-text">Availability enabled</span>
+                <span className="text-sm font-medium text-foreground">Availability enabled</span>
                 <input id="s-avail" type="checkbox" title="Availability enabled" checked={form.availability_enabled} onChange={(e) => setForm((prev) => ({ ...prev, availability_enabled: e.target.checked }))} />
               </label>
               <label className="row-card flex cursor-pointer items-center justify-between" htmlFor="s-remind">
-                <span className="text-sm font-semibold text-app-text">Reminders enabled</span>
+                <span className="text-sm font-medium text-foreground">Reminders enabled</span>
                 <input id="s-remind" type="checkbox" title="Reminders enabled" checked={form.reminder_enabled} onChange={(e) => setForm((prev) => ({ ...prev, reminder_enabled: e.target.checked }))} />
               </label>
               <div className="mt-1">
@@ -232,22 +232,22 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="panel-surface rounded-4xl p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <Code className="h-4 w-4 text-app-primary" />
-              <span className="text-sm font-bold text-app-text">Embed snippet</span>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <div className="flex items-center gap-2">
+              <Code className="h-5 w-5 text-primary" />
+              <span className="text-sm font-semibold text-foreground">Embed snippet</span>
             </div>
-            <pre className="overflow-x-auto rounded-2xl border border-app-border/60 bg-white/80 p-4 text-xs text-app-text-muted">
+            <pre className="overflow-x-auto rounded-2xl border border-border bg-card p-4 text-xs text-muted-foreground">
               {embedCode || "Chat embed code will appear when the clinic slug is available."}
             </pre>
           </div>
 
-          <div className="panel-surface rounded-4xl p-5">
-            <p className="panel-section-head">Readiness</p>
-            <p className="mt-2.5 text-[1.8rem] font-bold tracking-[-0.05em] text-app-text">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <p className="text-sm font-medium text-muted-foreground">Readiness</p>
+            <p className="mt-3 text-xl font-bold tracking-[-0.04em] text-foreground">
               {readiness?.completedCount || 0}/{readiness?.totalCount || 0} configured
             </p>
-            <p className="mt-1.5 text-sm text-app-text-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               {readiness?.status.replaceAll("_", " ")}
             </p>
           </div>

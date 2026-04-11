@@ -33,22 +33,22 @@ export default function ProductPage() {
               <Sparkles className="h-3.5 w-3.5" />
               Product architecture
             </div>
-            <h1 className="mt-6 text-[clamp(2.5rem,3vw,4.4rem)] font-bold tracking-[-0.055em] text-app-text">
+            <h1 className="mt-6 text-[clamp(2.5rem,3vw,4.4rem)] font-bold tracking-[-0.055em] text-foreground">
               Rebuilt from the page layer up for clinic operations.
             </h1>
-            <p className="mt-5 text-base leading-8 text-app-text-secondary">
+            <p className="mt-5 text-base leading-8 text-muted-foreground">
               The new frontend is calmer, clearer, and more disciplined: one family across marketing, auth, onboarding, dashboard, chat, and control surfaces.
             </p>
           </div>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
             {sections.map((section) => (
-              <article key={section.title} className="panel-surface rounded-4xl p-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-app-primary/10 text-app-primary">
+              <article key={section.title} className="bg-card rounded-4xl p-7">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <section.icon className="h-5 w-5" />
                 </div>
-                <h2 className="mt-5 text-xl font-bold tracking-[-0.04em] text-app-text">{section.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-app-text-muted">{section.body}</p>
+                <h2 className="mt-5 text-xl font-bold tracking-[-0.04em] text-foreground">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{section.body}</p>
               </article>
             ))}
           </div>
@@ -57,15 +57,15 @@ export default function ProductPage() {
         <section className="marketing-container grid gap-8 pb-16 lg:grid-cols-2 lg:pb-20">
           <MarketingProductWindow pathLabel="/dashboard/inbox" caption="Operational pages are framed like workbenches, not disconnected templates.">
             <div className="grid gap-4">
-              <div className="panel-surface rounded-3xl p-4">
-                <p className="text-sm font-bold text-app-text">Inbox hierarchy</p>
-                <p className="mt-2 text-sm text-app-text-muted">
+              <div className="bg-card rounded-3xl p-4">
+                <p className="text-sm font-bold text-foreground">Inbox hierarchy</p>
+                <p className="mt-2 text-sm text-muted-foreground">
                   Status bands, channel context, and staff actions are visible without collapsing into tiny gray text or dead space.
                 </p>
               </div>
-              <div className="panel-surface rounded-3xl p-4">
-                <p className="text-sm font-bold text-app-text">Clear detail surfaces</p>
-                <p className="mt-2 text-sm text-app-text-muted">
+              <div className="bg-card rounded-3xl p-4">
+                <p className="text-sm font-bold text-foreground">Clear detail surfaces</p>
+                <p className="mt-2 text-sm text-muted-foreground">
                   Related request context, message timeline, and action state stay organized around the same conversation.
                 </p>
               </div>
@@ -74,15 +74,15 @@ export default function ProductPage() {
 
           <MarketingProductWindow pathLabel="/dashboard/settings" caption="Settings, billing, and training share the same premium control-center family.">
             <div className="grid gap-4">
-              <div className="panel-surface rounded-3xl p-4">
-                <p className="text-sm font-bold text-app-text">Configuration leadership</p>
-                <p className="mt-2 text-sm text-app-text-muted">
+              <div className="bg-card rounded-3xl p-4">
+                <p className="text-sm font-bold text-foreground">Configuration leadership</p>
+                <p className="mt-2 text-sm text-muted-foreground">
                   Sections lead with what matters most, then keep supporting controls nearby instead of buried.
                 </p>
               </div>
-              <div className="panel-surface rounded-3xl p-4">
-                <p className="text-sm font-bold text-app-text">Consistent surface language</p>
-                <p className="mt-2 text-sm text-app-text-muted">
+              <div className="bg-card rounded-3xl p-4">
+                <p className="text-sm font-bold text-foreground">Consistent surface language</p>
+                <p className="mt-2 text-sm text-muted-foreground">
                   Marketing, app, and patient-facing routes all feel related without becoming sterile or generic.
                 </p>
               </div>
@@ -91,8 +91,8 @@ export default function ProductPage() {
         </section>
 
         <section className="marketing-container pb-16 lg:pb-20">
-          <div className="panel-surface rounded-[2.3rem] px-8 py-10 text-center">
-            <h2 className="text-[clamp(2rem,2.5vw,3.2rem)] font-bold tracking-[-0.05em] text-app-text">
+          <div className="bg-card rounded-[2.3rem] px-8 py-10 text-center">
+            <h2 className="text-[clamp(2rem,2.5vw,3.2rem)] font-bold tracking-[-0.05em] text-foreground">
               See the product with a live preview or open your workspace.
             </h2>
             <div className="mt-6 flex flex-wrap justify-center gap-3">

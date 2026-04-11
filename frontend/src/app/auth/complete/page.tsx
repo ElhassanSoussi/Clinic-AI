@@ -97,13 +97,13 @@ export default function AuthCompletePage() {
           <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
             <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden />
           </div>
-          <h2 className="text-lg font-semibold tracking-tight text-app-text">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Sign-in failed
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-app-text-secondary">{error}</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{error}</p>
           <Link
             href="/login"
-            className="mt-8 inline-flex items-center justify-center rounded-xl bg-app-primary-hover px-5 py-3 text-sm font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-app-primary-deep"
+            className="mt-8 inline-flex items-center justify-center rounded-xl hover:bg-primary px-5 py-3 text-sm font-semibold text-white shadow-md shadow-teal-900/15 transition-colors hover:bg-primary"
           >
             Back to login
           </Link>
@@ -115,12 +115,12 @@ export default function AuthCompletePage() {
   return (
     <div className="auth-page-ambient flex min-h-screen items-center justify-center px-4 py-12">
       <div className="auth-form-focus w-full max-w-sm px-10 py-12 text-center">
-        <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-app-primary-hover shadow-md shadow-teal-900/20">
+        <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl hover:bg-primary shadow-md shadow-teal-900/20">
           <Bot className="h-6 w-6 text-white" aria-hidden />
         </div>
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-app-primary-hover" aria-hidden />
-        <p className="mt-5 text-sm font-medium text-app-text-muted">Finishing sign in…</p>
-        <p className="mt-2 text-xs leading-relaxed text-app-text-muted">
+        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary-hover" aria-hidden />
+        <p className="mt-5 text-sm font-medium text-muted-foreground">Finishing sign in…</p>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
           Securely completing your session. This usually takes a moment.
         </p>
       </div>

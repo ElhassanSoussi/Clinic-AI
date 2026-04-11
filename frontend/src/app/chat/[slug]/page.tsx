@@ -211,51 +211,51 @@ export default function ChatPage({
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="panel-surface rounded-4xl px-6 py-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-app-text-muted">
+          <section className="bg-card rounded-4xl px-6 py-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               <Shield className="h-3.5 w-3.5" />
               {supportLine}
             </div>
-            <h1 className="mt-5 text-[clamp(2.3rem,3vw,4rem)] font-bold tracking-[-0.055em] text-app-text">
+            <h1 className="mt-5 text-[clamp(2.3rem,3vw,4rem)] font-bold tracking-[-0.055em] text-foreground">
               {assistantLabel}
             </h1>
-            <p className="mt-3 text-sm leading-7 text-app-text-secondary">
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
               {clinicName && clinicName !== assistantLabel
                 ? `${headline} · Front-desk assistant`
                 : "Calm, guided front-desk assistance for patient questions and booking flow."}
             </p>
 
             <div className="mt-8 grid gap-4">
-              <div className="rounded-[1.6rem] border border-app-border/70 bg-white/80 p-4">
-                <p className="text-sm font-bold text-app-text">What this chat does well</p>
-                <p className="mt-2 text-sm leading-7 text-app-text-muted">
+              <div className="rounded-[1.6rem] border border-border/70 bg-card/80 p-4">
+                <p className="text-sm font-bold text-foreground">What this chat does well</p>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">
                   It answers from configured clinic information, guides booking intake, and keeps the flow clear for patients without making the interface feel clinical or cold.
                 </p>
               </div>
               {hoursSummary ? (
-                <div className="rounded-[1.6rem] border border-app-border/70 bg-white/80 p-4">
-                  <p className="text-sm font-bold text-app-text">Hours summary</p>
-                  <p className="mt-2 text-sm leading-7 text-app-text-muted">{hoursSummary}</p>
+                <div className="rounded-[1.6rem] border border-border/70 bg-card/80 p-4">
+                  <p className="text-sm font-bold text-foreground">Hours summary</p>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{hoursSummary}</p>
                 </div>
               ) : null}
               {telHref ? (
-                <a href={telHref} className="rounded-[1.6rem] border border-app-border/70 bg-white/80 p-4 transition-colors hover:border-app-primary/20">
-                  <div className="inline-flex items-center gap-2 text-sm font-bold text-app-text">
-                    <Phone className="h-4 w-4 text-app-primary" />
+                <a href={telHref} className="rounded-[1.6rem] border border-border/70 bg-card/80 p-4 transition-colors hover:border-primary/20">
+                  <div className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
+                    <Phone className="h-4 w-4 text-primary" />
                     Call the clinic
                   </div>
-                  <p className="mt-2 text-sm text-app-text-muted">{clinicPhone}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{clinicPhone}</p>
                 </a>
               ) : null}
             </div>
           </section>
 
           <section className="chat-stage-shell flex min-h-[42rem] flex-col overflow-hidden">
-            <div className="border-b border-app-border/70 px-5 py-4">
+            <div className="border-b border-border/70 px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-bold text-app-text">{headline}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-app-text-muted">
+                  <p className="text-sm font-bold text-foreground">{headline}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     {clinicIsLive ? "Active assistant" : "Preview mode"}
                   </p>
                 </div>
@@ -269,7 +269,7 @@ export default function ChatPage({
 
               {step !== null && !leadCaptured ? (
                 <div className="mt-4">
-                  <div className="flex justify-between text-xs font-semibold uppercase tracking-[0.18em] text-app-text-muted">
+                  <div className="flex justify-between text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     <span>Booking progress</span>
                     <span>{progress}/{STEP_LABELS.length}</span>
                   </div>
@@ -277,7 +277,7 @@ export default function ChatPage({
                     {STEP_LABELS.map((label, index) => (
                       <div
                         key={label}
-                        className={`h-2 rounded-full ${index < progress ? "bg-app-primary" : "bg-slate-200"}`}
+                        className={`h-2 rounded-full ${index < progress ? "bg-primary" : "bg-slate-200"}`}
                       />
                     ))}
                   </div>
@@ -299,7 +299,7 @@ export default function ChatPage({
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`max-w-[85%] rounded-[1.5rem] px-4 py-3 text-sm leading-7 ${message.role === "assistant" ? "bg-app-surface-alt text-app-text" : "ml-auto bg-app-primary text-white"}`}
+                  className={`max-w-[85%] rounded-[1.5rem] px-4 py-3 text-sm leading-7 ${message.role === "assistant" ? "bg-card-alt text-foreground" : "ml-auto bg-primary text-white"}`}
                 >
                   {message.content}
                 </div>
@@ -311,7 +311,7 @@ export default function ChatPage({
                     <button
                       key={suggestion}
                       type="button"
-                      className="rounded-full border border-app-border/70 bg-white/80 px-4 py-2 text-sm font-bold text-app-text-secondary transition-colors hover:text-app-text"
+                      className="rounded-full border border-border/70 bg-card/80 px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
                       onClick={() => void sendMessage(suggestion)}
                     >
                       {suggestion}
@@ -321,7 +321,7 @@ export default function ChatPage({
               ) : null}
 
               {sending ? (
-                <div className="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-white/80 px-3 py-2 text-sm text-app-text-muted">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-3 py-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Assistant thinking...
                 </div>
@@ -330,7 +330,7 @@ export default function ChatPage({
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="border-t border-app-border/70 px-5 py-4">
+            <div className="border-t border-border/70 px-5 py-4">
               <div className="flex gap-3">
                 <input
                   className="app-field"
@@ -355,7 +355,7 @@ export default function ChatPage({
                   <Send className="h-4 w-4" />
                 </button>
               </div>
-              <p className="mt-3 text-xs uppercase tracking-[0.18em] text-app-text-muted">
+              <p className="mt-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 Patient-safe, calm, and clearly structured
               </p>
             </div>

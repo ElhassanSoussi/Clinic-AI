@@ -32,14 +32,14 @@ export function MetricCard({
     displayValue = Number.isFinite(value) ? value : "—";
   }
   return (
-    <div className="panel-surface rounded-[1.6rem] p-5">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="panel-section-head">{label}</p>
-          <p className="mt-3 text-[2rem] font-bold tracking-[-0.055em] text-app-text">{displayValue}</p>
-          {detail ? <p className="mt-2 text-xs leading-5 text-app-text-muted">{detail}</p> : null}
+          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="mt-3 text-3xl font-bold tracking-[-0.04em] text-foreground">{displayValue}</p>
+          {detail ? <p className="mt-2 text-xs leading-5 text-muted-foreground">{detail}</p> : null}
         </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${TONE_STYLES[tone]}`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${TONE_STYLES[tone]}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>

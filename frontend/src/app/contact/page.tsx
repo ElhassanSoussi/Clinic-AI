@@ -48,39 +48,39 @@ export default function ContactPage() {
               <Mail className="h-3.5 w-3.5" />
               Contact
             </div>
-            <h1 className="text-[clamp(2.4rem,3vw,4.2rem)] font-semibold tracking-[-0.055em] text-app-text">
+            <h1 className="text-[clamp(2.4rem,3vw,4.2rem)] font-semibold tracking-[-0.055em] text-foreground">
               Talk to us about your clinic workflow, launch plan, or rollout questions.
             </h1>
-            <p className="text-base leading-8 text-app-text-secondary">
+            <p className="text-base leading-8 text-muted-foreground">
               We’re happy to help you evaluate fit, understand how the workspace maps to your front-desk flow, and answer trust or implementation questions.
             </p>
 
             <div className="grid gap-4">
-              <div className="panel-surface rounded-[1.75rem] p-5">
-                <p className="text-sm font-semibold text-app-text">Email</p>
-                <p className="mt-2 text-sm text-app-text-muted">support@clinicai.example</p>
+              <div className="bg-card rounded-xl p-5">
+                <p className="text-sm font-semibold text-foreground">Email</p>
+                <p className="mt-2 text-sm text-muted-foreground">support@clinicai.example</p>
               </div>
-              <div className="panel-surface rounded-[1.75rem] p-5">
-                <p className="text-sm font-semibold text-app-text">Response style</p>
-                <p className="mt-2 text-sm text-app-text-muted">
+              <div className="bg-card rounded-xl p-5">
+                <p className="text-sm font-semibold text-foreground">Response style</p>
+                <p className="mt-2 text-sm text-muted-foreground">
                   Clear answers, product walkthroughs, and implementation guidance without sales-pressure theater.
                 </p>
               </div>
-              <div className="panel-surface rounded-[1.75rem] p-5">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-app-text">
-                  <ShieldCheck className="h-4 w-4 text-app-primary" />
+              <div className="bg-card rounded-xl p-5">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
                   Trust-first conversations
                 </div>
-                <p className="mt-2 text-sm text-app-text-muted">
+                <p className="mt-2 text-sm text-muted-foreground">
                   If your questions are about patient-facing behavior, safety, or launch readiness, say so in the message and we’ll route accordingly.
                 </p>
               </div>
             </div>
           </div>
 
-          <section className="panel-surface rounded-[2rem] p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-app-text">Send a note</h2>
-            <p className="mt-3 text-sm leading-7 text-app-text-muted">
+          <section className="bg-card rounded-[2rem] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold tracking-[-0.04em] text-foreground">Send a note</h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
               Share a little context and we’ll follow up with the most relevant answer.
             </p>
 
