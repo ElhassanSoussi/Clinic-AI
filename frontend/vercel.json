@@ -6,7 +6,12 @@
   "installCommand": "pnpm install",
   "devCommand": "pnpm run dev",
   "rewrites": [
-    { "handle": "filesystem" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "handle": "filesystem"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
