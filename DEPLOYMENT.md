@@ -62,29 +62,32 @@ Feature-specific backend env vars:
 
 1. Create a new Vercel project from this repo.
 2. Set the root directory to `frontend`.
-3. Add the **required** frontend env vars (see `frontend/.env.example`):
+3. Set the **Framework Preset** to **Vite** (Project → Settings → General → Framework). The repo includes `frontend/vercel.json` with `"framework": "vite"`; if the preset is left on **Next.js**, the build fails with “No Next.js version detected” because the app is Vite, not Next.
+4. Add the **required** frontend env vars (see `frontend/.env.example`):
    - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
    - `NEXT_PUBLIC_SUPABASE_URL=...`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
-4. Add **production**-recommended vars:
+5. Add **production**-recommended vars:
    - `NEXT_PUBLIC_SITE_URL=https://clinicaireply.com` — canonical URL for metadata/Open Graph (omit on preview if you are OK with `*.vercel.app` URLs in link previews; required for correct production sharing cards).
    - `API_INTERNAL_URL=https://api.clinicaireply.com/api` — optional; same as public API if server and browser use the same backend.
-5. OAuth UI flags (align with Supabase providers):
+6. OAuth UI flags (align with Supabase providers):
    - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
    - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Microsoft auth is configured in Supabase
-6. **Sentry (optional):**
+7. **Sentry (optional):**
    - `NEXT_PUBLIC_SENTRY_DSN` — error reporting (client + server init via `frontend/src/instrumentation*.ts`)
    - `SENTRY_DSN` — optional server-only override
    - For readable stack traces in Sentry: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` in CI or Vercel build env (see Sentry Next.js docs)
    - `NEXT_PUBLIC_VERCEL_ENV` — optional; set to `preview` or `production` if you want the **browser** SDK environment tag to match deployments (`VERCEL_ENV` is not exposed to the client by default)
-7. Attach the custom domain:
+8. Attach the custom domain:
    - `clinicaireply.com`
-8. Verify the site loads and can reach the backend API.
-9. Keep `clinicaireply.com` as the canonical frontend host. If `www.clinicaireply.com` is attached, it should redirect to the apex domain.
+9. Verify the site loads and can reach the backend API.
+10. Keep `clinicaireply.com` as the canonical frontend host. If `www.clinicaireply.com` is attached, it should redirect to the apex domain.
 
 **Preview deployments:** Vercel sets `VERCEL_URL` automatically. Point `NEXT_PUBLIC_API_URL` at a non-production API unless you intentionally want previews to hit production data.
 
 If Vercel shows `No fastapi entrypoint found`, the project is building the repo root instead of `frontend`. Update the Vercel project `Root Directory` to `frontend` and redeploy.
+
+If Vercel shows **No Next.js version detected**, the Framework Preset is still Next.js. Switch it to **Vite** (or redeploy after pulling `frontend/vercel.json`).
 
 Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md).
 
