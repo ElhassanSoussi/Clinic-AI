@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { Navigation } from "@/app/components/Navigation";
+import { Footer } from "@/app/components/Footer";
 import { Mail, MessageSquare, Phone } from "lucide-react";
 import { ApiError, apiJson } from "@/lib/api";
 import { notifyError, notifySuccess } from "@/lib/feedback";

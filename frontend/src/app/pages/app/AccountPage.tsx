@@ -5,6 +5,8 @@ import { ApiError } from "@/lib/api";
 import { fetchClinicMe, updateAuthProfile, changePassword } from "@/lib/api/services";
 import type { Clinic } from "@/lib/api/types";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function AccountPage() {
   const { session, patchSession } = useAuth();
@@ -103,9 +105,9 @@ export function AccountPage() {
   const initial = (fullName || session?.email || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-3xl">
+    <div className={cn(appPagePaddingClass, "max-w-3xl")}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Account</h1>
+        <h1 className={appPageTitleClass}>Account</h1>
         <p className="text-muted-foreground">Profile and password for your signed-in user</p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         {ok && <p className="text-sm text-emerald-700 mt-2">{ok}</p>}

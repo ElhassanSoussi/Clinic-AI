@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchFrontdeskInbox } from "@/lib/api/services";
 import type { InboxConversation } from "@/lib/api/types";
 import { formatRelativeTime } from "@/lib/format";
+import { cn } from "@/app/components/ui/utils";
+import { appPageTitleCompactClass } from "@/lib/page-layout";
 
 type Row = {
   id: string;
@@ -153,7 +155,7 @@ export function InboxPage() {
         <div className="p-4 sm:p-6 border-b border-border bg-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">Inbox</h1>
+              <h1 className={cn(appPageTitleCompactClass, "mb-1")}>Inbox</h1>
               <p className="text-sm text-muted-foreground">
                 {unreadCount} need attention • {loading ? "…" : conversations.length} shown
               </p>

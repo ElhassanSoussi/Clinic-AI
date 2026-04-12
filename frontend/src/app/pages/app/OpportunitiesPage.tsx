@@ -7,6 +7,7 @@ import { fetchFrontdeskAnalytics, fetchOpportunities, updateFollowUpTask } from 
 import type { FrontdeskAnalytics, Opportunity } from "@/lib/api/types";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 function typeStyle(type: string) {
   const t = type.toLowerCase();
@@ -82,9 +83,9 @@ export function OpportunitiesPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Opportunities</h1>
+            <h1 className={appPageTitleClass}>Opportunities</h1>
             <p className="text-[15px] text-muted-foreground">Front-desk opportunity queue tied to real patient signals</p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -135,7 +136,7 @@ export function OpportunitiesPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         {loading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
         {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No opportunities in queue.</p>}
         <div className="space-y-3">

@@ -14,6 +14,8 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { fetchOperations } from "@/lib/api/services";
 import type { ChannelReadiness, OperationsOverview } from "@/lib/api/types";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 function ChannelCard({ ch }: { ch: ChannelReadiness }) {
   const Icon = ch.channel?.toLowerCase().includes("sms") ? Smartphone : Globe;
@@ -91,9 +93,9 @@ export function OperationsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Operations</h1>
+            <h1 className={appPageTitleClass}>Operations</h1>
             <p className="text-[15px] text-muted-foreground">Live readiness, channels, and automation snapshot</p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -121,7 +123,7 @@ export function OperationsPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8 space-y-6">
+      <div className={cn(appPagePaddingClass, "space-y-6")}>
         {loading && <p className="text-sm text-muted-foreground">Loading operations…</p>}
         {data && (
           <>

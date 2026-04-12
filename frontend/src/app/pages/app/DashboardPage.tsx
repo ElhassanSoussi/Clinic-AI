@@ -10,6 +10,7 @@ import {
 } from "@/lib/api/services";
 import type { ActivityEvent, AppointmentRecord, FrontdeskAnalytics } from "@/lib/api/types";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 type Lead = { id: string; status: string };
 
@@ -86,9 +87,9 @@ export function DashboardPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
+            <h1 className={appPageTitleClass}>Dashboard</h1>
             <p className="text-muted-foreground">Clinic operations from your connected data</p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -145,7 +146,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg border border-border">
             <div className="p-6 border-b border-border">

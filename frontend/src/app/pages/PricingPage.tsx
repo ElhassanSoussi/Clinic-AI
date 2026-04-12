@@ -1,6 +1,6 @@
 import { Link } from "react-router";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { Navigation } from "@/app/components/Navigation";
+import { Footer } from "@/app/components/Footer";
 import { Check } from "lucide-react";
 
 export function PricingPage() {

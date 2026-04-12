@@ -15,6 +15,8 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { apiJson } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageTitleCompactClass } from "@/lib/page-layout";
 
 type LeadRow = {
   id: string;
@@ -112,10 +114,10 @@ export function LeadsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Leads</h1>
+              <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Leads</h1>
               <p className="text-muted-foreground">Track inquiries and convert prospects</p>
             </div>
             <button
@@ -176,7 +178,7 @@ export function LeadsPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         {error && (
           <div className="mb-4 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
             {error}

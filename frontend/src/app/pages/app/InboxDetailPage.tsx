@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Send, MoreVertical, Globe, Brain, User, Smartphone } from "lucide-react";
-import { ConfirmModal } from "../../components/Modal";
+import { ConfirmModal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchConversationDetail,
@@ -12,6 +12,7 @@ import type { ConversationDetail } from "@/lib/api/types";
 import { ApiError } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { appPagePaddingClass } from "@/lib/page-layout";
 
 export function InboxDetailPage() {
   const { id } = useParams();
@@ -109,7 +110,7 @@ export function InboxDetailPage() {
 
   if (loading && !detail) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <p className="text-muted-foreground">Loading conversation…</p>
       </div>
     );
@@ -117,7 +118,7 @@ export function InboxDetailPage() {
 
   if (error || !conv) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <Link to="/app/inbox" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back to inbox

@@ -1,6 +1,6 @@
 import { Link } from "react-router";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { Navigation } from "@/app/components/Navigation";
+import { Footer } from "@/app/components/Footer";
 import { CheckCircle, MessageSquare, Calendar, Users, Brain, Shield, ArrowRight, BarChart3, Settings, Eye, CheckCircle2, Target } from "lucide-react";
 
 export function LandingPage() {

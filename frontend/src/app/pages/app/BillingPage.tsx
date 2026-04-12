@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CreditCard, Calendar, AlertTriangle, Check, Shield } from "lucide-react";
-import { Modal } from "../../components/Modal";
+import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import {
@@ -12,6 +12,7 @@ import {
 import type { BillingPlan, BillingStatus } from "@/lib/api/types";
 import { getPublicOrigin } from "@/lib/site";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 function formatMoneyCents(cents: number): string {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(cents / 100);
@@ -129,9 +130,9 @@ export function BillingPage() {
   const currentPlanMeta = plans.find((p) => p.id === status?.plan);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className={appPagePaddingClass}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Billing</h1>
+        <h1 className={appPageTitleClass}>Billing</h1>
         <p className="text-muted-foreground">Subscription and lead limits from your clinic record</p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
       </div>

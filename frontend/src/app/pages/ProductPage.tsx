@@ -1,5 +1,5 @@
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { Navigation } from "@/app/components/Navigation";
+import { Footer } from "@/app/components/Footer";
 import { MessageSquare, Calendar, Users, Brain, BarChart3, Zap, Link as LinkIcon, Bell } from "lucide-react";
 
 export function ProductPage() {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Brain, Plus, BookOpen, Search, Edit2, Trash2, Upload, AlertTriangle, CheckCircle } from "lucide-react";
-import { Modal } from "../../components/Modal";
+import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import {
@@ -13,6 +13,8 @@ import {
 } from "@/lib/api/services";
 import type { TrainingDocument, TrainingKnowledgeSource, TrainingOverview } from "@/lib/api/types";
 import { dismissToast, notifyError, notifyLoading, notifySuccess } from "@/lib/feedback";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function AITrainingPage() {
   const { session } = useAuth();
@@ -163,10 +165,10 @@ export function AITrainingPage() {
   const docStats = overview?.document_stats;
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
+    <div className={cn(appPagePaddingClass, "max-w-6xl mx-auto")}>
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+          <h1 className={cn(appPageTitleClass, "flex items-center gap-2")}>
             <Brain className="w-8 h-8 text-primary" />
             AI Training
           </h1>

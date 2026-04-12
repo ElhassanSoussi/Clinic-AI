@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Check, Building, Clock, Zap, Copy, CheckCircle, ChevronRight, Sparkles, MessageSquare } from "lucide-react";
-import { BusinessHoursEditor } from "../../components/BusinessHoursEditor";
+import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import { fetchClinicMe, goLiveClinic, updateClinicMe } from "@/lib/api/services";

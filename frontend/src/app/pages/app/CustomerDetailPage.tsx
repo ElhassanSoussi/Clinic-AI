@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchCustomerDetail } from "@/lib/api/services";
 import type { CustomerDetail } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function CustomerDetailPage() {
   const { id } = useParams();
@@ -45,7 +46,7 @@ export function CustomerDetailPage() {
 
   if (loading && !profile) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <p className="text-muted-foreground">Loading patient…</p>
       </div>
     );
@@ -53,7 +54,7 @@ export function CustomerDetailPage() {
 
   if (error || !profile) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <Link to="/app/customers" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium">
           <ArrowLeft className="w-4 h-4" />
           Back to patients
@@ -76,7 +77,7 @@ export function CustomerDetailPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <Link to="/app/customers" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to patients
@@ -88,7 +89,7 @@ export function CustomerDetailPage() {
                 <span className="text-2xl font-bold text-teal-700">{initial}</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">{profile.name}</h1>
+                <h1 className={appPageTitleClass}>{profile.name}</h1>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                   <span>{profile.total_interactions ?? profile.conversation_count + profile.lead_count} total interactions</span>
                   <span>•</span>
@@ -138,7 +139,7 @@ export function CustomerDetailPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-3 gap-4">

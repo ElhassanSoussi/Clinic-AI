@@ -14,8 +14,8 @@ import {
   Zap,
   PauseCircle,
 } from "lucide-react";
-import { ConfirmModal } from "../../components/Modal";
-import { BusinessHoursEditor } from "../../components/BusinessHoursEditor";
+import { ConfirmModal } from "@/app/components/Modal";
+import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import {
@@ -36,6 +36,7 @@ import {
   validateBusinessHours,
 } from "@/lib/business-hours";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function SettingsPage() {
   const { session } = useAuth();
@@ -325,7 +326,7 @@ export function SettingsPage() {
 
   if (loading && !clinic) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <p className="text-muted-foreground">Loading clinic settings…</p>
       </div>
     );
@@ -333,7 +334,7 @@ export function SettingsPage() {
 
   if (loadError && !clinic) {
     return (
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <p className="text-destructive">{loadError}</p>
       </div>
     );
@@ -347,11 +348,11 @@ export function SettingsPage() {
     }) ?? [];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className={appPagePaddingClass}>
       <div className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Settings</h1>
+            <h1 className={appPageTitleClass}>Settings</h1>
             <p className="text-muted-foreground">Clinic configuration from your live workspace</p>
             {saveError && <p className="text-sm text-destructive mt-2">{saveError}</p>}
           </div>

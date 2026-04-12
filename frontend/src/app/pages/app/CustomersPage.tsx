@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchCustomers } from "@/lib/api/services";
 import type { CustomerSummary } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function CustomersPage() {
   const { session } = useAuth();
@@ -60,10 +61,10 @@ export function CustomersPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Patients</h1>
+              <h1 className={appPageTitleClass}>Patients</h1>
               <p className="text-[15px] text-muted-foreground">Customer profiles aggregated from conversations and requests</p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
@@ -106,7 +107,7 @@ export function CustomersPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
+      <div className={appPagePaddingClass}>
         <div className="flex gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

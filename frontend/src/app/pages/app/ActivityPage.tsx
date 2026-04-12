@@ -3,6 +3,7 @@ import { MessageSquare, Calendar, Users, Settings as SettingsIcon, FileText, Ale
 import { useAuth } from "@/lib/auth-context";
 import { apiJson } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
+import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 type ActivityEvent = {
   type: string;
@@ -78,9 +79,9 @@ export function ActivityPage() {
   }, [session?.accessToken]);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className={appPagePaddingClass}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Activity</h1>
+        <h1 className={appPageTitleClass}>Activity</h1>
         <p className="text-muted-foreground">Recent leads and conversations for your clinic</p>
       </div>
 

@@ -7,6 +7,8 @@ import { fetchAppointments, updateAppointment } from "@/lib/api/services";
 import type { AppointmentRecord } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageTitleCompactClass } from "@/lib/page-layout";
 
 const STATUS_OPTIONS = [
   "request_open",
@@ -136,10 +138,10 @@ export function AppointmentsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className={appPagePaddingClass}>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Appointments</h1>
+              <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Appointments</h1>
               <p className="text-muted-foreground">Live schedule from front-desk appointments</p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
@@ -195,7 +197,7 @@ export function AppointmentsPage() {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8 space-y-6">
+      <div className={cn(appPagePaddingClass, "space-y-6")}>
         {loading && <p className="text-sm text-muted-foreground">Loading appointments…</p>}
         {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No appointments returned for this clinic.</p>}
         {!loading &&
