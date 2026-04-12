@@ -129,7 +129,7 @@ export function BillingPage() {
   const currentPlanMeta = plans.find((p) => p.id === status?.plan);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Billing</h1>
         <p className="text-muted-foreground">Subscription and lead limits from your clinic record</p>

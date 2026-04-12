@@ -9,17 +9,17 @@ export function LandingPage() {
       <Navigation />
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h1 className="text-5xl font-bold text-foreground mb-6 leading-tight">
+          <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6 leading-tight px-1">
               Front desk operating system for modern clinics
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 px-1">
               AI-powered patient conversations, appointment booking, and clinic operations — unified in one platform your team will trust.
             </p>
 
-            <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-8 max-w-md sm:max-w-none mx-auto">
               <Link
                 to="/register"
                 className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold"
@@ -34,7 +34,7 @@ export function LandingPage() {
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground px-2">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-primary" />
                 <span>14-day free trial</span>
@@ -64,7 +64,7 @@ export function LandingPage() {
                 </div>
               </div>
               <div className="p-6 bg-background">
-                <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
                   <div className="bg-white rounded-lg p-4 border border-border">
                     <p className="text-2xl font-bold mb-1">24</p>
                     <p className="text-xs text-muted-foreground">New conversations</p>

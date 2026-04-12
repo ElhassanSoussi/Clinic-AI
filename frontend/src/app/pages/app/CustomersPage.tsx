@@ -60,7 +60,7 @@ export function CustomersPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Patients</h1>
@@ -69,7 +69,7 @@ export function CustomersPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white rounded-xl p-5 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
@@ -106,7 +106,7 @@ export function CustomersPage() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="flex gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

@@ -82,14 +82,14 @@ export function OpportunitiesPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">Opportunities</h1>
             <p className="text-[15px] text-muted-foreground">Front-desk opportunity queue tied to real patient signals</p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white rounded-xl p-5 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
@@ -135,7 +135,7 @@ export function OpportunitiesPage() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         {loading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
         {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No opportunities in queue.</p>}
         <div className="space-y-3">

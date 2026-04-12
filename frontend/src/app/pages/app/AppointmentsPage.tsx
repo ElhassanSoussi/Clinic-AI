@@ -136,7 +136,7 @@ export function AppointmentsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground mb-2">Appointments</h1>
@@ -154,7 +154,7 @@ export function AppointmentsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white rounded-lg p-5 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
@@ -195,7 +195,7 @@ export function AppointmentsPage() {
         </div>
       </div>
 
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 md:p-8 space-y-6">
         {loading && <p className="text-sm text-muted-foreground">Loading appointments…</p>}
         {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No appointments returned for this clinic.</p>}
         {!loading &&

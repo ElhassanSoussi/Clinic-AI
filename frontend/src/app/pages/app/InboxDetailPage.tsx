@@ -109,7 +109,7 @@ export function InboxDetailPage() {
 
   if (loading && !detail) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-muted-foreground">Loading conversation…</p>
       </div>
     );
@@ -117,7 +117,7 @@ export function InboxDetailPage() {
 
   if (error || !conv) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <Link to="/app/inbox" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back to inbox
@@ -130,16 +130,16 @@ export function InboxDetailPage() {
   const initial = (conv.customer_name || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="h-full flex bg-background">
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="border-b border-border bg-white">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <Link to="/app/inbox" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+    <div className="h-full min-h-0 flex flex-col bg-background">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <div className="border-b border-border bg-white shrink-0">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+              <Link to="/app/inbox" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium shrink-0">
                 <ArrowLeft className="w-4 h-4" />
                 Back to inbox
               </Link>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
+              <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                 <button
                   type="button"
                   onClick={() => void onToggleTakeover()}
@@ -197,7 +197,7 @@ export function InboxDetailPage() {
           <div className="px-6 py-2 text-sm text-destructive bg-destructive/10 border-b border-destructive/20">{actionError}</div>
         ) : null}
 
-        <div className="flex-1 overflow-auto p-6 space-y-6 bg-slate-50/50">
+        <div className="flex-1 min-h-0 overflow-auto p-4 sm:p-6 space-y-6 bg-slate-50/50">
           {loading && <p className="text-sm text-muted-foreground">Refreshing…</p>}
           {messages.map((msg) => {
             const isUser = msg.role === "user" || msg.role === "patient";

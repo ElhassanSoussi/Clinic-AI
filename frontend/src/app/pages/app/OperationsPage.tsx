@@ -91,7 +91,7 @@ export function OperationsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">Operations</h1>
             <p className="text-[15px] text-muted-foreground">Live readiness, channels, and automation snapshot</p>
@@ -121,7 +121,7 @@ export function OperationsPage() {
         </div>
       </div>
 
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 md:p-8 space-y-6">
         {loading && <p className="text-sm text-muted-foreground">Loading operations…</p>}
         {data && (
           <>
@@ -203,8 +203,8 @@ export function OperationsPage() {
                     <div className="mt-0.5">
                       <span
                         className={`w-2 h-2 rounded-full inline-block ${item.status.toLowerCase().includes("ok") || item.status.toLowerCase().includes("ready")
-                            ? "bg-emerald-500"
-                            : "bg-orange-500"
+                          ? "bg-emerald-500"
+                          : "bg-orange-500"
                           }`}
                       />
                     </div>

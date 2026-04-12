@@ -103,7 +103,7 @@ export function AccountPage() {
   const initial = (fullName || session?.email || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-6 md:p-8 max-w-3xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Account</h1>
         <p className="text-muted-foreground">Profile and password for your signed-in user</p>
@@ -128,12 +128,14 @@ export function AccountPage() {
           <label className="block text-sm font-medium mb-2">Full name</label>
           <input
             type="text"
+            data-testid="account-full-name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="w-full px-4 py-2 border border-border rounded-lg mb-4"
           />
           <button
             type="button"
+            data-testid="account-save-profile"
             disabled={busyProfile}
             onClick={() => void saveProfile()}
             className="px-4 py-2 bg-primary text-white rounded-lg font-medium disabled:opacity-50"

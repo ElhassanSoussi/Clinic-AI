@@ -80,7 +80,7 @@ export function LeadDetailPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-muted-foreground">Loading lead…</p>
       </div>
     );
@@ -88,7 +88,7 @@ export function LeadDetailPage() {
 
   if (error || !lead) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <Link to="/app/leads" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back to leads
@@ -101,7 +101,7 @@ export function LeadDetailPage() {
   const initial = (lead.patient_name || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <Link to="/app/leads" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ArrowLeft className="w-4 h-4" />
         Back to leads

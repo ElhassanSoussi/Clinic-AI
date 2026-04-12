@@ -325,7 +325,7 @@ export function SettingsPage() {
 
   if (loading && !clinic) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-muted-foreground">Loading clinic settings…</p>
       </div>
     );
@@ -333,7 +333,7 @@ export function SettingsPage() {
 
   if (loadError && !clinic) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-destructive">{loadError}</p>
       </div>
     );
@@ -347,7 +347,7 @@ export function SettingsPage() {
     }) ?? [];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
@@ -366,6 +366,7 @@ export function SettingsPage() {
             {hasChanges && (
               <button
                 type="button"
+                data-testid="settings-save-changes"
                 disabled={saving}
                 onClick={() => void handleSave()}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
@@ -476,6 +477,7 @@ export function SettingsPage() {
                 <label className="block text-sm font-medium mb-2">Clinic name</label>
                 <input
                   type="text"
+                  data-testid="settings-clinic-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
@@ -790,6 +792,7 @@ export function SettingsPage() {
             <div className="space-y-2">
               <button
                 type="button"
+                data-testid="settings-save-changes"
                 disabled={!hasChanges || saving}
                 onClick={() => void handleSave()}
                 className={`w-full px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${hasChanges && !saving ? "bg-primary text-white hover:bg-primary/90" : "bg-slate-100 text-slate-400 cursor-not-allowed"

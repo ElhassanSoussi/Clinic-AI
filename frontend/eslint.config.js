@@ -26,4 +26,16 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": "off",
     },
   },
+  {
+    files: ["src/app/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  {
+    files: ["src/lib/auth-context.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

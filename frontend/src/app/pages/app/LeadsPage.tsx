@@ -112,7 +112,7 @@ export function LeadsPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-foreground mb-2">Leads</h1>
@@ -128,7 +128,7 @@ export function LeadsPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white rounded-lg p-5 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
@@ -176,7 +176,7 @@ export function LeadsPage() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         {error && (
           <div className="mb-4 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
             {error}

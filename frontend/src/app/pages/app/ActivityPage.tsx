@@ -78,7 +78,7 @@ export function ActivityPage() {
   }, [session?.accessToken]);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Activity</h1>
         <p className="text-muted-foreground">Recent leads and conversations for your clinic</p>

@@ -206,24 +206,24 @@ export function PatientChatPage() {
 
   if (!activeSlug) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-4">
-          <h1 className="text-2xl font-bold">Patient chat</h1>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md space-y-4 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">Patient chat</h1>
           <p className="text-muted-foreground text-sm">
             Enter your clinic&apos;s public slug (same as in your Clinic AI dashboard). Example URL:{" "}
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">/chat?slug=my-clinic</code>
+            <code className="text-xs bg-muted px-1 py-0.5 rounded break-all">/chat?slug=my-clinic</code>
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={slugInput}
               onChange={(e) => setSlugInput(e.target.value)}
-              className="flex-1 px-4 py-2 border border-border rounded-lg"
+              className="flex-1 min-w-0 px-4 py-2 border border-border rounded-lg"
               placeholder="clinic-slug"
             />
             <button
               type="button"
               onClick={applySlug}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg shrink-0"
             >
               Start
             </button>
@@ -259,21 +259,21 @@ export function PatientChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl">
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-3xl min-w-0">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-border">
           <div
-            className={`p-6 ${headerColor ? "" : "bg-primary"}`}
+            className={`p-4 sm:p-6 ${headerColor ? "" : "bg-primary"}`}
             style={headerColor ? { backgroundColor: headerColor } : undefined}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                   <Bot className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">{branding.name}</h1>
-                  <div className="flex items-center gap-2 mt-1">
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl font-bold text-white truncate">{branding.name}</h1>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                     <p className="text-white/90 text-sm">
                       {branding.assistant_name || "AI Assistant"} • {branding.is_live ? "Online" : "Away"}
@@ -281,7 +281,7 @@ export function PatientChatPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
                 <div className="px-3 py-1 bg-white/20 rounded-full flex items-center gap-1.5">
                   <Shield className="w-3 h-3 text-white" />
                   <span className="text-xs text-white font-medium">Secure</span>
@@ -290,8 +290,8 @@ export function PatientChatPage() {
             </div>
           </div>
 
-          <div className="bg-muted/50 border-b border-border px-6 py-3">
-            <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+          <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <Shield className="w-3 h-3" />
                 <span>HIPAA Compliant</span>
@@ -313,7 +313,7 @@ export function PatientChatPage() {
             </div>
           )}
 
-          <div className="h-[500px] overflow-y-auto p-6 space-y-4 bg-muted/20">
+          <div className="h-[min(28rem,65dvh)] sm:h-[500px] overflow-y-auto p-4 sm:p-6 space-y-4 bg-muted/20 min-h-[240px]">
             {messages.map((msg) => (
               <div
                 key={msg.id}

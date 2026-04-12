@@ -121,8 +121,8 @@ export function InboxPage() {
   const unreadCount = conversations.filter((c) => c.unread).length;
 
   return (
-    <div className="h-full bg-background flex">
-      <div className="w-64 bg-white border-r border-border flex-shrink-0">
+    <div className="h-full bg-background flex flex-col lg:flex-row min-h-0">
+      <div className="w-full lg:w-64 lg:flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-border">
         <div className="p-6 border-b border-border">
           <h2 className="font-bold text-foreground">Filters</h2>
         </div>
@@ -149,9 +149,9 @@ export function InboxPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="p-6 border-b border-border bg-white">
-          <div className="flex items-center justify-between mb-4">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <div className="p-4 sm:p-6 border-b border-border bg-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground mb-1">Inbox</h1>
               <p className="text-sm text-muted-foreground">

@@ -86,14 +86,14 @@ export function DashboardPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
             <p className="text-muted-foreground">Clinic operations from your connected data</p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg p-6 border border-border">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
@@ -145,7 +145,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg border border-border">
             <div className="p-6 border-b border-border">

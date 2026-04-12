@@ -45,7 +45,7 @@ export function CustomerDetailPage() {
 
   if (loading && !profile) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <p className="text-muted-foreground">Loading patient…</p>
       </div>
     );
@@ -53,7 +53,7 @@ export function CustomerDetailPage() {
 
   if (error || !profile) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <Link to="/app/customers" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium">
           <ArrowLeft className="w-4 h-4" />
           Back to patients
@@ -76,7 +76,7 @@ export function CustomerDetailPage() {
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <Link to="/app/customers" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to patients
@@ -138,7 +138,7 @@ export function CustomerDetailPage() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-3 gap-4">

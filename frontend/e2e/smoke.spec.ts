@@ -13,6 +13,11 @@ test.describe("public smoke", () => {
 
   test("patient chat page loads", async ({ page }) => {
     await page.goto("/chat");
-    await expect(page.locator("body")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /patient chat/i })).toBeVisible();
+  });
+
+  test("register page loads", async ({ page }) => {
+    await page.goto("/register");
+    await expect(page.getByRole("heading", { name: /create your account/i })).toBeVisible();
   });
 });

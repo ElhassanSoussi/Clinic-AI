@@ -164,20 +164,22 @@ export function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-4xl min-w-0">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-border mb-4">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium">Welcome to Clinic AI</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3">Let&apos;s get you set up</h1>
-          <p className="text-lg text-muted-foreground">Connect real clinic data — no placeholder configuration</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-3">Let&apos;s get you set up</h1>
+          <p className="text-base sm:text-lg text-muted-foreground px-1">
+            Connect real clinic data — no placeholder configuration
+          </p>
           {error && <p className="text-sm text-destructive mt-3">{error}</p>}
         </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="flex items-center justify-between mb-4 min-w-[min(100%,520px)] sm:min-w-0">
             {steps.map((s, idx) => {
               const Icon = s.icon;
               const isActive = step === s.number;
@@ -211,7 +213,7 @@ export function OnboardingPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 border border-border shadow-xl">
+        <div className="bg-white rounded-2xl p-4 sm:p-8 border border-border shadow-xl">
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-bold mb-2">Clinic profile</h2>
@@ -295,20 +297,20 @@ export function OnboardingPage() {
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 mt-8 pt-6 border-t border-slate-200">
             {step > 1 ? (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium">
+              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium w-full sm:w-auto">
                 Back
               </button>
             ) : (
-              <div />
+              <div className="hidden sm:block" />
             )}
             {step === 1 && (
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => void saveStep1()}
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto sm:ml-auto"
               >
                 Save & continue
                 <ChevronRight className="w-4 h-4" />
@@ -319,7 +321,7 @@ export function OnboardingPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => void saveStep2()}
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto sm:ml-auto"
               >
                 Save & continue
                 <ChevronRight className="w-4 h-4" />
@@ -330,7 +332,7 @@ export function OnboardingPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => void finish()}
-                className="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center gap-2 text-lg disabled:opacity-50"
+                className="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium flex items-center justify-center gap-2 text-base sm:text-lg disabled:opacity-50 w-full sm:w-auto sm:ml-auto"
               >
                 <Zap className="w-5 h-5" />
                 {saving ? "Finishing…" : "Go live & open dashboard"}
