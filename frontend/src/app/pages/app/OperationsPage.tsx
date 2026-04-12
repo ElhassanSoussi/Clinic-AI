@@ -14,8 +14,9 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { fetchOperations } from "@/lib/api/services";
 import type { ChannelReadiness, OperationsOverview } from "@/lib/api/types";
+import { flattenRecordRows } from "@/lib/display-text";
 import { cn } from "@/app/components/ui/utils";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 function ChannelCard({ ch }: { ch: ChannelReadiness }) {
   const Icon = ch.channel?.toLowerCase().includes("sms") ? Smartphone : Globe;
@@ -42,12 +43,13 @@ function ChannelCard({ ch }: { ch: ChannelReadiness }) {
   );
 }
 
-function queuePreview(label: string, items: unknown[]) {
+function queuePreview(label: string, description: string, items: unknown[]) {
   return (
-    <div className="p-4 bg-slate-50 border border-border rounded-lg">
-      <p className="text-sm font-semibold text-foreground mb-1">{label}</p>
-      <p className="text-2xl font-bold text-foreground">{items.length}</p>
-      <p className="text-xs text-muted-foreground mt-1">Items in queue snapshot</p>
+    <div className="p-5 bg-white border border-border rounded-xl shadow-sm">
+      <p className={cn(appSectionTitleClass, "text-base")}>{label}</p>
+      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
+      <p className="text-3xl font-bold text-foreground mt-3 tabular-nums">{items.length}</p>
+      <p className="text-xs font-medium text-muted-foreground mt-1">Current snapshot count</p>
     </div>
   );
 }
@@ -96,7 +98,9 @@ export function OperationsPage() {
         <div className={appPagePaddingClass}>
           <div className="mb-6">
             <h1 className={appPageTitleClass}>Operations</h1>
-            <p className="text-[15px] text-muted-foreground">Live readiness, channels, and automation snapshot</p>
+            <p className={appPageSubtitleClass}>
+              Control center for channels, automation, deposits, and readiness — same backend signals, organized for staff.
+            </p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
 
@@ -131,7 +135,7 @@ export function OperationsPage() {
               <div className="px-6 py-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Globe className="w-5 h-5 text-slate-600" />
-                  <h2 className="text-lg font-bold text-foreground">Channels</h2>
+                  <h2 className={appSectionTitleClass}>Channels</h2>
                 </div>
                 <span className="text-xs font-medium text-slate-600">{data.channel_readiness.filter((c) => c.live).length} live</span>
               </div>
@@ -149,7 +153,7 @@ export function OperationsPage() {
               <div className="bg-white rounded-xl border border-border shadow-sm">
                 <div className="px-6 py-4 border-b border-border flex items-center gap-3">
                   <Bell className="w-5 h-5 text-slate-600" />
-                  <h2 className="text-lg font-bold text-foreground">Automation</h2>
+                  <h2 className={appSectionTitleClass}>Automation</h2>
                 </div>
                 <div className="p-6 space-y-3 text-sm">
                   <div className="flex justify-between">
@@ -177,52 +181,98 @@ export function OperationsPage() {
               <div className="bg-white rounded-xl border border-border shadow-sm">
                 <div className="px-6 py-4 border-b border-border flex items-center gap-3">
                   <Clock className="w-5 h-5 text-slate-600" />
-                  <h2 className="text-lg font-bold text-foreground">Deposit summary</h2>
+                  <h2 className={appSectionTitleClass}>Deposits</h2>
                 </div>
                 <div className="p-6">
-                  <pre className="text-xs bg-slate-950 text-slate-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap break-all">
-                    {JSON.stringify(data.deposit_summary ?? {}, null, 2)}
-                  </pre>
+                  {flattenRecordRows(data.deposit_summary ?? {}).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No deposit summary fields returned for this clinic.</p>
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg border border-border">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-50 border-b border-border">
+                          <tr>
+                            <th className="text-left font-semibold text-foreground px-4 py-2">Signal</th>
+                            <th className="text-left font-semibold text-foreground px-4 py-2">Value</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {flattenRecordRows(data.deposit_summary ?? {}).map((row) => (
+                            <tr key={row.label} className="border-b border-border last:border-0">
+                              <td className="px-4 py-2.5 text-muted-foreground align-top">{row.label}</td>
+                              <td className="px-4 py-2.5 font-medium text-foreground align-top">{row.value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
-              {queuePreview("Communication queue", (data.communication_queue as unknown[]) || [])}
-              {queuePreview("Review queue", (data.review_queue as unknown[]) || [])}
-              {queuePreview("Reminder candidates", (data.reminder_candidates as unknown[]) || [])}
+              {queuePreview(
+                "Communication queue",
+                "Patient-facing messages awaiting routing or staff handling.",
+                (data.communication_queue as unknown[]) || [],
+              )}
+              {queuePreview(
+                "Review queue",
+                "Items flagged for a second look before they leave the front desk.",
+                (data.review_queue as unknown[]) || [],
+              )}
+              {queuePreview(
+                "Reminder candidates",
+                "Appointments eligible for reminder automation based on current rules.",
+                (data.reminder_candidates as unknown[]) || [],
+              )}
             </div>
 
             <div className="bg-white rounded-xl border border-border shadow-sm">
               <div className="px-6 py-4 border-b border-border flex items-center gap-3">
                 <ActivityIcon className="w-5 h-5 text-slate-600" />
-                <h2 className="text-lg font-bold text-foreground">Readiness checklist</h2>
+                <h2 className={appSectionTitleClass}>Readiness checklist</h2>
               </div>
-              <div className="p-6 space-y-3">
+              <div className="p-6">
                 {(sys?.items || []).length === 0 && <p className="text-sm text-muted-foreground">No checklist items.</p>}
-                {(sys?.items || []).map((item) => (
-                  <div key={item.key} className="p-4 border border-border rounded-lg flex gap-3">
-                    <div className="mt-0.5">
-                      <span
-                        className={`w-2 h-2 rounded-full inline-block ${item.status.toLowerCase().includes("ok") || item.status.toLowerCase().includes("ready")
-                          ? "bg-emerald-500"
-                          : "bg-orange-500"
-                          }`}
-                      />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-foreground">{item.label}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{item.summary}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
+                <div className="grid md:grid-cols-2 gap-3">
+                  {(sys?.items || []).map((item) => {
+                    const ok =
+                      item.status.toLowerCase().includes("ok") || item.status.toLowerCase().includes("ready");
+                    return (
+                      <div
+                        key={item.key}
+                        className={cn(
+                          "p-4 rounded-xl border flex gap-3",
+                          ok ? "border-emerald-200 bg-emerald-50/40" : "border-amber-200 bg-amber-50/50",
+                        )}
+                      >
+                        <div className="mt-1">
+                          <span
+                            className={cn(
+                              "w-2.5 h-2.5 rounded-full inline-block",
+                              ok ? "bg-emerald-500" : "bg-amber-500",
+                            )}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm text-foreground">{item.label}</p>
+                          <p className="text-xs font-medium text-muted-foreground mt-0.5 capitalize">
+                            {item.status.replace(/_/g, " ")}
+                          </p>
+                          {item.summary ? <p className="text-xs text-foreground/90 mt-2 leading-relaxed">{item.summary}</p> : null}
+                          {item.detail ? <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.detail}</p> : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             <div className="bg-white rounded-xl border border-border shadow-sm">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Shortcuts</h2>
+                <h2 className={appSectionTitleClass}>Shortcuts</h2>
               </div>
               <div className="p-6 grid md:grid-cols-3 gap-4">
                 <Link

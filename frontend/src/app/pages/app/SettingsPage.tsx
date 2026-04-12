@@ -36,7 +36,8 @@ import {
   validateBusinessHours,
 } from "@/lib/business-hours";
 import { notifyError, notifySuccess } from "@/lib/feedback";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 export function SettingsPage() {
   const { session } = useAuth();
@@ -377,7 +378,13 @@ export function SettingsPage() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className={appPageTitleClass}>Settings</h1>
-            <p className="text-muted-foreground">Clinic configuration from your live workspace</p>
+            <p className={appPageSubtitleClass}>
+              Clinic control center — profile, channels, automation, and embed code share one save flow. Keep the assistant live only when you
+              are ready for patient-facing automation.
+            </p>
+            {!hasChanges && clinic ? (
+              <p className="text-sm font-medium text-emerald-800 mt-2">All changes saved to the server.</p>
+            ) : null}
             {saveError && <p className="text-sm text-destructive mt-2">{saveError}</p>}
           </div>
           <div className="flex items-center gap-3">
@@ -492,7 +499,7 @@ export function SettingsPage() {
                 <Building className="w-5 h-5 text-teal-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">Clinic information</h2>
+                <h2 className={cn(appSectionTitleClass, "text-xl")}>Clinic information</h2>
                 <p className="text-sm text-muted-foreground">Public-facing practice details</p>
               </div>
             </div>
@@ -619,8 +626,8 @@ export function SettingsPage() {
                 <Clock className="w-5 h-5 text-teal-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">Business hours</h2>
-                <p className="text-sm text-muted-foreground">Weekly schedule saved on your clinic record (structured JSON)</p>
+                <h2 className={cn(appSectionTitleClass, "text-xl")}>Business hours</h2>
+                <p className="text-sm text-muted-foreground">Weekly schedule stored as structured data on your clinic record</p>
               </div>
             </div>
             <BusinessHoursEditor value={hoursSchedule} onChange={setHoursSchedule} disabled={saving} />
@@ -632,7 +639,7 @@ export function SettingsPage() {
                 <Users className="w-5 h-5 text-teal-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">Team</h2>
+                <h2 className={cn(appSectionTitleClass, "text-xl")}>Team</h2>
                 <p className="text-sm text-muted-foreground">Additional staff seats and roles are not exposed via this API yet.</p>
               </div>
             </div>
@@ -647,8 +654,8 @@ export function SettingsPage() {
                 <Globe className="w-5 h-5 text-teal-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">Channels & embed</h2>
-                <p className="text-sm text-muted-foreground">Live readiness from the front-desk service</p>
+                <h2 className={cn(appSectionTitleClass, "text-xl")}>Channels & embed</h2>
+                <p className="text-sm text-muted-foreground">Live readiness from the front-desk service plus shareable entry points</p>
               </div>
             </div>
 
@@ -672,8 +679,13 @@ export function SettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Embed snippet (iframe)</label>
+                <div className="mb-3 rounded-lg border border-border bg-slate-50 px-4 py-3 text-sm text-muted-foreground leading-relaxed">
+                  Paste this HTML into your marketing site or patient portal. It loads the hosted chat widget for your clinic slug — no API keys
+                  in the browser. Adjust width/height to match your layout; keep the{" "}
+                  <span className="font-mono text-xs">title</span> attribute for accessibility.
+                </div>
                 <div className="relative">
-                  <div className="bg-slate-900 text-slate-100 p-4 rounded-lg font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all">
+                  <div className="bg-slate-900 text-slate-100 p-4 rounded-lg font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all border border-slate-700">
                     {iframeSnippet || "—"}
                   </div>
                   <button
@@ -742,7 +754,7 @@ export function SettingsPage() {
                 <Bell className="w-5 h-5 text-teal-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">Notifications & automation</h2>
+                <h2 className={cn(appSectionTitleClass, "text-xl")}>Notifications & automation</h2>
                 <p className="text-sm text-muted-foreground">Backed by clinic notification settings</p>
               </div>
             </div>
@@ -860,7 +872,7 @@ export function SettingsPage() {
           </div>
 
           <div className="bg-card rounded-xl p-6 border border-border shadow-sm sticky top-8">
-            <h3 className="font-semibold mb-4">Actions</h3>
+            <h3 className={cn(appSectionTitleClass, "mb-4")}>Save & publish</h3>
             <div className="space-y-2">
               <button
                 type="button"

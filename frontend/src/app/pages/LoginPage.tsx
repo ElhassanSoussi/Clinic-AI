@@ -71,86 +71,90 @@ export function LoginPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <Link to="/" className="flex items-center gap-2 mb-8">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">CA</span>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-slate-50/80">
+        <div className="w-full max-w-lg">
+          <div className="bg-white border border-border rounded-2xl shadow-sm p-6 sm:p-10">
+            <div className="mb-8">
+              <Link to="/" className="inline-flex items-center gap-2 mb-8">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+                  <span className="text-primary-foreground font-bold">CA</span>
+                </div>
+                <span className="font-bold text-xl text-foreground tracking-tight">Clinic AI</span>
+              </Link>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">Log in to your account</h2>
+              <p className="text-muted-foreground text-[15px] leading-relaxed">
+                Staff sign-in for the front-desk operating system. You will land back on the page you were viewing when the session expired.
+              </p>
+            </div>
+
+            {sessionExpiredNotice && (
+              <div className="mb-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-950 leading-relaxed">
+                {sessionExpiredNotice}
               </div>
-              <span className="font-bold text-xl">Clinic AI</span>
-            </Link>
-            <h2 className="text-3xl font-bold mb-2">Log in to your account</h2>
-            <p className="text-muted-foreground">Enter your credentials to continue</p>
-          </div>
+            )}
 
-          {sessionExpiredNotice && (
-            <div className="mb-4 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-950">
-              {sessionExpiredNotice}
-            </div>
-          )}
+            {error && (
+              <div className="mb-4 p-4 rounded-xl border border-destructive/50 bg-destructive/10 text-sm text-destructive">
+                {error}
+              </div>
+            )}
 
-          {error && (
-            <div className="mb-4 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
-              {error}
-            </div>
-          )}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-foreground">Work email</label>
+                <input
+                  type="email"
+                  data-testid="login-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/25 focus:border-primary outline-none bg-white text-foreground"
+                  placeholder="you@clinic.com"
+                  required
+                  autoComplete="email"
+                />
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
-              <input
-                type="email"
-                data-testid="login-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                placeholder="you@clinic.com"
-                required
-                autoComplete="email"
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-foreground">Password</label>
+                <input
+                  type="password"
+                  data-testid="login-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/25 focus:border-primary outline-none bg-white text-foreground"
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
-              <input
-                type="password"
-                data-testid="login-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-              />
-            </div>
+              <div className="flex items-center justify-between gap-4 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="rounded border-border" />
+                  <span className="text-sm text-foreground">Keep me signed in on this device</span>
+                </label>
+                <Link to="/contact" className="text-sm font-semibold text-primary hover:underline shrink-0">
+                  Need help?
+                </Link>
+              </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="rounded border-border" />
-                <span className="text-sm">Remember me</span>
-              </label>
-              <Link to="/contact" className="text-sm text-primary hover:underline">
-                Forgot password?
+              <button
+                type="submit"
+                data-testid="login-submit"
+                disabled={submitting}
+                className="w-full px-6 py-3.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors font-semibold disabled:opacity-60 shadow-sm"
+              >
+                {submitting ? "Signing in…" : "Log in"}
+              </button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-border text-center text-sm text-muted-foreground">
+              New to Clinic AI?{" "}
+              <Link to="/register" className="text-primary hover:underline font-semibold">
+                Create a workspace
               </Link>
             </div>
-
-            <button
-              type="submit"
-              data-testid="login-submit"
-              disabled={submitting}
-              className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-60"
-            >
-              {submitting ? "Signing in…" : "Log In"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-primary hover:underline font-medium">
-              Sign up
-            </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

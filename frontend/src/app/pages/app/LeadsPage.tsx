@@ -6,7 +6,7 @@ import {
   Plus,
   TrendingUp,
   Users,
-  DollarSign,
+  CheckCircle2,
   ArrowRight,
   Globe,
   Smartphone,
@@ -16,7 +16,8 @@ import { useAuth } from "@/lib/auth-context";
 import { apiJson } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/app/components/ui/utils";
-import { appPagePaddingClass, appPageTitleCompactClass } from "@/lib/page-layout";
+import { humanizeSnake } from "@/lib/display-text";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleCompactClass } from "@/lib/page-layout";
 
 type LeadRow = {
   id: string;
@@ -49,15 +50,43 @@ function statusLabel(status: string): string {
 function getStageColor(status: string) {
   const s = status.toLowerCase();
   if (s === "new") {
-    return "bg-blue-50 text-blue-700 border-blue-200";
+    return "bg-sky-50 text-sky-900 border-sky-200 ring-1 ring-sky-100";
   }
   if (s === "contacted") {
-    return "bg-purple-50 text-purple-700 border-purple-200";
+    return "bg-violet-50 text-violet-900 border-violet-200 ring-1 ring-violet-100";
   }
   if (s === "booked") {
-    return "bg-green-50 text-green-700 border-green-200";
+    return "bg-emerald-50 text-emerald-900 border-emerald-200 ring-1 ring-emerald-100";
+  }
+  if (s === "closed") {
+    return "bg-slate-100 text-slate-700 border-slate-200";
   }
   return "bg-muted text-muted-foreground border-border";
+}
+
+function nextStepHint(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "new") {
+    return "Next: reach out and confirm intent";
+  }
+  if (s === "contacted") {
+    return "Next: propose times or answer objections";
+  }
+  if (s === "booked") {
+    return "On calendar — confirm prep and reminders";
+  }
+  if (s === "closed") {
+    return "Closed — archive or revisit if they return";
+  }
+  return "Next: review details and update stage";
+}
+
+function sourceLabel(raw: string): string {
+  const r = (raw || "").trim();
+  if (!r) {
+    return "Chat";
+  }
+  return humanizeSnake(r.replace(/\./g, "_"));
 }
 
 export function LeadsPage() {
@@ -110,6 +139,22 @@ export function LeadsPage() {
   });
 
   const qualifiedCount = leads.filter((l) => l.status.toLowerCase() === "booked").length;
+  const newCount = leads.filter((l) => l.status.toLowerCase() === "new").length;
+  const activePipeline = leads.filter((l) => {
+    const s = l.status.toLowerCase();
+    return s !== "booked" && s !== "closed";
+  }).length;
+  const staleOpen = leads.filter((l) => {
+    const s = l.status.toLowerCase();
+    if (s === "booked" || s === "closed") {
+      return false;
+    }
+    if (!l.created_at) {
+      return false;
+    }
+    const t = new Date(l.created_at).getTime();
+    return Number.isFinite(t) && Date.now() - t > 72 * 3600 * 1000;
+  }).length;
 
   return (
     <div className="h-full bg-background overflow-auto">
@@ -118,7 +163,9 @@ export function LeadsPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Leads</h1>
-              <p className="text-muted-foreground">Track inquiries and convert prospects</p>
+              <p className={appPageSubtitleClass}>
+                Booking pipeline — see stage, source, and what to do next before opening a lead.
+              </p>
             </div>
             <button
               type="button"
@@ -147,18 +194,8 @@ export function LeadsPage() {
                   <Target className="w-5 h-5 text-primary" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-foreground mb-1">{loading ? "…" : qualifiedCount}</p>
-              <p className="text-sm text-muted-foreground">Booked</p>
-            </div>
-
-            <div className="bg-white rounded-lg p-5 border border-border">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-primary" />
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-foreground mb-1">—</p>
-              <p className="text-sm text-muted-foreground">Potential revenue</p>
+              <p className="text-3xl font-bold text-foreground mb-1">{loading ? "…" : newCount}</p>
+              <p className="text-sm text-muted-foreground">New — need first response</p>
             </div>
 
             <div className="bg-white rounded-lg p-5 border border-border">
@@ -167,12 +204,24 @@ export function LeadsPage() {
                   <TrendingUp className="w-5 h-5 text-primary" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-foreground mb-1">
+              <p className="text-3xl font-bold text-foreground mb-1">{loading ? "…" : activePipeline}</p>
+              <p className="text-sm text-muted-foreground">Active pipeline (not booked/closed)</p>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 border border-border">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-foreground mb-1">{loading ? "…" : qualifiedCount}</p>
+              <p className="text-sm text-muted-foreground">Booked</p>
+              <p className="text-xs text-muted-foreground mt-2 leading-snug">
                 {loading || leads.length === 0
                   ? "—"
-                  : `${Math.round((qualifiedCount / leads.length) * 100)}%`}
+                  : `${Math.round((qualifiedCount / leads.length) * 100)}% booked rate`}
+                {staleOpen > 0 ? ` · ${staleOpen} open >72h` : ""}
               </p>
-              <p className="text-sm text-muted-foreground">Booked rate</p>
             </div>
           </div>
         </div>
@@ -212,56 +261,95 @@ export function LeadsPage() {
           {filtered.map((lead) => {
             const SourceIcon = lead.source?.toLowerCase().includes("sms") ? Smartphone : Globe;
             const initial = (lead.patient_name || "?").charAt(0).toUpperCase();
+            const st = lead.status.toLowerCase();
+            const isStaleOpen =
+              st !== "booked" &&
+              st !== "closed" &&
+              lead.created_at &&
+              Date.now() - new Date(lead.created_at).getTime() > 72 * 3600 * 1000;
+            const hasEmail = Boolean((lead.patient_email || "").trim());
+            const hasPhone = Boolean((lead.patient_phone || "").trim());
 
             return (
               <Link
                 key={lead.id}
                 to={`/app/leads/${lead.id}`}
-                className="block bg-white rounded-lg border border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                className={cn(
+                  "block bg-white rounded-xl border transition-all hover:shadow-sm",
+                  st === "booked"
+                    ? "border-emerald-200 hover:border-emerald-300"
+                    : isStaleOpen
+                      ? "border-orange-200 hover:border-orange-300 border-l-4 border-l-orange-400"
+                      : "border-border hover:border-primary/40",
+                )}
               >
                 <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center flex-shrink-0 border border-border">
                         <span className="font-bold text-primary">{initial}</span>
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-foreground mb-1">{lead.patient_name || "Patient"}</h3>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-                          <span>{lead.patient_email || "—"}</span>
-                          <span>•</span>
-                          <span>{lead.patient_phone || "—"}</span>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h3 className="font-bold text-foreground text-base">{lead.patient_name || "Patient"}</h3>
+                          {isStaleOpen ? (
+                            <span className="text-[10px] font-bold uppercase tracking-wide bg-orange-50 text-orange-800 border border-orange-200 px-2 py-0.5 rounded">
+                              Stale
+                            </span>
+                          ) : null}
+                          {st === "booked" ? (
+                            <span className="text-[10px] font-bold uppercase tracking-wide bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded">
+                              Booked
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground mb-2">
+                          <span className={hasEmail ? "" : "text-muted-foreground/70"}>
+                            {hasEmail ? lead.patient_email : "No email"}
+                          </span>
+                          <span className="text-border">·</span>
+                          <span className={hasPhone ? "" : "text-muted-foreground/70"}>
+                            {hasPhone ? lead.patient_phone : "No phone"}
+                          </span>
+                          <span className="text-border">·</span>
+                          <span className="text-xs font-medium text-foreground/80">
+                            {hasEmail || hasPhone ? "Reachable" : "Needs contact capture"}
+                          </span>
                         </div>
 
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span
-                            className={`text-xs font-semibold px-2 py-1 rounded border ${getStageColor(lead.status)}`}
-                          >
+                        <p className="text-xs font-medium text-foreground mb-3">{nextStepHint(lead.status)}</p>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getStageColor(lead.status)}`}>
                             {statusLabel(lead.status)}
                           </span>
-                          <div className="flex items-center gap-1 px-2 py-1 bg-muted border border-border rounded">
-                            <SourceIcon className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-xs font-semibold">{lead.source || "chat"}</span>
+                          <div className="flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-border rounded-md">
+                            <SourceIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="text-xs font-semibold text-foreground">{sourceLabel(lead.source)}</span>
                           </div>
                           {lead.reason_for_visit ? (
-                            <span className="text-xs text-muted-foreground line-clamp-1">{lead.reason_for_visit}</span>
-                          ) : null}
+                            <span className="text-xs text-muted-foreground line-clamp-1 max-w-[280px]" title={lead.reason_for_visit}>
+                              Intent: {lead.reason_for_visit}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Intent not recorded</span>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6 flex-shrink-0">
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground mb-1">Updated</p>
-                        <p className="text-sm font-medium text-foreground">
+                    <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-3 lg:gap-4 flex-shrink-0 lg:min-w-[140px]">
+                      <div className="text-left lg:text-right">
+                        <p className="text-xs font-semibold text-muted-foreground mb-0.5">Added</p>
+                        <p className="text-sm font-semibold text-foreground tabular-nums">
                           {formatRelativeTime(lead.created_at ?? undefined) || "—"}
                         </p>
                       </div>
 
-                      <span className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold flex items-center gap-1">
-                        Open
-                        <ArrowRight className="w-3 h-3" />
+                      <span className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold shadow-sm">
+                        Open lead
+                        <ArrowRight className="w-4 h-4" />
                       </span>
                     </div>
                   </div>

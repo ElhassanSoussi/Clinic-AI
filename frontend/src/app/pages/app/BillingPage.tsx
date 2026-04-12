@@ -12,7 +12,8 @@ import {
 import type { BillingPlan, BillingStatus } from "@/lib/api/types";
 import { getPublicOrigin } from "@/lib/site";
 import { notifyError, notifySuccess } from "@/lib/feedback";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 function formatMoneyCents(cents: number): string {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(cents / 100);
@@ -145,9 +146,12 @@ export function BillingPage() {
 
   return (
     <div className={appPagePaddingClass}>
-      <div className="mb-8">
+      <div className="mb-8 max-w-3xl">
         <h1 className={appPageTitleClass}>Billing</h1>
-        <p className="text-muted-foreground">Subscription and lead limits from your clinic record</p>
+        <p className={appPageSubtitleClass}>
+          Billing center — this page reflects your clinic record and monthly lead allowance. Checkout upgrades the plan here; Stripe hosts
+          cards, invoices, and subscription lifecycle.
+        </p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
       </div>
 
@@ -199,55 +203,66 @@ export function BillingPage() {
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                  <h2 className="text-xl font-semibold">Current plan</h2>
+                  <div>
+                    <h2 className={cn(appSectionTitleClass, "text-xl")}>Current plan</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Synced from your workspace billing record.</p>
+                  </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-3 py-1 bg-primary text-white rounded-full text-sm font-medium capitalize">
+                    <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-bold capitalize shadow-sm">
                       {status.plan_name || status.plan}
                     </span>
-                    <span className="px-3 py-1 bg-accent text-primary rounded-full text-sm font-medium capitalize">
-                      {status.subscription_status}
+                    <span className="px-3 py-1.5 bg-accent text-primary rounded-full text-sm font-semibold capitalize border border-primary/15">
+                      {status.subscription_status.replace(/_/g, " ")}
                     </span>
                   </div>
+                </div>
+
+                <div className="rounded-lg border border-border bg-slate-50/80 p-4 mb-6">
+                  <p className="text-sm text-foreground leading-relaxed">
+                    <span className="font-semibold">What you manage here:</span> start checkout for paid tiers and see allowance usage.{" "}
+                    <span className="font-semibold">What Stripe manages:</span> payment methods, invoices, tax IDs, and cancellation timing
+                    after you are subscribed.
+                  </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6 mb-6 pb-6 border-b border-border">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Trial ends</p>
-                    <p className="text-lg font-semibold">{status.trial_ends_at || "—"}</p>
+                    <p className="text-lg font-semibold text-foreground">{status.trial_ends_at || "—"}</p>
                     {status.subscription_status === "trialing" || status.plan === "trial" ? (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        You are on a trial-style plan until checkout completes or the trial window ends.
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Trial access is enforced server-side. Completing checkout moves you onto a paid Stripe subscription when configured.
                       </p>
                     ) : null}
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Stripe subscription</p>
-                    <p className="text-lg font-semibold">{status.has_stripe_subscription ? "Connected" : "Not connected"}</p>
+                    <p className="text-sm text-muted-foreground mb-1">Stripe customer portal</p>
+                    <p className="text-lg font-semibold text-foreground">{status.has_stripe_subscription ? "Available" : "Not yet linked"}</p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      {status.has_stripe_subscription
+                        ? "Open the portal to update cards, download invoices, or adjust subscription settings."
+                        : "Finish a successful checkout so Stripe can attach a billing customer to this workspace."}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={() => setShowPlanModal(true)}
-                    className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
+                    className="px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white"
                   >
-                    Change plan
+                    Compare plans
                   </button>
                   <button
                     type="button"
                     disabled={busy === "portal" || !status.has_stripe_subscription}
                     onClick={() => void openPortal()}
-                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50"
+                    className="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 shadow-sm"
                   >
-                    {busy === "portal" ? "Opening…" : "Manage in Stripe"}
+                    {busy === "portal" ? "Opening…" : "Open Stripe customer portal"}
                   </button>
                 </div>
-                {!status.has_stripe_subscription && (
-                  <p className="text-xs text-muted-foreground mt-3">
-                    The customer portal is available after you complete a Stripe subscription checkout.
-                  </p>
-                )}
               </div>
 
               <div className="bg-card rounded-xl p-6 border border-border shadow-sm">

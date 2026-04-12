@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
-import { MessageSquare, Calendar, Users, Settings as SettingsIcon, FileText, AlertCircle, Clock, ArrowRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { MessageSquare, Calendar, Users, Settings as SettingsIcon, FileText, AlertCircle, Clock } from "lucide-react";
+import { format, isValid, parseISO, startOfDay } from "date-fns";
 import { useAuth } from "@/lib/auth-context";
 import { apiJson } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { activityTypeLabel } from "@/lib/display-text";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 type ActivityEvent = {
   type: string;
@@ -34,12 +37,44 @@ function iconForType(t: string) {
 
 function colorForType(t: string) {
   if (t === "lead_created" || t === "lead_status_changed") {
-    return "text-purple-600 bg-purple-50";
+    return "text-violet-700 bg-violet-50 border-violet-200";
   }
   if (t === "conversation_started") {
-    return "text-blue-600 bg-blue-50";
+    return "text-sky-800 bg-sky-50 border-sky-200";
   }
-  return "text-slate-600 bg-slate-50";
+  if (t.includes("appointment")) {
+    return "text-emerald-800 bg-emerald-50 border-emerald-200";
+  }
+  if (t.includes("alert")) {
+    return "text-orange-800 bg-orange-50 border-orange-200";
+  }
+  return "text-slate-700 bg-slate-50 border-slate-200";
+}
+
+function dayKey(ts: string | null | undefined): string {
+  if (!ts) {
+    return "undated";
+  }
+  try {
+    const d = parseISO(ts);
+    if (!isValid(d)) {
+      return "undated";
+    }
+    return format(startOfDay(d), "yyyy-MM-dd");
+  } catch {
+    return "undated";
+  }
+}
+
+function dayTitle(key: string): string {
+  if (key === "undated") {
+    return "Undated / no timestamp";
+  }
+  try {
+    return format(parseISO(`${key}T12:00:00`), "EEEE, MMMM d, yyyy");
+  } catch {
+    return key;
+  }
 }
 
 export function ActivityPage() {
@@ -78,17 +113,41 @@ export function ActivityPage() {
     };
   }, [session?.accessToken]);
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, ActivityEvent[]>();
+    for (const ev of events) {
+      const k = dayKey(ev.timestamp);
+      if (!map.has(k)) {
+        map.set(k, []);
+      }
+      map.get(k)!.push(ev);
+    }
+    const keys = [...map.keys()].sort((a, b) => {
+      if (a === "undated") {
+        return 1;
+      }
+      if (b === "undated") {
+        return -1;
+      }
+      return b.localeCompare(a);
+    });
+    return keys.map((key) => ({ key, label: dayTitle(key), items: map.get(key)! }));
+  }, [events]);
+
   return (
     <div className={appPagePaddingClass}>
       <div className="mb-8">
         <h1 className={appPageTitleClass}>Activity</h1>
-        <p className="text-muted-foreground">Recent leads and conversations for your clinic</p>
+        <p className={appPageSubtitleClass}>
+          Operational timeline — grouped by day with clear event types so staff can replay what changed recently.
+        </p>
       </div>
 
       <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-          <p className="text-sm text-muted-foreground mb-1">Events loaded</p>
-          <p className="text-3xl font-bold">{loading ? "…" : events.length}</p>
+        <div className="bg-card rounded-xl p-6 border border-border shadow-sm md:col-span-1">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Events loaded</p>
+          <p className="text-3xl font-bold text-foreground tabular-nums">{loading ? "…" : events.length}</p>
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">Latest 50 events from your clinic feed.</p>
         </div>
       </div>
 
@@ -98,54 +157,77 @@ export function ActivityPage() {
         </div>
       )}
 
-      <div className="bg-card rounded-xl border border-border shadow-sm">
-        <div className="p-6 border-b border-border">
-          <h2 className="text-lg font-semibold">Timeline</h2>
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-border bg-white">
+          <h2 className={appSectionTitleClass}>Timeline</h2>
+          <p className="text-sm text-muted-foreground mt-1">Newest days first. Each card states the action in plain language.</p>
         </div>
-        <div className="p-6">
+        <div className="p-6 bg-background">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!loading && events.length === 0 && (
-            <p className="text-sm text-muted-foreground">No activity yet.</p>
-          )}
-          <div className="relative ml-4 pl-8 space-y-6">
-            <div className="absolute left-0 top-3 bottom-3 w-px bg-border" />
+          {!loading && events.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
+          <div className="space-y-10">
             {!loading &&
-              events.map((ev, idx) => {
-                const Icon = iconForType(ev.type);
-                const colorClass = colorForType(ev.type);
-                return (
-                  <div key={`${ev.type}-${ev.resource_id}-${idx}`} className="relative">
-                    <div className="absolute -left-8 top-1.5 w-3 h-3 rounded-full bg-primary ring-4 ring-white" />
-                    <div className="bg-white rounded-lg border border-border p-4 hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 flex-1">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-sm mb-1">{ev.title}</h4>
-                            <p className="text-sm text-muted-foreground mb-2">{ev.detail}</p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {formatRelativeTime(ev.timestamp ?? undefined) || "—"}
-                              </span>
-                              <span className="text-xs opacity-70">{ev.type}</span>
+              grouped.map((group) => (
+                <section key={group.key}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wide whitespace-nowrap">{group.label}</h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="relative ml-2 sm:ml-4 pl-6 sm:pl-8 space-y-4">
+                    <div className="absolute left-0 top-2 bottom-2 w-px bg-border" />
+                    {group.items.map((ev, idx) => {
+                      const Icon = iconForType(ev.type);
+                      const chip = colorForType(ev.type);
+                      const typeLabel = activityTypeLabel(ev.type);
+                      return (
+                        <div key={`${ev.type}-${ev.resource_id}-${idx}`} className="relative">
+                          <div className="absolute -left-6 sm:-left-8 top-3 w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-background" />
+                          <div className="bg-white rounded-xl border border-border p-4 shadow-sm">
+                            <div className="flex items-start gap-3">
+                              <div
+                                className={cn(
+                                  "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border",
+                                  chip,
+                                )}
+                              >
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  <span className="text-[11px] font-bold uppercase tracking-wide text-primary">{typeLabel}</span>
+                                  {ev.resource_id ? (
+                                    <span className="text-[11px] font-mono text-muted-foreground">#{ev.resource_id.slice(0, 8)}…</span>
+                                  ) : null}
+                                </div>
+                                <h4 className="font-semibold text-foreground text-sm sm:text-base leading-snug">{ev.title}</h4>
+                                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{ev.detail}</p>
+                                <div className="flex items-center gap-2 mt-3 text-xs font-medium text-muted-foreground flex-wrap">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  {formatRelativeTime(ev.timestamp ?? undefined) || "—"}
+                                  {ev.timestamp ? (
+                                    <span className="text-muted-foreground/80">
+                                      ·{" "}
+                                      {(() => {
+                                        try {
+                                          const d = parseISO(ev.timestamp!);
+                                          return isValid(d) ? format(d, "MMM d, yyyy · HH:mm") : "";
+                                        } catch {
+                                          return "";
+                                        }
+                                      })()}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          className="flex items-center gap-1 px-3 py-1.5 text-sm text-primary hover:bg-primary/5 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          View
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                </section>
+              ))}
           </div>
         </div>
       </div>

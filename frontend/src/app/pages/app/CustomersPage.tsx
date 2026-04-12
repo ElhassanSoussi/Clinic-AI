@@ -4,8 +4,10 @@ import { Search, Filter, Users, Calendar, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCustomers } from "@/lib/api/services";
 import type { CustomerSummary } from "@/lib/api/types";
-import { formatDateTime } from "@/lib/format";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { formatDateTime, formatRelativeTime } from "@/lib/format";
+import { formatOutcomeLabel, sanitizeStaffNote } from "@/lib/display-text";
+import { cn } from "@/app/components/ui/utils";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 export function CustomersPage() {
   const { session } = useAuth();
@@ -65,7 +67,9 @@ export function CustomersPage() {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className={appPageTitleClass}>Patients</h1>
-              <p className="text-[15px] text-muted-foreground">Customer profiles aggregated from conversations and requests</p>
+              <p className={appPageSubtitleClass}>
+                Relationship workspace — one row per person with contact, touch history, and staff-safe notes (no raw payloads).
+              </p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
           </div>
@@ -99,8 +103,9 @@ export function CustomersPage() {
               <p className="text-sm text-muted-foreground">Shown</p>
             </div>
             <div className="bg-white rounded-xl p-5 border border-border">
-              <p className="text-sm text-muted-foreground">
-                Revenue and visit counts are not part of this API response; metrics below reflect interaction counts only.
+              <p className={cn(appSectionTitleClass, "text-base mb-1")}>At a glance</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Counts come from front-desk activity on this workspace: conversations, open requests, and booked leads tied to each profile.
               </p>
             </div>
           </div>
@@ -133,68 +138,92 @@ export function CustomersPage() {
 
         <div className="space-y-3">
           {!loading &&
-            filtered.map((customer) => (
-              <Link
-                key={customer.key}
-                to={`/app/customers/${encodeURIComponent(customer.key)}`}
-                className="group block bg-white rounded-xl border border-border hover:border-teal-200 hover:shadow-md transition-all"
-              >
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-lg font-bold text-teal-700">{customer.name.charAt(0)}</span>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="text-base font-bold text-foreground">{customer.name}</h3>
-                          {customer.follow_up_needed ? (
-                            <span className="px-2 py-0.5 text-xs font-semibold rounded bg-orange-50 text-orange-800 border border-orange-200">
-                              Follow-up
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-100 text-emerald-700">Active</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3 flex-wrap">
-                          <span>{customer.email || "—"}</span>
-                          <span>•</span>
-                          <span>{customer.phone || "—"}</span>
+            filtered.map((customer) => {
+              const note = sanitizeStaffNote(customer.latest_note, 160);
+              const outcome = formatOutcomeLabel(customer.last_outcome);
+              return (
+                <Link
+                  key={customer.key}
+                  to={`/app/customers/${encodeURIComponent(customer.key)}`}
+                  className="group block bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+                >
+                  <div className="p-5">
+                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-xl bg-accent border border-border flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg font-bold text-primary">{customer.name.charAt(0)}</span>
                         </div>
 
-                        <div className="flex items-center gap-6 flex-wrap text-xs text-muted-foreground">
-                          <span>
-                            Conversations: <strong className="text-foreground">{customer.conversation_count}</strong>
-                          </span>
-                          <span>
-                            Requests: <strong className="text-foreground">{customer.lead_count}</strong> (open{" "}
-                            {customer.open_request_count ?? "—"})
-                          </span>
-                          <span>
-                            Booked: <strong className="text-foreground">{customer.booked_count}</strong>
-                          </span>
-                          {customer.last_interaction_at ? (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5" />
-                              Last: {formatDateTime(customer.last_interaction_at)}
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-base font-bold text-foreground">{customer.name}</h3>
+                            {customer.follow_up_needed ? (
+                              <span className="px-2 py-0.5 text-xs font-bold rounded-md bg-orange-50 text-orange-900 border border-orange-200">
+                                Follow-up
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                In relationship
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3 flex-wrap">
+                            <span className="font-medium text-foreground/90">{customer.email || "No email"}</span>
+                            <span className="text-border">·</span>
+                            <span className="font-medium text-foreground/90">{customer.phone || "No phone"}</span>
+                          </div>
+
+                          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <div className="rounded-lg border border-border bg-slate-50/80 px-3 py-2">
+                              <dt className="text-muted-foreground font-medium">Conversations</dt>
+                              <dd className="text-lg font-bold text-foreground tabular-nums">{customer.conversation_count}</dd>
+                            </div>
+                            <div className="rounded-lg border border-border bg-slate-50/80 px-3 py-2">
+                              <dt className="text-muted-foreground font-medium">Requests</dt>
+                              <dd className="text-lg font-bold text-foreground tabular-nums">{customer.lead_count}</dd>
+                            </div>
+                            <div className="rounded-lg border border-border bg-slate-50/80 px-3 py-2">
+                              <dt className="text-muted-foreground font-medium">Open requests</dt>
+                              <dd className="text-lg font-bold text-foreground tabular-nums">{customer.open_request_count ?? "—"}</dd>
+                            </div>
+                            <div className="rounded-lg border border-border bg-slate-50/80 px-3 py-2">
+                              <dt className="text-muted-foreground font-medium">Booked</dt>
+                              <dd className="text-lg font-bold text-foreground tabular-nums">{customer.booked_count}</dd>
+                            </div>
+                          </dl>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-muted-foreground">
+                            {customer.last_interaction_at ? (
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                                Last touch {formatRelativeTime(customer.last_interaction_at)} ·{" "}
+                                <span className="text-muted-foreground font-normal">{formatDateTime(customer.last_interaction_at)}</span>
+                              </span>
+                            ) : (
+                              <span>No recorded touch yet</span>
+                            )}
+                          </div>
+                          {note ? (
+                            <p className="text-xs text-foreground/90 mt-2 line-clamp-2 border-l-2 border-primary/30 pl-2">
+                              <span className="font-semibold text-muted-foreground">Staff note · </span>
+                              {note}
+                            </p>
                           ) : null}
                         </div>
-                        {customer.latest_note ? (
-                          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">Note: {customer.latest_note}</p>
-                        ) : null}
+                      </div>
+
+                      <div className="lg:text-right flex-shrink-0 lg:max-w-[220px] lg:border-l lg:border-border lg:pl-5">
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-1">Last outcome</p>
+                        <p className="text-sm font-semibold text-foreground leading-snug">{outcome}</p>
+                        <p className="text-xs text-primary font-semibold mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Open profile →
+                        </p>
                       </div>
                     </div>
-
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xs text-muted-foreground mb-1">Last outcome</p>
-                      <p className="text-sm font-semibold text-foreground max-w-[200px]">{customer.last_outcome || "—"}</p>
-                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
         </div>
       </div>
     </div>

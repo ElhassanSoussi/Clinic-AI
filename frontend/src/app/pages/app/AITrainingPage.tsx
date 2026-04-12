@@ -14,7 +14,8 @@ import {
 import type { TrainingDocument, TrainingKnowledgeSource, TrainingOverview } from "@/lib/api/types";
 import { dismissToast, notifyError, notifyLoading, notifySuccess } from "@/lib/feedback";
 import { cn } from "@/app/components/ui/utils";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { humanizeSnake } from "@/lib/display-text";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 export function AITrainingPage() {
   const { session } = useAuth();
@@ -167,58 +168,73 @@ export function AITrainingPage() {
   return (
     <div className={cn(appPagePaddingClass, "max-w-6xl mx-auto")}>
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className={cn(appPageTitleClass, "flex items-center gap-2")}>
-            <Brain className="w-8 h-8 text-primary" />
+        <div className="max-w-2xl">
+          <h1 className={cn(appPageTitleClass, "flex items-center gap-3")}>
+            <Brain className="w-8 h-8 text-primary shrink-0" />
             AI Training
           </h1>
-          <p className="text-muted-foreground">Knowledge sources and documents from your clinic workspace</p>
+          <p className={appPageSubtitleClass}>
+            Knowledge workspace — curate what the assistant can cite, upload supporting files, and track readiness gaps before patients hit
+            edge cases.
+          </p>
           {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4" />
-          Add source
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAdd(true)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add knowledge source
+          </button>
+        </div>
       </div>
 
       {loading && <p className="text-muted-foreground">Loading…</p>}
 
       {overview && !loading && (
         <>
+          <div className="rounded-xl border border-primary/20 bg-accent/50 px-5 py-4 mb-8">
+            <p className={appSectionTitleClass}>Assistant coverage</p>
+            <p className="text-sm text-muted-foreground mt-1 max-w-3xl leading-relaxed">
+              Score and status come from your training service. Pair manual snippets with documents so answers stay aligned with how your
+              clinic actually operates.
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-sm text-muted-foreground mb-1">Knowledge score</p>
-              <p className="text-3xl font-bold">{overview.knowledge_score}</p>
-              <p className="text-xs text-muted-foreground mt-1 capitalize">{overview.knowledge_status.replace(/_/g, " ")}</p>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Knowledge score</p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">{overview.knowledge_score}</p>
+              <p className="text-xs font-medium text-muted-foreground mt-1">{humanizeSnake(overview.knowledge_status)}</p>
             </div>
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-sm text-muted-foreground mb-1">Manual sources</p>
-              <p className="text-3xl font-bold">{sources.length}</p>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Manual sources</p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">{sources.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">Curated snippets you edit here</p>
             </div>
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-sm text-muted-foreground mb-1">Documents</p>
-              <p className="text-3xl font-bold">{docStats?.total ?? overview.documents.length}</p>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Documents</p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">{docStats?.total ?? overview.documents.length}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Ready {docStats?.ready ?? 0} · Processing {docStats?.processing ?? 0} · Failed {docStats?.failed ?? 0}
               </p>
             </div>
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-sm text-muted-foreground mb-1">Assistant</p>
-              <p className="font-semibold">{overview.assistant_name || "—"}</p>
-              <p className="text-xs text-muted-foreground mt-1">{overview.clinic_name}</p>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Assistant</p>
+              <p className="font-semibold text-foreground">{overview.assistant_name || "—"}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-snug">{overview.clinic_name}</p>
             </div>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6">
-              <h2 className="font-semibold mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Readiness
+            <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h2 className={cn(appSectionTitleClass, "mb-1 flex items-center gap-2")}>
+                <BookOpen className="w-5 h-5 text-primary" />
+                Readiness checklist
               </h2>
+              <p className="text-sm text-muted-foreground mb-4">Structured checks from the training service — not clinical advice.</p>
               <ul className="space-y-2">
                 {overview.readiness_items.map((item) => (
                   <li key={item.key} className="flex items-start gap-2 text-sm">
@@ -234,24 +250,35 @@ export function AITrainingPage() {
                 ))}
               </ul>
             </div>
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="font-semibold mb-4">Gaps</h2>
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm border-l-4 border-l-orange-300">
+              <h2 className={cn(appSectionTitleClass, "mb-1")}>Coverage gaps</h2>
+              <p className="text-sm text-muted-foreground mb-3">Prioritize these before expanding to new services or locations.</p>
               {overview.knowledge_gaps.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No gaps reported.</p>
+                <p className="text-sm font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  No gaps reported — keep documents fresh as policies change.
+                </p>
               ) : (
-                <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                <ul className="space-y-2 text-sm text-foreground">
                   {overview.knowledge_gaps.map((g) => (
-                    <li key={g}>{g}</li>
+                    <li key={g} className="flex gap-2 items-start">
+                      <AlertTriangle className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                      <span>{g}</span>
+                    </li>
                   ))}
                 </ul>
               )}
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6 mb-8">
+          <div className="bg-card border border-border rounded-xl p-6 mb-8 shadow-sm">
             <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-              <h2 className="font-semibold">Documents</h2>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg cursor-pointer hover:bg-muted text-sm font-medium">
+              <div>
+                <h2 className={appSectionTitleClass}>Uploaded documents</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Files are chunked server-side — large PDFs may take a minute to become searchable.
+                </p>
+              </div>
+              <label className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-lg cursor-pointer hover:bg-muted text-sm font-semibold bg-white shadow-sm">
                 <Upload className="w-4 h-4" />
                 {busy === "upload" ? "Uploading…" : "Upload file"}
                 <input
@@ -263,13 +290,29 @@ export function AITrainingPage() {
               </label>
             </div>
             <div className="space-y-2">
-              {overview.documents.length === 0 && <p className="text-sm text-muted-foreground">No documents yet.</p>}
+              {overview.documents.length === 0 && (
+                <div className="text-center py-10 px-4 border border-dashed border-border rounded-xl bg-slate-50/50">
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-foreground">No documents yet</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">Upload policies, fee schedules, or FAQs patients ask about.</p>
+                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg cursor-pointer text-sm font-semibold">
+                    <Upload className="w-4 h-4" />
+                    Choose file
+                    <input
+                      type="file"
+                      className="hidden"
+                      aria-label="Upload training document from empty state"
+                      onChange={(e) => void onUpload(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                </div>
+              )}
               {overview.documents.map((d: TrainingDocument) => (
-                <div key={d.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-border">
+                <div key={d.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-border">
                   <div>
-                    <p className="text-sm font-medium">{d.filename}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {d.status.replace(/_/g, " ")}
+                    <p className="text-sm font-medium text-foreground">{d.filename}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {humanizeSnake(d.status)}
                       {d.chunk_count != null ? ` · ${d.chunk_count} chunks` : ""}
                       {d.error_message ? ` · ${d.error_message}` : ""}
                     </p>
@@ -288,26 +331,32 @@ export function AITrainingPage() {
             </div>
           </div>
 
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search sources..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg"
-            />
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className={appSectionTitleClass}>Manual knowledge sources</h2>
+              <p className="text-sm text-muted-foreground mt-1">Short, authoritative snippets — ideal for hours, parking, and visit prep.</p>
+            </div>
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search titles or body…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-white"
+              />
+            </div>
           </div>
 
           <div className="space-y-3">
             {filtered.map((s) => (
-              <div key={s.id} className="bg-card border border-border rounded-xl p-5 flex items-start justify-between gap-4">
+              <div key={s.id} className="bg-card border border-border rounded-xl p-5 flex items-start justify-between gap-4 shadow-sm">
                 <div className="min-w-0">
                   <p className="font-semibold text-foreground">{s.title}</p>
-                  <p className="text-xs text-muted-foreground capitalize mt-1">
-                    {s.source_type.replace(/_/g, " ")} · {s.status.replace(/_/g, " ")}
+                  <p className="text-xs text-muted-foreground mt-1 font-medium">
+                    {humanizeSnake(s.source_type)} · {humanizeSnake(s.status)}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-3 whitespace-pre-wrap">{s.content}</p>
+                  <p className="text-sm text-muted-foreground mt-2 line-clamp-3 whitespace-pre-wrap leading-relaxed">{s.content}</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   <button
@@ -331,11 +380,26 @@ export function AITrainingPage() {
               </div>
             ))}
             {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8 px-4 border border-dashed border-border rounded-xl">
-                {sources.length === 0
-                  ? "No custom sources yet. Use “Add source” or upload a document."
-                  : "No sources match your search."}
-              </p>
+              <div className="text-center py-10 px-4 border border-dashed border-border rounded-xl bg-white">
+                <p className="text-sm font-semibold text-foreground">
+                  {sources.length === 0 ? "Start with your first knowledge source" : "No sources match this search"}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1 mb-4">
+                  {sources.length === 0
+                    ? "Capture the answers staff repeat on the phone — the assistant will reuse them verbatim when appropriate."
+                    : "Try a different keyword or clear search."}
+                </p>
+                {sources.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAdd(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add source
+                  </button>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </>

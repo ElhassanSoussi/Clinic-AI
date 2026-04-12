@@ -1,5 +1,16 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { MessageSquare, Calendar, Users, TrendingUp, Clock, CheckCircle, AlertCircle, ArrowRight, Brain } from "lucide-react";
+import {
+  MessageSquare,
+  Calendar,
+  Users,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+  Brain,
+  ListTodo,
+} from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -10,7 +21,7 @@ import {
 } from "@/lib/api/services";
 import type { ActivityEvent, AppointmentRecord, FrontdeskAnalytics } from "@/lib/api/types";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 type Lead = { id: string; status: string };
 
@@ -92,14 +103,61 @@ export function DashboardPage() {
     }
   }, [aiPct]);
 
+  const unresolved = analytics?.unresolved_count ?? 0;
+  const followUps = analytics?.follow_up_needed_count ?? 0;
+
   return (
     <div className="h-full bg-background overflow-auto">
       <div className="border-b border-border bg-white">
         <div className={appPagePaddingClass}>
           <div className="mb-6">
             <h1 className={appPageTitleClass}>Dashboard</h1>
-            <p className="text-muted-foreground">Clinic operations from your connected data</p>
+            <p className={appPageSubtitleClass}>
+              Front desk command center — start with what needs a human, then scan volume and the schedule ahead.
+            </p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+          </div>
+
+          <div className="rounded-xl border border-border bg-slate-50/80 p-5 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ListTodo className="w-5 h-5 text-primary" />
+              <h2 className={appSectionTitleClass}>Priorities</h2>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <Link
+                to="/app/inbox"
+                className="rounded-lg border border-border bg-white p-4 hover:border-primary/40 hover:shadow-sm transition-all"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Inbox</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{loading ? "…" : unresolved}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Unresolved threads</p>
+                <p className="text-xs font-semibold text-primary mt-2 inline-flex items-center gap-1">
+                  Triage <ArrowRight className="w-3 h-3" />
+                </p>
+              </Link>
+              <Link
+                to="/app/inbox"
+                className="rounded-lg border border-border bg-white p-4 hover:border-primary/40 hover:shadow-sm transition-all"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Follow-up</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{loading ? "…" : followUps}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Flagged for staff</p>
+                <p className="text-xs font-semibold text-primary mt-2 inline-flex items-center gap-1">
+                  Review <ArrowRight className="w-3 h-3" />
+                </p>
+              </Link>
+              <Link
+                to="/app/leads"
+                className="rounded-lg border border-border bg-white p-4 hover:border-primary/40 hover:shadow-sm transition-all"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pipeline</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{loading ? "…" : newLeads}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">New leads</p>
+                <p className="text-xs font-semibold text-primary mt-2 inline-flex items-center gap-1">
+                  Open leads <ArrowRight className="w-3 h-3" />
+                </p>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -163,18 +221,18 @@ export function DashboardPage() {
                   <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
                     <AlertCircle className="w-4 h-4 text-orange-600" />
                   </div>
-                  <h3 className="font-bold text-foreground">Queue health</h3>
+                  <h3 className={appSectionTitleClass}>Queue health</h3>
                 </div>
               </div>
             </div>
             <div className="p-6 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Unresolved</span>
-                <span className="font-semibold">{loading ? "…" : analytics?.unresolved_count ?? "—"}</span>
+                <span className="font-semibold text-foreground">{loading ? "…" : analytics?.unresolved_count ?? "—"}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Follow-ups needed</span>
-                <span className="font-semibold">{loading ? "…" : analytics?.follow_up_needed_count ?? "—"}</span>
+                <span className="font-semibold text-foreground">{loading ? "…" : analytics?.follow_up_needed_count ?? "—"}</span>
               </div>
               <Link to="/app/inbox" className="block p-3 border border-border rounded-lg hover:bg-muted transition-colors">
                 <div className="flex items-center justify-between">
@@ -200,7 +258,7 @@ export function DashboardPage() {
                   <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                     <Brain className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="font-bold text-foreground">AI handling</h3>
+                  <h3 className={appSectionTitleClass}>AI handling</h3>
                 </div>
               </div>
             </div>
@@ -227,7 +285,7 @@ export function DashboardPage() {
                   <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                     <Clock className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="font-bold text-foreground">Deposits</h3>
+                  <h3 className={appSectionTitleClass}>Deposits</h3>
                 </div>
               </div>
             </div>
@@ -255,7 +313,7 @@ export function DashboardPage() {
           <div className="bg-white rounded-lg border border-border">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-foreground">Recent Activity</h2>
+                <h2 className={appSectionTitleClass}>Recent activity</h2>
                 <Link to="/app/activity" className="text-sm font-semibold text-primary hover:underline">View all</Link>
               </div>
             </div>
@@ -295,7 +353,7 @@ export function DashboardPage() {
           <div className="bg-white rounded-lg border border-border">
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-foreground">Upcoming appointments</h2>
+                <h2 className={appSectionTitleClass}>Upcoming on the schedule</h2>
                 <Link to="/app/appointments" className="text-sm font-semibold text-primary hover:underline">View all</Link>
               </div>
             </div>

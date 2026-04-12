@@ -6,7 +6,7 @@ import { fetchClinicMe, updateAuthProfile, changePassword } from "@/lib/api/serv
 import type { Clinic } from "@/lib/api/types";
 import { notifyError, notifySuccess } from "@/lib/feedback";
 import { cn } from "@/app/components/ui/utils";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
 export function AccountPage() {
   const { session, patchSession } = useAuth();
@@ -108,23 +108,26 @@ export function AccountPage() {
     <div className={cn(appPagePaddingClass, "max-w-3xl")}>
       <div className="mb-8">
         <h1 className={appPageTitleClass}>Account</h1>
-        <p className="text-muted-foreground">Profile and password for your signed-in user</p>
+        <p className={appPageSubtitleClass}>
+          Identity and security for the signed-in staff member. Clinic-wide configuration stays under Settings.
+        </p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         {ok && <p className="text-sm text-emerald-700 mt-2">{ok}</p>}
       </div>
 
       <div className="space-y-6">
-        <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">{initial}</span>
+        <div className="bg-card rounded-xl p-6 border border-border shadow-sm overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 pb-6 border-b border-border">
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-sm ring-4 ring-primary/10">
+              <span className="text-2xl font-bold text-primary-foreground">{initial}</span>
             </div>
-            <div>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Profile
+            <div className="flex-1 min-w-0">
+              <h2 className={cn(appSectionTitleClass, "text-xl flex items-center gap-2")}>
+                <User className="w-5 h-5 text-primary" />
+                Profile summary
               </h2>
-              <p className="text-sm text-muted-foreground">{session?.email}</p>
+              <p className="text-sm font-medium text-foreground mt-1 truncate">{session?.email}</p>
+              <p className="text-xs text-muted-foreground mt-1">Used for sign-in and operational notifications to you as a user.</p>
             </div>
           </div>
           <label htmlFor="account-full-name" className="block text-sm font-medium mb-2">
@@ -143,38 +146,44 @@ export function AccountPage() {
             data-testid="account-save-profile"
             disabled={busyProfile}
             onClick={() => void saveProfile()}
-            className="px-4 py-2 bg-primary text-white rounded-lg font-medium disabled:opacity-50"
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold disabled:opacity-50 shadow-sm"
           >
             {busyProfile ? "Saving…" : "Save profile"}
           </button>
         </div>
 
         <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Building className="w-5 h-5" />
-            Clinic
+          <h2 className={cn(appSectionTitleClass, "text-lg mb-1 flex items-center gap-2")}>
+            <Building className="w-5 h-5 text-primary" />
+            Clinic membership
           </h2>
+          <p className="text-sm text-muted-foreground mb-4">Read-only context for the workspace you are signed into.</p>
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!loading && clinic && (
-            <div className="text-sm space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="w-4 h-4" />
-                {clinic.name} · {clinic.slug}
+            <div className="rounded-lg border border-border bg-slate-50/80 p-4 text-sm">
+              <div className="flex items-start gap-2 text-foreground">
+                <Mail className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="font-semibold">{clinic.name}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5 font-mono">slug · {clinic.slug}</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Clinic-wide settings are under Settings in the app nav.</p>
+              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                Update branding, channels, and automation under <span className="font-semibold text-foreground">Settings</span> in the sidebar.
+              </p>
             </div>
           )}
         </div>
 
         <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5" />
+          <h2 className={cn(appSectionTitleClass, "text-lg mb-1 flex items-center gap-2")}>
+            <Shield className="w-5 h-5 text-primary" />
             Security
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Session list, device management, and audit history are not exposed by this API — only password change is available here.
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+            Session list, device management, and audit history are not exposed by this API — password rotation is managed here.
           </p>
-          <div className="space-y-3 max-w-md">
+          <div className="space-y-4 max-w-md">
             <div>
               <label htmlFor="account-current-password" className="block text-sm font-medium mb-1">
                 Current password
@@ -223,7 +232,7 @@ export function AccountPage() {
               type="button"
               disabled={busyPw || !currentPassword || !newPassword}
               onClick={() => void savePassword()}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold disabled:opacity-50 shadow-sm"
             >
               <Key className="w-4 h-4" />
               {busyPw ? "Updating…" : "Update password"}

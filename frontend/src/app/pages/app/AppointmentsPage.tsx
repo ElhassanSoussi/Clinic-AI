@@ -7,8 +7,9 @@ import { fetchAppointments, updateAppointment } from "@/lib/api/services";
 import type { AppointmentRecord } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
+import { appointmentStatusLabel, humanizeSnake } from "@/lib/display-text";
 import { cn } from "@/app/components/ui/utils";
-import { appPagePaddingClass, appPageTitleCompactClass } from "@/lib/page-layout";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleCompactClass, appSectionTitleClass } from "@/lib/page-layout";
 
 const STATUS_OPTIONS = [
   "request_open",
@@ -41,6 +42,45 @@ function displayTime(iso: string | null | undefined, fallback: string): string {
   } catch {
     return fallback || "—";
   }
+}
+
+function sortAppointmentsInGroup(items: AppointmentRecord[]): AppointmentRecord[] {
+  return [...items].sort((a, b) => {
+    if (!a.appointment_starts_at && !b.appointment_starts_at) {
+      return 0;
+    }
+    if (!a.appointment_starts_at) {
+      return -1;
+    }
+    if (!b.appointment_starts_at) {
+      return 1;
+    }
+    try {
+      return parseISO(a.appointment_starts_at).getTime() - parseISO(b.appointment_starts_at).getTime();
+    } catch {
+      return 0;
+    }
+  });
+}
+
+function rowStateAccent(status: string): string {
+  const s = (status || "").toLowerCase();
+  if (s === "request_open" || !s) {
+    return "border-l-4 border-l-amber-400";
+  }
+  if (s === "confirmed") {
+    return "border-l-4 border-l-emerald-500";
+  }
+  if (s.includes("cancel") || s === "no_show") {
+    return "border-l-4 border-l-red-400";
+  }
+  if (s.includes("reschedule")) {
+    return "border-l-4 border-l-violet-400";
+  }
+  if (s === "completed") {
+    return "border-l-4 border-l-slate-300";
+  }
+  return "border-l-4 border-l-transparent";
 }
 
 export function AppointmentsPage() {
@@ -89,7 +129,7 @@ export function AppointmentsPage() {
       }
       return a.localeCompare(b);
     });
-    return keys.map((k) => ({ key: k, label: k, items: map.get(k)! }));
+    return keys.map((k) => ({ key: k, label: k, items: sortAppointmentsInGroup(map.get(k)!) }));
   }, [rows]);
 
   const todayCount = useMemo(
@@ -142,7 +182,9 @@ export function AppointmentsPage() {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Appointments</h1>
-              <p className="text-muted-foreground">Live schedule from front-desk appointments</p>
+              <p className={appPageSubtitleClass}>
+                Schedule board — time-first rows, grouped by day, with status and deposit context from your live data.
+              </p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
             <div className="flex items-center gap-3">
@@ -202,71 +244,93 @@ export function AppointmentsPage() {
         {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No appointments returned for this clinic.</p>}
         {!loading &&
           grouped.map((group) => (
-            <div key={group.key} className="bg-white rounded-lg border border-border">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <div key={group.key} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-border bg-slate-50/60 flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                  <h2 className="font-bold text-foreground">{dayHeading(group.key)}</h2>
-                  <p className="text-sm text-muted-foreground">{group.items.length} slot{group.items.length === 1 ? "" : "s"}</p>
+                  <h2 className={cn(appSectionTitleClass, "text-base sm:text-lg")}>{dayHeading(group.key)}</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {group.items.length} appointment{group.items.length === 1 ? "" : "s"} · sorted by time
+                  </p>
                 </div>
               </div>
               <div className="divide-y divide-border">
                 {group.items.map((apt) => (
-                  <div key={apt.lead_id} className="p-5 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-start gap-6 flex-wrap">
-                      <div className="w-20 text-right">
-                        <p className="text-lg font-bold text-foreground">
-                          {displayTime(apt.appointment_starts_at, apt.preferred_datetime_text)}
-                        </p>
-                        <p className="text-xs text-muted-foreground capitalize">{apt.appointment_status.replace(/_/g, " ")}</p>
+                  <div
+                    key={apt.lead_id}
+                    className={cn("p-4 sm:p-5 hover:bg-slate-50/60 transition-colors bg-white", rowStateAccent(apt.appointment_status))}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-stretch gap-4">
+                      <div className="flex sm:flex-col sm:justify-between sm:w-24 shrink-0 gap-2 sm:gap-1">
+                        <div>
+                          <p className="text-2xl font-bold text-foreground tabular-nums leading-none">
+                            {displayTime(apt.appointment_starts_at, apt.preferred_datetime_text || "TBD")}
+                          </p>
+                          {!apt.appointment_starts_at ? (
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 mt-1">Unscheduled</p>
+                          ) : null}
+                        </div>
+                        <span className="inline-flex sm:self-start px-2 py-0.5 rounded-md text-xs font-semibold bg-white border border-border text-foreground">
+                          {appointmentStatusLabel(apt.appointment_status)}
+                        </span>
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                      <div className="flex-1 min-w-0 border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-5">
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 border border-border">
                               <span className="font-bold text-primary">{(apt.patient_name || "?").charAt(0)}</span>
                             </div>
                             <div className="min-w-0">
                               <h3 className="font-bold text-foreground mb-1">{apt.patient_name || "Patient"}</h3>
                               <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                                 <span className="flex items-center gap-1">
-                                  <Mail className="w-3 h-3" />
-                                  {apt.patient_email || "—"}
+                                  <Mail className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate max-w-[200px]">{apt.patient_email || "—"}</span>
                                 </span>
                                 <span className="flex items-center gap-1">
-                                  <Phone className="w-3 h-3" />
+                                  <Phone className="w-3.5 h-3.5 shrink-0" />
                                   {apt.patient_phone || "—"}
                                 </span>
                               </div>
+                              <p className="text-sm font-medium text-foreground mt-2">{apt.reason_for_visit || "Reason not set"}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {apt.appointment_starts_at
+                                  ? formatDateTime(apt.appointment_starts_at)
+                                  : apt.preferred_datetime_text || "Patient preference not tied to a slot yet"}
+                              </p>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-2 items-end">
-                            <label className="text-xs text-muted-foreground">
-                              Appointment status
+                          <div className="flex flex-col gap-3 lg:items-end lg:min-w-[220px]">
+                            <div className="w-full lg:w-auto">
+                              <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                                Update status
+                              </label>
                               <select
-                                className="ml-2 border border-border rounded-md px-2 py-1 text-sm bg-white"
+                                className="w-full lg:w-auto min-w-[200px] border border-border rounded-lg px-3 py-2 text-sm bg-white font-medium text-foreground"
                                 value={apt.appointment_status}
                                 disabled={busyId === apt.lead_id}
                                 onChange={(e) => void onStatusChange(apt.lead_id, e.target.value)}
                               >
                                 {STATUS_OPTIONS.map((s) => (
                                   <option key={s} value={s}>
-                                    {s.replace(/_/g, " ")}
+                                    {appointmentStatusLabel(s)}
                                   </option>
                                 ))}
                               </select>
-                            </label>
-                            <p className="text-xs text-muted-foreground">
-                              Reminder: <span className="font-medium text-foreground">{apt.reminder_status}</span> · Deposit:{" "}
-                              <span className="font-medium text-foreground">{apt.deposit_status}</span>
-                              {apt.deposit_required ? " (required)" : ""}
-                            </p>
+                            </div>
+                            <div className="rounded-lg border border-border bg-slate-50 px-3 py-2 text-xs text-muted-foreground w-full lg:max-w-xs">
+                              <p>
+                                <span className="font-semibold text-foreground">Reminder:</span>{" "}
+                                {humanizeSnake(apt.reminder_status || "—")}
+                              </p>
+                              <p className="mt-1">
+                                <span className="font-semibold text-foreground">Deposit:</span>{" "}
+                                {humanizeSnake(apt.deposit_status || "—")}
+                                {apt.deposit_required ? " · required for this visit" : ""}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-sm text-foreground font-medium">{apt.reason_for_visit || "Reason not set"}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {apt.appointment_starts_at ? formatDateTime(apt.appointment_starts_at) : apt.preferred_datetime_text || ""}
-                        </p>
                       </div>
                     </div>
                   </div>

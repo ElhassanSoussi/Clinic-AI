@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchCustomerDetail } from "@/lib/api/services";
 import type { CustomerDetail } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
+import { formatOutcomeLabel, humanizeSnake, sanitizeStaffNote } from "@/lib/display-text";
 import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
 
 export function CustomerDetailPage() {
@@ -85,15 +86,15 @@ export function CustomerDetailPage() {
 
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl font-bold text-teal-700">{initial}</span>
+              <div className="w-16 h-16 rounded-xl bg-accent border border-border flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl font-bold text-primary">{initial}</span>
               </div>
               <div>
                 <h1 className={appPageTitleClass}>{profile.name}</h1>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                   <span>{profile.total_interactions ?? profile.conversation_count + profile.lead_count} total interactions</span>
                   <span>•</span>
-                  <span className="capitalize">{profile.last_outcome || "—"}</span>
+                  <span>{formatOutcomeLabel(profile.last_outcome)}</span>
                 </div>
               </div>
             </div>
@@ -170,8 +171,8 @@ export function CustomerDetailPage() {
                     className="block p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-teal-200 transition-colors"
                   >
                     <p className="font-semibold text-foreground">{lead.patient_name}</p>
-                    <p className="text-xs text-muted-foreground capitalize mt-1">
-                      {lead.status} · {lead.reason_for_visit || "No reason"}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {humanizeSnake(lead.status)} · {lead.reason_for_visit || "No reason captured"}
                     </p>
                   </Link>
                 ))}
@@ -195,8 +196,12 @@ export function CustomerDetailPage() {
                       to={`/app/inbox/${conv.id}`}
                       className="block p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-teal-200 transition-colors"
                     >
-                      <p className="text-sm font-semibold text-foreground capitalize">{conv.channel?.replace(/_/g, " ") || "Thread"}</p>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{conv.last_message_preview || conv.derived_status}</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {humanizeSnake((conv.channel || "thread").replace(/\./g, "_"))}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {conv.last_message_preview || humanizeSnake((conv.derived_status || "").replace(/\./g, "_")) || "—"}
+                      </p>
                     </Link>
                   );
                 })}
@@ -226,7 +231,10 @@ export function CustomerDetailPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-foreground">{t.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{t.detail}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          {sanitizeStaffNote(t.detail, 280) ||
+                            (t.detail?.trim() ? "Update recorded — use the links below for full context." : "—")}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">{formatDateTime(t.occurred_at ?? undefined)}</p>
                         <div className="flex gap-2 mt-2 flex-wrap">
                           {t.lead_id ? (
@@ -258,7 +266,9 @@ export function CustomerDetailPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Latest note</p>
-                  <p className="font-semibold text-foreground">{profile.latest_note || "—"}</p>
+                  <p className="font-semibold text-foreground leading-relaxed">
+                    {sanitizeStaffNote(profile.latest_note, 400) || "—"}
+                  </p>
                 </div>
               </div>
             </div>
