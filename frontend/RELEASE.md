@@ -1,6 +1,6 @@
 # Frontend release & deployment (Vercel)
 
-Operator-focused steps for shipping the Next.js app. For full-stack context see [../DEPLOYMENT.md](../DEPLOYMENT.md) and [../LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md).
+Operator-focused steps for shipping the **Vite + React SPA** in `frontend/`. Full-stack context: [../DEPLOYMENT.md](../DEPLOYMENT.md), [../LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md), manual smoke: [TESTING.md](./TESTING.md).
 
 ## 1. Vercel project
 
@@ -26,8 +26,8 @@ Copy [`.env.example`](.env.example) as a checklist. Summary:
 **Strongly recommended for production**
 
 - `NEXT_PUBLIC_SITE_URL` — public https origin, e.g. `https://clinicaireply.com`  
-  - Without it on Vercel, metadata/Open Graph use `https://${VERCEL_URL}` (fine for previews; production should set the real marketing domain).
-  - Resolution order is documented in `src/lib/env.ts` (`getSiteMetadataBaseUrl`).
+  - Used for Stripe return URLs, patient chat link, and iframe snippet in Settings (`src/lib/site.ts` → `getPublicOrigin()`).  
+  - If unset in the browser, the app falls back to `window.location.origin` (OK for that tab; set the var in production so copied links match your canonical domain).
 
 **Optional**
 
@@ -37,7 +37,7 @@ Copy [`.env.example`](.env.example) as a checklist. Summary:
 
 **CI / source maps (optional)**
 
-- `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — see [Sentry Next.js source maps](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — optional; see Sentry docs for Vite/browser source maps if you add Sentry to this app
 
 **Preview vs production**
 
@@ -62,7 +62,7 @@ Use real-shaped values in `.env.local` for a local production build when validat
 
 1. Open the deployment URL (preview or production).
 2. Hard refresh; confirm no blank root layout.
-3. **Marketing** — `/` loads; “Try live demo” goes to `/chat/demo` (public chat slug `demo`).
+3. **Marketing** — `/` loads; public patient chat is **`/chat?slug=…`** (e.g. `/chat?slug=demo` if a `demo` clinic exists).
 4. **Auth** — `/login`, `/register` render; sign-in with a test account if backend is live.
 5. **API** — dashboard data loads (network tab: API calls succeed, not CORS errors).
 6. **Observability** — if Sentry is configured, trigger a test error in a safe environment and confirm the event (optional).
@@ -70,7 +70,7 @@ Use real-shaped values in `.env.local` for a local production build when validat
 ## 5. Domains
 
 - Primary: apex `clinicaireply.com` (example — substitute your domain).
-- `www` should redirect to apex (see `src/proxy.ts` / Vercel redirects).
+- `www` should redirect to apex (configure in Vercel **Domains** or your DNS host).
 - Set `NEXT_PUBLIC_SITE_URL` on **production** to the canonical https URL.
 
 ## 6. Rollback
@@ -83,5 +83,5 @@ Checkout and Customer Portal are driven by the **backend** API; the frontend doe
 
 ## 8. Widget and embed
 
-- Script URL: `{YOUR_FRONTEND_ORIGIN}/widget.js`
-- Demo chat path: `/chat/demo` (same app, dynamic `[slug]` route).
+- Script URL (if you ship `widget.js`): `{YOUR_FRONTEND_ORIGIN}/widget.js` — confirm the file exists in `dist` / CDN for your deployment.
+- Patient chat page: **`/chat?slug=CLINIC_SLUG`** (query param, not a path segment). The URL shown in **Settings** is the source of truth.

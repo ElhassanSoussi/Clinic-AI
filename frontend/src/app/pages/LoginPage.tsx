@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { ApiError, CLINIC_AI_SESSION_EXPIRED_STORAGE_KEY } from "@/lib/api";
 
 function safeInternalReturnPath(raw: string | null): string | null {
   if (!raw) {
@@ -22,7 +22,19 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [sessionExpiredNotice, setSessionExpiredNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(CLINIC_AI_SESSION_EXPIRED_STORAGE_KEY)) {
+        sessionStorage.removeItem(CLINIC_AI_SESSION_EXPIRED_STORAGE_KEY);
+        setSessionExpiredNotice("Your session expired or was revoked. Sign in again to continue.");
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (ready && session) {
@@ -71,6 +83,12 @@ export function LoginPage() {
             <h2 className="text-3xl font-bold mb-2">Log in to your account</h2>
             <p className="text-muted-foreground">Enter your credentials to continue</p>
           </div>
+
+          {sessionExpiredNotice && (
+            <div className="mb-4 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-950">
+              {sessionExpiredNotice}
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">

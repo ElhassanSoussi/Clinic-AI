@@ -73,6 +73,8 @@
 
 ## Post-Deploy Verification
 
+Use **route-by-route** checks in [frontend/TESTING.md](frontend/TESTING.md) (manual smoke tables). Optional: `cd frontend && PLAYWRIGHT_BASE_URL=https://your-domain pnpm run e2e:live` for quick HTML smoke.
+
 ### Core Health
 
 - [ ] `GET https://api.clinicaireply.com/api/health` → `{"status": "ok"}`

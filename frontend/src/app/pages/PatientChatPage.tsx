@@ -22,6 +22,9 @@ function sessionStorageKey(slug: string) {
   return `clinic_ai_chat_session_${slug}`;
 }
 
+/** Matches typical clinic slugs; avoids junk in the query string before hitting the API. */
+const CHAT_SLUG_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/;
+
 function getOrCreateSessionId(slug: string): string {
   const key = sessionStorageKey(slug);
   let id = sessionStorage.getItem(key);
@@ -36,6 +39,7 @@ export function PatientChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const slugParam = (searchParams.get("slug") || "").trim();
   const [slugInput, setSlugInput] = useState(slugParam);
+  const [slugFieldError, setSlugFieldError] = useState<string | null>(null);
 
   const [branding, setBranding] = useState<Branding | null>(null);
   const [brandingError, setBrandingError] = useState<string | null>(null);
@@ -56,8 +60,20 @@ export function PatientChatPage() {
   useEffect(() => {
     if (!activeSlug) {
       setBranding(null);
+      setBrandingError(null);
       setMessages([]);
       sessionIdRef.current = null;
+      return;
+    }
+
+    if (!CHAT_SLUG_PATTERN.test(activeSlug)) {
+      setBranding(null);
+      setMessages([]);
+      sessionIdRef.current = null;
+      setBrandingLoading(false);
+      setBrandingError(
+        "Invalid slug in URL. Use letters, numbers, hyphens, or underscores — same value as in Settings → public chat link.",
+      );
       return;
     }
 
@@ -118,6 +134,13 @@ export function PatientChatPage() {
     if (!s) {
       return;
     }
+    if (!CHAT_SLUG_PATTERN.test(s)) {
+      setSlugFieldError(
+        "Use letters, numbers, hyphens, or underscores only (match the slug from your dashboard).",
+      );
+      return;
+    }
+    setSlugFieldError(null);
     setSearchParams({ slug: s });
   };
 
@@ -213,10 +236,18 @@ export function PatientChatPage() {
             Enter your clinic&apos;s public slug (same as in your Clinic AI dashboard). Example URL:{" "}
             <code className="text-xs bg-muted px-1 py-0.5 rounded break-all">/chat?slug=my-clinic</code>
           </p>
+          {slugFieldError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {slugFieldError}
+            </p>
+          ) : null}
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={slugInput}
-              onChange={(e) => setSlugInput(e.target.value)}
+              onChange={(e) => {
+                setSlugFieldError(null);
+                setSlugInput(e.target.value);
+              }}
               className="flex-1 min-w-0 px-4 py-2 border border-border rounded-lg"
               placeholder="clinic-slug"
             />

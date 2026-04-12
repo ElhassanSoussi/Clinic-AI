@@ -62,6 +62,9 @@ export type ApiFetchOptions = RequestInit & { accessToken?: string | null };
 /** Dispatched when an authenticated request returns 401 (handled in AuthProvider). */
 export const CLINIC_AI_SESSION_EXPIRED_EVENT = "clinic-ai:session-expired";
 
+/** Set before session clear so `/login` can show a one-time notice. */
+export const CLINIC_AI_SESSION_EXPIRED_STORAGE_KEY = "clinic_ai_session_expired_notice";
+
 export async function apiFetch(path: string, init: ApiFetchOptions = {}): Promise<Response> {
   const { accessToken, headers: initHeaders, ...rest } = init;
   const headers = new Headers(initHeaders);
@@ -90,6 +93,11 @@ export async function apiFetch(path: string, init: ApiFetchOptions = {}): Promis
   }
   if (accessToken && res.status === 401 && !path.startsWith("/auth/login") && !path.startsWith("/auth/register")) {
     if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem(CLINIC_AI_SESSION_EXPIRED_STORAGE_KEY, "1");
+      } catch {
+        /* ignore */
+      }
       window.dispatchEvent(new Event(CLINIC_AI_SESSION_EXPIRED_EVENT));
     }
   }

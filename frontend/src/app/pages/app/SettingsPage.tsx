@@ -300,6 +300,30 @@ export function SettingsPage() {
     }
   };
 
+  const copyChatUrl = async () => {
+    if (!chatUrl) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(chatUrl);
+      notifySuccess("Chat link copied");
+    } catch {
+      notifyError("Could not copy. Select the text in the box manually.");
+    }
+  };
+
+  const copyEmbedSnippet = async () => {
+    if (!iframeSnippet) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(iframeSnippet);
+      notifySuccess("Embed HTML copied");
+    } catch {
+      notifyError("Could not copy. Select the snippet manually.");
+    }
+  };
+
   const handleTestEmail = async () => {
     if (!session?.accessToken) {
       return;
@@ -610,8 +634,10 @@ export function SettingsPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => chatUrl && navigator.clipboard.writeText(chatUrl)}
-                    className="absolute top-2 right-2 p-2 bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors"
+                    aria-label="Copy public chat link"
+                    disabled={!chatUrl}
+                    onClick={() => void copyChatUrl()}
+                    className="absolute top-2 right-2 p-2 bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <Copy className="w-4 h-4" />
                   </button>
@@ -625,8 +651,10 @@ export function SettingsPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => iframeSnippet && navigator.clipboard.writeText(iframeSnippet)}
-                    className="absolute top-2 right-2 p-2 bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors"
+                    aria-label="Copy iframe embed HTML"
+                    disabled={!iframeSnippet}
+                    onClick={() => void copyEmbedSnippet()}
+                    className="absolute top-2 right-2 p-2 bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <Copy className="w-4 h-4" />
                   </button>

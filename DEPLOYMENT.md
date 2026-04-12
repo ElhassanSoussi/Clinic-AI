@@ -74,10 +74,9 @@ Feature-specific backend env vars:
    - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
    - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Microsoft auth is configured in Supabase
 7. **Sentry (optional):**
-   - `NEXT_PUBLIC_SENTRY_DSN` — error reporting (client + server init via `frontend/src/instrumentation*.ts`)
-   - `SENTRY_DSN` — optional server-only override
-   - For readable stack traces in Sentry: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` in CI or Vercel build env (see Sentry Next.js docs)
-   - `NEXT_PUBLIC_VERCEL_ENV` — optional; set to `preview` or `production` if you want the **browser** SDK environment tag to match deployments (`VERCEL_ENV` is not exposed to the client by default)
+   - If you add Sentry to this Vite SPA: set `NEXT_PUBLIC_SENTRY_DSN` and follow Sentry’s Vite/browser SDK setup (this repo does not ship `instrumentation.ts` like Next.js).
+   - For source maps in CI: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` per Sentry docs.
+   - `NEXT_PUBLIC_VERCEL_ENV` — optional env tag for the browser SDK.
 8. Attach the custom domain:
    - `clinicaireply.com`
 9. Verify the site loads and can reach the backend API.
@@ -89,18 +88,17 @@ If Vercel shows `No fastapi entrypoint found`, the project is building the repo 
 
 If Vercel shows **No Next.js version detected**, the Framework Preset is still Next.js. Switch it to **Vite** (or redeploy after pulling `frontend/vercel.json`).
 
-Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md).
+Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md). After deploy, run manual smoke steps in [frontend/TESTING.md](frontend/TESTING.md) and/or `PLAYWRIGHT_BASE_URL=… pnpm run e2e:live` in `frontend/`.
 
 ## Supabase
 
 1. Set Auth Site URL to:
    - `https://clinicaireply.com`
-2. Add Auth Redirect URL:
-   - `https://clinicaireply.com/auth/callback`
+2. **Redirect URLs:** The current SPA signs in via the **backend** (`/auth/login`, `/auth/register`); there is no `/auth/callback` route in the Vite app. Add `https://clinicaireply.com/auth/callback` (and preview URLs if needed) **when** you enable Supabase OAuth (Google/Microsoft) in the browser; required for those providers, not for email/password-only via API.
 3. Apply:
    - `backend/schema.sql`
    - every file in `backend/migrations/` in timestamp order
-4. Copy env values into Render and Vercel:
+4. Copy env values into Render and Vercel (`NEXT_PUBLIC_*` from Supabase settings):
    - project URL
    - anon key
    - service role key
