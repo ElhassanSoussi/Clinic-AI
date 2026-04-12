@@ -1,128 +1,182 @@
-"use client";
-
 import {
   createContext,
-  useEffect,
-  useContext,
-  useState,
-  useMemo,
   useCallback,
+  useContext,
+  useMemo,
+  useState,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
-import type { AuthResponse } from "@/types";
-import { clearApiCache } from "@/lib/api";
-import { createClient } from "@/utils/supabase/client";
+import { ApiError, apiJson } from "./api";
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: AuthResponse | null;
-  setAuthenticatedUser: (data: AuthResponse) => void;
-  login: (data: AuthResponse) => void;
-  loginWithOnboarding: (data: AuthResponse) => void;
-  logout: () => Promise<void>;
+const STORAGE_KEY = "clinic_ai_auth_session";
+
+export type AuthSession = {
+  accessToken: string;
+  userId: string;
+  email: string;
+  fullName: string;
+  clinicId: string;
+  clinicSlug: string;
+};
+
+type AuthResponse = {
+  access_token: string;
+  user_id: string;
+  email: string;
+  full_name: string;
+  clinic_id: string;
+  clinic_slug: string;
+  requires_email_confirmation?: boolean;
+  message?: string;
+};
+
+type AuthContextValue = {
+  session: AuthSession | null;
+  ready: boolean;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  register: (input: {
+    email: string;
+    password: string;
+    full_name: string;
+    clinic_name: string;
+  }) => Promise<AuthResponse>;
+  logout: () => void;
+  setSessionFromAuthResponse: (body: AuthResponse) => void;
+  /** Merge into the persisted session (e.g. after profile update). Does not call the API. */
+  patchSession: (patch: Partial<Pick<AuthSession, "fullName" | "email" | "clinicSlug">>) => void;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+function toSession(body: AuthResponse): AuthSession {
+  return {
+    accessToken: body.access_token,
+    userId: body.user_id,
+    email: body.email,
+    fullName: body.full_name,
+    clinicId: body.clinic_id,
+    clinicSlug: body.clinic_slug,
+  };
 }
 
-const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
-  setAuthenticatedUser: () => {},
-  login: () => {},
-  loginWithOnboarding: () => {},
-  logout: async () => {},
-});
+function readStoredSession(): AuthSession | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return JSON.parse(raw) as AuthSession;
+    }
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+  return null;
+}
 
-export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
-  const [user, setUser] = useState<AuthResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<AuthSession | null>(readStoredSession);
+  const [ready] = useState(true);
 
-  useEffect(() => {
-    if (globalThis.window !== undefined) {
-      const stored = localStorage.getItem("auth_user");
-      const token = localStorage.getItem("access_token");
+  const persist = useCallback((next: AuthSession | null) => {
+    if (next) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    setSession(next);
+  }, []);
 
-      if (stored && token) {
-        try {
-          const parsed = JSON.parse(stored) as AuthResponse;
-          if (token.trim() && parsed.access_token.trim()) {
-            globalThis.queueMicrotask(() => setUser(parsed));
-          } else {
-            localStorage.removeItem("auth_user");
-            localStorage.removeItem("access_token");
-          }
-        } catch {
-          localStorage.removeItem("auth_user");
-          localStorage.removeItem("access_token");
+  const setSessionFromAuthResponse = useCallback(
+    (body: AuthResponse) => {
+      persist(toSession(body));
+    },
+    [persist],
+  );
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const body = await apiJson<AuthResponse>("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        });
+        if (body.access_token) {
+          persist(toSession(body));
         }
+        return body;
+      } catch (e) {
+        if (e instanceof ApiError) {
+          throw e;
+        }
+        throw new ApiError(e instanceof Error ? e.message : "Login failed", 0);
       }
-    }
+    },
+    [persist],
+  );
 
-    globalThis.queueMicrotask(() => setIsLoading(false));
-  }, []);
-
-  const setAuthenticatedUser = useCallback((data: AuthResponse) => {
-    if (!data.access_token.trim()) {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("auth_user");
-      clearApiCache();
-      setUser(null);
-      return;
-    }
-    clearApiCache();
-    localStorage.setItem("access_token", data.access_token);
-    localStorage.setItem("auth_user", JSON.stringify(data));
-    setUser(data);
-  }, []);
-
-  const login = useCallback((data: AuthResponse) => {
-    setAuthenticatedUser(data);
-    router.push("/dashboard");
-  }, [router, setAuthenticatedUser]);
-
-  const loginWithOnboarding = useCallback((data: AuthResponse) => {
-    setAuthenticatedUser(data);
-    router.push("/dashboard");
-  }, [router, setAuthenticatedUser]);
-
-  const logout = useCallback(async () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("auth_user");
-    clearApiCache();
+  const register = useCallback(async (input: {
+    email: string;
+    password: string;
+    full_name: string;
+    clinic_name: string;
+  }) => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-    } catch { /* ignore sign-out errors */ }
-    setUser(null);
-    router.push("/login");
-  }, [router]);
+      const body = await apiJson<AuthResponse>("/auth/register", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      if (body.access_token) {
+        persist(toSession(body));
+      }
+      return body;
+    } catch (e) {
+      if (e instanceof ApiError) {
+        throw e;
+      }
+      throw new ApiError(e instanceof Error ? e.message : "Registration failed", 0);
+    }
+  }, [persist]);
+
+  const logout = useCallback(() => {
+    persist(null);
+  }, [persist]);
+
+  const patchSession = useCallback(
+    (patch: Partial<Pick<AuthSession, "fullName" | "email" | "clinicSlug">>) => {
+      setSession((prev) => {
+        if (!prev) {
+          return prev;
+        }
+        const next = { ...prev, ...patch };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    [],
+  );
 
   const value = useMemo(
     () => ({
-      isAuthenticated: !!user,
-      isLoading,
-      user,
-      setAuthenticatedUser,
+      session,
+      ready,
       login,
-      loginWithOnboarding,
+      register,
       logout,
+      setSessionFromAuthResponse,
+      patchSession,
     }),
-    [user, isLoading, setAuthenticatedUser, login, loginWithOnboarding, logout]
+    [session, ready, login, register, logout, setSessionFromAuthResponse, patchSession],
   );
 
-  return (
-    <AuthContext.Provider
-      value={value}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
   return ctx;
+}
+
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
 }

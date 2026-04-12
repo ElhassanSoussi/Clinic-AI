@@ -116,5 +116,17 @@
   "claudeCode.useTerminal": true,
   "cursor.composer.shouldChimeAfterChatFinishes": false,
   "cursor.general.emailPrivacyEnabled": true,
-  "cursor.composer.shouldAutoSaveNonAgent": false
+  "cursor.composer.shouldAutoSaveNonAgent": false,
+  "cursorpyright.analysis.diagnosticMode": "openFilesOnly",
+  "cursorpyright.analysis.ignore": [
+    "/opt/homebrew/**",
+    "**/backend/venv/**",
+    "**/.next/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+    "**/.tox/**",
+    "**/.nox/**",
+    "**/.direnv/**"
+  ]
 }

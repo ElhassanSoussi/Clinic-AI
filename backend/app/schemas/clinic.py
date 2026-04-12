@@ -72,3 +72,4 @@ class ClinicUpdateRequest(BaseModel):
     assistant_name: Optional[str] = None
     primary_color: Optional[str] = None
     logo_url: Optional[str] = None
+    is_live: Optional[bool] = None
