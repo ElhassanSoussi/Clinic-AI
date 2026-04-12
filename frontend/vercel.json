@@ -7,9 +7,6 @@
   "devCommand": "pnpm run dev",
   "rewrites": [
     {
-      "handle": "filesystem"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

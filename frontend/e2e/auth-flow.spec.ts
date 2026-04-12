@@ -1,8 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { getE2eCredentials } from "./helpers/credentials";
+import { getE2eCredentials, hasE2eCredentials } from "./helpers/credentials";
 
 test.describe("authenticated user journey", () => {
   test("logs in, covers onboarding, settings, billing, leads, inbox, account, logs out", async ({ page }) => {
+    test.skip(
+      !hasE2eCredentials(),
+      "Set E2E_USER_EMAIL and E2E_USER_PASSWORD in frontend/.env.e2e (see e2e/env.example). Backend must be reachable.",
+    );
     const { email, password } = getE2eCredentials();
 
     await page.goto("/login");
