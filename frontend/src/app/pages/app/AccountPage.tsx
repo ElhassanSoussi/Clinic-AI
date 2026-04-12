@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { User, Mail, Building, Shield, Key, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { fetchClinicMe, updateAuthProfile, changePassword } from "@/lib/api/services";
 import type { Clinic } from "@/lib/api/types";
 import { notifyError, notifySuccess } from "@/lib/feedback";
@@ -17,6 +17,7 @@ export function AccountPage() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [clinicLoadError, setClinicLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [busyProfile, setBusyProfile] = useState(false);
@@ -28,32 +29,31 @@ export function AccountPage() {
     }
   }, [session?.fullName]);
 
-  useEffect(() => {
+  const loadClinic = useCallback(async () => {
     if (!session?.accessToken) {
       return;
     }
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const c = await fetchClinicMe(session.accessToken);
-        if (!cancelled) {
-          setClinic(c);
-        }
-      } catch {
-        if (!cancelled) {
-          setClinic(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setClinicLoadError(null);
+    try {
+      const c = await fetchClinicMe(session.accessToken);
+      setClinic(c);
+    } catch (e) {
+      setClinic(null);
+      setClinicLoadError(userFacingApiError(e, "Could not load clinic details"));
+    } finally {
+      setLoading(false);
+    }
   }, [session?.accessToken]);
+
+  useEffect(() => {
+    void loadClinic();
+  }, [loadClinic]);
+
+  const profileDirty = useMemo(
+    () => fullName.trim() !== (session?.fullName ?? "").trim(),
+    [fullName, session?.fullName],
+  );
 
   const saveProfile = async () => {
     if (!session?.accessToken) {
@@ -69,7 +69,7 @@ export function AccountPage() {
       setOk("Profile updated.");
       notifySuccess("Profile updated");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Profile update failed";
+      const msg = userFacingApiError(e, "Profile update failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -94,7 +94,7 @@ export function AccountPage() {
       setOk("Password updated.");
       notifySuccess("Password updated");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Password change failed";
+      const msg = userFacingApiError(e, "Password change failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -144,11 +144,11 @@ export function AccountPage() {
           <button
             type="button"
             data-testid="account-save-profile"
-            disabled={busyProfile}
+            disabled={busyProfile || !profileDirty}
             onClick={() => void saveProfile()}
             className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold disabled:opacity-50 shadow-sm"
           >
-            {busyProfile ? "Saving…" : "Save profile"}
+            {busyProfile ? "Saving…" : profileDirty ? "Save profile" : "No changes"}
           </button>
         </div>
 
@@ -159,6 +159,19 @@ export function AccountPage() {
           </h2>
           <p className="text-sm text-muted-foreground mb-4">The practice you&apos;re signed into (read-only here).</p>
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {!loading && clinicLoadError && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive space-y-2">
+              <p>{clinicLoadError}</p>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void loadClinic()}
+                className="px-3 py-1.5 rounded-md border border-border bg-white text-foreground text-xs font-semibold hover:bg-muted disabled:opacity-50"
+              >
+                Retry
+              </button>
+            </div>
+          )}
           {!loading && clinic && (
             <div className="rounded-lg border border-border bg-slate-50/80 p-4 text-sm">
               <div className="flex items-start gap-2 text-foreground">

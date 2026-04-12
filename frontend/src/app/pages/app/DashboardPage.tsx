@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   MessageSquare,
   Calendar,
@@ -12,6 +12,7 @@ import {
   ListTodo,
 } from "lucide-react";
 import { Link } from "react-router";
+import { userFacingApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchActivity,
@@ -34,45 +35,37 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadDashboard = useCallback(async () => {
     if (!session?.accessToken) {
       return;
     }
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [a, l, act, appts] = await Promise.all([
-          fetchFrontdeskAnalytics(session.accessToken),
-          fetchLeads(session.accessToken),
-          fetchActivity(session.accessToken, 8),
-          fetchAppointments(session.accessToken, "upcoming"),
-        ]);
-        if (!cancelled) {
-          setAnalytics(a);
-          setLeads(l);
-          setActivity(act);
-          setAppointments(appts);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load dashboard");
-          setAnalytics(null);
-          setLeads([]);
-          setActivity([]);
-          setAppointments([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const [a, l, act, appts] = await Promise.all([
+        fetchFrontdeskAnalytics(session.accessToken),
+        fetchLeads(session.accessToken),
+        fetchActivity(session.accessToken, 8),
+        fetchAppointments(session.accessToken, "upcoming"),
+      ]);
+      setAnalytics(a);
+      setLeads(l);
+      setActivity(act);
+      setAppointments(appts);
+    } catch (e) {
+      setError(userFacingApiError(e, "Failed to load dashboard"));
+      setAnalytics(null);
+      setLeads([]);
+      setActivity([]);
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+    }
   }, [session?.accessToken]);
+
+  useEffect(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
 
   const newLeads = leads.filter((x) => x.status.toLowerCase() === "new").length;
 
@@ -115,7 +108,19 @@ export function DashboardPage() {
             <p className={appPageSubtitleClass}>
               Start with threads and follow-ups that need a person, then check volume and what&apos;s on the calendar.
             </p>
-            {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+            {error && (
+              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="text-sm text-destructive max-w-xl">{error}</p>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => void loadDashboard()}
+                  className="shrink-0 px-3 py-1.5 rounded-lg border border-border text-sm font-semibold hover:bg-muted disabled:opacity-50 w-fit"
+                >
+                  {loading ? "Retrying…" : "Retry"}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl border border-border bg-slate-50/80 p-5 mb-6">

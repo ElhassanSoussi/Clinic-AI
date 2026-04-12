@@ -8,9 +8,11 @@ type ModalProps = {
   description?: string;
   children: ReactNode;
   size?: "sm" | "md" | "lg";
+  /** When true, the header close control is disabled (e.g. during an in-flight request). */
+  closeDisabled?: boolean;
 };
 
-export function Modal({ isOpen, onClose, title, description, children, size = "md" }: ModalProps) {
+export function Modal({ isOpen, onClose, title, description, children, size = "md", closeDisabled = false }: ModalProps) {
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -31,8 +33,9 @@ export function Modal({ isOpen, onClose, title, description, children, size = "m
             <button
               type="button"
               onClick={onClose}
+              disabled={closeDisabled}
               aria-label="Close dialog"
-              className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors"
+              className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors disabled:opacity-40 disabled:pointer-events-none"
             >
               <X className="w-4 h-4" aria-hidden />
             </button>
@@ -53,6 +56,8 @@ type ConfirmModalProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "default" | "danger";
+  /** Disables both actions to prevent double-submit while an async confirm is running. */
+  pending?: boolean;
 };
 
 export function ConfirmModal({
@@ -64,6 +69,7 @@ export function ConfirmModal({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   variant = "default",
+  pending = false,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
 
@@ -80,17 +86,20 @@ export function ConfirmModal({
         </div>
         <div className="p-6 pt-0 flex items-center gap-3">
           <button
+            type="button"
             onClick={onClose}
-            className="flex-1 h-10 px-4 border border-border rounded-lg hover:bg-slate-50 transition-colors font-semibold text-sm"
+            disabled={pending}
+            className="flex-1 h-10 px-4 border border-border rounded-lg hover:bg-slate-50 transition-colors font-semibold text-sm disabled:opacity-50 disabled:pointer-events-none"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
+            disabled={pending}
             onClick={() => {
               onConfirm();
             }}
-            className={`flex-1 h-10 px-4 rounded-lg transition-colors font-semibold text-sm shadow-sm ${confirmButtonClass}`}
+            className={`flex-1 h-10 px-4 rounded-lg transition-colors font-semibold text-sm shadow-sm disabled:opacity-50 disabled:pointer-events-none ${confirmButtonClass}`}
           >
             {confirmLabel}
           </button>

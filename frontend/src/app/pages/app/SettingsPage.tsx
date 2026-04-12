@@ -17,7 +17,7 @@ import {
 import { ConfirmModal } from "@/app/components/Modal";
 import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import {
   fetchChannels,
   fetchClinicMe,
@@ -92,39 +92,31 @@ export function SettingsPage() {
     setAvailabilitySheetTab(c.availability_sheet_tab || "Availability");
   }, []);
 
-  useEffect(() => {
+  const loadSettings = useCallback(async () => {
     if (!session?.accessToken) {
       return;
     }
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(null);
-      try {
-        const [me, ch, readiness] = await Promise.all([
-          fetchClinicMe(session.accessToken),
-          fetchChannels(session.accessToken),
-          fetchSystemReadiness(session.accessToken).catch(() => null),
-        ]);
-        if (!cancelled) {
-          hydrate(me);
-          setChannels(ch || []);
-          setSystemReadiness(readiness);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : "Failed to load settings");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [me, ch, readiness] = await Promise.all([
+        fetchClinicMe(session.accessToken),
+        fetchChannels(session.accessToken),
+        fetchSystemReadiness(session.accessToken).catch(() => null),
+      ]);
+      hydrate(me);
+      setChannels(ch || []);
+      setSystemReadiness(readiness);
+    } catch (e) {
+      setLoadError(userFacingApiError(e, "Failed to load settings"));
+    } finally {
+      setLoading(false);
+    }
   }, [session?.accessToken, hydrate]);
+
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
 
   const baseline = useMemo(() => {
     if (!clinic) {
@@ -243,7 +235,7 @@ export function SettingsPage() {
         /* non-fatal */
       }
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Save failed";
+      const msg = userFacingApiError(e, "Save failed");
       setSaveError(msg);
       notifyError(msg);
     } finally {
@@ -268,7 +260,7 @@ export function SettingsPage() {
         /* non-fatal */
       }
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Go-live failed";
+      const msg = userFacingApiError(e, "Go-live failed");
       setSaveError(msg);
       notifyError(msg);
     } finally {
@@ -293,7 +285,7 @@ export function SettingsPage() {
         /* non-fatal */
       }
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not pause";
+      const msg = userFacingApiError(e, "Could not pause");
       setSaveError(msg);
       notifyError(msg);
     } finally {
@@ -341,7 +333,7 @@ export function SettingsPage() {
         notifySuccess("Test email sent", "Check the notification inbox you configured.");
       }
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Test email failed";
+      const msg = userFacingApiError(e, "Test email failed");
       setSaveError(msg);
       notifyError(msg);
     } finally {
@@ -360,7 +352,16 @@ export function SettingsPage() {
   if (loadError && !clinic) {
     return (
       <div className={appPagePaddingClass}>
-        <p className="text-destructive">{loadError}</p>
+        <h1 className={appPageTitleClass}>Settings</h1>
+        <p className="text-destructive mt-2 max-w-lg">{loadError}</p>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => void loadSettings()}
+          className="mt-4 px-4 py-2 rounded-lg border border-border font-semibold text-sm hover:bg-muted disabled:opacity-50"
+        >
+          {loading ? "Loading…" : "Retry"}
+        </button>
       </div>
     );
   }
@@ -457,7 +458,7 @@ export function SettingsPage() {
             </div>
             <button
               type="button"
-              disabled={pauseBusy}
+              disabled={pauseBusy || saving}
               onClick={() => setShowPauseConfirm(true)}
               className="px-4 py-2 border border-emerald-300 bg-white text-emerald-900 rounded-lg hover:bg-emerald-100/80 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
@@ -479,7 +480,7 @@ export function SettingsPage() {
               </p>
               <button
                 type="button"
-                disabled={goLiveBusy}
+                disabled={goLiveBusy || saving}
                 onClick={() => void handleGoLive()}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
               >
@@ -492,7 +493,12 @@ export function SettingsPage() {
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div
+          className={cn(
+            "lg:col-span-2 space-y-6 transition-opacity",
+            saving && "opacity-60 pointer-events-none",
+          )}
+        >
           <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
@@ -787,7 +793,7 @@ export function SettingsPage() {
               </div>
               <button
                 type="button"
-                disabled={testBusy}
+                disabled={testBusy || saving}
                 onClick={() => void handleTestEmail()}
                 className="px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-muted disabled:opacity-50"
               >
@@ -903,6 +909,7 @@ export function SettingsPage() {
         description="This sets your clinic to not live. Existing conversations are unchanged; new patient automation stops until you go live again."
         confirmLabel={pauseBusy ? "Pausing…" : "Pause"}
         variant="danger"
+        pending={pauseBusy}
       />
     </div>
   );

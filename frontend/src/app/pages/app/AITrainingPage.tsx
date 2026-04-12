@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Brain, Plus, BookOpen, Search, Edit2, Trash2, Upload, AlertTriangle, CheckCircle } from "lucide-react";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import {
   createTrainingSource,
   deleteTrainingDocument,
@@ -39,7 +39,7 @@ export function AITrainingPage() {
       const o = await fetchTrainingOverview(session.accessToken);
       setOverview(o);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load training");
+      setError(userFacingApiError(e, "Failed to load training"));
       setOverview(null);
     } finally {
       setLoading(false);
@@ -53,8 +53,8 @@ export function AITrainingPage() {
   const sources = overview?.custom_sources ?? [];
   const filtered = sources.filter(
     (s) =>
-      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.content.toLowerCase().includes(searchQuery.toLowerCase()),
+      (s.title ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.content ?? "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const onCreate = async () => {
@@ -70,7 +70,7 @@ export function AITrainingPage() {
       await load();
       notifySuccess("Knowledge source added");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Create failed";
+      const msg = userFacingApiError(e, "Create failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -92,7 +92,7 @@ export function AITrainingPage() {
       await load();
       notifySuccess("Knowledge source updated");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Update failed";
+      const msg = userFacingApiError(e, "Update failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -113,7 +113,7 @@ export function AITrainingPage() {
       await load();
       notifySuccess("Knowledge source removed");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Delete failed";
+      const msg = userFacingApiError(e, "Delete failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -134,7 +134,7 @@ export function AITrainingPage() {
       await load();
       notifySuccess("Document removed");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Delete failed";
+      const msg = userFacingApiError(e, "Delete failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -155,7 +155,7 @@ export function AITrainingPage() {
       notifySuccess("Document uploaded", "Processing may take a minute; refresh if status stays pending.");
     } catch (e) {
       dismissToast(tid);
-      const msg = e instanceof ApiError ? e.message : "Upload failed";
+      const msg = userFacingApiError(e, "Upload failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -181,8 +181,9 @@ export function AITrainingPage() {
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             type="button"
+            disabled={busy !== null}
             onClick={() => setShowAdd(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold shadow-sm disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             Add knowledge source
@@ -248,7 +249,7 @@ export function AITrainingPage() {
               </h2>
               <p className="text-sm text-muted-foreground mb-4">Setup checks from the training service (operational, not medical advice).</p>
               <ul className="space-y-2">
-                {overview.readiness_items.map((item) => (
+                {(overview.readiness_items ?? []).map((item) => (
                   <li key={item.key} className="flex items-start gap-2 text-sm">
                     {item.configured ? (
                       <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
@@ -265,13 +266,13 @@ export function AITrainingPage() {
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm border-l-4 border-l-orange-300">
               <h2 className={cn(appSectionTitleClass, "mb-1")}>Coverage gaps</h2>
               <p className="text-sm text-muted-foreground mb-3">Prioritize these before expanding to new services or locations.</p>
-              {overview.knowledge_gaps.length === 0 ? (
+              {(overview.knowledge_gaps ?? []).length === 0 ? (
                 <p className="text-sm font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
                   No gaps reported — keep documents fresh as policies change.
                 </p>
               ) : (
                 <ul className="space-y-2 text-sm text-foreground">
-                  {overview.knowledge_gaps.map((g) => (
+                  {(overview.knowledge_gaps ?? []).map((g) => (
                     <li key={g} className="flex gap-2 items-start">
                       <AlertTriangle className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
                       <span>{g}</span>
@@ -290,11 +291,14 @@ export function AITrainingPage() {
                   Files are chunked server-side — large PDFs may take a minute to become searchable.
                 </p>
               </div>
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-lg cursor-pointer hover:bg-muted text-sm font-semibold bg-white shadow-sm">
+              <label
+                className={`inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-lg text-sm font-semibold bg-white shadow-sm ${busy !== null ? "opacity-50 pointer-events-none" : "cursor-pointer hover:bg-muted"}`}
+              >
                 <Upload className="w-4 h-4" />
                 {busy === "upload" ? "Uploading…" : "Upload file"}
                 <input
                   type="file"
+                  disabled={busy !== null}
                   className="hidden"
                   aria-label="Upload training document file"
                   onChange={(e) => void onUpload(e.target.files?.[0] ?? null)}
@@ -302,18 +306,21 @@ export function AITrainingPage() {
               </label>
             </div>
             <div className="space-y-2">
-              {overview.documents.length === 0 && (
+              {(overview.documents ?? []).length === 0 && (
                 <div className="text-center py-10 px-4 border border-dashed border-border rounded-xl bg-slate-50/50">
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm font-semibold text-foreground">No documents yet</p>
                   <p className="text-sm text-muted-foreground mt-1 mb-4">
                     Good starting points: hours, fees, prep instructions, or FAQs your front desk repeats often.
                   </p>
-                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg cursor-pointer text-sm font-semibold">
+                  <label
+                    className={`inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold ${busy !== null ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
+                  >
                     <Upload className="w-4 h-4" />
                     Choose file
                     <input
                       type="file"
+                      disabled={busy !== null}
                       className="hidden"
                       aria-label="Upload training document from empty state"
                       onChange={(e) => void onUpload(e.target.files?.[0] ?? null)}
@@ -321,7 +328,7 @@ export function AITrainingPage() {
                   </label>
                 </div>
               )}
-              {overview.documents.map((d: TrainingDocument) => (
+              {(overview.documents ?? []).map((d: TrainingDocument) => (
                 <div key={d.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-border">
                   <div>
                     <p className="text-sm font-medium text-foreground">{d.filename}</p>
@@ -406,8 +413,9 @@ export function AITrainingPage() {
                 {sources.length === 0 ? (
                   <button
                     type="button"
+                    disabled={busy !== null}
                     onClick={() => setShowAdd(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4" />
                     Add source
@@ -419,7 +427,12 @@ export function AITrainingPage() {
         </>
       )}
 
-      <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="New knowledge source">
+      <Modal
+        isOpen={showAdd}
+        onClose={() => busy === null && setShowAdd(false)}
+        closeDisabled={busy !== null}
+        title="New knowledge source"
+      >
         <div className="space-y-3">
           <label htmlFor="training-new-title" className="sr-only">
             Title
@@ -429,8 +442,9 @@ export function AITrainingPage() {
             type="text"
             placeholder="Title"
             value={newTitle}
+            disabled={busy !== null}
             onChange={(e) => setNewTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-lg"
+            className="w-full px-3 py-2 border border-border rounded-lg disabled:opacity-50"
           />
           <label htmlFor="training-new-content" className="sr-only">
             Content
@@ -440,8 +454,9 @@ export function AITrainingPage() {
             rows={6}
             placeholder="Content"
             value={newContent}
+            disabled={busy !== null}
             onChange={(e) => setNewContent(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-lg"
+            className="w-full px-3 py-2 border border-border rounded-lg disabled:opacity-50"
           />
           <button
             type="button"
@@ -454,7 +469,12 @@ export function AITrainingPage() {
         </div>
       </Modal>
 
-      <Modal isOpen={!!editItem} onClose={() => setEditItem(null)} title="Edit source">
+      <Modal
+        isOpen={!!editItem}
+        onClose={() => busy === null && setEditItem(null)}
+        closeDisabled={busy !== null}
+        title="Edit source"
+      >
         {editItem && (
           <div className="space-y-3">
             <label htmlFor="training-edit-title" className="sr-only">
@@ -464,8 +484,9 @@ export function AITrainingPage() {
               id="training-edit-title"
               type="text"
               value={editItem.title}
+              disabled={busy !== null}
               onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
-              className="w-full px-3 py-2 border border-border rounded-lg"
+              className="w-full px-3 py-2 border border-border rounded-lg disabled:opacity-50"
             />
             <label htmlFor="training-edit-content" className="sr-only">
               Content
@@ -474,8 +495,9 @@ export function AITrainingPage() {
               id="training-edit-content"
               rows={8}
               value={editItem.content}
+              disabled={busy !== null}
               onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
-              className="w-full px-3 py-2 border border-border rounded-lg"
+              className="w-full px-3 py-2 border border-border rounded-lg disabled:opacity-50"
             />
             <button
               type="button"

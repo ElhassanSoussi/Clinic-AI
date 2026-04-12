@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { Check, Building, Clock, Zap, Copy, CheckCircle, ChevronRight, Sparkles, MessageSquare } from "lucide-react";
 import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { fetchClinicMe, goLiveClinic, updateClinicMe } from "@/lib/api/services";
 import type { Clinic } from "@/lib/api/types";
 import { getPublicOrigin } from "@/lib/site";
@@ -47,7 +47,7 @@ export function OnboardingPage() {
       const s = c.onboarding_step && c.onboarding_step >= 1 && c.onboarding_step <= 3 ? c.onboarding_step : 1;
       setStep(c.onboarding_completed ? 3 : s);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load clinic");
+      setError(userFacingApiError(e, "Failed to load clinic"));
     } finally {
       setLoading(false);
     }
@@ -81,7 +81,7 @@ export function OnboardingPage() {
       setStep(2);
       notifySuccess("Step 1 saved");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Save failed";
+      const msg = userFacingApiError(e, "Save failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -111,7 +111,7 @@ export function OnboardingPage() {
       setStep(3);
       notifySuccess("Business hours saved");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Save failed";
+      const msg = userFacingApiError(e, "Save failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -131,7 +131,7 @@ export function OnboardingPage() {
       notifySuccess("Welcome aboard", "Your clinic is live. Redirecting to the dashboard.");
       navigate("/app/dashboard");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not finish onboarding";
+      const msg = userFacingApiError(e, "Could not finish onboarding");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -360,7 +360,19 @@ export function OnboardingPage() {
                   <button
                     type="button"
                     aria-label="Copy public chat link"
-                    onClick={() => chatUrl && navigator.clipboard.writeText(chatUrl)}
+                    onClick={() => {
+                      if (!chatUrl) {
+                        return;
+                      }
+                      void (async () => {
+                        try {
+                          await navigator.clipboard.writeText(chatUrl);
+                          notifySuccess("Chat link copied");
+                        } catch {
+                          notifyError("Could not copy. Select the link text manually.");
+                        }
+                      })();
+                    }}
                     className="absolute top-2 right-2 p-2 bg-slate-700 rounded text-white"
                   >
                     <Copy className="w-4 h-4" aria-hidden />
@@ -378,7 +390,12 @@ export function OnboardingPage() {
 
           <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 mt-8 pt-6 border-t border-slate-200">
             {step > 1 ? (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium w-full sm:w-auto">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setStep(step - 1)}
+                className="px-6 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 font-medium w-full sm:w-auto disabled:opacity-50"
+              >
                 Back
               </button>
             ) : (

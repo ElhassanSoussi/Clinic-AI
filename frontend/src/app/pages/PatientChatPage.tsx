@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { Send, Shield, Clock, CheckCircle, Bot, User } from "lucide-react";
-import { ApiError, apiFetch, apiJson, parseApiErrorMessage } from "@/lib/api";
+import { ApiError, apiFetch, apiJson, parseApiErrorMessage, userFacingApiError } from "@/lib/api";
 
 type Branding = {
   name: string;
@@ -88,6 +88,9 @@ export function PatientChatPage() {
         if (cancelled) {
           return;
         }
+        if (!data?.name?.trim()) {
+          throw new ApiError("Clinic branding is not available for this link.", 404);
+        }
         setBranding(data);
         const assistant = data.assistant_name?.trim() || "your AI assistant";
         const intro = `Hello! I'm ${assistant} at ${data.name}. How may I help you today?`;
@@ -104,8 +107,7 @@ export function PatientChatPage() {
         if (cancelled) {
           return;
         }
-        const msg =
-          e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Could not load clinic.";
+        const msg = userFacingApiError(e, "Could not load clinic.");
         setBrandingError(msg);
         setBranding(null);
         setMessages([]);
@@ -180,7 +182,18 @@ export function PatientChatPage() {
         if (!res.ok) {
           throw new Error(await parseApiErrorMessage(res));
         }
-        const data = (await res.json()) as { reply: string; session_id: string };
+        const raw = await res.text();
+        let parsed: unknown;
+        try {
+          parsed = raw.trim() ? JSON.parse(raw) : {};
+        } catch {
+          throw new Error("Unexpected response from chat.");
+        }
+        const data = parsed as { reply?: unknown };
+        if (typeof data.reply !== "string" || !data.reply.trim()) {
+          throw new Error("Unexpected response from chat.");
+        }
+        const replyText = data.reply.trim();
         setMessages((prev) =>
           prev.map((m) => (m.id === patientId ? { ...m, status: "delivered" as const } : m)),
         );
@@ -189,14 +202,13 @@ export function PatientChatPage() {
           {
             id: crypto.randomUUID(),
             sender: "assistant",
-            text: data.reply,
+            text: replyText,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             status: "delivered",
           },
         ]);
       } catch (e) {
-        const msg =
-          e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Message failed to send.";
+        const msg = userFacingApiError(e, "Message failed to send.");
         setChatError(msg);
         setMessages((prev) =>
           prev.map((m) => (m.id === patientId ? { ...m, status: "failed" as const } : m)),
@@ -210,7 +222,7 @@ export function PatientChatPage() {
 
   const handleSend = useCallback(() => {
     const patientText = message.trim();
-    if (!patientText || !activeSlug) {
+    if (!patientText || !activeSlug || isTyping) {
       return;
     }
     const patientId = crypto.randomUUID();
@@ -227,7 +239,7 @@ export function PatientChatPage() {
     ]);
     setMessage("");
     void sendPatientMessage(patientText, patientId);
-  }, [activeSlug, message, sendPatientMessage]);
+  }, [activeSlug, message, sendPatientMessage, isTyping]);
 
   const retryPatientMessage = useCallback(
     (patientId: string, patientText: string) => {
@@ -492,9 +504,9 @@ export function PatientChatPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
-              <Shield className="w-3 h-3 text-primary" />
-              <span>Your messages are encrypted and HIPAA-compliant</span>
+            <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground text-center px-1">
+              <Shield className="w-3 h-3 text-primary shrink-0" />
+              <span>This assistant is run by your clinic. Avoid sharing more personal detail than you would in a normal text.</span>
             </div>
           </div>
         </div>

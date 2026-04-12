@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Mail, Phone, MessageSquare, Calendar, Brain, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { fetchLead, fetchLeadConversation, updateLead } from "@/lib/api/services";
 import type { LeadRow, MessageRow } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
@@ -23,44 +23,43 @@ export function LeadDetailPage() {
   const [saving, setSaving] = useState(false);
   const [linkedConversationId, setLinkedConversationId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const isDirty = useMemo(() => {
+    if (!lead) {
+      return false;
+    }
+    return notes !== (lead.notes || "") || status !== (lead.status || "");
+  }, [lead, notes, status]);
+
+  const load = useCallback(async () => {
     if (!id || !session?.accessToken) {
       return;
     }
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [l, conv] = await Promise.all([
-          fetchLead(session.accessToken, id),
-          fetchLeadConversation(session.accessToken, id),
-        ]);
-        if (!cancelled) {
-          setLead(l);
-          setNotes(l.notes || "");
-          setStatus(l.status || "");
-          setMessages(conv.messages || []);
-          const convObj = conv.conversation as { id?: string } | null;
-          setLinkedConversationId(convObj?.id ?? null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load lead");
-          setLead(null);
-          setMessages([]);
-          setLinkedConversationId(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const [l, conv] = await Promise.all([
+        fetchLead(session.accessToken, id),
+        fetchLeadConversation(session.accessToken, id),
+      ]);
+      setLead(l);
+      setNotes(l.notes || "");
+      setStatus(l.status || "");
+      setMessages(conv.messages || []);
+      const convObj = conv.conversation as { id?: string } | null;
+      setLinkedConversationId(convObj?.id ?? null);
+    } catch (e) {
+      setError(userFacingApiError(e, "Failed to load lead"));
+      setLead(null);
+      setMessages([]);
+      setLinkedConversationId(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id, session?.accessToken]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const saveLead = async () => {
     if (!id || !session?.accessToken || !lead) {
@@ -73,7 +72,7 @@ export function LeadDetailPage() {
       setLead(updated);
       notifySuccess("Lead updated");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Save failed";
+      const msg = userFacingApiError(e, "Save failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -81,7 +80,7 @@ export function LeadDetailPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !lead) {
     return (
       <div className={appPagePaddingClass}>
         <p className="text-muted-foreground">Loading lead…</p>
@@ -96,7 +95,15 @@ export function LeadDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to leads
         </Link>
-        <p className="text-destructive">{error || "Lead not found."}</p>
+        <p className="text-destructive max-w-lg">{error || "Lead not found."}</p>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => void load()}
+          className="mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold hover:bg-muted disabled:opacity-50"
+        >
+          {loading ? "Retrying…" : "Retry"}
+        </button>
       </div>
     );
   }
@@ -133,8 +140,9 @@ export function LeadDetailPage() {
               <span className="text-muted-foreground block mb-1 font-semibold">Pipeline stage</span>
               <select
                 value={status}
+                disabled={saving}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full sm:min-w-[200px] border border-border rounded-lg px-3 py-2.5 bg-white font-medium text-foreground"
+                className="w-full sm:min-w-[200px] border border-border rounded-lg px-3 py-2.5 bg-white font-medium text-foreground disabled:opacity-50"
               >
                 {stages.map((s) => (
                   <option key={s} value={s}>
@@ -190,17 +198,18 @@ export function LeadDetailPage() {
               <textarea
                 id="lead-staff-notes"
                 value={notes}
+                disabled={saving}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-border rounded-lg"
+                className="w-full px-3 py-2 border border-border rounded-lg disabled:opacity-50"
               />
               <button
                 type="button"
-                disabled={saving}
+                disabled={saving || !isDirty}
                 onClick={() => void saveLead()}
                 className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
               >
-                {saving ? "Saving…" : "Save notes & status"}
+                {saving ? "Saving…" : isDirty ? "Save notes & status" : "Saved"}
               </button>
             </div>
           </div>

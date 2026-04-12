@@ -10,6 +10,29 @@ export class ApiError extends Error {
   }
 }
 
+/** Maps API/network errors to short, staff-friendly copy (toast + inline). */
+export function userFacingApiError(error: unknown, fallback = "Something went wrong. Try again."): string {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return "Your session expired. Sign in again to continue.";
+    }
+    if (error.status === 403) {
+      return "You don't have permission to do that.";
+    }
+    if (error.status === 404) {
+      return "We couldn't find that. It may have been removed or the link is out of date.";
+    }
+    if (error.message) {
+      return error.message;
+    }
+    return fallback;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
+
 export async function parseApiErrorMessage(res: Response): Promise<string> {
   const ct = (res.headers.get("content-type") || "").toLowerCase();
   const raw = await res.text();
@@ -112,5 +135,17 @@ export async function apiJson<T>(path: string, init: ApiFetchOptions = {}): Prom
   if (res.status === 204) {
     return undefined as T;
   }
-  return (await res.json()) as T;
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return undefined as T;
+  }
+  try {
+    return JSON.parse(trimmed) as T;
+  } catch {
+    throw new ApiError(
+      "The server returned data we couldn't read. Check your connection and API URL, then try again.",
+      502,
+    );
+  }
 }

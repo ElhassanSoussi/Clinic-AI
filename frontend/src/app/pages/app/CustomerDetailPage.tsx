@@ -10,6 +10,7 @@ import {
   Clock,
   Settings,
 } from "lucide-react";
+import { userFacingApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCustomerDetail } from "@/lib/api/services";
 import type { CustomerDetail } from "@/lib/api/types";
@@ -36,7 +37,7 @@ export function CustomerDetailPage() {
       const data = await fetchCustomerDetail(session.accessToken, key);
       setProfile(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load patient");
+      setError(userFacingApiError(e, "Failed to load patient"));
       setProfile(null);
     } finally {
       setLoading(false);
@@ -94,8 +95,8 @@ export function CustomerDetailPage() {
               <div className="min-w-0">
                 <h1 className={cn(appPageTitleCompactClass)}>{profile.name}</h1>
                 <p className={cn(appPageSubtitleClass, "mt-1")}>
-                  {profile.total_interactions ?? profile.conversation_count + profile.lead_count} recorded interactions · last outcome:{" "}
-                  {formatOutcomeLabel(profile.last_outcome)}
+                  {profile.total_interactions ?? (profile.conversation_count ?? 0) + (profile.lead_count ?? 0)} recorded interactions · last
+                  outcome: {formatOutcomeLabel(profile.last_outcome)}
                 </p>
               </div>
             </div>

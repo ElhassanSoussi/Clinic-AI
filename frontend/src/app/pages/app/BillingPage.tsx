@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CreditCard, Calendar, AlertTriangle, Check, Shield } from "lucide-react";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { ApiError, userFacingApiError } from "@/lib/api";
 import {
   createBillingCheckout,
   createBillingPortal,
@@ -47,7 +47,7 @@ export function BillingPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load billing");
+          setError(userFacingApiError(e, "Failed to load billing"));
         }
       } finally {
         if (!cancelled) {
@@ -111,7 +111,7 @@ export function BillingPage() {
       notifySuccess("Opening Stripe checkout…");
       window.location.href = checkout_url.trim();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Checkout failed";
+      const msg = userFacingApiError(e, "Checkout failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -134,7 +134,7 @@ export function BillingPage() {
       notifySuccess("Opening Stripe customer portal…");
       window.location.href = portal_url.trim();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not open billing portal";
+      const msg = userFacingApiError(e, "Could not open billing portal");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -182,8 +182,9 @@ export function BillingPage() {
                   </p>
                   <button
                     type="button"
+                    disabled={busy !== null}
                     onClick={() => setShowPlanModal(true)}
-                    className="text-sm font-semibold text-primary hover:underline"
+                    className="text-sm font-semibold text-primary hover:underline disabled:opacity-50 disabled:no-underline"
                   >
                     View plans
                   </button>
@@ -204,7 +205,12 @@ export function BillingPage() {
                     You are approaching this billing period&apos;s lead limit. Upgrade in Stripe checkout or manage your subscription in the
                     customer portal.
                   </p>
-                  <button type="button" onClick={() => setShowPlanModal(true)} className="text-sm text-primary hover:underline font-medium">
+                  <button
+                    type="button"
+                    disabled={busy !== null}
+                    onClick={() => setShowPlanModal(true)}
+                    className="text-sm text-primary hover:underline font-medium disabled:opacity-50 disabled:no-underline"
+                  >
                     View paid plans
                   </button>
                 </div>
@@ -225,7 +231,7 @@ export function BillingPage() {
                       {status.plan_name || status.plan}
                     </span>
                     <span className="px-3 py-1.5 bg-accent text-primary rounded-full text-sm font-semibold capitalize border border-primary/15">
-                      {status.subscription_status.replace(/_/g, " ")}
+                      {(status.subscription_status ?? "unknown").replace(/_/g, " ")}
                     </span>
                   </div>
                 </div>
@@ -262,18 +268,19 @@ export function BillingPage() {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
+                    disabled={busy !== null}
                     onClick={() => setShowPlanModal(true)}
                     className={
                       status.has_stripe_subscription
-                        ? "px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white"
-                        : "px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold shadow-sm"
+                        ? "px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white disabled:opacity-50"
+                        : "px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold shadow-sm disabled:opacity-50"
                     }
                   >
                     {status.has_stripe_subscription ? "Change plan" : "Choose a plan"}
                   </button>
                   <button
                     type="button"
-                    disabled={busy === "portal" || !status.has_stripe_subscription}
+                    disabled={busy !== null || !status.has_stripe_subscription}
                     onClick={() => void openPortal()}
                     className={
                       status.has_stripe_subscription
@@ -313,7 +320,7 @@ export function BillingPage() {
                 </p>
                 <button
                   type="button"
-                  disabled={!status.has_stripe_subscription || busy === "portal"}
+                  disabled={!status.has_stripe_subscription || busy !== null}
                   onClick={() => void openPortal()}
                   className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors font-medium disabled:opacity-50"
                 >
@@ -359,7 +366,13 @@ export function BillingPage() {
         </>
       )}
 
-      <Modal isOpen={showPlanModal} onClose={() => setShowPlanModal(false)} title="Choose a plan" size="lg">
+      <Modal
+        isOpen={showPlanModal}
+        onClose={() => busy === null && setShowPlanModal(false)}
+        closeDisabled={busy !== null}
+        title="Choose a plan"
+        size="lg"
+      >
         <div className="grid md:grid-cols-3 gap-4">
           {plans.map((plan) => {
             const isCurrent = status?.plan === plan.id;

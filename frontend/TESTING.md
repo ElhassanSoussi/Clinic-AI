@@ -10,15 +10,15 @@
 
 | Command | What runs |
 |--------|-----------|
-| `pnpm run e2e` | Smoke + critical routes (default CI/local green run; **no** `auth-flow`) |
+| `pnpm run e2e` | **Recommended default:** `smoke` + `critical-pages` only — green without auth env |
 | `pnpm run e2e:smoke` | `e2e/smoke.spec.ts` only |
-| `pnpm run e2e:critical` | Public pages, login redirects, optional session crawl |
-| `pnpm run e2e:auth` | Full login → app → logout (`auth-flow.spec.ts`) — needs `frontend/.env.e2e` |
-| `pnpm run e2e:all` | Every spec including auth-flow |
-| `pnpm run e2e:live` | Deployed frontend HTML smoke — needs `PLAYWRIGHT_BASE_URL` |
+| `pnpm run e2e:critical` | `e2e/critical-pages.spec.ts` only (public pages, login redirects, optional logged-in crawl) |
+| `pnpm run e2e:auth` | Full login → app → logout (`auth-flow.spec.ts`) — requires `frontend/.env.e2e` credentials |
+| `pnpm run e2e:all` | Every spec under `e2e/`, including `auth-flow` (needs credentials or those tests skip) |
+| `pnpm run e2e:live` | Deployed frontend HTML smoke (`deployed-smoke.spec.ts`) — set `PLAYWRIGHT_BASE_URL` |
 | `pnpm run e2e:ui` | Playwright UI mode |
 
-Without `E2E_USER_EMAIL` / `E2E_USER_PASSWORD`, `e2e/auth-flow.spec.ts` **skips** with an explicit reason in the report (not a failure). The skip message points at `frontend/.env.e2e.example` and `pnpm exec playwright install chromium`.
+Without `E2E_USER_EMAIL` / `E2E_USER_PASSWORD`, specs that need a real session **`test.skip`** with an explicit reason (intentional — **not** a failure). The skip message points at `frontend/.env.e2e.example` and `pnpm exec playwright install chromium`.
 
 ### Live / production smoke (Playwright)
 

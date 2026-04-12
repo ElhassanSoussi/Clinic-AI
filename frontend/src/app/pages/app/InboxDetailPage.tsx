@@ -9,7 +9,7 @@ import {
   updateThreadWorkflow,
 } from "@/lib/api/services";
 import type { ConversationDetail } from "@/lib/api/types";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
 import { formatSessionRef, humanizeSnake, formatThreadMessageBody } from "@/lib/display-text";
@@ -37,7 +37,7 @@ export function InboxDetailPage() {
       setDetail(data);
     } catch (e) {
       setDetail(null);
-      setError(e instanceof Error ? e.message : "Failed to load conversation");
+      setError(userFacingApiError(e, "Failed to load conversation"));
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export function InboxDetailPage() {
       await load();
       notifySuccess(conv.manual_takeover ? "Returned thread to AI" : "Manual takeover enabled");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not update thread control";
+      const msg = userFacingApiError(e, "Could not update thread control");
       setActionError(msg);
       notifyError(msg);
     } finally {
@@ -102,7 +102,7 @@ export function InboxDetailPage() {
       setShowCloseConfirm(false);
       notifySuccess("Thread closed");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Could not close thread";
+      const msg = userFacingApiError(e, "Could not close thread");
       setActionError(msg);
       notifyError(msg);
     } finally {
@@ -125,7 +125,15 @@ export function InboxDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to inbox
         </Link>
-        <p className="text-destructive">{error || "Conversation not found."}</p>
+        <p className="text-destructive max-w-lg">{error || "Conversation not found."}</p>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => void load()}
+          className="mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold hover:bg-muted disabled:opacity-50"
+        >
+          {loading ? "Retrying…" : "Retry"}
+        </button>
       </div>
     );
   }
@@ -335,6 +343,7 @@ export function InboxDetailPage() {
         description="This marks the inbox workflow closed. You can still open the linked lead from Leads if one exists."
         confirmLabel={busy === "close" ? "Closing…" : "Close thread"}
         variant="danger"
+        pending={busy === "close"}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { differenceInHours, parseISO } from "date-fns";
 import { Target, TrendingUp, DollarSign, Users, ArrowRight, Clock, AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { fetchFrontdeskAnalytics, fetchOpportunities, updateFollowUpTask } from "@/lib/api/services";
 import type { FrontdeskAnalytics, Opportunity } from "@/lib/api/types";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
@@ -45,7 +45,7 @@ export function OpportunitiesPage() {
       setRows(opps || []);
       setAnalytics(a);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load opportunities");
+      setError(userFacingApiError(e, "Failed to load opportunities"));
       setRows([]);
       setAnalytics(null);
     } finally {
@@ -63,6 +63,9 @@ export function OpportunitiesPage() {
     if (!session?.accessToken) {
       return;
     }
+    if (busyId) {
+      return;
+    }
     setBusyId(taskId);
     try {
       await updateFollowUpTask(session.accessToken, taskId, body);
@@ -75,7 +78,7 @@ export function OpportunitiesPage() {
         notifySuccess("Task updated");
       }
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Update failed";
+      const msg = userFacingApiError(e, "Update failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -92,7 +95,19 @@ export function OpportunitiesPage() {
             <p className={appPageSubtitleClass}>
               Follow-ups worth another touch: why each row is here, and buttons to snooze, complete, or open the thread or chart.
             </p>
-            {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+            {error && (
+              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="text-sm text-destructive max-w-xl">{error}</p>
+                <button
+                  type="button"
+                  disabled={loading || busyId !== null}
+                  onClick={() => void load()}
+                  className="shrink-0 px-3 py-1.5 rounded-lg border border-border text-sm font-semibold hover:bg-muted disabled:opacity-50 w-fit"
+                >
+                  {loading ? "Retrying…" : "Retry"}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

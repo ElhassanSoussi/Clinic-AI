@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Calendar, ChevronDown, Clock, Filter, Mail, Phone } from "lucide-react";
 import { format, isThisWeek, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
+import { userFacingApiError } from "@/lib/api";
 import { fetchAppointments, updateAppointment } from "@/lib/api/services";
 import type { AppointmentRecord } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
@@ -104,7 +104,7 @@ export function AppointmentsPage() {
       const data = await fetchAppointments(session.accessToken, "all");
       setRows(data || []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load appointments");
+      setError(userFacingApiError(e, "Failed to load appointments"));
       setRows([]);
     } finally {
       setLoading(false);
@@ -166,7 +166,7 @@ export function AppointmentsPage() {
       await load();
       notifySuccess("Appointment status updated");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Update failed";
+      const msg = userFacingApiError(e, "Update failed");
       setError(msg);
       notifyError(msg);
     } finally {
@@ -196,7 +196,19 @@ export function AppointmentsPage() {
               <p className={appPageSubtitleClass}>
                 Day-by-day schedule with times, status, and patient context from your live data.
               </p>
-              {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+              {error && (
+                <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                  <p className="text-sm text-destructive max-w-xl">{error}</p>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => void load()}
+                    className="shrink-0 px-3 py-1.5 rounded-lg border border-border text-sm font-semibold hover:bg-muted disabled:opacity-50 w-fit"
+                  >
+                    {loading ? "Retrying…" : "Retry"}
+                  </button>
+                </div>
+              )}
             </div>
             <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="w-full sm:w-auto">
               <CollapsibleTrigger asChild>
