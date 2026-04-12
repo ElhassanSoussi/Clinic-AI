@@ -171,7 +171,7 @@ class SheetsValidateResponse(BaseModel):
 
 
 class GoogleSheetsConnectRequest(BaseModel):
-    return_to: Optional[str] = "/dashboard/settings?section=google-sheets"
+    return_to: Optional[str] = "/app/settings?section=google-sheets"
     tab_name: Optional[str] = "Leads"
     availability_enabled: bool = False
     availability_tab: Optional[str] = "Availability"
@@ -184,7 +184,7 @@ class GoogleSheetsConnectResponse(BaseModel):
 
 
 class MicrosoftExcelConnectRequest(BaseModel):
-    return_to: Optional[str] = "/dashboard/settings?section=google-sheets"
+    return_to: Optional[str] = "/app/settings?section=google-sheets"
     tab_name: Optional[str] = "Leads"
     availability_enabled: bool = False
     availability_tab: Optional[str] = "Availability"
@@ -326,7 +326,7 @@ async def start_google_sheets_connect(
         {
             "clinic_id": clinic["id"],
             "user_id": current_user["id"],
-            "return_to": req.return_to or "/dashboard/settings?section=google-sheets",
+            "return_to": req.return_to or "/app/settings?section=google-sheets",
             "tab_name": req.tab_name or "Leads",
             "availability_enabled": req.availability_enabled,
             "availability_tab": req.availability_tab or "Availability",
@@ -353,14 +353,14 @@ async def complete_google_sheets_connect(
 
     if error or error_description:
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             google_sheets_error=error_description or error or "Google connection failed.",
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
 
     if not code or not state:
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             google_sheets_error="Missing Google authorization code. Please try again.",
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
@@ -400,7 +400,7 @@ async def complete_google_sheets_connect(
             }
         ).eq("id", payload["clinic_id"]).execute()
 
-        return_to = str(payload.get("return_to") or "/dashboard/settings?section=google-sheets")
+        return_to = str(payload.get("return_to") or "/app/settings?section=google-sheets")
         target = _append_query_params(
             f"{frontend_base}{return_to}",
             google_sheets_connected="1",
@@ -410,7 +410,7 @@ async def complete_google_sheets_connect(
     except Exception as exc:
         logger.error(f"Google Sheets quick connect failed: {exc}")
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             google_sheets_error=str(exc),
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
@@ -445,7 +445,7 @@ async def start_microsoft_excel_connect(
         {
             "clinic_id": clinic["id"],
             "user_id": current_user["id"],
-            "return_to": req.return_to or "/dashboard/settings?section=google-sheets",
+            "return_to": req.return_to or "/app/settings?section=google-sheets",
             "tab_name": req.tab_name or "Leads",
             "availability_enabled": req.availability_enabled,
             "availability_tab": req.availability_tab or "Availability",
@@ -471,14 +471,14 @@ async def complete_microsoft_excel_connect(
 
     if error or error_description:
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             excel_connect_error=error_description or error or "Microsoft connection failed.",
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
 
     if not code or not state:
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             excel_connect_error="Missing Microsoft authorization code. Please try again.",
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
@@ -519,7 +519,7 @@ async def complete_microsoft_excel_connect(
             }
         ).eq("id", payload["clinic_id"]).execute()
 
-        return_to = str(payload.get("return_to") or "/dashboard/settings?section=google-sheets")
+        return_to = str(payload.get("return_to") or "/app/settings?section=google-sheets")
         target = _append_query_params(
             f"{frontend_base}{return_to}",
             excel_connected="1",
@@ -529,7 +529,7 @@ async def complete_microsoft_excel_connect(
     except Exception as exc:
         logger.error(f"Microsoft Excel quick connect failed: {exc}")
         target = _append_query_params(
-            f"{frontend_base}/dashboard/settings?section=google-sheets",
+            f"{frontend_base}/app/settings?section=google-sheets",
             excel_connect_error=str(exc),
         )
         return RedirectResponse(target, status_code=status.HTTP_302_FOUND)

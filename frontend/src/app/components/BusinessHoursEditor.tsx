@@ -40,6 +40,7 @@ export function BusinessHoursEditor({ value, onChange, disabled }: Props) {
                   value={row.open}
                   disabled={disabled}
                   onChange={(e) => patchDay(day, { open: e.target.value })}
+                  aria-label={`${labelWeekday(day)} opening time`}
                   className="px-2 py-1.5 border border-border rounded-md text-sm bg-white"
                 />
                 <span className="text-muted-foreground text-sm">to</span>
@@ -48,6 +49,7 @@ export function BusinessHoursEditor({ value, onChange, disabled }: Props) {
                   value={row.close}
                   disabled={disabled}
                   onChange={(e) => patchDay(day, { close: e.target.value })}
+                  aria-label={`${labelWeekday(day)} closing time`}
                   className="px-2 py-1.5 border border-border rounded-md text-sm bg-white"
                 />
               </div>

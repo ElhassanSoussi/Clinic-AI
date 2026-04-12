@@ -5078,8 +5078,8 @@ def _deposit_delivery_reason(event: Optional[dict[str, Any]]) -> str:
 def _deposit_checkout_urls(lead_id: str) -> tuple[str, str]:
     settings = get_settings()
     base_url = settings.frontend_app_url.rstrip("/")
-    success_url = f"{base_url}/dashboard/appointments?deposit=success&lead_id={lead_id}"
-    cancel_url = f"{base_url}/dashboard/appointments?deposit=cancelled&lead_id={lead_id}"
+    success_url = f"{base_url}/app/appointments?deposit=success&lead_id={lead_id}"
+    cancel_url = f"{base_url}/app/appointments?deposit=cancelled&lead_id={lead_id}"
     return success_url, cancel_url
 
 

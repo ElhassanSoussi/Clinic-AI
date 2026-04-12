@@ -46,6 +46,8 @@
   --sidebar-accent-foreground: #0d9488;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #0d9488;
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
 }
 
 .dark {

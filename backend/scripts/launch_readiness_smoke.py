@@ -48,7 +48,7 @@ def main() -> int:
     checks.append(check("Backend health", lambda: fetch_json(urljoin(f"{BACKEND_URL}/", "health"))[0]))
     checks.append(check("Billing plans", lambda: fetch_json(urljoin(f"{BACKEND_URL}/", "billing/plans"))[0]))
 
-    for path in ["/", "/login", "/register", "/dashboard", "/dashboard/operations"]:
+    for path in ["/", "/login", "/register", "/app/dashboard", "/app/operations"]:
         checks.append(check(f"Frontend {path}", lambda path=path: fetch_status(f"{FRONTEND_URL}{path}")))
 
     token = ""

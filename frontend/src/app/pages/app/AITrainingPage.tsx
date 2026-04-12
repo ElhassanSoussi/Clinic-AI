@@ -254,7 +254,12 @@ export function AITrainingPage() {
               <label className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg cursor-pointer hover:bg-muted text-sm font-medium">
                 <Upload className="w-4 h-4" />
                 {busy === "upload" ? "Uploading…" : "Upload file"}
-                <input type="file" className="hidden" onChange={(e) => void onUpload(e.target.files?.[0] ?? null)} />
+                <input
+                  type="file"
+                  className="hidden"
+                  aria-label="Upload training document file"
+                  onChange={(e) => void onUpload(e.target.files?.[0] ?? null)}
+                />
               </label>
             </div>
             <div className="space-y-2">
@@ -271,11 +276,12 @@ export function AITrainingPage() {
                   </div>
                   <button
                     type="button"
+                    aria-label={`Delete document ${d.filename}`}
                     onClick={() => void onDeleteDoc(d.id)}
                     disabled={busy !== null}
                     className="p-2 text-muted-foreground hover:text-red-600 disabled:opacity-50"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden />
                   </button>
                 </div>
               ))}
@@ -306,18 +312,20 @@ export function AITrainingPage() {
                 <div className="flex gap-2 flex-shrink-0">
                   <button
                     type="button"
+                    aria-label={`Edit source ${s.title}`}
                     onClick={() => setEditItem({ ...s })}
                     className="p-2 border border-border rounded-lg hover:bg-muted"
                   >
-                    <Edit2 className="w-4 h-4" />
+                    <Edit2 className="w-4 h-4" aria-hidden />
                   </button>
                   <button
                     type="button"
+                    aria-label={`Delete source ${s.title}`}
                     onClick={() => void onDeleteSource(s.id)}
                     disabled={busy !== null}
                     className="p-2 border border-border rounded-lg hover:bg-red-50 text-red-600 disabled:opacity-50"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden />
                   </button>
                 </div>
               </div>
@@ -335,14 +343,22 @@ export function AITrainingPage() {
 
       <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="New knowledge source">
         <div className="space-y-3">
+          <label htmlFor="training-new-title" className="sr-only">
+            Title
+          </label>
           <input
+            id="training-new-title"
             type="text"
             placeholder="Title"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             className="w-full px-3 py-2 border border-border rounded-lg"
           />
+          <label htmlFor="training-new-content" className="sr-only">
+            Content
+          </label>
           <textarea
+            id="training-new-content"
             rows={6}
             placeholder="Content"
             value={newContent}
@@ -363,13 +379,21 @@ export function AITrainingPage() {
       <Modal isOpen={!!editItem} onClose={() => setEditItem(null)} title="Edit source">
         {editItem && (
           <div className="space-y-3">
+            <label htmlFor="training-edit-title" className="sr-only">
+              Title
+            </label>
             <input
+              id="training-edit-title"
               type="text"
               value={editItem.title}
               onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
               className="w-full px-3 py-2 border border-border rounded-lg"
             />
+            <label htmlFor="training-edit-content" className="sr-only">
+              Content
+            </label>
             <textarea
+              id="training-edit-content"
               rows={8}
               value={editItem.content}
               onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}

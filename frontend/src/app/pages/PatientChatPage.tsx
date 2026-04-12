@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { Send, Shield, Clock, CheckCircle, Bot, User } from "lucide-react";
 import { ApiError, apiFetch, apiJson, parseApiErrorMessage } from "@/lib/api";
@@ -128,6 +128,19 @@ export function PatientChatPage() {
     }
     return undefined;
   }, [branding]);
+
+  const chatHeaderRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = chatHeaderRef.current;
+    if (!el) {
+      return;
+    }
+    if (headerColor) {
+      el.style.backgroundColor = headerColor;
+    } else {
+      el.style.removeProperty("background-color");
+    }
+  }, [headerColor]);
 
   const applySlug = () => {
     const s = slugInput.trim();
@@ -293,10 +306,7 @@ export function PatientChatPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-3xl min-w-0">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-border">
-          <div
-            className={`p-4 sm:p-6 ${headerColor ? "" : "bg-primary"}`}
-            style={headerColor ? { backgroundColor: headerColor } : undefined}
-          >
+          <div ref={chatHeaderRef} className={`p-4 sm:p-6 ${headerColor ? "" : "bg-primary"}`}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
@@ -420,9 +430,9 @@ export function PatientChatPage() {
                 </div>
                 <div className="bg-white border border-border px-4 py-3 rounded-2xl rounded-bl-sm">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
                   </div>
                 </div>
               </div>

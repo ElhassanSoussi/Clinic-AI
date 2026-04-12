@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CreditCard, Calendar, AlertTriangle, Check, Shield } from "lucide-react";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
@@ -77,6 +77,14 @@ export function BillingPage() {
   };
 
   const uc = usageColor(leadPct);
+  const leadUsageBarRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = leadUsageBarRef.current;
+    if (el) {
+      el.style.width = `${leadPct}%`;
+    }
+  }, [leadPct]);
+
   const needsAttention = leadPct >= 80;
   const atLimit =
     Boolean(status?.monthly_lead_limit) &&
@@ -252,7 +260,7 @@ export function BillingPage() {
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-3">
-                    <div className={`${uc.bar} h-3 rounded-full transition-all`} style={{ width: `${leadPct}%` }} />
+                    <div ref={leadUsageBarRef} className={`${uc.bar} h-3 rounded-full transition-all min-w-0`} />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{leadPct.toFixed(1)}% of monthly lead limit</p>
                 </div>

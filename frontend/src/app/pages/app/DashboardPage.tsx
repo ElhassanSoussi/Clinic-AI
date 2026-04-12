@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MessageSquare, Calendar, Users, TrendingUp, Clock, CheckCircle, AlertCircle, ArrowRight, Brain } from "lucide-react";
 import { Link } from "react-router";
 import { useAuth } from "@/lib/auth-context";
@@ -83,6 +83,14 @@ export function DashboardPage() {
   const capturePct = analytics
     ? Math.min(100, Math.round((analytics.lead_capture_rate || 0) * 100))
     : 0;
+
+  const aiResolutionBarRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = aiResolutionBarRef.current;
+    if (el) {
+      el.style.width = `${aiPct}%`;
+    }
+  }, [aiPct]);
 
   return (
     <div className="h-full bg-background overflow-auto">
@@ -203,7 +211,7 @@ export function DashboardPage() {
                   <span className="text-sm font-bold text-foreground">{loading ? "…" : `${aiPct}%`}</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${aiPct}%` }} />
+                  <div ref={aiResolutionBarRef} className="bg-primary h-2 rounded-full transition-all min-w-0" />
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">

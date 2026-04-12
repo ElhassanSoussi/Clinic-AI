@@ -27,9 +27,6 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
@@ -126,18 +123,35 @@ function SidebarProvider({
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
 
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) {
+      return;
+    }
+    el.removeAttribute("style");
+    if (!style) {
+      return;
+    }
+    const target = el.style as unknown as Record<string, unknown>;
+    for (const key in style) {
+      if (!Object.prototype.hasOwnProperty.call(style, key)) {
+        continue;
+      }
+      const value = (style as Record<string, unknown>)[key];
+      if (value === undefined || value === null) {
+        continue;
+      }
+      target[key] = value;
+    }
+  }, [style]);
+
   return (
     <SidebarContext.Provider value={contextValue}>
       <TooltipProvider delayDuration={0}>
         <div
+          ref={wrapperRef}
           data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
           className={cn(
             "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
             className,
@@ -187,12 +201,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [--sidebar-width:18rem] [&>button]:hidden"
           side={side}
         >
           <SheetHeader className="sr-only">

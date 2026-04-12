@@ -499,8 +499,11 @@ export function SettingsPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Clinic name</label>
+                <label htmlFor="settings-clinic-name" className="block text-sm font-medium mb-2">
+                  Clinic name
+                </label>
                 <input
+                  id="settings-clinic-name"
                   type="text"
                   data-testid="settings-clinic-name"
                   value={name}
@@ -510,8 +513,11 @@ export function SettingsPage() {
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Phone</label>
+                  <label htmlFor="settings-phone" className="block text-sm font-medium mb-2">
+                    Phone
+                  </label>
                   <input
+                    id="settings-phone"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -519,8 +525,11 @@ export function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <label htmlFor="settings-email" className="block text-sm font-medium mb-2">
+                    Email
+                  </label>
                   <input
+                    id="settings-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -529,8 +538,11 @@ export function SettingsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Address</label>
+                <label htmlFor="settings-address" className="block text-sm font-medium mb-2">
+                  Address
+                </label>
                 <input
+                  id="settings-address"
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -539,8 +551,11 @@ export function SettingsPage() {
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Assistant display name</label>
+                  <label htmlFor="settings-assistant-name" className="block text-sm font-medium mb-2">
+                    Assistant display name
+                  </label>
                   <input
+                    id="settings-assistant-name"
                     type="text"
                     value={assistantName}
                     onChange={(e) => setAssistantName(e.target.value)}
@@ -548,15 +563,21 @@ export function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Primary color</label>
+                  <span className="block text-sm font-medium mb-2">Primary color</span>
                   <div className="flex gap-2 items-center">
                     <input
+                      id="settings-primary-color"
                       type="color"
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
+                      aria-label="Primary brand color picker"
                       className="h-10 w-14 rounded border border-border bg-white cursor-pointer"
                     />
+                    <label htmlFor="settings-primary-color-hex" className="sr-only">
+                      Primary color hex value
+                    </label>
                     <input
+                      id="settings-primary-color-hex"
                       type="text"
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
@@ -566,8 +587,11 @@ export function SettingsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Greeting message</label>
+                <label htmlFor="settings-greeting-message" className="block text-sm font-medium mb-2">
+                  Greeting message
+                </label>
                 <textarea
+                  id="settings-greeting-message"
                   value={greetingMessage}
                   onChange={(e) => setGreetingMessage(e.target.value)}
                   rows={3}
@@ -575,8 +599,11 @@ export function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Fallback message</label>
+                <label htmlFor="settings-fallback-message" className="block text-sm font-medium mb-2">
+                  Fallback message
+                </label>
                 <textarea
+                  id="settings-fallback-message"
                   value={fallbackMessage}
                   onChange={(e) => setFallbackMessage(e.target.value)}
                   rows={2}
@@ -689,12 +716,16 @@ export function SettingsPage() {
                     type="checkbox"
                     checked={availabilityEnabled}
                     onChange={(e) => setAvailabilityEnabled(e.target.checked)}
+                    aria-label="Enable availability scheduling"
                     className="w-4 h-4 rounded border-border"
                   />
                 </label>
                 <div>
-                  <label className="block text-xs font-medium mb-1 text-muted-foreground">Availability sheet tab</label>
+                  <label htmlFor="settings-availability-sheet-tab" className="block text-xs font-medium mb-1 text-muted-foreground">
+                    Availability sheet tab
+                  </label>
                   <input
+                    id="settings-availability-sheet-tab"
                     type="text"
                     value={availabilitySheetTab}
                     onChange={(e) => setAvailabilitySheetTab(e.target.value)}
@@ -726,12 +757,16 @@ export function SettingsPage() {
                   type="checkbox"
                   checked={notificationsEnabled}
                   onChange={(e) => setNotificationsEnabled(e.target.checked)}
+                  aria-label="Enable email notifications"
                   className="w-4 h-4 rounded border-border"
                 />
               </label>
               <div>
-                <label className="block text-sm font-medium mb-2">Notification email</label>
+                <label htmlFor="settings-notification-email" className="block text-sm font-medium mb-2">
+                  Notification email
+                </label>
                 <input
+                  id="settings-notification-email"
                   type="email"
                   value={notificationEmail}
                   onChange={(e) => setNotificationEmail(e.target.value)}
@@ -756,12 +791,16 @@ export function SettingsPage() {
                   type="checkbox"
                   checked={reminderEnabled}
                   onChange={(e) => setReminderEnabled(e.target.checked)}
+                  aria-label="Enable appointment reminders"
                   className="w-4 h-4 rounded border-border"
                 />
               </label>
               <div>
-                <label className="block text-sm font-medium mb-2">Hours before appointment</label>
+                <label htmlFor="settings-reminder-lead-hours" className="block text-sm font-medium mb-2">
+                  Hours before appointment
+                </label>
                 <input
+                  id="settings-reminder-lead-hours"
                   type="number"
                   min={1}
                   value={reminderLeadHours}
@@ -779,12 +818,16 @@ export function SettingsPage() {
                   type="checkbox"
                   checked={followUpAutomation}
                   onChange={(e) => setFollowUpAutomation(e.target.checked)}
+                  aria-label="Enable follow-up automation"
                   className="w-4 h-4 rounded border-border"
                 />
               </label>
               <div>
-                <label className="block text-sm font-medium mb-2">Follow-up delay (minutes)</label>
+                <label htmlFor="settings-follow-up-delay" className="block text-sm font-medium mb-2">
+                  Follow-up delay (minutes)
+                </label>
                 <input
+                  id="settings-follow-up-delay"
                   type="number"
                   min={5}
                   value={followUpDelayMinutes}

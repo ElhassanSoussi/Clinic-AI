@@ -29,10 +29,12 @@ export function Modal({ isOpen, onClose, title, description, children, size = "m
               {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
             </div>
             <button
+              type="button"
               onClick={onClose}
+              aria-label="Close dialog"
               className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden />
             </button>
           </div>
         </div>

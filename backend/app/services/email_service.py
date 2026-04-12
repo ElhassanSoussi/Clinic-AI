@@ -117,7 +117,7 @@ def send_new_lead_email(clinic: dict, lead: dict, *, raise_on_error: bool = Fals
     safe_reason = escape(lead.get('reason_for_visit', 'N/A'))
     safe_datetime = escape(lead.get('preferred_datetime_text', 'N/A'))
     safe_lead_id = escape(str(lead.get('id', '')))
-    lead_url = f"{dashboard_base_url}/dashboard/leads/{safe_lead_id}" if dashboard_base_url else ""
+    lead_url = f"{dashboard_base_url}/app/leads/{safe_lead_id}" if dashboard_base_url else ""
     lead_button_html = ""
 
     if lead_url:

@@ -127,8 +127,11 @@ export function AccountPage() {
               <p className="text-sm text-muted-foreground">{session?.email}</p>
             </div>
           </div>
-          <label className="block text-sm font-medium mb-2">Full name</label>
+          <label htmlFor="account-full-name" className="block text-sm font-medium mb-2">
+            Full name
+          </label>
           <input
+            id="account-full-name"
             type="text"
             data-testid="account-full-name"
             value={fullName}
@@ -173,9 +176,12 @@ export function AccountPage() {
           </p>
           <div className="space-y-3 max-w-md">
             <div>
-              <label className="block text-sm font-medium mb-1">Current password</label>
+              <label htmlFor="account-current-password" className="block text-sm font-medium mb-1">
+                Current password
+              </label>
               <div className="relative">
                 <input
+                  id="account-current-password"
                   type={showCurrent ? "text" : "password"}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
@@ -183,17 +189,21 @@ export function AccountPage() {
                 />
                 <button
                   type="button"
+                  aria-label={showCurrent ? "Hide current password" : "Show current password"}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
                   onClick={() => setShowCurrent(!showCurrent)}
                 >
-                  {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showCurrent ? <EyeOff className="w-4 h-4" aria-hidden /> : <Eye className="w-4 h-4" aria-hidden />}
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">New password</label>
+              <label htmlFor="account-new-password" className="block text-sm font-medium mb-1">
+                New password
+              </label>
               <div className="relative">
                 <input
+                  id="account-new-password"
                   type={showNew ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -201,10 +211,11 @@ export function AccountPage() {
                 />
                 <button
                   type="button"
+                  aria-label={showNew ? "Hide new password" : "Show new password"}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
                   onClick={() => setShowNew(!showNew)}
                 >
-                  {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showNew ? <EyeOff className="w-4 h-4" aria-hidden /> : <Eye className="w-4 h-4" aria-hidden />}
                 </button>
               </div>
             </div>

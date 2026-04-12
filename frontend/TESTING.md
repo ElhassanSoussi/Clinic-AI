@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Install browsers once: `pnpm exec playwright install chromium` (from `frontend/`).
+- Install browsers once: `pnpm exec playwright install chromium` (from `frontend/`). Headless runs fail with “Executable doesn't exist” until this completes (some CI/sandbox environments need network permission for the download).
 
 ## Commands
 
@@ -55,6 +55,39 @@ Use the printed credentials in `frontend/.env.e2e`.
 Run against your **live** frontend URL with backend envs set. Check each row; note pass/fail.
 
 **Training route in app:** `/app/ai-training` (not `/app/training`).
+
+### Live smoke sequence (step-by-step)
+
+Do these in order once per release or after infra changes. Substitute your real origin for `https://clinicaireply.com` and a real clinic slug for `YOUR_SLUG`.
+
+**Public (logged out)**
+
+1. Open `https://clinicaireply.com/` — landing renders.
+2. Open `/product`, `/pricing`, `/trust`, `/faq`, `/contact` — each loads a primary heading (no blank screen).
+3. Open `/privacy`, `/terms` — legal pages load.
+4. Open `/login` — sign-in form; submit only if API + Supabase envs are correct for this host.
+5. Open `/register` — registration form.
+6. Open `/chat` — patient chat gate; enter slug or use step 7.
+7. Open `/chat?slug=YOUR_SLUG` — branding loads or clear error; if clinic not live, expect non-live banner.
+8. Open `/chat?slug=bad slug!` — invalid slug message (client-side validation before API).
+
+**Authenticated**
+
+1. Sign in from `/login` — land on `/app/dashboard` (or `?from=` deep link after login).
+2. Open `/app/dashboard` — metrics or empty states.
+3. Open `/app/settings` — loads; **Save** → success toast; **Go live** / **Pause** if shown — live state updates.
+4. Open `/app/billing` — loads; checkout / portal buttons error with toast if Stripe not configured (no silent failure).
+5. Open `/app/inbox`, `/app/leads`, `/app/appointments` — list or empty state.
+6. Open `/app/ai-training` — training overview loads.
+7. Open `/app/account` — update profile; save feedback.
+8. **Logout** — return to `/login`; hit `/app/settings` logged out → redirect to `/login?from=…`.
+
+**Error / edge**
+
+1. With app logged in, expire or clear token (or wait for expiry) — next API 401 should clear session; login page shows session-expired style notice if implemented.
+2. Unset or wrong `NEXT_PUBLIC_API_URL` on a test build — API errors should be user-visible strings, not raw HTML.
+3. Settings save failure (e.g. offline) — toast + error banner when applicable.
+4. Empty inbox/leads — empty state, not infinite spinner.
 
 ### Public (logged out)
 

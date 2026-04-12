@@ -171,8 +171,11 @@ export function LeadDetailPage() {
                   </Link>
                 </p>
               ) : null}
-              <label className="block text-sm font-medium mb-2">Staff notes</label>
+              <label htmlFor="lead-staff-notes" className="block text-sm font-medium mb-2">
+                Staff notes
+              </label>
               <textarea
+                id="lead-staff-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}

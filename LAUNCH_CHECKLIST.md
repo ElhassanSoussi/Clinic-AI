@@ -5,7 +5,8 @@
 - [ ] **Core backend env vars**:
   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`
   - `ENVIRONMENT=production`
-  - `CORS_ORIGINS=https://clinicaireply.com`
+  - `CORS_ORIGINS` — comma-separated **exact** frontend origins the browser will send (e.g. `https://clinicaireply.com`); if you serve `https://www.…` or Vercel preview URLs against this API, include those origins too.
+  - `FRONTEND_APP_URL=https://clinicaireply.com` — no trailing slash; used for Stripe deposit return URLs, email dashboard links, and OAuth return paths (must match real SPA routes under `/app/...`).
   - `PYTHON_VERSION=3.11.15`
 - [ ] **Frontend env vars** — Set in Vercel/hosting (see `frontend/.env.example`, `frontend/RELEASE.md`):
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -18,7 +19,7 @@
 - [ ] **Stripe env vars** if billing or deposits are live:
   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
   - `STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_PREMIUM`
-  - `FRONTEND_APP_URL=https://clinicaireply.com`
+  - (Checkout success/cancel URLs for plan upgrades are sent by the SPA from `getPublicOrigin()` + `/app/billing?…`; deposit return URLs are built server-side from `FRONTEND_APP_URL` + `/app/appointments?…`.)
 - [ ] **Twilio env vars** if SMS is live:
   - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`
   - `TWILIO_FROM_NUMBER` or `TWILIO_MESSAGING_SERVICE_SID`
@@ -39,13 +40,7 @@
   - Site URL = `https://clinicaireply.com`
   - If you add Google/Microsoft sign-in later: redirect URLs must include your Supabase callback URL and production origin
   - `www.clinicaireply.com` redirects to `https://clinicaireply.com`
-- [ ] **Migrations applied**:
-  - `20260331_add_channel_foundation.sql`
-  - `20260331_add_frontdesk_automation.sql`
-  - `20260331_add_sms_delivery.sql`
-  - `20260331_add_sms_threads.sql`
-  - `20260331_add_sms_ai_takeover.sql`
-  - `20260402_add_appointment_deposits.sql`
+- [ ] **Migrations applied** — run every file in `backend/migrations/*.sql` in **filename (timestamp) order** (not only a subset); keep in sync with `backend/schema.sql` for fresh installs.
 - [ ] **Stripe** — Live mode configured:
   - Live secret key set (`sk_live_...`)
   - Two price IDs created (Professional, Premium)

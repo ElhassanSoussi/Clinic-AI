@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Check, Building, Clock, Zap, Copy, CheckCircle, ChevronRight, Sparkles, MessageSquare } from "lucide-react";
 import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
@@ -146,6 +146,13 @@ export function OnboardingPage() {
   ];
 
   const progressPercentage = (step / 3) * 100;
+  const onboardingProgressRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = onboardingProgressRef.current;
+    if (el) {
+      el.style.width = `${progressPercentage}%`;
+    }
+  }, [progressPercentage]);
   const chatUrl = clinic ? `${getPublicOrigin()}/chat?slug=${encodeURIComponent(clinic.slug)}` : "";
 
   const hoursSummary = useMemo(() => {
@@ -209,7 +216,14 @@ export function OnboardingPage() {
             })}
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary transition-all duration-500" style={{ width: `${progressPercentage}%` }} />
+            <div
+              ref={onboardingProgressRef}
+              className="h-full bg-primary transition-all duration-500 min-w-0"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progressPercentage)}
+            />
           </div>
         </div>
 
@@ -220,28 +234,50 @@ export function OnboardingPage() {
               <p className="text-muted-foreground mb-6">These fields map directly to `/api/clinics/me`.</p>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Clinic name</label>
+                  <label htmlFor="onboarding-clinic-name" className="block text-sm font-semibold mb-2">
+                    Clinic name
+                  </label>
                   <input
+                    id="onboarding-clinic-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-3 border border-border rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Phone</label>
+                  <label htmlFor="onboarding-phone" className="block text-sm font-semibold mb-2">
+                    Phone
+                  </label>
                   <input
+                    id="onboarding-phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full px-4 py-3 border border-border rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Greeting message</label>
-                  <textarea value={greeting} onChange={(e) => setGreeting(e.target.value)} rows={3} className="w-full px-4 py-3 border border-border rounded-lg" />
+                  <label htmlFor="onboarding-greeting" className="block text-sm font-semibold mb-2">
+                    Greeting message
+                  </label>
+                  <textarea
+                    id="onboarding-greeting"
+                    value={greeting}
+                    onChange={(e) => setGreeting(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-border rounded-lg"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Fallback message</label>
-                  <textarea value={fallback} onChange={(e) => setFallback(e.target.value)} rows={2} className="w-full px-4 py-3 border border-border rounded-lg" />
+                  <label htmlFor="onboarding-fallback" className="block text-sm font-semibold mb-2">
+                    Fallback message
+                  </label>
+                  <textarea
+                    id="onboarding-fallback"
+                    value={fallback}
+                    onChange={(e) => setFallback(e.target.value)}
+                    rows={2}
+                    className="w-full px-4 py-3 border border-border rounded-lg"
+                  />
                 </div>
               </div>
             </div>
@@ -281,10 +317,11 @@ export function OnboardingPage() {
                   {chatUrl}
                   <button
                     type="button"
+                    aria-label="Copy public chat link"
                     onClick={() => chatUrl && navigator.clipboard.writeText(chatUrl)}
                     className="absolute top-2 right-2 p-2 bg-slate-700 rounded text-white"
                   >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-4 h-4" aria-hidden />
                   </button>
                 </div>
               </div>

@@ -24,10 +24,10 @@ Production domains:
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `OPENAI_API_KEY`
    - `ENVIRONMENT=production`
-   - `CORS_ORIGINS=https://clinicaireply.com`
+   - `CORS_ORIGINS` — comma-separated list of allowed **browser origins** (scheme + host + port). Production example: `https://clinicaireply.com`. Add `https://www.clinicaireply.com` or preview origins if those hits will talk to this API.
    - `PYTHON_VERSION=3.11.15`
 5. Add production app URL env:
-   - `FRONTEND_APP_URL=https://clinicaireply.com`
+   - `FRONTEND_APP_URL=https://clinicaireply.com` (no trailing slash; used for email links, deposit checkout returns, and Sheets/Excel OAuth redirects into the Vite app at `/app/...`)
 6. Attach the custom domain:
    - `api.clinicaireply.com`
 7. Verify:
@@ -156,7 +156,7 @@ Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md). After deploy, ru
 ## Pre-Deploy Checks
 
 - `python3 -m py_compile backend/app/main.py backend/app/routers/*.py backend/app/services/*.py backend/app/schemas/*.py backend/create_test_user.py backend/scripts/launch_readiness_smoke.py`
-- `cd frontend && npm run lint && npm run build && npm run e2e` (dev server for Playwright; see `frontend/TESTING.md`; optional `pnpm run e2e:auth` needs `frontend/.env.e2e`; post-deploy HTML smoke: `PLAYWRIGHT_BASE_URL=https://… pnpm run e2e:live`)
+- `cd frontend && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run e2e` (Playwright starts the dev server unless `PLAYWRIGHT_BASE_URL` is set; see `frontend/TESTING.md`; `pnpm run e2e:auth` needs `frontend/.env.e2e`; post-deploy HTML smoke: `PLAYWRIGHT_BASE_URL=https://… pnpm run e2e:live`)
 - `GET /api/health` returns `{"status":"ok"}`
 - required env vars are present
 - `NEXT_PUBLIC_API_URL` points to `https://api.clinicaireply.com/api`
