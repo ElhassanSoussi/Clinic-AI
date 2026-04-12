@@ -78,7 +78,7 @@ Do these in order once per release or after infra changes. Substitute your real 
 1. Sign in from `/login` — land on `/app/dashboard` (or `?from=` deep link after login).
 2. Open `/app/dashboard` — metrics or empty states.
 3. Open `/app/settings` — loads; **Save** → success toast; **Go live** / **Pause** if shown — live state updates.
-4. Open `/app/billing` — loads; checkout / portal buttons error with toast if Stripe not configured (no silent failure).
+4. Open `/app/billing` — loads; checkout / portal buttons error with toast if Stripe not configured (no silent failure). After a real Stripe Checkout, return URLs use `?checkout=success` or `?checkout=cancel`; the page shows a toast and refreshes billing status (success) or a neutral cancelled message (cancel).
 5. Open `/app/inbox`, `/app/leads`, `/app/appointments` — list or empty state.
 6. Open `/app/ai-training` — training overview loads.
 7. Open `/app/account` — update profile; save feedback.

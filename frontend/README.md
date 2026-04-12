@@ -13,6 +13,7 @@ Vite + React SPA. Local dev: `pnpm run dev` (port **1201**).
 | Var | When |
 |-----|------|
 | `NEXT_PUBLIC_API_URL` | **Required** in production (e.g. `https://api.example.com/api`). Dev defaults to `http://127.0.0.1:7001/api` if unset. |
+| `VITE_PUBLIC_API_URL` | Optional alias read by the same client code — use **one** of these names consistently (avoid conflicting values). |
 | `NEXT_PUBLIC_SITE_URL` | **Strongly recommended** in production — canonical origin for Stripe returns, Settings chat link, embed snippet. |
 | `NEXT_PUBLIC_SUPABASE_*` | Per `.env.example` if the app uses Supabase from the client. |
 

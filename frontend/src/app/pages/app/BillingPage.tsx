@@ -1,4 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
+import { toast } from "sonner";
 import { CreditCard, Calendar, AlertTriangle, Check, Shield } from "lucide-react";
 import { Modal } from "@/app/components/Modal";
 import { useAuth } from "@/lib/auth-context";
@@ -21,6 +23,7 @@ function formatMoneyCents(cents: number): string {
 
 export function BillingPage() {
   const { session } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,37 +31,49 @@ export function BillingPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [showPlanModal, setShowPlanModal] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!session?.accessToken) {
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        const [st, pl] = await Promise.all([
-          fetchBillingStatus(session.accessToken),
-          fetchBillingPlans(),
-        ]);
-        if (!cancelled) {
-          setStatus(st);
-          setPlans(pl || []);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(userFacingApiError(e, "Failed to load billing"));
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  const loadBilling = useCallback(async () => {
+    if (!session?.accessToken) {
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const [st, pl] = await Promise.all([
+        fetchBillingStatus(session.accessToken),
+        fetchBillingPlans(),
+      ]);
+      setStatus(st);
+      setPlans(pl || []);
+    } catch (e) {
+      setError(userFacingApiError(e, "Failed to load billing"));
+    } finally {
+      setLoading(false);
+    }
   }, [session?.accessToken]);
+
+  useEffect(() => {
+    void loadBilling();
+  }, [loadBilling]);
+
+  /** Stripe Checkout redirects here with ?checkout=success|cancel (see openCheckout). */
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    if (!checkout) {
+      return;
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("checkout");
+    setSearchParams(next, { replace: true });
+
+    if (checkout === "success") {
+      notifySuccess("Payment setup complete", "Your plan may take a moment to update after Stripe finishes.");
+      void loadBilling();
+    } else if (checkout === "cancel") {
+      toast.message("Checkout cancelled", {
+        description: "No charge was made. You can subscribe when you're ready.",
+      });
+    }
+  }, [searchParams, setSearchParams, loadBilling]);
 
   const leadPct = useMemo(() => {
     if (!status?.monthly_lead_limit) {
