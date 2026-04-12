@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Check, Building, Clock, Zap, Copy, CheckCircle, ChevronRight, Sparkles, MessageSquare } from "lucide-react";
 import { BusinessHoursEditor } from "@/app/components/BusinessHoursEditor";
 import { useAuth } from "@/lib/auth-context";
@@ -140,9 +140,24 @@ export function OnboardingPage() {
   };
 
   const steps = [
-    { number: 1, title: "Clinic info", icon: Building },
-    { number: 2, title: "Hours", icon: Clock },
-    { number: 3, title: "Go live", icon: Zap },
+    {
+      number: 1,
+      title: "Clinic profile",
+      caption: "Identity & patient-facing messages",
+      icon: Building,
+    },
+    {
+      number: 2,
+      title: "Hours",
+      caption: "Structured schedule JSON",
+      icon: Clock,
+    },
+    {
+      number: 3,
+      title: "Review & go live",
+      caption: "Confirm, then activate",
+      icon: Zap,
+    },
   ];
 
   const progressPercentage = (step / 3) * 100;
@@ -180,7 +195,11 @@ export function OnboardingPage() {
           </div>
           <h1 className="text-2xl sm:text-4xl font-bold mb-3">Let&apos;s get you set up</h1>
           <p className="text-base sm:text-lg text-muted-foreground px-1">
-            Connect real clinic data — no placeholder configuration
+            Each step saves to your clinic record via the API. You can revisit everything later in{" "}
+            <Link to="/app/settings" className="text-primary font-semibold hover:underline">
+              Settings
+            </Link>
+            .
           </p>
           {error && <p className="text-sm text-destructive mt-3">{error}</p>}
         </div>
@@ -205,6 +224,9 @@ export function OnboardingPage() {
                       {isComplete ? <Check className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
                     </div>
                     <p className={`text-sm font-medium mt-2 ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{s.title}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 text-center max-w-[7rem] leading-snug hidden sm:block">
+                      {s.caption}
+                    </p>
                   </div>
                   {idx < steps.length - 1 && (
                     <div className="flex-1 h-1 mx-4 bg-muted rounded-full overflow-hidden">
@@ -231,7 +253,10 @@ export function OnboardingPage() {
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-bold mb-2">Clinic profile</h2>
-              <p className="text-muted-foreground mb-6">These fields map directly to `/api/clinics/me`.</p>
+              <p className="text-muted-foreground mb-6">
+                Saved with <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">PUT /clinics/me</span> — name,
+                phone, and the messages patients see when chat opens or the assistant hands off.
+              </p>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="onboarding-clinic-name" className="block text-sm font-semibold mb-2">
@@ -286,7 +311,10 @@ export function OnboardingPage() {
           {step === 2 && (
             <div>
               <h2 className="text-2xl font-bold mb-2">Business hours</h2>
-              <p className="text-muted-foreground mb-4">Set open days and times. We save the same structured JSON your clinic record expects.</p>
+              <p className="text-muted-foreground mb-4">
+                Validation runs in the browser before save. The same payload is stored on your clinic and used for scheduling
+                context — no separate “wizard-only” copy.
+              </p>
               <BusinessHoursEditor value={hoursSchedule} onChange={setHoursSchedule} disabled={saving} />
             </div>
           )}
@@ -295,9 +323,19 @@ export function OnboardingPage() {
             <div>
               <h2 className="text-2xl font-bold mb-2">Review & go live</h2>
               <p className="text-muted-foreground mb-6">
-                Confirm details below, then enable your assistant. This uses the real go-live endpoint and marks onboarding complete.
+                <span className="font-semibold text-foreground">Go live</span> calls your clinic&apos;s go-live endpoint, then sets{" "}
+                <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">onboarding_completed</span> on the same record.
+                If anything looks wrong, go back to steps 1–2 — nothing here is cosmetic-only.
               </p>
-              <div className="p-4 bg-slate-50 border border-border rounded-xl mb-4 text-sm space-y-2">
+              <div className="p-4 bg-slate-50 border border-border rounded-xl mb-4 text-sm space-y-3">
+                <p className="font-semibold text-foreground">Pre-flight checklist</p>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <li>Clinic name and phone are correct for patients and staff caller ID context.</li>
+                  <li>Greeting and fallback messages read well in live chat (you can edit anytime in Settings).</li>
+                  <li>Business hours match your real schedule — the assistant uses this for availability language.</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-white border border-border rounded-xl mb-4 text-sm space-y-2">
                 <p>
                   <span className="font-semibold">Clinic:</span> {name.trim() || "—"} · {phone.trim() || "no phone"}
                 </p>
@@ -305,7 +343,11 @@ export function OnboardingPage() {
                   <span className="font-semibold">Hours:</span> {hoursSummary}
                 </p>
                 <p className="text-muted-foreground">
-                  After go-live, you can pause automation anytime from Settings without losing configuration.
+                  After go-live, use{" "}
+                  <Link to="/app/settings" className="text-primary font-semibold hover:underline">
+                    Settings
+                  </Link>{" "}
+                  to pause automation, adjust channels, or update copy — without rerunning this wizard.
                 </p>
               </div>
               <div className="p-5 border border-border rounded-xl mb-4">
@@ -328,7 +370,7 @@ export function OnboardingPage() {
               <div className="p-4 bg-muted/50 border border-border rounded-xl flex gap-3">
                 <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-muted-foreground">
-                  SMS numbers and advanced channel setup appear under Settings → Channels after your workspace is provisioned.
+                  SMS numbers and advanced channel setup appear under Settings → Channels after your account is provisioned.
                 </p>
               </div>
             </div>

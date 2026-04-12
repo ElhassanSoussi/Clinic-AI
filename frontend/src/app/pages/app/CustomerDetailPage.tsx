@@ -8,13 +8,15 @@ import {
   MessageSquare,
   CheckCircle2,
   Clock,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCustomerDetail } from "@/lib/api/services";
 import type { CustomerDetail } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { formatOutcomeLabel, humanizeSnake, sanitizeStaffNote } from "@/lib/display-text";
-import { appPagePaddingClass, appPageTitleClass } from "@/lib/page-layout";
+import { appPagePaddingClass, appPageSubtitleClass, appPageTitleCompactClass, appSectionTitleClass } from "@/lib/page-layout";
+import { cn } from "@/app/components/ui/utils";
 
 export function CustomerDetailPage() {
   const { id } = useParams();
@@ -85,17 +87,16 @@ export function CustomerDetailPage() {
           </Link>
 
           <div className="flex items-start justify-between flex-wrap gap-4">
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 min-w-0">
               <div className="w-16 h-16 rounded-xl bg-accent border border-border flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold text-primary">{initial}</span>
               </div>
-              <div>
-                <h1 className={appPageTitleClass}>{profile.name}</h1>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                  <span>{profile.total_interactions ?? profile.conversation_count + profile.lead_count} total interactions</span>
-                  <span>•</span>
-                  <span>{formatOutcomeLabel(profile.last_outcome)}</span>
-                </div>
+              <div className="min-w-0">
+                <h1 className={cn(appPageTitleCompactClass)}>{profile.name}</h1>
+                <p className={cn(appPageSubtitleClass, "mt-1")}>
+                  {profile.total_interactions ?? profile.conversation_count + profile.lead_count} recorded interactions · last outcome:{" "}
+                  {formatOutcomeLabel(profile.last_outcome)}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -160,7 +161,7 @@ export function CustomerDetailPage() {
 
             <div className="bg-white rounded-xl border border-border shadow-sm">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Recent requests</h2>
+                <h2 className={cn(appSectionTitleClass, "text-base")}>Recent requests</h2>
               </div>
               <div className="p-6 space-y-3">
                 {profile.recent_requests.length === 0 && <p className="text-sm text-muted-foreground">No recent requests.</p>}
@@ -181,7 +182,7 @@ export function CustomerDetailPage() {
 
             <div className="bg-white rounded-xl border border-border shadow-sm">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Recent conversations</h2>
+                <h2 className={cn(appSectionTitleClass, "text-base")}>Recent conversations</h2>
               </div>
               <div className="p-6 space-y-3">
                 {profile.recent_conversations.length === 0 && <p className="text-sm text-muted-foreground">No conversations linked.</p>}
@@ -210,10 +211,14 @@ export function CustomerDetailPage() {
 
             <div className="bg-white rounded-xl border border-border shadow-sm">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Timeline</h2>
+                <h2 className={cn(appSectionTitleClass, "text-base")}>Timeline</h2>
               </div>
               <div className="p-6 space-y-4">
-                {profile.timeline.length === 0 && <p className="text-sm text-muted-foreground">No timeline events.</p>}
+                {profile.timeline.length === 0 && (
+                  <p className="text-sm text-muted-foreground rounded-lg border border-dashed border-border bg-slate-50/60 px-4 py-5 text-center">
+                    No events on file yet — activity will appear as patients reach out and staff update leads.
+                  </p>
+                )}
                 {profile.timeline.map((item) => {
                   const t = item as {
                     id?: string;
@@ -230,7 +235,9 @@ export function CustomerDetailPage() {
                         <Clock className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{t.title}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {humanizeSnake((t.title || "").replace(/\./g, "_"))}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                           {sanitizeStaffNote(t.detail, 280) ||
                             (t.detail?.trim() ? "Update recorded — use the links below for full context." : "—")}
@@ -258,7 +265,7 @@ export function CustomerDetailPage() {
 
           <div className="space-y-6">
             <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wide mb-4">Summary</h3>
+              <h3 className={cn(appSectionTitleClass, "mb-4")}>Summary</h3>
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Open requests</p>
@@ -274,7 +281,7 @@ export function CustomerDetailPage() {
             </div>
 
             <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wide mb-4">Quick actions</h3>
+              <h3 className={cn(appSectionTitleClass, "mb-4")}>Quick actions</h3>
               <div className="space-y-2">
                 <Link
                   to="/app/inbox"
@@ -283,8 +290,16 @@ export function CustomerDetailPage() {
                   <MessageSquare className="w-4 h-4 text-slate-500" />
                   Open inbox
                 </Link>
-                <p className="text-xs text-muted-foreground">
-                  Deep clinical records, insurance, and charting are not stored in this workspace — only operational CRM data from Clinic AI.
+                <Link
+                  to="/app/settings"
+                  className="w-full h-11 px-4 border border-border rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4 text-slate-500" />
+                  Clinic settings
+                </Link>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  What you see here is front-desk and CRM context from Clinic AI, not a full medical record. Change channels and automation in
+                  Settings.
                 </p>
               </div>
             </div>

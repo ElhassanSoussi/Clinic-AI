@@ -6,9 +6,11 @@
  * When unset, auth-dependent tests use `test.skip` so the default `pnpm run e2e` stays green.
  */
 export const E2E_AUTH_SKIP_REASON =
-  "Authenticated E2E skipped: set E2E_USER_EMAIL and E2E_USER_PASSWORD in frontend/.env.e2e (copy .env.e2e.example). " +
-  "Ensure NEXT_PUBLIC_API_URL in frontend/.env targets a running backend. " +
-  "Seed a user: backend/create_test_user.py. Run full auth suite: pnpm run e2e:auth.";
+  "SKIP (auth E2E): Missing E2E_USER_EMAIL / E2E_USER_PASSWORD. Copy frontend/.env.e2e.example → frontend/.env.e2e and fill both. " +
+  "Ensure frontend/.env has NEXT_PUBLIC_API_URL pointing at a live API. " +
+  "Install browsers once: pnpm exec playwright install chromium (from frontend/). " +
+  "Seed credentials: cd backend && python create_test_user.py. " +
+  "Run authenticated suite only: pnpm run e2e:auth. Default pnpm run e2e stays green without this file.";
 
 export function hasE2eCredentials(): boolean {
   const email = process.env.E2E_USER_EMAIL?.trim();

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Filter,
@@ -11,10 +11,12 @@ import {
   Globe,
   Smartphone,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { apiJson } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/format";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/app/components/ui/collapsible";
 import { cn } from "@/app/components/ui/utils";
 import { humanizeSnake } from "@/lib/display-text";
 import { appPagePaddingClass, appPageSubtitleClass, appPageTitleCompactClass } from "@/lib/page-layout";
@@ -95,6 +97,9 @@ export function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [stageFilter, setStageFilter] = useState<"all" | "new" | "contacted" | "booked" | "closed">("all");
+  const [staleOnly, setStaleOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     if (!session?.accessToken) {
@@ -126,17 +131,35 @@ export function LeadsPage() {
     };
   }, [session?.accessToken]);
 
-  const filtered = leads.filter((l) => {
-    if (!q.trim()) {
-      return true;
-    }
-    const n = q.toLowerCase();
-    return (
-      l.patient_name.toLowerCase().includes(n) ||
-      l.patient_email.toLowerCase().includes(n) ||
-      (l.patient_phone || "").toLowerCase().includes(n)
-    );
-  });
+  const filtered = useMemo(() => {
+    return leads.filter((l) => {
+      if (stageFilter !== "all" && l.status.toLowerCase() !== stageFilter) {
+        return false;
+      }
+      if (staleOnly) {
+        const st = l.status.toLowerCase();
+        if (st === "booked" || st === "closed") {
+          return false;
+        }
+        if (!l.created_at) {
+          return false;
+        }
+        const t = new Date(l.created_at).getTime();
+        if (!Number.isFinite(t) || Date.now() - t <= 72 * 3600 * 1000) {
+          return false;
+        }
+      }
+      if (!q.trim()) {
+        return true;
+      }
+      const n = q.toLowerCase();
+      return (
+        l.patient_name.toLowerCase().includes(n) ||
+        l.patient_email.toLowerCase().includes(n) ||
+        (l.patient_phone || "").toLowerCase().includes(n)
+      );
+    });
+  }, [leads, q, stageFilter, staleOnly]);
 
   const qualifiedCount = leads.filter((l) => l.status.toLowerCase() === "booked").length;
   const newCount = leads.filter((l) => l.status.toLowerCase() === "new").length;
@@ -164,7 +187,7 @@ export function LeadsPage() {
             <div>
               <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Leads</h1>
               <p className={appPageSubtitleClass}>
-                Booking pipeline — see stage, source, and what to do next before opening a lead.
+                Track requests from first message to booked: stage, source, and next step at a glance.
               </p>
             </div>
             <button
@@ -233,30 +256,97 @@ export function LeadsPage() {
             {error}
           </div>
         )}
-        <div className="flex gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search leads..."
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
-            />
+        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="mb-6 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-start">
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search leads..."
+                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+              />
+            </div>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "px-4 py-2 border border-border rounded-lg transition-colors flex items-center gap-2 font-semibold bg-white shrink-0",
+                  stageFilter !== "all" || staleOnly ? "border-primary/40 bg-primary/5" : "hover:bg-muted",
+                )}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                <ChevronDown className={cn("w-4 h-4 transition-transform", filtersOpen && "rotate-180")} />
+                {(stageFilter !== "all" || staleOnly) && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-primary">On</span>
+                )}
+              </button>
+            </CollapsibleTrigger>
           </div>
-          <button
-            type="button"
-            className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors flex items-center gap-2 font-semibold bg-white"
-          >
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-        </div>
+          <CollapsibleContent className="rounded-xl border border-border bg-white p-4 space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Stage</p>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    ["all", "All"],
+                    ["new", "New"],
+                    ["contacted", "Contacted"],
+                    ["booked", "Booked"],
+                    ["closed", "Closed"],
+                  ] as const
+                ).map(([val, label]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setStageFilter(val)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors",
+                      stageFilter === val
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-foreground border-border hover:bg-muted",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-foreground">
+              <input
+                type="checkbox"
+                checked={staleOnly}
+                onChange={(e) => setStaleOnly(e.target.checked)}
+                className="rounded border-border"
+              />
+              Open leads older than 72 hours (excludes booked & closed)
+            </label>
+          </CollapsibleContent>
+        </Collapsible>
 
         <div className="space-y-3">
           {loading && <p className="text-muted-foreground text-sm">Loading leads…</p>}
           {!loading && filtered.length === 0 && (
-            <p className="text-muted-foreground text-sm">No leads yet. Patient chat will create leads here.</p>
+            <div className="rounded-xl border border-dashed border-border bg-slate-50/60 px-6 py-8 text-center max-w-lg">
+              <p className="text-sm font-medium text-foreground">
+                {leads.length === 0 ? "No leads yet" : "No leads match"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {leads.length === 0 ? (
+                  <>
+                    New requests from your public chat and other channels will land here. Copy your chat link from{" "}
+                    <Link to="/app/settings" className="text-primary font-semibold hover:underline">
+                      Settings
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  <>Clear the search box or reset filters to see more rows.</>
+                )}
+              </p>
+            </div>
           )}
           {filtered.map((lead) => {
             const SourceIcon = lead.source?.toLowerCase().includes("sms") ? Smartphone : Globe;

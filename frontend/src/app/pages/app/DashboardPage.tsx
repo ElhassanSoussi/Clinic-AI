@@ -113,7 +113,7 @@ export function DashboardPage() {
           <div className="mb-6">
             <h1 className={appPageTitleClass}>Dashboard</h1>
             <p className={appPageSubtitleClass}>
-              Front desk command center — start with what needs a human, then scan volume and the schedule ahead.
+              Start with threads and follow-ups that need a person, then check volume and what&apos;s on the calendar.
             </p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -170,7 +170,7 @@ export function DashboardPage() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {loading ? "…" : analytics?.conversations_total ?? "—"}
               </p>
-              <p className="text-sm text-muted-foreground">Conversations (period)</p>
+              <p className="text-sm text-muted-foreground">Conversations this period</p>
             </div>
 
             <div className="bg-white rounded-lg p-6 border border-border">
@@ -273,7 +273,7 @@ export function DashboardPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Derived from front-desk analytics. Not a clinical quality score.
+                Estimate from your analytics — useful for staffing, not a measure of clinical quality.
               </p>
             </div>
           </div>
@@ -303,7 +303,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <Link to="/app/operations" className="text-sm font-semibold text-primary hover:underline inline-block">
-                Operations center →
+                View channels &amp; deposits →
               </Link>
             </div>
           </div>
@@ -321,7 +321,20 @@ export function DashboardPage() {
               <div className="space-y-4">
                 {loading && <p className="text-sm text-muted-foreground">Loading activity…</p>}
                 {!loading && activity.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No recent activity yet.</p>
+                  <div className="rounded-lg border border-dashed border-border bg-slate-50/60 px-4 py-6 text-center">
+                    <p className="text-sm font-medium text-foreground">No recent activity</p>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                      When patients chat, book, or staff update records, entries will show here. Open{" "}
+                      <Link to="/app/inbox" className="text-primary font-semibold hover:underline">
+                        Inbox
+                      </Link>{" "}
+                      or{" "}
+                      <Link to="/app/leads" className="text-primary font-semibold hover:underline">
+                        Leads
+                      </Link>{" "}
+                      to work the queue.
+                    </p>
+                  </div>
                 )}
                 {!loading &&
                   activity.map((item) => {
@@ -360,7 +373,16 @@ export function DashboardPage() {
             <div className="p-6">
               {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
               {!loading && upcomingPreview.length === 0 && (
-                <p className="text-sm text-muted-foreground">No scheduled appointments in the current view.</p>
+                <div className="rounded-lg border border-dashed border-border bg-slate-50/60 px-4 py-6 text-center">
+                  <p className="text-sm font-medium text-foreground">Nothing on the near-term calendar</p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                    Upcoming visits from your live schedule will list here.{" "}
+                    <Link to="/app/appointments" className="text-primary font-semibold hover:underline">
+                      Open appointments
+                    </Link>{" "}
+                    for the full board.
+                  </p>
+                </div>
               )}
               <div className="space-y-4">
                 {!loading &&

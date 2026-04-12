@@ -379,8 +379,8 @@ export function SettingsPage() {
           <div>
             <h1 className={appPageTitleClass}>Settings</h1>
             <p className={appPageSubtitleClass}>
-              Clinic control center — profile, channels, automation, and embed code share one save flow. Keep the assistant live only when you
-              are ready for patient-facing automation.
+              Clinic profile, hours, notifications, and your public chat link. Save changes when you edit; turn the assistant live only when
+              you&apos;re ready for patients to use it.
             </p>
             {!hasChanges && clinic ? (
               <p className="text-sm font-medium text-emerald-800 mt-2">All changes saved to the server.</p>

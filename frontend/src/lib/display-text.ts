@@ -106,3 +106,18 @@ export function formatSessionRef(sessionId: string | null | undefined): string {
 export function appointmentStatusLabel(status: string): string {
   return humanizeSnake(status || "unknown");
 }
+
+/** Thread / chat bubbles: avoid dumping raw JSON or huge escaped blobs into the UI. */
+export function formatThreadMessageBody(content: string | null | undefined): string {
+  if (!content?.trim()) {
+    return "—";
+  }
+  const t = content.trim();
+  if (/^\s*(?:\[|\{)[\s\S]*(?:\]|\})\s*$/.test(t)) {
+    return "Structured update — open the linked request or timeline for full details.";
+  }
+  if (t.length > 4000) {
+    return `${t.slice(0, 4000).trim()}…`;
+  }
+  return t;
+}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Calendar, Clock, Filter, Mail, Phone } from "lucide-react";
+import { Link } from "react-router";
+import { Calendar, ChevronDown, Clock, Filter, Mail, Phone } from "lucide-react";
 import { format, isThisWeek, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
@@ -8,6 +9,7 @@ import type { AppointmentRecord } from "@/lib/api/types";
 import { formatDateTime } from "@/lib/format";
 import { notifyError, notifySuccess } from "@/lib/feedback";
 import { appointmentStatusLabel, humanizeSnake } from "@/lib/display-text";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/app/components/ui/collapsible";
 import { cn } from "@/app/components/ui/utils";
 import { appPagePaddingClass, appPageSubtitleClass, appPageTitleCompactClass, appSectionTitleClass } from "@/lib/page-layout";
 
@@ -89,6 +91,8 @@ export function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | (typeof STATUS_OPTIONS)[number]>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!session?.accessToken) {
@@ -111,9 +115,16 @@ export function AppointmentsPage() {
     void load();
   }, [load]);
 
+  const filteredRows = useMemo(() => {
+    if (statusFilter === "all") {
+      return rows;
+    }
+    return rows.filter((r) => (r.appointment_status || "").toLowerCase() === statusFilter.toLowerCase());
+  }, [rows, statusFilter]);
+
   const grouped = useMemo(() => {
     const map = new Map<string, AppointmentRecord[]>();
-    for (const r of rows) {
+    for (const r of filteredRows) {
       const k = dayKey(r.appointment_starts_at) || "unscheduled";
       if (!map.has(k)) {
         map.set(k, []);
@@ -130,7 +141,7 @@ export function AppointmentsPage() {
       return a.localeCompare(b);
     });
     return keys.map((k) => ({ key: k, label: k, items: sortAppointmentsInGroup(map.get(k)!) }));
-  }, [rows]);
+  }, [filteredRows]);
 
   const todayCount = useMemo(
     () => rows.filter((r) => r.appointment_starts_at && isToday(parseISO(r.appointment_starts_at))).length,
@@ -183,19 +194,62 @@ export function AppointmentsPage() {
             <div>
               <h1 className={cn(appPageTitleCompactClass, "mb-2")}>Appointments</h1>
               <p className={appPageSubtitleClass}>
-                Schedule board — time-first rows, grouped by day, with status and deposit context from your live data.
+                Day-by-day schedule with times, status, and patient context from your live data.
               </p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors flex items-center gap-2 font-semibold"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-              </button>
-            </div>
+            <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="w-full sm:w-auto">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full sm:w-auto px-4 py-2 border border-border rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold bg-white",
+                    statusFilter !== "all" ? "border-primary/40 bg-primary/5" : "hover:bg-muted",
+                  )}
+                >
+                  <Filter className="w-4 h-4" />
+                  Status filter
+                  <ChevronDown className={cn("w-4 h-4 transition-transform", filtersOpen && "rotate-180")} />
+                  {statusFilter !== "all" && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-primary">On</span>
+                  )}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3 rounded-xl border border-border bg-white p-4 space-y-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Summary tiles above always reflect your full schedule. Only the day groups below are filtered.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter("all")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors",
+                      statusFilter === "all"
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white border-border hover:bg-muted",
+                    )}
+                  >
+                    All statuses
+                  </button>
+                  {STATUS_OPTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setStatusFilter(s)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors",
+                        statusFilter === s
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white border-border hover:bg-muted",
+                      )}
+                    >
+                      {appointmentStatusLabel(s)}
+                    </button>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -241,7 +295,30 @@ export function AppointmentsPage() {
 
       <div className={cn(appPagePaddingClass, "space-y-6")}>
         {loading && <p className="text-sm text-muted-foreground">Loading appointments…</p>}
-        {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No appointments returned for this clinic.</p>}
+        {!loading && rows.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border bg-slate-50/60 px-6 py-10 text-center max-w-lg">
+            <p className="text-sm font-medium text-foreground">No appointments yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              When patients book through your flows, visits will appear here. Start from{" "}
+              <Link to="/app/leads" className="text-primary font-semibold hover:underline">
+                Leads
+              </Link>{" "}
+              or{" "}
+              <Link to="/app/inbox" className="text-primary font-semibold hover:underline">
+                Inbox
+              </Link>{" "}
+              for new requests.
+            </p>
+          </div>
+        )}
+        {!loading && rows.length > 0 && filteredRows.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border bg-slate-50/60 px-6 py-8 text-center max-w-lg">
+            <p className="text-sm font-medium text-foreground">No appointments for this status</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Clear the status filter to see the full schedule, or pick another status.
+            </p>
+          </div>
+        )}
         {!loading &&
           grouped.map((group) => (
             <div key={group.key} className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">

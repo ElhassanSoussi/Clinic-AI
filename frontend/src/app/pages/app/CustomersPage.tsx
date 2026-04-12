@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { Search, Filter, Users, Calendar, Clock } from "lucide-react";
+import { Search, Filter, Users, Calendar, Clock, ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCustomers } from "@/lib/api/services";
 import type { CustomerSummary } from "@/lib/api/types";
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
 import { formatOutcomeLabel, sanitizeStaffNote } from "@/lib/display-text";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/app/components/ui/collapsible";
 import { cn } from "@/app/components/ui/utils";
 import { appPagePaddingClass, appPageSubtitleClass, appPageTitleClass, appSectionTitleClass } from "@/lib/page-layout";
 
@@ -15,6 +16,8 @@ export function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [followUpOnly, setFollowUpOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     if (!session?.accessToken) {
@@ -46,17 +49,21 @@ export function CustomersPage() {
   }, [session?.accessToken]);
 
   const filtered = useMemo(() => {
+    let list = rows;
+    if (followUpOnly) {
+      list = list.filter((c) => c.follow_up_needed);
+    }
     const q = query.trim().toLowerCase();
     if (!q) {
-      return rows;
+      return list;
     }
-    return rows.filter(
+    return list.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.email || "").toLowerCase().includes(q) ||
         (c.phone || "").toLowerCase().includes(q),
     );
-  }, [rows, query]);
+  }, [rows, query, followUpOnly]);
 
   const followUps = useMemo(() => filtered.filter((c) => c.follow_up_needed).length, [filtered]);
 
@@ -68,7 +75,7 @@ export function CustomersPage() {
             <div>
               <h1 className={appPageTitleClass}>Patients</h1>
               <p className={appPageSubtitleClass}>
-                Relationship workspace — one row per person with contact, touch history, and staff-safe notes (no raw payloads).
+                One row per person: contact info, recent visits to your front desk, and short staff notes patients should never see raw.
               </p>
               {error && <p className="text-sm text-destructive mt-2">{error}</p>}
             </div>
@@ -105,7 +112,7 @@ export function CustomersPage() {
             <div className="bg-white rounded-xl p-5 border border-border">
               <p className={cn(appSectionTitleClass, "text-base mb-1")}>At a glance</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Counts come from front-desk activity on this workspace: conversations, open requests, and booked leads tied to each profile.
+                Totals reflect live front-desk data: conversations, open requests, and booked leads linked to each person.
               </p>
             </div>
           </div>
@@ -113,28 +120,59 @@ export function CustomersPage() {
       </div>
 
       <div className={appPagePaddingClass}>
-        <div className="flex gap-3 mb-6 flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by name, email, or phone..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
-            />
+        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="mb-6 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-start">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by name, email, or phone..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+              />
+            </div>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "h-11 px-4 border border-border rounded-lg transition-colors flex items-center gap-2 text-sm font-medium bg-white shrink-0",
+                  followUpOnly ? "border-primary/40 bg-primary/5" : "hover:bg-muted",
+                )}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                <ChevronDown className={cn("w-4 h-4 transition-transform", filtersOpen && "rotate-180")} />
+                {followUpOnly && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-primary">On</span>
+                )}
+              </button>
+            </CollapsibleTrigger>
           </div>
-          <button
-            type="button"
-            className="h-11 px-4 border border-border rounded-lg hover:bg-muted transition-colors flex items-center gap-2 text-sm font-medium bg-white"
-          >
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-        </div>
+          <CollapsibleContent className="rounded-xl border border-border bg-white p-4">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-foreground">
+              <input
+                type="checkbox"
+                checked={followUpOnly}
+                onChange={(e) => setFollowUpOnly(e.target.checked)}
+                className="rounded border-border"
+              />
+              Follow-up needed only
+            </label>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              Matches the follow-up flag from your clinic data — same signal as the orange badge on each row.
+            </p>
+          </CollapsibleContent>
+        </Collapsible>
 
         {loading && <p className="text-sm text-muted-foreground">Loading patients…</p>}
-        {!loading && filtered.length === 0 && <p className="text-sm text-muted-foreground">No patient profiles found.</p>}
+        {!loading && filtered.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {rows.length === 0
+              ? "No patient profiles found."
+              : "No patients match your search or filters. Try clearing the follow-up filter or search terms."}
+          </p>
+        )}
 
         <div className="space-y-3">
           {!loading &&

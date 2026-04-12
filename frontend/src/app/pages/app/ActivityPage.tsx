@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { MessageSquare, Calendar, Users, Settings as SettingsIcon, FileText, AlertCircle, Clock } from "lucide-react";
 import { format, isValid, parseISO, startOfDay } from "date-fns";
 import { useAuth } from "@/lib/auth-context";
@@ -139,7 +140,7 @@ export function ActivityPage() {
       <div className="mb-8">
         <h1 className={appPageTitleClass}>Activity</h1>
         <p className={appPageSubtitleClass}>
-          Operational timeline — grouped by day with clear event types so staff can replay what changed recently.
+          A day-by-day log of what changed — new chats, leads, and updates your team should know about.
         </p>
       </div>
 
@@ -147,7 +148,7 @@ export function ActivityPage() {
         <div className="bg-card rounded-xl p-6 border border-border shadow-sm md:col-span-1">
           <p className="text-sm font-medium text-muted-foreground mb-1">Events loaded</p>
           <p className="text-3xl font-bold text-foreground tabular-nums">{loading ? "…" : events.length}</p>
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">Latest 50 events from your clinic feed.</p>
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">Showing the 50 most recent events.</p>
         </div>
       </div>
 
@@ -160,11 +161,21 @@ export function ActivityPage() {
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="p-6 border-b border-border bg-white">
           <h2 className={appSectionTitleClass}>Timeline</h2>
-          <p className="text-sm text-muted-foreground mt-1">Newest days first. Each card states the action in plain language.</p>
+          <p className="text-sm text-muted-foreground mt-1">Newest days first. Each row is a single event.</p>
         </div>
         <div className="p-6 bg-background">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!loading && events.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
+          {!loading && events.length === 0 && (
+            <div className="rounded-lg border border-dashed border-border bg-slate-50/60 px-4 py-8 text-center">
+              <p className="text-sm font-medium text-foreground">No activity in this window</p>
+              <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                That usually means a quiet period or a new clinic. Patient chats and lead updates will appear here automatically.{" "}
+                <Link to="/app/dashboard" className="text-primary font-semibold hover:underline">
+                  Back to dashboard
+                </Link>
+              </p>
+            </div>
+          )}
           <div className="space-y-10">
             {!loading &&
               grouped.map((group) => (

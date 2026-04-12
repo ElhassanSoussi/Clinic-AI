@@ -1,5 +1,8 @@
 # Launch Checklist — Clinic AI
 
+**Env matrix, deploy order, and commands:** [DEPLOYMENT.md](DEPLOYMENT.md) (authoritative).  
+**Manual + Playwright smoke:** [frontend/TESTING.md](frontend/TESTING.md).
+
 ## Pre-Deploy
 
 - [ ] **Core backend env vars**:
@@ -12,7 +15,7 @@
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `NEXT_PUBLIC_API_URL=https://api.clinicaireply.com/api`
   - `NEXT_PUBLIC_SITE_URL=https://clinicaireply.com` (production canonical URL for OG/metadata)
-  - Optional: `API_INTERNAL_URL` if server-side fetches need a different API base
+  - (Ignore `API_INTERNAL_URL` — not used by the current Vite bundle.)
   - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH=true`
   - `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH=true` only after Azure auth is configured in Supabase
   - Optional observability: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, and CI vars for Sentry source maps (`SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`)
@@ -36,7 +39,7 @@
 - [ ] **Admin secret** only if protected admin routes are intentionally enabled:
   - `ADMIN_SECRET`
 - [ ] **Supabase** — Schema applied, Auth configured:
-  - Email/password enabled (current SPA uses backend `/auth/login` and `/auth/register`, not Supabase OAuth in the browser)
+  - Email/password enabled (current SPA uses backend `POST /api/auth/login` and `POST /api/auth/register`, not Supabase OAuth in the browser)
   - Site URL = `https://clinicaireply.com`
   - If you add Google/Microsoft sign-in later: redirect URLs must include your Supabase callback URL and production origin
   - `www.clinicaireply.com` redirects to `https://clinicaireply.com`
@@ -53,7 +56,7 @@
   - `https://api.clinicaireply.com/api/clinics/google-sheets/callback`
 - [ ] **Microsoft Excel quick connect** (if used) — Microsoft Entra app registration includes:
   - `https://api.clinicaireply.com/api/clinics/microsoft-excel/callback`
-- [ ] **Frontend builds** — `npm run build` succeeds locally with production env vars
+- [ ] **Frontend builds** — `cd frontend && pnpm run build` succeeds with production env vars
 - [ ] **No localhost** — Grep for `localhost` in production env vars (should be zero)
 - [ ] **Readiness surface reviewed** — Operations → System readiness shows only the expected blocked or partial items
 
@@ -68,7 +71,7 @@
 
 ## Post-Deploy Verification
 
-Use **route-by-route** checks in [frontend/TESTING.md](frontend/TESTING.md) (manual smoke tables). Optional: `cd frontend && PLAYWRIGHT_BASE_URL=https://your-domain pnpm run e2e:live` for quick HTML smoke.
+Follow the numbered sequence in [frontend/TESTING.md](frontend/TESTING.md). Optional: `PLAYWRIGHT_BASE_URL=https://your-domain pnpm run e2e:live` from `frontend/`.
 
 ### Core Health
 
@@ -101,9 +104,7 @@ Use **route-by-route** checks in [frontend/TESTING.md](frontend/TESTING.md) (man
 
 ### Widget Embed
 
-- [ ] Add `<script src="https://clinicaireply.com/widget.js" data-clinic="YOUR_SLUG"></script>` to a test page
-- [ ] Widget appears in bottom-right corner
-- [ ] Chat works through the widget
+- [ ] If you ship `widget.js` from the frontend host, verify it exists in `dist`/CDN and embed per your integration doc (see [frontend/RELEASE.md](frontend/RELEASE.md))
 
 ### Billing (Real Money!)
 

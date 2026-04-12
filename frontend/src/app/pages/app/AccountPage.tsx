@@ -109,7 +109,7 @@ export function AccountPage() {
       <div className="mb-8">
         <h1 className={appPageTitleClass}>Account</h1>
         <p className={appPageSubtitleClass}>
-          Identity and security for the signed-in staff member. Clinic-wide configuration stays under Settings.
+          Your name, email, and password for this login. Branding, chat, and automation for the whole practice are under Settings.
         </p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         {ok && <p className="text-sm text-emerald-700 mt-2">{ok}</p>}
@@ -157,7 +157,7 @@ export function AccountPage() {
             <Building className="w-5 h-5 text-primary" />
             Clinic membership
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">Read-only context for the workspace you are signed into.</p>
+          <p className="text-sm text-muted-foreground mb-4">The practice you&apos;re signed into (read-only here).</p>
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!loading && clinic && (
             <div className="rounded-lg border border-border bg-slate-50/80 p-4 text-sm">

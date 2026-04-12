@@ -90,7 +90,7 @@ export function OpportunitiesPage() {
           <div className="mb-6">
             <h1 className={appPageTitleClass}>Opportunities</h1>
             <p className={appPageSubtitleClass}>
-              Recovery and follow-up queue — each row explains why it surfaced and what to do next (complete, snooze, or open context).
+              Follow-ups worth another touch: why each row is here, and buttons to snooze, complete, or open the thread or chart.
             </p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -115,7 +115,7 @@ export function OpportunitiesPage() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {loading ? "…" : analytics?.estimated_value_recovered_label || "—"}
               </p>
-              <p className="text-sm text-muted-foreground">Recovered (period label)</p>
+              <p className="text-sm text-muted-foreground">Recovery label (period)</p>
             </div>
 
             <div className="bg-white rounded-xl p-5 border border-border">
@@ -143,18 +143,18 @@ export function OpportunitiesPage() {
             <div className="mt-6 rounded-xl border border-primary/20 bg-accent/40 px-5 py-4 flex flex-wrap items-start gap-4">
               <div className="flex items-center gap-2 text-primary">
                 <RefreshCw className="w-5 h-5 shrink-0" />
-                <h3 className={appSectionTitleClass}>Recovery signal (analytics)</h3>
+                <h3 className={appSectionTitleClass}>Recovery snapshot</h3>
               </div>
               <p className="text-sm text-foreground/90 leading-relaxed flex-1 min-w-[240px]">
-                Front-desk analytics show{" "}
+                Analytics show{" "}
                 <span className="font-semibold text-foreground">{analytics.recovered_opportunities ?? "—"}</span> recovered opportunities
                 {analytics.estimated_value_recovered_label ? (
                   <>
                     {" "}
-                    with label <span className="font-semibold text-foreground">{analytics.estimated_value_recovered_label}</span>
+                    ({analytics.estimated_value_recovered_label})
                   </>
                 ) : null}
-                . Use the queue below to clear or snooze live follow-ups tied to patients.
+                . Use the list below for live follow-ups tied to patients.
               </p>
             </div>
           ) : null}
@@ -163,7 +163,22 @@ export function OpportunitiesPage() {
 
       <div className={appPagePaddingClass}>
         {loading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
-        {!loading && rows.length === 0 && <p className="text-sm text-muted-foreground">No opportunities in queue.</p>}
+        {!loading && rows.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border bg-slate-50/60 px-6 py-10 text-center max-w-lg">
+            <p className="text-sm font-medium text-foreground">Queue is clear</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Nothing needs a recovery nudge right now. Check{" "}
+              <Link to="/app/inbox" className="text-primary font-semibold hover:underline">
+                Inbox
+              </Link>{" "}
+              and{" "}
+              <Link to="/app/leads" className="text-primary font-semibold hover:underline">
+                Leads
+              </Link>{" "}
+              for day-to-day work.
+            </p>
+          </div>
+        )}
         <div className="space-y-3">
           {!loading &&
             rows.map((opp) => {
@@ -216,11 +231,6 @@ export function OpportunitiesPage() {
                             {recent && !stale ? (
                               <span className="px-2 py-0.5 bg-sky-50 text-sky-900 text-xs font-semibold rounded-md border border-sky-200">
                                 Recent
-                              </span>
-                            ) : null}
-                            {taskDone ? (
-                              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs font-semibold rounded-md border border-border">
-                                Complete-capable
                               </span>
                             ) : null}
                           </div>

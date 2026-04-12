@@ -149,13 +149,22 @@ export function BillingPage() {
       <div className="mb-8 max-w-3xl">
         <h1 className={appPageTitleClass}>Billing</h1>
         <p className={appPageSubtitleClass}>
-          Billing center — this page reflects your clinic record and monthly lead allowance. Checkout upgrades the plan here; Stripe hosts
-          cards, invoices, and subscription lifecycle.
+          Your plan and monthly lead usage for this clinic. Subscribe or change plans here; Stripe keeps cards, invoices, and renewals.
         </p>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
       </div>
 
       {loading && <p className="text-muted-foreground">Loading billing…</p>}
+
+      {!loading && !status && !error && (
+        <div className="rounded-xl border border-dashed border-border bg-slate-50/70 px-6 py-10 max-w-xl">
+          <h2 className={cn(appSectionTitleClass, "mb-2")}>Billing isn&apos;t available yet</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            We couldn&apos;t load your billing status. Refresh the page, or confirm your account is set up on the server. Payments still
+            run only through Stripe when checkout is configured.
+          </p>
+        </div>
+      )}
 
       {!loading && status && (
         <>
@@ -168,11 +177,15 @@ export function BillingPage() {
                 <div className="flex-1">
                   <h3 className="font-semibold mb-2 text-red-900">Lead limit reached</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    This workspace has used its monthly lead allowance ({status.monthly_leads_used} / {status.monthly_lead_limit}). Upgrade or
-                    wait for the next reset; enforcement happens on the server.
+                    This clinic has used its monthly lead allowance ({status.monthly_leads_used} / {status.monthly_lead_limit}). Upgrade or
+                    wait for the next billing reset — limits are enforced on the server.
                   </p>
-                  <button type="button" onClick={() => setShowPlanModal(true)} className="text-sm text-primary hover:underline font-medium">
-                    View paid plans
+                  <button
+                    type="button"
+                    onClick={() => setShowPlanModal(true)}
+                    className="text-sm font-semibold text-primary hover:underline"
+                  >
+                    View plans
                   </button>
                 </div>
               </div>
@@ -205,7 +218,7 @@ export function BillingPage() {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                   <div>
                     <h2 className={cn(appSectionTitleClass, "text-xl")}>Current plan</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Synced from your workspace billing record.</p>
+                    <p className="text-sm text-muted-foreground mt-1">Synced from your clinic billing record.</p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-bold capitalize shadow-sm">
@@ -241,7 +254,7 @@ export function BillingPage() {
                     <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                       {status.has_stripe_subscription
                         ? "Open the portal to update cards, download invoices, or adjust subscription settings."
-                        : "Finish a successful checkout so Stripe can attach a billing customer to this workspace."}
+                        : "Complete checkout once so Stripe can link a billing profile to this clinic."}
                     </p>
                   </div>
                 </div>
@@ -250,17 +263,25 @@ export function BillingPage() {
                   <button
                     type="button"
                     onClick={() => setShowPlanModal(true)}
-                    className="px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white"
+                    className={
+                      status.has_stripe_subscription
+                        ? "px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white"
+                        : "px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold shadow-sm"
+                    }
                   >
-                    Compare plans
+                    {status.has_stripe_subscription ? "Change plan" : "Choose a plan"}
                   </button>
                   <button
                     type="button"
                     disabled={busy === "portal" || !status.has_stripe_subscription}
                     onClick={() => void openPortal()}
-                    className="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 shadow-sm"
+                    className={
+                      status.has_stripe_subscription
+                        ? "px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 shadow-sm"
+                        : "px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors font-semibold bg-white disabled:opacity-50"
+                    }
                   >
-                    {busy === "portal" ? "Opening…" : "Open Stripe customer portal"}
+                    {busy === "portal" ? "Opening…" : "Stripe customer portal"}
                   </button>
                 </div>
               </div>

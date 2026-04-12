@@ -8,7 +8,7 @@ Operator-focused steps for shipping the **Vite + React SPA** in `frontend/`. Ful
 |--------|--------|
 | Root Directory | `frontend` |
 | Framework | Vite (SPA) |
-| Build Command | `npm run build` → `dist/` |
+| Build Command | `pnpm run build` → `dist/` (see `vercel.json`) |
 | Output | `dist` (static); configure SPA fallback to `index.html` |
 
 If the build looks for Python/FastAPI, the root directory is wrong.
@@ -31,7 +31,7 @@ Copy [`.env.example`](.env.example) as a checklist. Summary:
 
 **Optional**
 
-- `API_INTERNAL_URL` — if server-side calls must use a different base than the browser
+- (No separate server API URL in this SPA — browser uses `NEXT_PUBLIC_API_URL` only.)
 - `NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH` / `NEXT_PUBLIC_ENABLE_MICROSOFT_OAUTH` — hide or show provider buttons (defaults true; align with Supabase provider setup)
 - Sentry: `NEXT_PUBLIC_SENTRY_DSN`, optional `SENTRY_DSN` for server, optional `NEXT_PUBLIC_VERCEL_ENV` for client environment tags
 
@@ -49,12 +49,13 @@ Copy [`.env.example`](.env.example) as a checklist. Summary:
 
 ```bash
 cd frontend
-npm run lint
-npm run build
-npm run e2e
+pnpm run lint
+pnpm run typecheck
+pnpm run build
+pnpm run e2e
 ```
 
-`e2e` runs smoke + critical routes (no full login journey). For authenticated E2E, configure `frontend/.env.e2e` and run `npm run e2e:auth` — see [TESTING.md](./TESTING.md).
+`e2e` runs smoke + critical routes (no full login journey). For authenticated E2E, copy `.env.e2e.example` → `.env.e2e` and run `pnpm run e2e:auth` — see [TESTING.md](./TESTING.md).
 
 Use real-shaped values in `.env.local` for a local production build when validating.
 

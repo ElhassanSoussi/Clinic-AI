@@ -333,24 +333,23 @@ export function PatientChatPage() {
 
           {!branding.is_live ? (
             <div className="px-4 sm:px-6 py-2 text-xs sm:text-sm bg-amber-50 text-amber-900 border-b border-amber-200">
-              This clinic is not live yet. Messages may not get an automated reply until the owner completes go-live in
-              settings.
+              This clinic hasn&apos;t turned on the assistant yet. You may not get an instant reply until they go live in their dashboard.
             </div>
           ) : null}
 
           <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3">
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground text-center">
               <div className="flex items-center gap-1.5">
-                <Shield className="w-3 h-3" />
-                <span>HIPAA Compliant</span>
+                <Shield className="w-3 h-3 shrink-0" />
+                <span>Messages go to this clinic&apos;s assistant — not a general chatbot.</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3 h-3" />
-                <span>End-to-End Encrypted</span>
+                <CheckCircle className="w-3 h-3 shrink-0" />
+                <span>For emergencies or urgent care, call the clinic or local services — don&apos;t rely on chat.</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3" />
-                <span>Typically replies in &lt; 1 min</span>
+                <Clock className="w-3 h-3 shrink-0" />
+                <span>Reply speed depends on clinic hours and how busy staff are.</span>
               </div>
             </div>
           </div>

@@ -174,8 +174,7 @@ export function AITrainingPage() {
             AI Training
           </h1>
           <p className={appPageSubtitleClass}>
-            Knowledge workspace — curate what the assistant can cite, upload supporting files, and track readiness gaps before patients hit
-            edge cases.
+            Teach the assistant what to say: short notes, uploaded files, and a readiness checklist so answers match how your practice runs.
           </p>
           {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         </div>
@@ -191,15 +190,28 @@ export function AITrainingPage() {
         </div>
       </div>
 
-      {loading && <p className="text-muted-foreground">Loading…</p>}
+      {loading && <p className="text-muted-foreground">Loading training data…</p>}
+
+      {!loading && !overview && !error && (
+        <div className="rounded-xl border border-dashed border-border bg-slate-50/60 px-6 py-10 text-center max-w-lg">
+          <p className="text-sm font-medium text-foreground">Couldn&apos;t load training overview</p>
+          <p className="text-sm text-muted-foreground mt-1">Check your connection and try again.</p>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {overview && !loading && (
         <>
           <div className="rounded-xl border border-primary/20 bg-accent/50 px-5 py-4 mb-8">
             <p className={appSectionTitleClass}>Assistant coverage</p>
             <p className="text-sm text-muted-foreground mt-1 max-w-3xl leading-relaxed">
-              Score and status come from your training service. Pair manual snippets with documents so answers stay aligned with how your
-              clinic actually operates.
+              Scores and status come from the training service. Combine short snippets with documents for the best coverage.
             </p>
           </div>
 
@@ -234,7 +246,7 @@ export function AITrainingPage() {
                 <BookOpen className="w-5 h-5 text-primary" />
                 Readiness checklist
               </h2>
-              <p className="text-sm text-muted-foreground mb-4">Structured checks from the training service — not clinical advice.</p>
+              <p className="text-sm text-muted-foreground mb-4">Setup checks from the training service (operational, not medical advice).</p>
               <ul className="space-y-2">
                 {overview.readiness_items.map((item) => (
                   <li key={item.key} className="flex items-start gap-2 text-sm">
@@ -294,7 +306,9 @@ export function AITrainingPage() {
                 <div className="text-center py-10 px-4 border border-dashed border-border rounded-xl bg-slate-50/50">
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm font-semibold text-foreground">No documents yet</p>
-                  <p className="text-sm text-muted-foreground mt-1 mb-4">Upload policies, fee schedules, or FAQs patients ask about.</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    Good starting points: hours, fees, prep instructions, or FAQs your front desk repeats often.
+                  </p>
                   <label className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg cursor-pointer text-sm font-semibold">
                     <Upload className="w-4 h-4" />
                     Choose file

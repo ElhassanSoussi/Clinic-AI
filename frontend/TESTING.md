@@ -1,5 +1,7 @@
 # Frontend testing & launch checks
 
+**Deploy matrix, order, and provider URLs:** [../DEPLOYMENT.md](../DEPLOYMENT.md). This file is **commands + manual smoke sequence** only.
+
 ## Prerequisites
 
 - Install browsers once: `pnpm exec playwright install chromium` (from `frontend/`). Headless runs fail with “Executable doesn't exist” until this completes (some CI/sandbox environments need network permission for the download).
@@ -16,7 +18,7 @@
 | `pnpm run e2e:live` | Deployed frontend HTML smoke — needs `PLAYWRIGHT_BASE_URL` |
 | `pnpm run e2e:ui` | Playwright UI mode |
 
-Without `E2E_USER_EMAIL` / `E2E_USER_PASSWORD`, auth specs **skip** (not fail).
+Without `E2E_USER_EMAIL` / `E2E_USER_PASSWORD`, `e2e/auth-flow.spec.ts` **skips** with an explicit reason in the report (not a failure). The skip message points at `frontend/.env.e2e.example` and `pnpm exec playwright install chromium`.
 
 ### Live / production smoke (Playwright)
 
@@ -38,7 +40,7 @@ When `PLAYWRIGHT_BASE_URL` is set, Playwright does **not** start the Vite dev se
 
 Copy `frontend/.env.e2e.example` → `frontend/.env.e2e`.
 
-**Avoid localhost in production:** Vercel/Render env vars must use real `https://` API and site URLs. See [LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md).
+**Avoid localhost in production:** Vercel/Render env vars must use real `https://` API and site URLs. See [../DEPLOYMENT.md](../DEPLOYMENT.md) and [../LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md).
 
 ## Test user (auth E2E)
 
@@ -71,7 +73,7 @@ Do these in order once per release or after infra changes. Substitute your real 
 7. Open `/chat?slug=YOUR_SLUG` — branding loads or clear error; if clinic not live, expect non-live banner.
 8. Open `/chat?slug=bad slug!` — invalid slug message (client-side validation before API).
 
-**Authenticated**
+**Authenticated (same host)**
 
 1. Sign in from `/login` — land on `/app/dashboard` (or `?from=` deep link after login).
 2. Open `/app/dashboard` — metrics or empty states.
@@ -84,45 +86,10 @@ Do these in order once per release or after infra changes. Substitute your real 
 
 **Error / edge**
 
-1. With app logged in, expire or clear token (or wait for expiry) — next API 401 should clear session; login page shows session-expired style notice if implemented.
-2. Unset or wrong `NEXT_PUBLIC_API_URL` on a test build — API errors should be user-visible strings, not raw HTML.
-3. Settings save failure (e.g. offline) — toast + error banner when applicable.
+1. Expired JWT — next API **401** clears session; login may show session-expired notice.
+2. Wrong or unset `NEXT_PUBLIC_API_URL` — user-visible API errors, not raw HTML.
+3. Settings save failure — toast + error banner when applicable.
 4. Empty inbox/leads — empty state, not infinite spinner.
-
-### Public (logged out)
-
-| Route | What to verify |
-|-------|----------------|
-| `/` | Home renders; no blank screen |
-| `/product`, `/pricing`, `/trust`, `/faq`, `/contact` | Primary content and headings load |
-| `/login` | Form renders; sign-in works when API is correct |
-| `/register` | Form renders; registration or confirmation message as expected |
-| `/chat` | Slug prompt; **invalid slug** shows validation message |
-| `/chat?slug=YOUR_SLUG` | Branding loads; **not live** shows banner; send message if backend allows |
-
-### Authenticated
-
-| Route | What to verify |
-|-------|----------------|
-| Login | Dashboard after success; **`/login?from=…`** returns to deep link after sign-in |
-| `/app/dashboard` | Loads metrics/lists or sensible empty states |
-| `/app/settings` | Loads; **Save** shows success toast; **Go live** / **Pause** update live pill |
-| `/app/billing` | Loads; checkout/portal buttons show **error toast** if Stripe URL missing (no silent blank redirect) |
-| `/app/inbox`, `/app/leads`, `/app/appointments` | Lists load or empty state |
-| `/app/ai-training` | Overview loads |
-| `/app/account` | Profile save and feedback |
-| Logout | Returns to `/login`; `/app/*` redirects to login with **`from`** query |
-
-### Error / edge
-
-| Scenario | Expected |
-|----------|----------|
-| Wrong `NEXT_PUBLIC_API_URL` / offline API | User-visible error (not raw HTML dump); console error in prod if URL unset |
-| Expired JWT | Next authenticated API **401** clears session; **login shows amber “session expired” notice** |
-| Bad chat slug | Validation before API; unknown slug → branding error + “Try another slug” |
-| Empty inbox/leads | Empty state or “no data”, not infinite spinner |
-| Billing failure | Toast + inline error on billing page |
-| Settings save failure | Toast + `saveError` banner |
 
 ---
 
@@ -132,4 +99,4 @@ Do these in order once per release or after infra changes. Substitute your real 
 - **Automated auth (`e2e:auth`):** full journey when `.env.e2e` is set.
 - **Manual:** Stripe real money, email/SMS, go-live side effects, production-only CORS.
 
-See also [../LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md) for org-wide env and DNS.
+Deep business checklist: [../LAUNCH_CHECKLIST.md](../LAUNCH_CHECKLIST.md).

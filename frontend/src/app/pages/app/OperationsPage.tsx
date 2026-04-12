@@ -49,7 +49,7 @@ function queuePreview(label: string, description: string, items: unknown[]) {
       <p className={cn(appSectionTitleClass, "text-base")}>{label}</p>
       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
       <p className="text-3xl font-bold text-foreground mt-3 tabular-nums">{items.length}</p>
-      <p className="text-xs font-medium text-muted-foreground mt-1">Current snapshot count</p>
+      <p className="text-xs font-medium text-muted-foreground mt-1">{items.length === 0 ? "Nothing in this queue right now" : "In this queue"}</p>
     </div>
   );
 }
@@ -99,7 +99,7 @@ export function OperationsPage() {
           <div className="mb-6">
             <h1 className={appPageTitleClass}>Operations</h1>
             <p className={appPageSubtitleClass}>
-              Control center for channels, automation, deposits, and readiness — same backend signals, organized for staff.
+              Channels, reminders, deposits, and system checks in one place — most day-to-day changes still live in Settings.
             </p>
             {error && <p className="text-sm text-destructive mt-2">{error}</p>}
           </div>
@@ -116,7 +116,7 @@ export function OperationsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-foreground mb-1 capitalize">System {overall.replace(/_/g, " ")}</h2>
-                  <p className="text-sm text-muted-foreground">From front-desk system readiness check</p>
+                  <p className="text-sm text-muted-foreground">Latest system readiness check for your clinic</p>
                 </div>
               </div>
               <Link to="/app/settings" className="h-9 px-4 border border-border rounded-lg hover:bg-muted transition-colors text-sm font-semibold inline-flex items-center">
@@ -141,7 +141,12 @@ export function OperationsPage() {
               </div>
               <div className="p-6">
                 <div className="grid md:grid-cols-2 gap-4">
-                  {data.channel_readiness.length === 0 && <p className="text-sm text-muted-foreground">No channel data.</p>}
+                  {data.channel_readiness.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-border bg-slate-50/60 px-4 py-6 text-center text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground">No channel details yet</p>
+                      <p className="mt-1">Configure web chat and other channels under Settings when your clinic is provisioned.</p>
+                    </div>
+                  )}
                   {data.channel_readiness.map((ch) => (
                     <ChannelCard key={ch.id} ch={ch} />
                   ))}
