@@ -1,10 +1,23 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 
+function safeInternalReturnPath(raw: string | null): string | null {
+  if (!raw) {
+    return null;
+  }
+  const decoded = decodeURIComponent(raw).trim();
+  if (!decoded.startsWith("/") || decoded.startsWith("//") || decoded.includes("://")) {
+    return null;
+  }
+  return decoded;
+}
+
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = safeInternalReturnPath(searchParams.get("from"));
   const { login, session, ready } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,9 +26,9 @@ export function LoginPage() {
 
   useEffect(() => {
     if (ready && session) {
-      navigate("/app/dashboard", { replace: true });
+      navigate(returnTo ?? "/app/dashboard", { replace: true });
     }
-  }, [ready, session, navigate]);
+  }, [ready, session, navigate, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +36,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate("/app/dashboard");
+      navigate(returnTo ?? "/app/dashboard", { replace: true });
     } catch (err) {
       const msg =
         err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Sign in failed.";

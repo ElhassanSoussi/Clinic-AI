@@ -7,9 +7,9 @@ Operator-focused steps for shipping the Next.js app. For full-stack context see 
 | Setting | Value |
 |--------|--------|
 | Root Directory | `frontend` |
-| Framework | Next.js |
-| Build Command | `npm run build` (default) |
-| Output | default (`.next`) |
+| Framework | Vite (SPA) |
+| Build Command | `npm run build` → `dist/` |
+| Output | `dist` (static); configure SPA fallback to `index.html` |
 
 If the build looks for Python/FastAPI, the root directory is wrong.
 
@@ -53,6 +53,8 @@ npm run lint
 npm run build
 npm run e2e
 ```
+
+`e2e` runs smoke + critical routes (no full login journey). For authenticated E2E, configure `frontend/.env.e2e` and run `npm run e2e:auth` — see [TESTING.md](./TESTING.md).
 
 Use real-shaped values in `.env.local` for a local production build when validating.
 

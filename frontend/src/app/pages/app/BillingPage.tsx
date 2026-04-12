@@ -96,8 +96,11 @@ export function BillingPage() {
         success_url: `${origin}/app/billing?checkout=success`,
         cancel_url: `${origin}/app/billing?checkout=cancel`,
       });
+      if (!checkout_url?.trim()) {
+        throw new ApiError("Checkout did not return a URL. Verify Stripe keys and billing env on the server.", 500);
+      }
       notifySuccess("Opening Stripe checkout…");
-      window.location.href = checkout_url;
+      window.location.href = checkout_url.trim();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : "Checkout failed";
       setError(msg);
@@ -116,8 +119,11 @@ export function BillingPage() {
     setError(null);
     try {
       const { portal_url } = await createBillingPortal(session.accessToken, `${origin}/app/billing`);
+      if (!portal_url?.trim()) {
+        throw new ApiError("Portal did not return a URL. Verify Stripe customer portal configuration.", 500);
+      }
       notifySuccess("Opening Stripe customer portal…");
-      window.location.href = portal_url;
+      window.location.href = portal_url.trim();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : "Could not open billing portal";
       setError(msg);

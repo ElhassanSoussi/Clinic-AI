@@ -1,4 +1,7 @@
-/** Canonical browser origin for Stripe return URLs and public links. */
+/**
+ * Canonical browser origin for Stripe return URLs, patient chat links, and embed snippets.
+ * Prefer `NEXT_PUBLIC_SITE_URL` in production so links match the marketing domain (not a preview URL).
+ */
 export function getPublicOrigin(): string {
   const env = import.meta.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (env) {

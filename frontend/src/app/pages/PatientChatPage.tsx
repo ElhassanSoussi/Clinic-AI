@@ -290,6 +290,13 @@ export function PatientChatPage() {
             </div>
           </div>
 
+          {!branding.is_live ? (
+            <div className="px-4 sm:px-6 py-2 text-xs sm:text-sm bg-amber-50 text-amber-900 border-b border-amber-200">
+              This clinic is not live yet. Messages may not get an automated reply until the owner completes go-live in
+              settings.
+            </div>
+          ) : null}
+
           <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">

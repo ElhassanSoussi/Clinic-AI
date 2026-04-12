@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { getE2eCredentials, hasE2eCredentials } from "./helpers/credentials";
+import { E2E_AUTH_SKIP_REASON, hasE2eCredentials } from "./helpers/credentials";
+import { loginAsE2EUser } from "./helpers/login";
 
 /** Marketing + auth entry routes — must render primary heading. */
 const PUBLIC_CRITICAL: { path: string; heading: RegExp }[] = [
@@ -56,21 +57,18 @@ test.describe("e2e-critical: app routes require login", () => {
       await expect(page).toHaveURL(/\/login/, { timeout: 20_000 });
     });
   }
+
+  test("unauthenticated /app/settings sends ?from= for post-login return", async ({ page }) => {
+    await page.goto("/app/settings");
+    await expect(page).toHaveURL(/\/login\?from=%2Fapp%2Fsettings/, { timeout: 20_000 });
+  });
 });
 
 test.describe("e2e-critical: app routes with session", () => {
   test("all app paths render main shell after login", async ({ page }) => {
-    test.skip(
-      !hasE2eCredentials(),
-      "Set E2E_USER_EMAIL and E2E_USER_PASSWORD in frontend/.env.e2e to run authenticated critical coverage.",
-    );
-    const { email, password } = getE2eCredentials();
+    test.skip(!hasE2eCredentials(), E2E_AUTH_SKIP_REASON);
 
-    await page.goto("/login");
-    await page.getByTestId("login-email").fill(email);
-    await page.getByTestId("login-password").fill(password);
-    await page.getByTestId("login-submit").click();
-    await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 45_000 });
+    await loginAsE2EUser(page);
 
     for (const path of APP_CRITICAL_PATHS) {
       await page.goto(path);

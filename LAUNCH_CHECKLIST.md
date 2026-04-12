@@ -35,14 +35,10 @@
 - [ ] **Admin secret** only if protected admin routes are intentionally enabled:
   - `ADMIN_SECRET`
 - [ ] **Supabase** — Schema applied, Auth configured:
-  - Email/password enabled
+  - Email/password enabled (current SPA uses backend `/auth/login` and `/auth/register`, not Supabase OAuth in the browser)
   - Site URL = `https://clinicaireply.com`
-  - Redirect URLs include `https://clinicaireply.com/auth/callback`
+  - If you add Google/Microsoft sign-in later: redirect URLs must include your Supabase callback URL and production origin
   - `www.clinicaireply.com` redirects to `https://clinicaireply.com`
-  - Google provider enabled if Google sign-in is live
-  - Azure provider enabled if Microsoft sign-in is live
-  - Google and Azure app consoles include the Supabase callback URL
-  - Azure enables `Allow users without an email` if tenant claims are inconsistent
 - [ ] **Migrations applied**:
   - `20260331_add_channel_foundation.sql`
   - `20260331_add_frontdesk_automation.sql`
@@ -88,11 +84,10 @@
 
 - [ ] Register a new test account
 - [ ] Verify email received (if enabled)
-- [ ] Login works, redirects to dashboard
-- [ ] Google sign-in works from `https://clinicaireply.com/login`
-- [ ] Microsoft sign-in works from `https://clinicaireply.com/login` if Azure auth is live
+- [ ] Login works, redirects to dashboard; deep-link to `/app/settings` while logged out → login → returns to settings (`?from=` flow)
 - [ ] Logout works, redirects to login
 - [ ] Repeated failed sign-up attempts show a clear rate-limit or confirmation message and do not leave a fake session behind
+- [ ] Optional: after adding OAuth to the product, verify Google/Microsoft from production login
 
 ### Onboarding
 
@@ -100,11 +95,11 @@
 - [ ] Complete all onboarding steps
 - [ ] Dashboard loads after onboarding
 
-### Chat Widget
+### Patient chat (public)
 
-- [ ] Visit `/chat/YOUR_SLUG` — chat loads
-- [ ] Send a message — AI responds
-- [ ] Lead capture triggers (name/email/phone collection)
+- [ ] Visit `/chat?slug=YOUR_SLUG` — branding loads (404 if slug unknown)
+- [ ] If clinic is not live, banner explains automation may not reply; after go-live, send a message — AI responds when backend allows
+- [ ] Lead capture triggers (name/email/phone collection) when configured
 - [ ] New lead appears in dashboard
 
 ### Widget Embed

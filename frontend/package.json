@@ -9,9 +9,12 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "e2e": "playwright test",
-    "e2e:critical": "playwright test e2e/critical-pages.spec.ts",
+    "e2e": "playwright test e2e/smoke.spec.ts e2e/critical-pages.spec.ts",
+    "e2e:all": "playwright test",
     "e2e:smoke": "playwright test e2e/smoke.spec.ts",
+    "e2e:critical": "playwright test e2e/critical-pages.spec.ts",
+    "e2e:auth": "playwright test e2e/auth-flow.spec.ts",
+    "e2e:live": "playwright test e2e/deployed-smoke.spec.ts",
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {

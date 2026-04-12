@@ -2,11 +2,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { ApiError, apiJson } from "./api";
+import { ApiError, CLINIC_AI_SESSION_EXPIRED_EVENT, apiJson } from "./api";
 
 const STORAGE_KEY = "clinic_ai_auth_session";
 
@@ -137,6 +138,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     persist(null);
+  }, [persist]);
+
+  useEffect(() => {
+    const onExpired = () => {
+      persist(null);
+    };
+    window.addEventListener(CLINIC_AI_SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(CLINIC_AI_SESSION_EXPIRED_EVENT, onExpired);
   }, [persist]);
 
   const patchSession = useCallback(

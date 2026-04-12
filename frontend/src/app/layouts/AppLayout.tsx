@@ -69,8 +69,8 @@ function AppSidebarNav({ session, pathname, onNavigate, onLogout }: AppSidebarNa
                 to={item.path}
                 onClick={onNavigate}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                   }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -86,8 +86,8 @@ function AppSidebarNav({ session, pathname, onNavigate, onLogout }: AppSidebarNa
           to="/app/account"
           onClick={onNavigate}
           className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${pathname === "/app/account"
-              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-              : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
             }`}
         >
           <UserCircle className="w-5 h-5 flex-shrink-0" />
@@ -130,7 +130,12 @@ export function AppLayout() {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    const returnTo = `${location.pathname}${location.search}`;
+    const loginTo =
+      returnTo.startsWith("/app") && !returnTo.startsWith("//")
+        ? `/login?from=${encodeURIComponent(returnTo)}`
+        : "/login";
+    return <Navigate to={loginTo} replace />;
   }
 
   return (

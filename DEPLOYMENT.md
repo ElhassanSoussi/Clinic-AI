@@ -158,7 +158,7 @@ Operator checklist: [frontend/RELEASE.md](frontend/RELEASE.md).
 ## Pre-Deploy Checks
 
 - `python3 -m py_compile backend/app/main.py backend/app/routers/*.py backend/app/services/*.py backend/app/schemas/*.py backend/create_test_user.py backend/scripts/launch_readiness_smoke.py`
-- `cd frontend && npm run lint && npm run build && npm run e2e` (e2e needs a normal local environment for the dev server)
+- `cd frontend && npm run lint && npm run build && npm run e2e` (dev server for Playwright; see `frontend/TESTING.md`; optional `pnpm run e2e:auth` needs `frontend/.env.e2e`; post-deploy HTML smoke: `PLAYWRIGHT_BASE_URL=https://… pnpm run e2e:live`)
 - `GET /api/health` returns `{"status":"ok"}`
 - required env vars are present
 - `NEXT_PUBLIC_API_URL` points to `https://api.clinicaireply.com/api`

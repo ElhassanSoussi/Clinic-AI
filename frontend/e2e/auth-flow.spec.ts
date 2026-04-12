@@ -1,22 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { getE2eCredentials, hasE2eCredentials } from "./helpers/credentials";
+import { E2E_AUTH_SKIP_REASON, hasE2eCredentials } from "./helpers/credentials";
+import { loginAsE2EUser } from "./helpers/login";
 
 test.describe("authenticated user journey", () => {
   test("logs in, covers onboarding, settings, billing, leads, inbox, account, logs out", async ({ page }) => {
-    test.skip(
-      !hasE2eCredentials(),
-      "Set E2E_USER_EMAIL and E2E_USER_PASSWORD in frontend/.env.e2e (see e2e/env.example). Backend must be reachable.",
-    );
-    const { email, password } = getE2eCredentials();
+    test.skip(!hasE2eCredentials(), E2E_AUTH_SKIP_REASON);
 
-    await page.goto("/login");
-    await expect(page.getByRole("heading", { name: /log in to your account/i })).toBeVisible();
-    await page.getByTestId("login-email").fill(email);
-    await page.getByTestId("login-password").fill(password);
-    await page.getByTestId("login-submit").click();
-
-    await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 45_000 });
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await loginAsE2EUser(page);
 
     await page.goto("/app/onboarding");
     await expect(page.getByRole("heading", { name: /let's get you set up/i })).toBeVisible({ timeout: 30_000 });
