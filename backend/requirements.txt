@@ -7,7 +7,7 @@ openai==1.58.1
 pydantic==2.10.4
 pydantic[email]==2.10.4
 pydantic-settings==2.7.1
-python-multipart==0.0.20
+python-multipart==0.0.31
 gspread==6.1.4
 google-auth==2.38.0
 openpyxl==3.1.5
